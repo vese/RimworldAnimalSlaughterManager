@@ -398,7 +398,7 @@ namespace ASM
         {
             switch (c.type)
             {
-                case CondType.Trait: return "Trait:" + (c.trait?.defName ?? "");
+                case CondType.Trait: return "Trait:" + (c.trait?.defName ?? "") + ":" + c.inheritMode;
                 case CondType.Disease: return "Disease:" + (c.disease?.defName ?? "");
                 case CondType.Training: return "Training:" + (c.trainable?.defName ?? "");
                 case CondType.TrainingNone:
