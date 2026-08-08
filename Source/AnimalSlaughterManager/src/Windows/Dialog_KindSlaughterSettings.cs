@@ -305,6 +305,10 @@ namespace ASM
             y += CondSectionH + listH;
             y = DrawBlockDivider(x, y, w);
             DrawConditionSection(x, y, halfW, listH, "ASM.AdultFemales", settings.prioAdultFemale, ref condScroll3, ref condListH3, ref condGroup3, false, true);
+            // Vertical divider between female columns.
+            GUI.color = new Color(1f, 1f, 1f, 0.25f);
+            Widgets.DrawLineVertical(x + halfW + 6f, y, listH + CondSectionH);
+            GUI.color = vdPrev;
             DrawConditionSection(x2, y, halfW, listH, "ASM.YoungFemales", settings.prioYoungFemale, ref condScroll4, ref condListH4, ref condGroup4, false, false);
         }
 
