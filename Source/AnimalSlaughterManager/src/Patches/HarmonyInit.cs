@@ -8,7 +8,7 @@ namespace ASM
     {
         static ASM_HarmonyInit()
         {
-            new Harmony("vesily.animalslaughtermanager").PatchAll();
+            new Harmony("vesilya.animalslaughtermanager").PatchAll();
         }
     }
 }

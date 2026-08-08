@@ -2,7 +2,7 @@
 <ModMetaData>
   <name>Animal Slaughter Manager</name>
   <author>ves-ily</author>
-  <packageId>vesily.animalslaughtermanager</packageId>
+  <packageId>vesilya.animalslaughtermanager</packageId>
   <supportedVersions>
     <li>1.6</li>
   </supportedVersions>
