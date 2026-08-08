@@ -28,6 +28,10 @@ ADDITIONAL
 COMPATIBILITY
 - Animal Traits System (optional) — animal trait support for priorities and protection. Without ATS the mod works, but the trait section is unavailable.
 
+ADDING / REMOVING FROM A SAVE
+- Safe to add to an existing colony at any time.
+- Safe to remove. On the FIRST load after disabling the mod, RimWorld will log an error about a missing map component ("Could not find type named ASM.ASM_MapComp") and drop the mod's data. This is normal and expected for any mod and is harmless — the colony loads and plays fine. After you save once more, the leftover data is gone and the message will not reappear.
+
 Source: https://github.com/vese/RimworldAnimalSlaughterManager
 
 ---
@@ -53,6 +57,10 @@ Animal Slaughter Manager расширяет встроенный авто-заб
 
 СОВМЕСТИМОСТЬ
 - Animal Traits System (опционально) — поддержка черт животных для приоритетов и защиты. Без ATS мод работает, просто раздел черт недоступен.
+
+ДОБАВЛЕНИЕ / УДАЛЕНИЕ С СЕЙВА
+- Можно безопасно добавлять в существующую колонию в любой момент.
+- Можно безопасно удалять. При ПЕРВОЙ загрузке после отключения мода RimWorld запишет в лог ошибку о пропущенном map-компоненте ("Could not find type named ASM.ASM_MapComp") и сбросит данные мода. Это нормальное и ожидаемое поведение для любого мода, оно безобидно — колония грузится и играется дальше. После повторного сохранения остатки данных исчезают, и сообщение больше не появляется.
 
 Исходный код: https://github.com/vese/RimworldAnimalSlaughterManager</description>
   <modIconPath>UI/Icons/ASM/Shield</modIconPath>
