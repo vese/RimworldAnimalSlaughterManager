@@ -1,0 +1,5 @@
+**/bin/
+**/obj/
+Assemblies/*.pdb
+Assemblies/*.xml
+.vs/

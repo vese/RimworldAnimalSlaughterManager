@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>Animal Slaughter Manager</name>
+  <author>ves-ily</author>
+  <packageId>vesily.animalslaughtermanager</packageId>
+  <supportedVersions>
+    <li>1.6</li>
+  </supportedVersions>
+  <description>Animal Slaughter Manager расширяет встроенное авто-забой животных (вкладка «Животные»):
+
+- Приоритет по возрасту отдельно для взрослых и молодняка: можно указать, забивать сначала старших или молодых (для каждой группы независимо). По умолчанию — как в игре (старшие первыми).
+- Защита конкретного животного: кнопка-гизмо на животном исключает его из авто-забоя независимо от настроек.
+- Интеграция с Animal Traits System (опционально): можно задать, сколько животных определённого вида с определёнными чертами оставлять (на развод), и пометить, наследуемая ли черта — чтобы разводить более выгодных животных.
+
+Интеграция с Animal Traits System необязательна: без неё мод работает, просто раздел черт недоступен.</description>
+  <modDependencies />
+  <loadAfter>
+    <li>Ludeon.RimWorld</li>
+    <li>Ludeon.RimWorld.Royalty</li>
+    <li>Ludeon.RimWorld.Ideology</li>
+    <li>Ludeon.RimWorld.Biotech</li>
+    <li>Ludeon.RimWorld.Anomaly</li>
+    <li>Ludeon.RimWorld.Odyssey</li>
+    <li>luved.animaltraits</li>
+  </loadAfter>
+</ModMetaData>
