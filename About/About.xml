@@ -27,9 +27,9 @@
 
 СОВМЕСТИМОСТЬ
 - Animal Traits System (опционально) — поддержка черт животных для приоритетов и защиты. Без ATS мод работает, просто раздел черт недоступен.
-- Harmony — встроен в мод (Lib.Harmony компилируется в DLL, не требует отдельного мода Harmony).
 
 Исходный код: https://github.com/vese/RimworldAnimalSlaughterManager</description>
+  <modIconPath>UI/Icons/ASM/Shield</modIconPath>
   <modDependencies />
   <loadAfter>
     <li>Ludeon.RimWorld</li>
