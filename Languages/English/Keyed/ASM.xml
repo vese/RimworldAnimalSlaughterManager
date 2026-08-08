@@ -16,9 +16,9 @@
   <ASM.YoungestFirst>Youngest first</ASM.YoungestFirst>
 
   <ASM.KeepTraits>Keep for breeding (protect from slaughter)</ASM.KeepTraits>
-  <ASM.KeepTraitsHelp>Keep this many animals of this kind carrying the trait. Scoped by age and inheritability.</ASM.KeepTraitsHelp>
+  <ASM.KeepTraitsHelp>Protect a set number of animals with this trait from auto-slaughter. Filtered by age and inheritability.</ASM.KeepTraitsHelp>
   <ASM.CullTraits>Prioritize for slaughter</ASM.CullTraits>
-  <ASM.CullTraitsHelp>Animals of this kind carrying these traits are slaughtered first when the herd is over its limits.</ASM.CullTraitsHelp>
+  <ASM.CullTraitsHelp>Slaughter animals with these traits first when the herd exceeds its limits.</ASM.CullTraitsHelp>
   <ASM.Trait>Trait</ASM.Trait>
   <ASM.Keep>Keep</ASM.Keep>
   <ASM.AgeScope>Age</ASM.AgeScope>
@@ -120,7 +120,7 @@
   <ASM.ValidationProblems>{0}: condition list issues — {1}</ASM.ValidationProblems>
   <ASM.CondProblemTip>Conflict or duplicate: {0}</ASM.CondProblemTip>
   <ASM.CondConflictTip>{0} conflicts with: {1}</ASM.CondConflictTip>
-  <ASM.PriorityHelp>Condition lists set the slaughter order top-to-bottom: animals matching conditions higher up are slaughtered last, lower down — first. Animals matching no condition are sorted by age (from the settings above).</ASM.PriorityHelp>
+  <ASM.PriorityHelp>Conditions in the list set the slaughter order top-to-bottom: animals matching conditions higher up are slaughtered last, lower down — first. Remaining animals are sorted by age from the settings above.</ASM.PriorityHelp>
   <ASM.AlertConditionLabel>Slaughter priority conflicts</ASM.AlertConditionLabel>
   <ASM.AlertConditionDesc>Some animal kinds have duplicate or contradictory conditions in their slaughter priority lists:</ASM.AlertConditionDesc>
   <ASM.CondAddDisease>Disease...</ASM.CondAddDisease>
@@ -128,7 +128,7 @@
   <ASM.Unavailable>unavailable</ASM.Unavailable>
   <ASM.TabGeneral>General</ASM.TabGeneral>
   <ASM.DefaultAgePref>Default age direction for slaughter</ASM.DefaultAgePref>
-  <ASM.DefaultAgePrefHelp>Used as the fallback for age×sex buckets that have no condition list. Per-bucket age settings on the Priorities tab still override this.</ASM.DefaultAgePrefHelp>
+  <ASM.DefaultAgePrefHelp>These settings apply to all kinds at once — which animals to slaughter first (oldest or youngest) for each of the four age×sex buckets.</ASM.DefaultAgePrefHelp>
   <ASM.ConfirmApplyAgePref>Apply this change to other kinds where this setting was already customized?</ASM.ConfirmApplyAgePref>
   <ASM.ConfirmApplyPref>Apply this change to other kinds where this setting was already customized?</ASM.ConfirmApplyPref>
   <ASM.GeneralTabHelp>Settings here apply to the current kind. On change you can propagate to all kinds where they were already customized. Per-bucket condition lists on the Priorities tab are separate.</ASM.GeneralTabHelp>
@@ -157,7 +157,7 @@
   <ASM.TabPriorities>Priorities</ASM.TabPriorities>
   <ASM.TabExceptions>Special rules</ASM.TabExceptions>
   <ASM.ForceCullTraits>Force slaughter</ASM.ForceCullTraits>
-  <ASM.ForceCullTraitsHelp>Animals of this kind with these traits are always slaughtered, regardless of count and other settings. Protection takes precedence.</ASM.ForceCullTraitsHelp>
+  <ASM.ForceCullTraitsHelp>Slaughter animals with these traits always, regardless of herd size and other settings. Individual protection and breeding targets override this.</ASM.ForceCullTraitsHelp>
   <ASM.Good>Good</ASM.Good>
   <ASM.Bad>Bad</ASM.Bad>
   <ASM.TypeCol>Type</ASM.TypeCol>

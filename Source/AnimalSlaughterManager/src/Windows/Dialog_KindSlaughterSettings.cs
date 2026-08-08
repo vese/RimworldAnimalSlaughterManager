@@ -261,6 +261,18 @@ namespace ASM
             comp.MarkDirty();
         }
 
+        // A thicker, more distinct separator line (for separating the help text block from
+        // the age-preference rows above and the condition sections below).
+        private static float DrawSectionSeparator(float x, float y, float w)
+        {
+            Color prev = GUI.color;
+            GUI.color = new Color(1f, 1f, 1f, 0.5f);
+            Widgets.DrawLineHorizontal(x, y + DividerGap / 2f, w);
+            Widgets.DrawLineHorizontal(x, y + DividerGap / 2f + 2f, w);
+            GUI.color = prev;
+            return y + DividerGap;
+        }
+
         private void DrawPrioritiesTab(float x, float y, float w, float listH)
         {
             y = DrawPrefRow(x, y, w, "ASM.AdultMales", true, true);
@@ -269,9 +281,10 @@ namespace ASM
             y = DrawPrefRow(x, y, w, "ASM.YoungFemales", false, false);
             y += 8f;
 
-            y = DrawBlockDivider(x, y, w);
+            // Distinct double-line separator above the help text (thicker than section dividers).
+            y = DrawSectionSeparator(x, y, w);
 
-            // Help text explaining how the condition lists work.
+            // Gray help text — same style as other tabs.
             GUI.color = Color.gray;
             Text.Font = GameFont.Tiny;
             Widgets.Label(new Rect(x, y, w, 36f), "ASM.PriorityHelp".Translate());
@@ -279,7 +292,7 @@ namespace ASM
             Text.Font = GameFont.Small;
             y += 40f;
 
-            // 2×2 grid: row 1 = males (adult | young), row 2 = females (adult | young).
+            // 2×2 grid with dividers between all sections.
             float halfW = (w - 8f) / 2f;
             float x2 = x + halfW + 8f;
             DrawConditionSection(x, y, halfW, listH, "ASM.AdultMales", settings.prioAdultMale, ref condScroll1, ref condListH1, ref condGroup1, true, true);
@@ -858,7 +871,9 @@ namespace ASM
             }
             else
             {
+                GUI.color = Color.gray;
                 Widgets.Label(new Rect(x, y, w, 20f), helpKey.Translate());
+                GUI.color = Color.white;
                 y += 26f;
             }
 
