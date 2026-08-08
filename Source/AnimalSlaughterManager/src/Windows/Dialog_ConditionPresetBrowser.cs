@@ -176,43 +176,31 @@ namespace ASM
             bool isCondPreset = e.scope == PresetScope.List && e.condBucket != null;
             bool sameBucket = e.condBucket == bucket;
             bool isKindOrAll = e.scope == PresetScope.Kind || e.scope == PresetScope.All;
-            // Overwrite only for same-scope condition presets (can't overwrite a kind/all preset from here).
             bool canOverwrite = isCondPreset && sameBucket && HasData;
             if (index % 2 == 1) Widgets.DrawAltRect(row);
             float loadW = Mathf.Max(96f, Text.CalcSize("ASM.LoadPreset".Translate()).x + 18f);
             float overW = Mathf.Max(96f, Text.CalcSize("ASM.OverwritePreset".Translate()).x + 18f);
             const float delW = 26f, dateW = 86f, gap = 6f;
+            // Fixed mark width (reserved always so columns align).
+            float markW = Mathf.Max(60f, Text.CalcSize("ASM.PresetAllMark".Translate()).x + 6f);
 
+            // Always reserve all columns right-to-left so dates/marks align across rows.
             float right = row.xMax;
             Rect delRect = new Rect(right - delW, row.y + 2f, delW, 26f); right -= delW + gap;
-            if (canOverwrite)
-            {
-                Rect overBtn = new Rect(right - overW, row.y + 2f, overW, 26f); right -= overW + gap;
-                var captured0 = e;
-                if (Widgets.ButtonText(overBtn, "ASM.OverwritePreset".Translate()))
-                {
-                    var n = captured0;
-                    Find.WindowStack.Add(new Dialog_MessageBox("ASM.ConfirmOverwrite".Translate(n.name),
-                        "ASM.OverwritePreset".Translate(), () => OverwriteEntry(n),
-                        "No".Translate()) { doCloseX = true });
-                }
-            }
+            Rect overRect = new Rect(right - overW, row.y + 2f, overW, 26f); right -= overW + gap;
             Rect loadBtn = new Rect(right - loadW, row.y + 2f, loadW, 26f); right -= loadW + gap;
             Rect dateRect = new Rect(right - dateW, row.y + 4f, dateW, 22f); right -= dateW + gap;
-
-            // Mark column: scope mark for cross-scope/cross-bucket.
-            string mark = null;
-            if (isKindOrAll) mark = e.scope == PresetScope.All ? "ASM.PresetAllMark".Translate() : "ASM.PresetKindMark".Translate();
-            else if (isCondPreset && !sameBucket) mark = BucketLabel(e.condBucket.Value);
-            float markW = mark != null ? Mathf.Max(60f, Text.CalcSize(mark).x + 6f) : 0f;
-            Rect markRect = mark != null ? new Rect(right - markW, row.y + 4f, markW, 22f) : default(Rect);
-            if (mark != null) right -= markW + gap;
+            Rect markRect = new Rect(right - markW, row.y + 4f, markW, 22f); right -= markW + gap;
             Rect nameRect = new Rect(row.x, row.y + 5f, Mathf.Max(right - row.x, 40f), 22f);
 
             Text.Anchor = TextAnchor.MiddleLeft;
             Widgets.Label(nameRect, e.name);
             Text.Anchor = TextAnchor.UpperLeft;
 
+            // Mark column: scope mark for cross-scope/cross-bucket (reserved even if empty).
+            string mark = null;
+            if (isKindOrAll) mark = e.scope == PresetScope.All ? "ASM.PresetAllMark".Translate() : "ASM.PresetKindMark".Translate();
+            else if (isCondPreset && !sameBucket) mark = BucketLabel(e.condBucket.Value);
             if (mark != null)
             {
                 GUI.color = Color.cyan;
@@ -227,6 +215,19 @@ namespace ASM
             Widgets.Label(dateRect, e.date.ToString("yyyy-MM-dd HH:mm"));
             GUI.color = Color.white;
             Text.Font = GameFont.Small;
+
+            // Overwrite button (only when applicable; space always reserved).
+            if (canOverwrite)
+            {
+                var captured0 = e;
+                if (Widgets.ButtonText(overRect, "ASM.OverwritePreset".Translate()))
+                {
+                    var n = captured0;
+                    Find.WindowStack.Add(new Dialog_MessageBox("ASM.ConfirmOverwrite".Translate(n.name),
+                        "ASM.OverwritePreset".Translate(), () => OverwriteEntry(n),
+                        "No".Translate()) { doCloseX = true });
+                }
+            }
 
             if (isKindOrAll) TooltipHandler.TipRegion(row, "ASM.CondPresetCrossBucket".Translate(e.scope.ToString()));
 

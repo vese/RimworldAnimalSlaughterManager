@@ -282,7 +282,7 @@ namespace ASM
             Widgets.Label(nameRect, e.name);
             Text.Anchor = TextAnchor.UpperLeft;
 
-            // Extra column — overwrite (same scope + has data) or scope mark (cross-level).
+            // Extra column — always reserved (keeps columns aligned). Content depends on row type.
             if (!crossLevel && HasSomethingToSave())
             {
                 if (Widgets.ButtonText(extraRect, "ASM.OverwritePreset".Translate()))
