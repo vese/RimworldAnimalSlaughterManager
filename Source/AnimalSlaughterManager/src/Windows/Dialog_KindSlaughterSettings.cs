@@ -69,7 +69,8 @@ namespace ASM
         {
             float h = HeaderH + TabStripH;
             if (currentTab == 0)
-                h += PrefsH + DividerGap + 2 * CondSectionH + DividerGap;  // prefs, 2 rows of section titles (2×2 grid), inter-row divider
+                // prefs (incl. 8px gap) + section separator + help text + top/bottom section headers + inter-row block divider.
+                h += PrefsH + DividerGap + 36f + 2 * CondSectionH + DividerGap;
             else if (currentTab == 1)
                 h += SectionNonListH + DividerGap + SectionNonListH;           // keep, divider, forceCull
             else
