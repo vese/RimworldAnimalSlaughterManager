@@ -526,21 +526,21 @@ namespace ASM
             const float btnH = 24f;
             const float iconS = 22f;
 
-            // Row 1: title (left) + copy + paste icons (right). Paste hidden when no clipboard.
-            float r1Right = x + w;
-            Rect copyBtn = new Rect(r1Right - iconS, y + 3f, iconS, iconS);
-            r1Right -= iconS + gap;
+            // Row 1: title (left) + copy + paste icons right after the title.
             Text.Font = GameFont.Medium;
             Text.Anchor = TextAnchor.MiddleLeft;
-            Widgets.Label(new Rect(x, y, r1Right - x, 28f), titleKey.Translate());
+            float titleW = Text.CalcSize(titleKey.Translate()).x + 8f;
+            Widgets.Label(new Rect(x, y, titleW, 28f), titleKey.Translate());
             Text.Anchor = TextAnchor.UpperLeft;
             Text.Font = GameFont.Small;
+            float iconX = x + titleW;
+            Rect copyBtn = new Rect(iconX, y + 3f, iconS, iconS);
             TooltipHandler.TipRegion(copyBtn, "ASM.CopyConditions".Translate());
             if (Widgets.ButtonImage(copyBtn, TexButton.Copy))
                 clipboard = list.Select(c => c.Clone()).ToList();
             if (HasClipboard)
             {
-                Rect pasteBtn = new Rect(r1Right - iconS, y + 3f, iconS, iconS);
+                Rect pasteBtn = new Rect(iconX + iconS + gap, y + 3f, iconS, iconS);
                 TooltipHandler.TipRegion(pasteBtn, "ASM.PasteConditions".Translate());
                 if (Widgets.ButtonImage(pasteBtn, TexButton.Paste))
                 {
