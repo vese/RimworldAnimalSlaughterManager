@@ -103,7 +103,7 @@
   <ASM.CondImportKind>Из вида</ASM.CondImportKind>
   <ASM.CondImportAll>Из всех</ASM.CondImportAll>
   <ASM.PresetNameTitle>Название пресета</ASM.PresetNameTitle>
-  <ASM.CondPresetTitle>Пресеты условий: {0}</ASM.CondPresetTitle>
+  <ASM.CondPresetTitle>Пресеты приоритетов: {0}</ASM.CondPresetTitle>
   <ASM.CondPresetCrossBucket>Сохранено из корзины: {0}</ASM.CondPresetCrossBucket>
   <ASM.CondToggleTip>Клик переключает есть/нет</ASM.CondToggleTip>
   <ASM.CondAddTraitHas>Черта (наличие)...</ASM.CondAddTraitHas>

@@ -103,7 +103,7 @@
   <ASM.CondImportKind>From kind</ASM.CondImportKind>
   <ASM.CondImportAll>From all</ASM.CondImportAll>
   <ASM.PresetNameTitle>Preset name</ASM.PresetNameTitle>
-  <ASM.CondPresetTitle>Condition presets: {0}</ASM.CondPresetTitle>
+  <ASM.CondPresetTitle>Priority presets: {0}</ASM.CondPresetTitle>
   <ASM.CondPresetCrossBucket>Saved from bucket: {0}</ASM.CondPresetCrossBucket>
   <ASM.CondToggleTip>Click to toggle has/missing</ASM.CondToggleTip>
   <ASM.CondAddTraitHas>Trait (has)...</ASM.CondAddTraitHas>

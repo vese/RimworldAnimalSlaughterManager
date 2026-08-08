@@ -181,8 +181,12 @@ namespace ASM
             float loadW = Mathf.Max(96f, Text.CalcSize("ASM.LoadPreset".Translate()).x + 18f);
             float overW = Mathf.Max(96f, Text.CalcSize("ASM.OverwritePreset".Translate()).x + 18f);
             const float delW = 26f, dateW = 86f, gap = 6f;
-            // Fixed mark width (reserved always so columns align).
-            float markW = Mathf.Max(60f, Text.CalcSize("ASM.PresetAllMark".Translate()).x + 6f);
+            // Mark width: wide enough for the longest bucket label (e.g. "Молодые самки").
+            Text.Font = GameFont.Tiny;
+            float markW = Mathf.Max(80f, Mathf.Max(
+                Text.CalcSize(BucketLabel(CondBucket.AdultMale)).x,
+                Text.CalcSize(BucketLabel(CondBucket.YoungFemale)).x) + 8f);
+            Text.Font = GameFont.Small;
 
             // Columns right-to-left: delete, load, overwrite (left of load), date, mark, name.
             float right = row.xMax;
@@ -204,10 +208,12 @@ namespace ASM
             if (mark != null)
             {
                 GUI.color = Color.cyan;
+                Text.Font = GameFont.Tiny;
                 Text.Anchor = TextAnchor.MiddleRight;
                 Widgets.Label(markRect, mark);
                 Text.Anchor = TextAnchor.UpperLeft;
                 GUI.color = Color.white;
+                Text.Font = GameFont.Small;
             }
 
             Text.Font = GameFont.Tiny;
