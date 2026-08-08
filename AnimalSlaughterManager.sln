@@ -1,0 +1,59 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{A50B72EE-3CA7-D8CB-A92D-2CF815BB9373}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimalSlaughterManager", "src\Source\AnimalSlaughterManager\AnimalSlaughterManager.csproj", "{3795411B-1BF2-4FD9-B200-55B80108B925}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{6B9B15CC-1AFB-4303-A2AD-8129BA337802}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "About", "src\About", "{43D2749B-6852-4093-ABE2-1045B2839EA2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Defs", "src\Defs", "{4A42329E-A3E4-4AAF-A508-7DC9E19C25A6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Languages", "src\Languages", "{C8DFF7AC-25A4-4F4C-93C4-5210DA0A7A0A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Textures", "src\Textures", "{8581B51B-7F66-43CC-9FAD-84B6F09E2709}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Assemblies", "src\Assemblies", "{6D463633-2972-4C9B-B9A0-9C4BE053D723}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3795411B-1BF2-4FD9-B200-55B80108B925}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3795411B-1BF2-4FD9-B200-55B80108B925}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3795411B-1BF2-4FD9-B200-55B80108B925}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3795411B-1BF2-4FD9-B200-55B80108B925}.Debug|x64.Build.0 = Debug|Any CPU
+		{3795411B-1BF2-4FD9-B200-55B80108B925}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3795411B-1BF2-4FD9-B200-55B80108B925}.Debug|x86.Build.0 = Debug|Any CPU
+		{3795411B-1BF2-4FD9-B200-55B80108B925}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3795411B-1BF2-4FD9-B200-55B80108B925}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3795411B-1BF2-4FD9-B200-55B80108B925}.Release|x64.ActiveCfg = Release|Any CPU
+		{3795411B-1BF2-4FD9-B200-55B80108B925}.Release|x64.Build.0 = Release|Any CPU
+		{3795411B-1BF2-4FD9-B200-55B80108B925}.Release|x86.ActiveCfg = Release|Any CPU
+		{3795411B-1BF2-4FD9-B200-55B80108B925}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A50B72EE-3CA7-D8CB-A92D-2CF815BB9373} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{3795411B-1BF2-4FD9-B200-55B80108B925} = {A50B72EE-3CA7-D8CB-A92D-2CF815BB9373}
+		{43D2749B-6852-4093-ABE2-1045B2839EA2} = {6B9B15CC-1AFB-4303-A2AD-8129BA337802}
+		{4A42329E-A3E4-4AAF-A508-7DC9E19C25A6} = {6B9B15CC-1AFB-4303-A2AD-8129BA337802}
+		{C8DFF7AC-25A4-4F4C-93C4-5210DA0A7A0A} = {6B9B15CC-1AFB-4303-A2AD-8129BA337802}
+		{8581B51B-7F66-43CC-9FAD-84B6F09E2709} = {6B9B15CC-1AFB-4303-A2AD-8129BA337802}
+		{6D463633-2972-4C9B-B9A0-9C4BE053D723} = {6B9B15CC-1AFB-4303-A2AD-8129BA337802}
+	EndGlobalSection
+EndGlobal
