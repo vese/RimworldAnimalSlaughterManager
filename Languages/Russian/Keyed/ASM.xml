@@ -16,7 +16,7 @@
   <ASM.YoungestFirst>Сначала молодых</ASM.YoungestFirst>
 
   <ASM.KeepTraits>Оставлять на развод (защита от забоя)</ASM.KeepTraits>
-  <ASM.KeepTraitsHelp>Оставлять столько животных этого вида с указанной чертой. Ограничение по возрасту и наследуемости.</ASM.KeepTraitsHelp>
+  <ASM.KeepTraitsHelp>Оставлять заданное количество животных этого вида с указанной чертой. Ограничение по возрасту и наследуемости.</ASM.KeepTraitsHelp>
   <ASM.CullTraits>Приоритетны для забоя</ASM.CullTraits>
   <ASM.CullTraitsHelp>Животные этого вида с этими чертами забиваются первыми, когда поголовье превышает лимиты.</ASM.CullTraitsHelp>
   <ASM.Trait>Черта</ASM.Trait>
@@ -120,6 +120,7 @@
   <ASM.ValidationProblems>{0}: проблемы в списках условий — {1}</ASM.ValidationProblems>
   <ASM.CondProblemTip>Конфликт или дубликат: {0}</ASM.CondProblemTip>
   <ASM.CondConflictTip>{0} конфликтует с: {1}</ASM.CondConflictTip>
+  <ASM.PriorityHelp>Списки условий определяют очерёдность забоя: условия выше — животные защищаются (забиваются последними), условия ниже — забиваются первыми. Не подходящие ни под условие — в середине (по возрасту из настроек выше).</ASM.PriorityHelp>
   <ASM.AlertConditionLabel>Конфликты в приоритетах забоя</ASM.AlertConditionLabel>
   <ASM.AlertConditionDesc>У некоторых видов есть дубликаты или противоречивые условия в списках приоритетов забоя:</ASM.AlertConditionDesc>
   <ASM.CondAddDisease>Болезнь...</ASM.CondAddDisease>

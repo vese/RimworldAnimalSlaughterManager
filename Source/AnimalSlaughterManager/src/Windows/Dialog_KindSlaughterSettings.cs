@@ -271,6 +271,14 @@ namespace ASM
 
             y = DrawBlockDivider(x, y, w);
 
+            // Help text explaining how the condition lists work.
+            GUI.color = Color.gray;
+            Text.Font = GameFont.Tiny;
+            Widgets.Label(new Rect(x, y, w, 36f), "ASM.PriorityHelp".Translate());
+            GUI.color = Color.white;
+            Text.Font = GameFont.Small;
+            y += 40f;
+
             // 2×2 grid: row 1 = males (adult | young), row 2 = females (adult | young).
             float halfW = (w - 8f) / 2f;
             float x2 = x + halfW + 8f;
@@ -851,7 +859,7 @@ namespace ASM
             else
             {
                 Widgets.Label(new Rect(x, y, w, 20f), helpKey.Translate());
-                y += 22f;
+                y += 26f;
             }
 
             y = DrawColumnHeaders(x, y, isKeep);

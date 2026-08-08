@@ -169,9 +169,9 @@ namespace ASM
             float sy = inRect.yMax - saveRowH + 2f;
             GUI.enabled = hasData;
             nameBuffer = Widgets.TextField(new Rect(inRect.x, sy, inRect.width - btnW - gap, 26f), nameBuffer);
-            GUI.enabled = true;
             if (Widgets.ButtonText(new Rect(inRect.xMax - btnW, sy, btnW, 26f), "ASM.SavePreset".Translate(), active: canSave) && canSave)
                 TrySave();
+            GUI.enabled = true;
         }
 
         private static int ScopeRank(PresetScope s) => s == PresetScope.All ? 3 : s == PresetScope.Kind ? 2 : 1;
@@ -282,8 +282,8 @@ namespace ASM
             Widgets.Label(nameRect, e.name);
             Text.Anchor = TextAnchor.UpperLeft;
 
-            // Extra column — overwrite (same scope) or scope mark (cross-level).
-            if (!crossLevel)
+            // Extra column — overwrite (same scope + has data) or scope mark (cross-level).
+            if (!crossLevel && HasSomethingToSave())
             {
                 if (Widgets.ButtonText(extraRect, "ASM.OverwritePreset".Translate()))
                 {
