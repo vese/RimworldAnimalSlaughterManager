@@ -114,20 +114,11 @@ namespace ASM
             listHeight = Mathf.Max(cy - view.y, outRect.height);
             Widgets.EndScrollView();
 
-            // Save row: name field + Overwrite (left of Save) + Save.
+            // Save row: name field + Save.
             float sy = inRect.yMax - saveRowH + 2f;
             bool canSave = HasData && !nameBuffer.Trim().NullOrEmpty();
-            string overName = nameBuffer.Trim();
-            float overW = Mathf.Max(96f, Text.CalcSize("ASM.OverwritePreset".Translate()).x + 18f);
-            float fieldW = inRect.width - btnW - overW - 2f * Gap;
             GUI.enabled = HasData;
-            nameBuffer = Widgets.TextField(new Rect(inRect.x, sy, fieldW, 26f), nameBuffer);
-            if (Widgets.ButtonText(new Rect(inRect.x + fieldW + Gap, sy, overW, 26f), "ASM.OverwritePreset".Translate(), active: canSave) && canSave)
-            {
-                Find.WindowStack.Add(new Dialog_MessageBox("ASM.ConfirmOverwrite".Translate(overName),
-                    "ASM.OverwritePreset".Translate(), () => OverwriteByName(overName),
-                    "No".Translate()) { doCloseX = true });
-            }
+            nameBuffer = Widgets.TextField(new Rect(inRect.x, sy, inRect.width - btnW - Gap, 26f), nameBuffer);
             if (Widgets.ButtonText(new Rect(inRect.xMax - btnW, sy, btnW, 26f), "ASM.SavePreset".Translate(), active: canSave) && canSave)
                 TrySave();
             GUI.enabled = true;
@@ -225,7 +216,18 @@ namespace ASM
             GUI.color = Color.white;
             Text.Font = GameFont.Small;
 
-            // Overwrite moved to the save row (space always reserved here for alignment).
+            // Overwrite button (left of Load, same-bucket + has data only; space always reserved).
+            if (canOverwrite)
+            {
+                var captured0 = e;
+                if (Widgets.ButtonText(overRect, "ASM.OverwritePreset".Translate()))
+                {
+                    var n = captured0;
+                    Find.WindowStack.Add(new Dialog_MessageBox("ASM.ConfirmOverwrite".Translate(n.name),
+                        "ASM.OverwritePreset".Translate(), () => OverwriteEntry(n),
+                        "No".Translate()) { doCloseX = true });
+                }
+            }
 
             if (isKindOrAll) TooltipHandler.TipRegion(row, "ASM.CondPresetCrossBucket".Translate(e.scope.ToString()));
 

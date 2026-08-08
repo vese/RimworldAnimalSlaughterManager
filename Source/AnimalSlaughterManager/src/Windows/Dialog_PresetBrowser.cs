@@ -187,22 +187,12 @@ namespace ASM
             listHeight = Mathf.Max(cy - view.y, outRect.height);
             Widgets.EndScrollView();
 
-            // Save row: name field + Overwrite (left of Save) + Save. Both buttons disabled when
-            // nothing to save; overwrite requires a name to be typed (it saves under that name).
+            // Save row: name field + Save. Disabled when nothing to save or no name.
             bool hasData = HasSomethingToSave();
             bool canSave = hasData && !nameBuffer.Trim().NullOrEmpty();
-            string overName = nameBuffer.Trim();
             float sy = inRect.yMax - saveRowH + 2f;
-            float overW = Mathf.Max(96f, Text.CalcSize("ASM.OverwritePreset".Translate()).x + 18f);
-            float fieldW = inRect.width - btnW - overW - 2f * gap;
             GUI.enabled = hasData;
-            nameBuffer = Widgets.TextField(new Rect(inRect.x, sy, fieldW, 26f), nameBuffer);
-            if (Widgets.ButtonText(new Rect(inRect.x + fieldW + gap, sy, overW, 26f), "ASM.OverwritePreset".Translate(), active: canSave) && canSave)
-            {
-                Find.WindowStack.Add(new Dialog_MessageBox("ASM.ConfirmOverwrite".Translate(overName),
-                    "ASM.OverwritePreset".Translate(), () => OverwritePresetByName(overName),
-                    "No".Translate()) { doCloseX = true });
-            }
+            nameBuffer = Widgets.TextField(new Rect(inRect.x, sy, inRect.width - btnW - gap, 26f), nameBuffer);
             if (Widgets.ButtonText(new Rect(inRect.xMax - btnW, sy, btnW, 26f), "ASM.SavePreset".Translate(), active: canSave) && canSave)
                 TrySave();
             GUI.enabled = true;
@@ -290,10 +280,10 @@ namespace ASM
             // Zebra rows, like the save/load list.
             if (index % 2 == 1) Widgets.DrawAltRect(row);
 
-            // Columns are reserved right-to-left from the right edge; every row reserves the same set,
-            // so columns stay aligned. The "extra" slot holds the scope mark (cross-level) — overwrite
-            // moved to the save row at the bottom.
+            // Columns always reserved right-to-left. Overwrite (left of Load) only shown
+            // for same-scope rows when there is data to overwrite with.
             float loadW = Mathf.Max(96f, Text.CalcSize("ASM.LoadPreset".Translate()).x + 18f);
+            float overW = Mathf.Max(96f, Text.CalcSize("ASM.OverwritePreset".Translate()).x + 18f);
             float extraW = Mathf.Max(60f, Text.CalcSize("ASM.PresetAllMark".Translate()).x + 6f);
             const float delW = 26f, dateW = 86f, gap = 6f;
 
@@ -302,6 +292,8 @@ namespace ASM
             right -= delW + gap;
             Rect loadBtn = new Rect(right - loadW, row.y + 2f, loadW, 26f);
             right -= loadW + gap;
+            Rect overBtn = new Rect(right - overW, row.y + 2f, overW, 26f);
+            right -= overW + gap;
             Rect dateRect = new Rect(right - dateW, row.y + 4f, dateW, 22f);
             right -= dateW + gap;
             Rect extraRect = new Rect(right - extraW, row.y + 4f, extraW, 22f);
@@ -331,6 +323,18 @@ namespace ASM
             Widgets.Label(dateRect, e.date.ToString("yyyy-MM-dd HH:mm"));
             GUI.color = Color.white;
             Text.Font = GameFont.Small;
+
+            // Overwrite button (left of Load, same-scope rows with data only).
+            if (!crossLevel && HasSomethingToSave())
+            {
+                if (Widgets.ButtonText(overBtn, "ASM.OverwritePreset".Translate()))
+                {
+                    var n = captured;
+                    Find.WindowStack.Add(new Dialog_MessageBox("ASM.ConfirmOverwrite".Translate(n.name),
+                        "ASM.OverwritePreset".Translate(), () => OverwriteEntry(n),
+                        "No".Translate()) { doCloseX = true });
+                }
+            }
 
             if (crossLevel) TooltipHandler.TipRegion(row, CrossLevelTip(e));
 

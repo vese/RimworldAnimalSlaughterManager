@@ -15,8 +15,8 @@
   <ASM.OldestFirst>Oldest first</ASM.OldestFirst>
   <ASM.YoungestFirst>Youngest first</ASM.YoungestFirst>
 
-  <ASM.KeepTraits>Keep for breeding (protect from slaughter)</ASM.KeepTraits>
-  <ASM.KeepTraitsHelp>Protect a set number of animals with this trait from auto-slaughter. Filtered by age and inheritability.</ASM.KeepTraitsHelp>
+  <ASM.KeepTraits>Protect from slaughter</ASM.KeepTraits>
+  <ASM.KeepTraitsHelp>Protect a set number of animals with this trait from auto-slaughter.</ASM.KeepTraitsHelp>
   <ASM.CullTraits>Prioritize for slaughter</ASM.CullTraits>
   <ASM.CullTraitsHelp>Slaughter animals with these traits first when the herd exceeds its limits.</ASM.CullTraitsHelp>
   <ASM.Trait>Trait</ASM.Trait>
@@ -128,10 +128,9 @@
   <ASM.Unavailable>unavailable</ASM.Unavailable>
   <ASM.TabGeneral>General</ASM.TabGeneral>
   <ASM.DefaultAgePref>Default age direction for slaughter</ASM.DefaultAgePref>
-  <ASM.DefaultAgePrefHelp>These settings apply to all kinds at once — which animals to slaughter first (oldest or youngest) for each of the four age×sex buckets.</ASM.DefaultAgePrefHelp>
   <ASM.ConfirmApplyAgePref>Apply this change to other kinds where this setting was already customized?</ASM.ConfirmApplyAgePref>
   <ASM.ConfirmApplyPref>Apply this change to other kinds where this setting was already customized?</ASM.ConfirmApplyPref>
-  <ASM.GeneralTabHelp>Settings here apply to the current kind. On change you can propagate to all kinds where they were already customized. Per-bucket condition lists on the Priorities tab are separate.</ASM.GeneralTabHelp>
+  <ASM.GeneralTabHelp>These settings define the default age-based slaughter order for all kinds at once.</ASM.GeneralTabHelp>
   <ASM.Bonded>Bonded</ASM.Bonded>
   <ASM.ManagePresets>Manage presets...</ASM.ManagePresets>
   <ASM.ConfirmDelete>Delete preset '{0}'?</ASM.ConfirmDelete>
@@ -157,7 +156,7 @@
   <ASM.TabPriorities>Priorities</ASM.TabPriorities>
   <ASM.TabExceptions>Special rules</ASM.TabExceptions>
   <ASM.ForceCullTraits>Force slaughter</ASM.ForceCullTraits>
-  <ASM.ForceCullTraitsHelp>Slaughter animals with these traits always, regardless of herd size and other settings. Individual protection and breeding targets override this.</ASM.ForceCullTraitsHelp>
+  <ASM.ForceCullTraitsHelp>Slaughter animals with these traits always, regardless of herd size and other settings, except those protected by traits or individually.</ASM.ForceCullTraitsHelp>
   <ASM.Good>Good</ASM.Good>
   <ASM.Bad>Bad</ASM.Bad>
   <ASM.TypeCol>Type</ASM.TypeCol>

@@ -290,12 +290,17 @@ namespace ASM
             Widgets.Label(new Rect(x, y, w, 36f), "ASM.PriorityHelp".Translate());
             GUI.color = Color.white;
             Text.Font = GameFont.Small;
-            y += 40f;
+            y += 36f;
 
-            // 2×2 grid with dividers between all sections.
-            float halfW = (w - 8f) / 2f;
-            float x2 = x + halfW + 8f;
+            // 2×2 grid with dividers between all sections + vertical divider between columns.
+            float halfW = (w - 12f) / 2f;
+            float x2 = x + halfW + 12f;
             DrawConditionSection(x, y, halfW, listH, "ASM.AdultMales", settings.prioAdultMale, ref condScroll1, ref condListH1, ref condGroup1, true, true);
+            // Vertical divider between columns.
+            Color vdPrev = GUI.color;
+            GUI.color = new Color(1f, 1f, 1f, 0.25f);
+            Widgets.DrawLineVertical(x + halfW + 6f, y, listH + CondSectionH);
+            GUI.color = vdPrev;
             DrawConditionSection(x2, y, halfW, listH, "ASM.YoungMales", settings.prioYoungMale, ref condScroll2, ref condListH2, ref condGroup2, true, false);
             y += CondSectionH + listH;
             y = DrawBlockDivider(x, y, w);
@@ -872,9 +877,11 @@ namespace ASM
             else
             {
                 GUI.color = Color.gray;
+                Text.Font = GameFont.Tiny;
                 Widgets.Label(new Rect(x, y, w, 20f), helpKey.Translate());
                 GUI.color = Color.white;
-                y += 26f;
+                Text.Font = GameFont.Small;
+                y += 24f;
             }
 
             y = DrawColumnHeaders(x, y, isKeep);

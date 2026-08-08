@@ -15,8 +15,8 @@
   <ASM.OldestFirst>Сначала старших</ASM.OldestFirst>
   <ASM.YoungestFirst>Сначала молодых</ASM.YoungestFirst>
 
-  <ASM.KeepTraits>Оставлять на развод (защита от забоя)</ASM.KeepTraits>
-  <ASM.KeepTraitsHelp>Защитить заданное количество животных с указанной чертой от авто-забоя. Фильтр по возрасту и наследуемости.</ASM.KeepTraitsHelp>
+  <ASM.KeepTraits>Защита от забоя</ASM.KeepTraits>
+  <ASM.KeepTraitsHelp>Защитить заданное количество животных с указанной чертой от авто-забоя.</ASM.KeepTraitsHelp>
   <ASM.CullTraits>Приоритетны для забоя</ASM.CullTraits>
   <ASM.CullTraitsHelp>Забивать животных с этими чертами в первую очередь при превышении лимитов поголовья.</ASM.CullTraitsHelp>
   <ASM.Trait>Черта</ASM.Trait>
@@ -120,7 +120,7 @@
   <ASM.ValidationProblems>{0}: проблемы в списках условий — {1}</ASM.ValidationProblems>
   <ASM.CondProblemTip>Конфликт или дубликат: {0}</ASM.CondProblemTip>
   <ASM.CondConflictTip>{0} конфликтует с: {1}</ASM.CondConflictTip>
-  <ASM.PriorityHelp>Условия в списке задают очерёдность забоя сверху вниз: животные под условия вверху забиваются последними, внизу — первыми. Оставшиеся сортируются по возрасту из настроек выше.</ASM.PriorityHelp>
+  <ASM.PriorityHelp>Условия в списке задают очерёдность забоя сверху вниз: животные, подходящие по условия вверху, забиваются последними, внизу — первыми. Оставшиеся сортируются по возрасту из настроек выше.</ASM.PriorityHelp>
   <ASM.AlertConditionLabel>Конфликты в приоритетах забоя</ASM.AlertConditionLabel>
   <ASM.AlertConditionDesc>У некоторых видов есть дубликаты или противоречивые условия в списках приоритетов забоя:</ASM.AlertConditionDesc>
   <ASM.CondAddDisease>Болезнь...</ASM.CondAddDisease>
@@ -128,10 +128,9 @@
   <ASM.Unavailable>недоступно</ASM.Unavailable>
   <ASM.TabGeneral>Общие</ASM.TabGeneral>
   <ASM.DefaultAgePref>Каких по возрасту забивать первыми</ASM.DefaultAgePref>
-  <ASM.DefaultAgePrefHelp>Эти настройки применяются ко всем видам сразу. Каких животных забивать первыми — старших или молодых — для каждой из четырёх корзин возраст×пол.</ASM.DefaultAgePrefHelp>
   <ASM.ConfirmApplyAgePref>Применить изменение к видам, где настройка уже была изменена?</ASM.ConfirmApplyAgePref>
   <ASM.ConfirmApplyPref>Применить изменение к видам, где эта настройка уже была изменена?</ASM.ConfirmApplyPref>
-  <ASM.GeneralTabHelp>Настройки применяются к текущему виду. При изменении можно применить их ко всем видам, где они уже были настроены. Списки условий на вкладке «Приоритеты» — отдельно.</ASM.GeneralTabHelp>
+  <ASM.GeneralTabHelp>Эти настройки задают дефолтное поведение для выбора животных на забой по возрасту для всех видов сразу.</ASM.GeneralTabHelp>
   <ASM.Bonded>Привяз.</ASM.Bonded>
   <ASM.ManagePresets>Управление пресетами...</ASM.ManagePresets>
   <ASM.ConfirmDelete>Удалить пресет «{0}»?</ASM.ConfirmDelete>
@@ -157,7 +156,7 @@
   <ASM.TabPriorities>Приоритеты</ASM.TabPriorities>
   <ASM.TabExceptions>Особые правила</ASM.TabExceptions>
   <ASM.ForceCullTraits>Принудительный забой</ASM.ForceCullTraits>
-  <ASM.ForceCullTraitsHelp>Забивать животных с этими чертами всегда, независимо от поголовья и других настроек. Индивидуальная защита и цели разведения перевешивают.</ASM.ForceCullTraitsHelp>
+  <ASM.ForceCullTraitsHelp>Забивать животных с этими чертами всегда, независимо от поголовья и других настроек, кроме защищенных чертами и индивидуально.</ASM.ForceCullTraitsHelp>
   <ASM.Good>Хорошая</ASM.Good>
   <ASM.Bad>Плохая</ASM.Bad>
   <ASM.TypeCol>Тип</ASM.TypeCol>
