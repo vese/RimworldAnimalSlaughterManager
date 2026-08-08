@@ -13,6 +13,11 @@ if not defined DEST (
 
 git pull
 
+:: Сохраняем PublishedFileId.txt (ID Workshop-предмета) из папки игры в репо,
+:: иначе rd ниже полностью стирает папку мода и следующая публикация в Steam
+:: создаёт НОВЫЙ предмет вместо обновления существующего.
+if exist "%DEST%\About\PublishedFileId.txt" copy /y "%DEST%\About\PublishedFileId.txt" "%~dp0About\PublishedFileId.txt" >nul
+
 rd /s /q "%DEST%"
 set "SOURCE=%~dp0About"
 xcopy "%SOURCE%" "%DEST%\About\" /e /i /h /k /y /r
