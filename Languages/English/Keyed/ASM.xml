@@ -175,7 +175,7 @@
   <ASM.ResetSpecialRules>Reset special rules</ASM.ResetSpecialRules>
   <ASM.ResetKind>Reset kind settings</ASM.ResetKind>
   <ASM.KindPresets>Kind presets...</ASM.KindPresets>
-  <ASM.TraitListPresets>List presets...</ASM.TraitListPresets>
+  <ASM.TraitListPresets>Presets...</ASM.TraitListPresets>
 
   <ASM.KindPresetsTitle>Kind presets: {0}</ASM.KindPresetsTitle>
   <ASM.PresetTitleAll>Slaughter settings presets</ASM.PresetTitleAll>

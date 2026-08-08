@@ -175,7 +175,7 @@
   <ASM.ResetSpecialRules>Сброс особых правил</ASM.ResetSpecialRules>
   <ASM.ResetKind>Сброс настроек вида</ASM.ResetKind>
   <ASM.KindPresets>Пресеты для вида...</ASM.KindPresets>
-  <ASM.TraitListPresets>Пресеты списка...</ASM.TraitListPresets>
+  <ASM.TraitListPresets>Пресеты...</ASM.TraitListPresets>
 
   <ASM.KindPresetsTitle>Пресеты для вида: {0}</ASM.KindPresetsTitle>
   <ASM.PresetTitleAll>Пресеты настроек забоя</ASM.PresetTitleAll>

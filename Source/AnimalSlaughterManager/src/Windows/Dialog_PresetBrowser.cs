@@ -61,7 +61,7 @@ namespace ASM
             }
         }
 
-        public override Vector2 InitialSize => new Vector2(720f, 600f);
+        public override Vector2 InitialSize => new Vector2(820f, 600f);
 
         public Dialog_PresetBrowser(ASM_MapComp comp, PresetScope scope, ThingDef kind, TraitListKind? listKind)
         {
@@ -132,11 +132,13 @@ namespace ASM
             float btnW = Mathf.Max(96f, Text.CalcSize("ASM.SavePreset".Translate()).x + 18f);
 
             // --- Top: search row, one Gap below the title. Magnifier + filter field spanning the left
-            // half with a clear ✕ right after it; scope-type toggles fill the right half. ---
+            // half with a clear ✕ right after it; scope-type toggles fill the right half (skipped for
+            // the All-scope browser which only shows one type). ---
             float y = inRect.y + Gap;
             const float topH = 28f;
-            float mid = inRect.x + inRect.width * 0.5f;
             const float icon = 22f, gap = 6f, clearGap = 10f;
+            bool showToggles = scope != PresetScope.All;
+            float mid = showToggles ? inRect.x + inRect.width * 0.5f : inRect.xMax - icon - clearGap;
             GUI.DrawTexture(new Rect(inRect.x, y + (topH - icon) / 2f, icon, icon), TexButton.Search);
             float fieldX = inRect.x + icon + gap;
             float fieldEnd = mid - icon - clearGap;
@@ -145,16 +147,20 @@ namespace ASM
             TooltipHandler.TipRegion(clearBtn, "ASM.Clear".Translate());
             if (Widgets.ButtonImage(clearBtn, TexButton.CloseXSmall))
                 filterBuffer = "";
-            // Scope-type filters (only the scopes visible in this context), right-aligned to the
-            // window edge.
-            var scopes = new List<PresetScope> { PresetScope.List, PresetScope.Kind, PresetScope.All };
-            float toggleW = 0f;
-            foreach (var sc in scopes)
-                if (ScopeVisible(sc)) toggleW += ScopeToggleWidth(sc) + Gap;
-            float tx = inRect.xMax - toggleW + Gap;
-            foreach (var sc in scopes)
-                DrawScopeToggle(ref tx, y, sc);
-            y += topH + Gap;
+            if (!showToggles) { y += topH + Gap; }
+            else
+            {
+                // Scope-type filters (only the scopes visible in this context), right-aligned to the
+                // window edge.
+                var scopes = new List<PresetScope> { PresetScope.List, PresetScope.Kind, PresetScope.All };
+                float toggleW = 0f;
+                foreach (var sc in scopes)
+                    if (ScopeVisible(sc)) toggleW += ScopeToggleWidth(sc) + Gap;
+                float tx = inRect.xMax - toggleW + Gap;
+                foreach (var sc in scopes)
+                    DrawScopeToggle(ref tx, y, sc);
+                y += topH + Gap;
+            }
 
             // --- Bottom: save row (name field + Save button). ---
             const float saveRowH = 30f;

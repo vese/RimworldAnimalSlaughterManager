@@ -29,7 +29,7 @@ namespace ASM
         private const float PadX = 8f;
         private const float RowH = 30f;
 
-        public override Vector2 InitialSize => new Vector2(720f, 600f);
+        public override Vector2 InitialSize => new Vector2(820f, 600f);
 
         public Dialog_ConditionPresetBrowser(ASM_MapComp comp, CondBucket bucket, List<SlaughterCondition> targetList)
         {
@@ -184,11 +184,11 @@ namespace ASM
             // Fixed mark width (reserved always so columns align).
             float markW = Mathf.Max(60f, Text.CalcSize("ASM.PresetAllMark".Translate()).x + 6f);
 
-            // Always reserve all columns right-to-left so dates/marks align across rows.
+            // Columns right-to-left: delete, load, overwrite (left of load), date, mark, name.
             float right = row.xMax;
             Rect delRect = new Rect(right - delW, row.y + 2f, delW, 26f); right -= delW + gap;
-            Rect overRect = new Rect(right - overW, row.y + 2f, overW, 26f); right -= overW + gap;
             Rect loadBtn = new Rect(right - loadW, row.y + 2f, loadW, 26f); right -= loadW + gap;
+            Rect overRect = new Rect(right - overW, row.y + 2f, overW, 26f); right -= overW + gap;
             Rect dateRect = new Rect(right - dateW, row.y + 4f, dateW, 22f); right -= dateW + gap;
             Rect markRect = new Rect(right - markW, row.y + 4f, markW, 22f); right -= markW + gap;
             Rect nameRect = new Rect(row.x, row.y + 5f, Mathf.Max(right - row.x, 40f), 22f);
