@@ -36,6 +36,13 @@ namespace ASM
             inheritMode = inheritMode,
         };
 
+        /// <summary>True when this condition references a def (trait/disease/trainable) that failed
+        /// to resolve on load (def-providing mod disabled). Such entries are no-ops and get pruned.</summary>
+        public bool HasNullDef =>
+            (type == CondType.Trait && trait == null) ||
+            (type == CondType.Disease && disease == null) ||
+            (type == CondType.Training && trainable == null);
+
         public bool Matches(Pawn p)
         {
             if (p == null) return false;

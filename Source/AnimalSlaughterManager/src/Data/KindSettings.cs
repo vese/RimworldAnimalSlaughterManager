@@ -118,6 +118,18 @@ namespace ASM
                 if (prioYoungMale == null) prioYoungMale = new List<SlaughterCondition>();
                 if (prioAdultFemale == null) prioAdultFemale = new List<SlaughterCondition>();
                 if (prioYoungFemale == null) prioYoungFemale = new List<SlaughterCondition>();
+
+                // A trait/disease/trainable def may resolve to null when the mod that defined it
+                // (e.g. Animal Traits System) was disabled on this save. Drop those dead entries so
+                // the settings don't fill up with no-op "?" rows. (This does not silence RimWorld's
+                // own "Could not load reference" log for hediffs still on the pawns — that is the
+                // base game resolving the save, outside this mod's control.)
+                keepTraits.RemoveAll(t => t == null || t.trait == null);
+                cullTraits.RemoveAll(t => t == null || t.trait == null);
+                spareTraits.RemoveAll(t => t == null || t.trait == null);
+                forceCullTraits.RemoveAll(t => t == null || t.trait == null);
+                foreach (var list in new[] { prioAdultMale, prioYoungMale, prioAdultFemale, prioYoungFemale })
+                    list?.RemoveAll(c => c == null || c.HasNullDef);
             }
         }
     }
