@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <PawnColumnDef>
+    <defName>ASM_IndivProtection</defName>
+    <workerClass>ASM.PawnColumnWorker_IndivProtection</workerClass>
+    <headerIcon>UI/Icons/ASM/Shield</headerIcon>
+    <sortable>true</sortable>
+  </PawnColumnDef>
+</Defs>
