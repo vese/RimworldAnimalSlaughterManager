@@ -67,7 +67,7 @@ Animal Slaughter Manager расширяет встроенный авто-заб
   <modDependencies>
     <li>
       <packageId>brrainz.harmony</packageId>
-      <name>Harmony</name>
+      <displayName>Harmony</displayName>
       <steamWorkshopUrl>steam://url/CommunityFilePage/2009463077</steamWorkshopUrl>
       <downloadUrl>https://github.com/pardeike/HarmonyRimWorld/releases/latest</downloadUrl>
     </li>
