@@ -194,7 +194,7 @@ namespace ASM
                     var n = captured0;
                     Find.WindowStack.Add(new Dialog_MessageBox("ASM.ConfirmOverwrite".Translate(n.name),
                         "ASM.OverwritePreset".Translate(), () => OverwriteEntry(n),
-                        "No".Translate()));
+                        "No".Translate()) { doCloseX = true });
                 }
             }
             Rect loadBtn = new Rect(right - loadW, row.y + 2f, loadW, 26f); right -= loadW + gap;
@@ -238,7 +238,8 @@ namespace ASM
             {
                 var n = captured;
                 Find.WindowStack.Add(new Dialog_MessageBox("ASM.ConfirmDelete".Translate(n.name),
-                    "ASM.DeletePreset".Translate(), () => PresetIO.Delete(n)));
+                    "ASM.DeletePreset".Translate(), () => PresetIO.Delete(n),
+                    "No".Translate()) { doCloseX = true });
             }
         }
 

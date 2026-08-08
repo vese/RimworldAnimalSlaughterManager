@@ -120,7 +120,7 @@
   <ASM.ValidationProblems>{0}: condition list issues — {1}</ASM.ValidationProblems>
   <ASM.CondProblemTip>Conflict or duplicate: {0}</ASM.CondProblemTip>
   <ASM.CondConflictTip>{0} conflicts with: {1}</ASM.CondConflictTip>
-  <ASM.PriorityHelp>Condition lists set the slaughter order: conditions higher up protect animals (slaughtered last), conditions lower down are slaughtered first. Animals matching no condition fall in the middle (by age from the settings above).</ASM.PriorityHelp>
+  <ASM.PriorityHelp>Condition lists set the slaughter order top-to-bottom: animals matching conditions higher up are slaughtered last, lower down — first. Animals matching no condition are sorted by age (from the settings above).</ASM.PriorityHelp>
   <ASM.AlertConditionLabel>Slaughter priority conflicts</ASM.AlertConditionLabel>
   <ASM.AlertConditionDesc>Some animal kinds have duplicate or contradictory conditions in their slaughter priority lists:</ASM.AlertConditionDesc>
   <ASM.CondAddDisease>Disease...</ASM.CondAddDisease>

@@ -120,7 +120,7 @@
   <ASM.ValidationProblems>{0}: проблемы в списках условий — {1}</ASM.ValidationProblems>
   <ASM.CondProblemTip>Конфликт или дубликат: {0}</ASM.CondProblemTip>
   <ASM.CondConflictTip>{0} конфликтует с: {1}</ASM.CondConflictTip>
-  <ASM.PriorityHelp>Списки условий определяют очерёдность забоя: условия выше — животные защищаются (забиваются последними), условия ниже — забиваются первыми. Не подходящие ни под условие — в середине (по возрасту из настроек выше).</ASM.PriorityHelp>
+  <ASM.PriorityHelp>Списки условий задают очерёдность забоя сверху вниз: животные под условия выше забиваются последними, под условия ниже — первыми. Животные, не подходящие ни под одно условие, сортируются по возрасту (из настроек выше).</ASM.PriorityHelp>
   <ASM.AlertConditionLabel>Конфликты в приоритетах забоя</ASM.AlertConditionLabel>
   <ASM.AlertConditionDesc>У некоторых видов есть дубликаты или противоречивые условия в списках приоритетов забоя:</ASM.AlertConditionDesc>
   <ASM.CondAddDisease>Болезнь...</ASM.CondAddDisease>

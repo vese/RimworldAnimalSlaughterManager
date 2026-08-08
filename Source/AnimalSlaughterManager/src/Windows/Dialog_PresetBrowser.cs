@@ -289,7 +289,8 @@ namespace ASM
                 {
                     var n = captured;
                     Find.WindowStack.Add(new Dialog_MessageBox("ASM.ConfirmOverwrite".Translate(n.name),
-                        "ASM.OverwritePreset".Translate(), () => OverwriteEntry(n)));
+                        "ASM.OverwritePreset".Translate(), () => OverwriteEntry(n),
+                        "No".Translate()) { doCloseX = true });
                 }
             }
             else if (mark != null)
@@ -321,7 +322,8 @@ namespace ASM
                     string confirm = scope == PresetScope.List
                         ? "ASM.ConfirmDeleteList".Translate(n.name)
                         : scope == PresetScope.Kind ? "ASM.ConfirmDeleteKind".Translate(n.name) : "ASM.ConfirmDelete".Translate(n.name);
-                    Find.WindowStack.Add(new Dialog_MessageBox(confirm, "ASM.DeletePreset".Translate(), () => PresetIO.Delete(n)));
+                    Find.WindowStack.Add(new Dialog_MessageBox(confirm, "ASM.DeletePreset".Translate(), () => PresetIO.Delete(n),
+                        "No".Translate()) { doCloseX = true });
                 }
             }
         }
