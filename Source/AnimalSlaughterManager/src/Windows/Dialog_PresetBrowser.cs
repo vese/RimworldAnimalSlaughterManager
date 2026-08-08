@@ -72,7 +72,32 @@ namespace ASM
             doCloseX = true;
             draggable = true;
             resizeable = true;
-            optionalTitle = Title();
+            optionalTitle = PresetTitle();
+        }
+
+        private string PresetTitle()
+        {
+            string kindLabel = kind != null ? kind.LabelCap.ToString() : "";
+            switch (scope)
+            {
+                case PresetScope.Kind:
+                    return "ASM.PresetTitleKind".Translate(kindLabel);
+                case PresetScope.List:
+                    return ListTitle(listKind, kindLabel);
+                default:
+                    return "ASM.PresetTitleAll".Translate();
+            }
+        }
+
+        private string ListTitle(TraitListKind? lk, string kindLabel)
+        {
+            switch (lk)
+            {
+                case TraitListKind.Keep: return "ASM.PresetTitleKeep".Translate(kindLabel);
+                case TraitListKind.ForceCull: return "ASM.PresetTitleForceCull".Translate(kindLabel);
+                case TraitListKind.Cull: return "ASM.PresetTitleCull".Translate(kindLabel);
+                default: return "ASM.PresetTitleSpare".Translate(kindLabel);
+            }
         }
 
         private string Title()
@@ -162,13 +187,22 @@ namespace ASM
             listHeight = Mathf.Max(cy - view.y, outRect.height);
             Widgets.EndScrollView();
 
-            // Save row pinned to the bottom. The field is disabled when there is nothing to save; the
-            // Save button is additionally disabled until a (non-empty) name is typed.
+            // Save row: name field + Overwrite (left of Save) + Save. Both buttons disabled when
+            // nothing to save; overwrite requires a name to be typed (it saves under that name).
             bool hasData = HasSomethingToSave();
             bool canSave = hasData && !nameBuffer.Trim().NullOrEmpty();
+            string overName = nameBuffer.Trim();
             float sy = inRect.yMax - saveRowH + 2f;
+            float overW = Mathf.Max(96f, Text.CalcSize("ASM.OverwritePreset".Translate()).x + 18f);
+            float fieldW = inRect.width - btnW - overW - 2f * gap;
             GUI.enabled = hasData;
-            nameBuffer = Widgets.TextField(new Rect(inRect.x, sy, inRect.width - btnW - gap, 26f), nameBuffer);
+            nameBuffer = Widgets.TextField(new Rect(inRect.x, sy, fieldW, 26f), nameBuffer);
+            if (Widgets.ButtonText(new Rect(inRect.x + fieldW + gap, sy, overW, 26f), "ASM.OverwritePreset".Translate(), active: canSave) && canSave)
+            {
+                Find.WindowStack.Add(new Dialog_MessageBox("ASM.ConfirmOverwrite".Translate(overName),
+                    "ASM.OverwritePreset".Translate(), () => OverwritePresetByName(overName),
+                    "No".Translate()) { doCloseX = true });
+            }
             if (Widgets.ButtonText(new Rect(inRect.xMax - btnW, sy, btnW, 26f), "ASM.SavePreset".Translate(), active: canSave) && canSave)
                 TrySave();
             GUI.enabled = true;
@@ -257,11 +291,10 @@ namespace ASM
             if (index % 2 == 1) Widgets.DrawAltRect(row);
 
             // Columns are reserved right-to-left from the right edge; every row reserves the same set,
-            // so columns stay aligned even when a row has no delete button, no overwrite button or no
-            // scope mark. The "extra" slot holds the overwrite button (same-scope rows) or the scope
-            // mark (cross-level rows) — they are mutually exclusive.
+            // so columns stay aligned. The "extra" slot holds the scope mark (cross-level) — overwrite
+            // moved to the save row at the bottom.
             float loadW = Mathf.Max(96f, Text.CalcSize("ASM.LoadPreset".Translate()).x + 18f);
-            float extraW = Mathf.Max(120f, Text.CalcSize("ASM.OverwritePreset".Translate()).x + 18f);
+            float extraW = Mathf.Max(60f, Text.CalcSize("ASM.PresetAllMark".Translate()).x + 6f);
             const float delW = 26f, dateW = 86f, gap = 6f;
 
             float right = row.xMax;
@@ -271,7 +304,7 @@ namespace ASM
             right -= loadW + gap;
             Rect dateRect = new Rect(right - dateW, row.y + 4f, dateW, 22f);
             right -= dateW + gap;
-            Rect extraRect = new Rect(right - extraW, row.y + 2f, extraW, 26f);
+            Rect extraRect = new Rect(right - extraW, row.y + 4f, extraW, 22f);
             right -= extraW + gap;
             Rect nameRect = new Rect(row.x, row.y + 5f, Mathf.Max(right - row.x, 40f), 22f);
 
@@ -282,18 +315,8 @@ namespace ASM
             Widgets.Label(nameRect, e.name);
             Text.Anchor = TextAnchor.UpperLeft;
 
-            // Extra column — always reserved (keeps columns aligned). Content depends on row type.
-            if (!crossLevel && HasSomethingToSave())
-            {
-                if (Widgets.ButtonText(extraRect, "ASM.OverwritePreset".Translate()))
-                {
-                    var n = captured;
-                    Find.WindowStack.Add(new Dialog_MessageBox("ASM.ConfirmOverwrite".Translate(n.name),
-                        "ASM.OverwritePreset".Translate(), () => OverwriteEntry(n),
-                        "No".Translate()) { doCloseX = true });
-                }
-            }
-            else if (mark != null)
+            // Extra column — scope mark (cross-level) or empty (same scope).
+            if (mark != null)
             {
                 GUI.color = Color.cyan;
                 Text.Anchor = TextAnchor.MiddleRight;
@@ -363,6 +386,17 @@ namespace ASM
 
         // Overwrite an existing same-scope preset with the current settings. Serialize overwrites a
         // same-name file, so this just reuses the normal export path under the preset's own name.
+        private void OverwritePresetByName(string name)
+        {
+            switch (scope)
+            {
+                case PresetScope.All: PresetIO.ExportAll(name, comp); break;
+                case PresetScope.Kind: PresetIO.ExportKind(name, kind, Settings); break;
+                default: PresetIO.ExportList(name, listKind.Value, kind, TargetList); break;
+            }
+            Messages.Message("ASM.PresetOverwritten".Translate(name), MessageTypeDefOf.TaskCompletion, false);
+        }
+
         private void OverwriteEntry(PresetEntry e)
         {
             switch (scope)

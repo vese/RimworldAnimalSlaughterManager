@@ -675,15 +675,15 @@ namespace ASM
             opts.Add(new FloatMenuOption("ASM.CondDiseaseAnyHas".Translate(), () => { list.Add(new SlaughterCondition(CondType.DiseaseAny) { has = true }); comp.MarkDirty(); }));
             opts.Add(new FloatMenuOption("ASM.CondDiseaseAnyMissing".Translate(), () => { list.Add(new SlaughterCondition(CondType.DiseaseAny) { has = false }); comp.MarkDirty(); }));
             opts.Add(new FloatMenuOption("ASM.CondAddTrait".Translate(), () => Find.WindowStack.Add(new Dialog_TraitPicker(picked => { foreach (var (d, has) in picked) list.Add(new SlaughterCondition(CondType.Trait) { trait = d, has = has }); comp.MarkDirty(); }))));
+            opts.Add(new FloatMenuOption("ASM.CondPositiveHas".Translate(), () => { list.Add(new SlaughterCondition(CondType.HasPositiveTrait) { has = true }); comp.MarkDirty(); }));
+            opts.Add(new FloatMenuOption("ASM.CondPositiveMissing".Translate(), () => { list.Add(new SlaughterCondition(CondType.HasPositiveTrait) { has = false }); comp.MarkDirty(); }));
+            opts.Add(new FloatMenuOption("ASM.CondNegativeHas".Translate(), () => { list.Add(new SlaughterCondition(CondType.HasNegativeTrait) { has = true }); comp.MarkDirty(); }));
+            opts.Add(new FloatMenuOption("ASM.CondNegativeMissing".Translate(), () => { list.Add(new SlaughterCondition(CondType.HasNegativeTrait) { has = false }); comp.MarkDirty(); }));
             opts.Add(new FloatMenuOption("ASM.CondAddDisease".Translate(), () => OpenDefSubmenu(list, CondType.Disease, DefDatabase<HediffDef>.AllDefs.Where(d => d.makesSickThought).OrderBy(d => d.LabelCap.ToString()), true)));
             opts.Add(new FloatMenuOption("ASM.CondAddTraining".Translate(), () => OpenTrainingSubmenu(list)));
             opts.Add(new FloatMenuOption("ASM.CondTrainingNone".Translate(), () => { list.Add(new SlaughterCondition(CondType.TrainingNone)); comp.MarkDirty(); }));
             opts.Add(new FloatMenuOption("ASM.CondTrainingPartial".Translate(), () => { list.Add(new SlaughterCondition(CondType.TrainingPartial)); comp.MarkDirty(); }));
             opts.Add(new FloatMenuOption("ASM.CondTrainingFull".Translate(), () => { list.Add(new SlaughterCondition(CondType.TrainingFull)); comp.MarkDirty(); }));
-            opts.Add(new FloatMenuOption("ASM.CondPositiveHas".Translate(), () => { list.Add(new SlaughterCondition(CondType.HasPositiveTrait) { has = true }); comp.MarkDirty(); }));
-            opts.Add(new FloatMenuOption("ASM.CondPositiveMissing".Translate(), () => { list.Add(new SlaughterCondition(CondType.HasPositiveTrait) { has = false }); comp.MarkDirty(); }));
-            opts.Add(new FloatMenuOption("ASM.CondNegativeHas".Translate(), () => { list.Add(new SlaughterCondition(CondType.HasNegativeTrait) { has = true }); comp.MarkDirty(); }));
-            opts.Add(new FloatMenuOption("ASM.CondNegativeMissing".Translate(), () => { list.Add(new SlaughterCondition(CondType.HasNegativeTrait) { has = false }); comp.MarkDirty(); }));
             Find.WindowStack.Add(new FloatMenu(opts));
         }
 

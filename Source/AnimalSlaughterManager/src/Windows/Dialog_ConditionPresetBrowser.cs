@@ -29,7 +29,7 @@ namespace ASM
         private const float PadX = 8f;
         private const float RowH = 30f;
 
-        public override Vector2 InitialSize => new Vector2(620f, 560f);
+        public override Vector2 InitialSize => new Vector2(720f, 600f);
 
         public Dialog_ConditionPresetBrowser(ASM_MapComp comp, CondBucket bucket, List<SlaughterCondition> targetList)
         {
@@ -114,11 +114,20 @@ namespace ASM
             listHeight = Mathf.Max(cy - view.y, outRect.height);
             Widgets.EndScrollView();
 
-            // Save row — both field and button disabled when no conditions in the list.
+            // Save row: name field + Overwrite (left of Save) + Save.
             float sy = inRect.yMax - saveRowH + 2f;
             bool canSave = HasData && !nameBuffer.Trim().NullOrEmpty();
+            string overName = nameBuffer.Trim();
+            float overW = Mathf.Max(96f, Text.CalcSize("ASM.OverwritePreset".Translate()).x + 18f);
+            float fieldW = inRect.width - btnW - overW - 2f * Gap;
             GUI.enabled = HasData;
-            nameBuffer = Widgets.TextField(new Rect(inRect.x, sy, inRect.width - btnW - Gap, 26f), nameBuffer);
+            nameBuffer = Widgets.TextField(new Rect(inRect.x, sy, fieldW, 26f), nameBuffer);
+            if (Widgets.ButtonText(new Rect(inRect.x + fieldW + Gap, sy, overW, 26f), "ASM.OverwritePreset".Translate(), active: canSave) && canSave)
+            {
+                Find.WindowStack.Add(new Dialog_MessageBox("ASM.ConfirmOverwrite".Translate(overName),
+                    "ASM.OverwritePreset".Translate(), () => OverwriteByName(overName),
+                    "No".Translate()) { doCloseX = true });
+            }
             if (Widgets.ButtonText(new Rect(inRect.xMax - btnW, sy, btnW, 26f), "ASM.SavePreset".Translate(), active: canSave) && canSave)
                 TrySave();
             GUI.enabled = true;
@@ -216,18 +225,7 @@ namespace ASM
             GUI.color = Color.white;
             Text.Font = GameFont.Small;
 
-            // Overwrite button (only when applicable; space always reserved).
-            if (canOverwrite)
-            {
-                var captured0 = e;
-                if (Widgets.ButtonText(overRect, "ASM.OverwritePreset".Translate()))
-                {
-                    var n = captured0;
-                    Find.WindowStack.Add(new Dialog_MessageBox("ASM.ConfirmOverwrite".Translate(n.name),
-                        "ASM.OverwritePreset".Translate(), () => OverwriteEntry(n),
-                        "No".Translate()) { doCloseX = true });
-                }
-            }
+            // Overwrite moved to the save row (space always reserved here for alignment).
 
             if (isKindOrAll) TooltipHandler.TipRegion(row, "ASM.CondPresetCrossBucket".Translate(e.scope.ToString()));
 
@@ -251,6 +249,12 @@ namespace ASM
             PresetIO.ExportConditions(name, bucket, targetList);
             Messages.Message("ASM.PresetSaved".Translate(name), MessageTypeDefOf.TaskCompletion, false);
             nameBuffer = "";
+        }
+
+        private void OverwriteByName(string name)
+        {
+            PresetIO.ExportConditions(name, bucket, targetList);
+            Messages.Message("ASM.PresetOverwritten".Translate(name), MessageTypeDefOf.TaskCompletion, false);
         }
 
         private void OverwriteEntry(PresetEntry e)

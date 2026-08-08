@@ -179,6 +179,12 @@
   <ASM.TraitListPresets>List presets...</ASM.TraitListPresets>
 
   <ASM.KindPresetsTitle>Kind presets: {0}</ASM.KindPresetsTitle>
+  <ASM.PresetTitleAll>Slaughter settings presets</ASM.PresetTitleAll>
+  <ASM.PresetTitleKind>Kind settings presets: {0}</ASM.PresetTitleKind>
+  <ASM.PresetTitleKeep>Protection presets: {0}</ASM.PresetTitleKeep>
+  <ASM.PresetTitleForceCull>Force slaughter presets: {0}</ASM.PresetTitleForceCull>
+  <ASM.PresetTitleCull>Cull presets: {0}</ASM.PresetTitleCull>
+  <ASM.PresetTitleSpare>Spare presets: {0}</ASM.PresetTitleSpare>
   <ASM.ListPresetsTitle>List presets: {0} ({1})</ASM.ListPresetsTitle>
   <ASM.ListNameKeep>Breeding</ASM.ListNameKeep>
   <ASM.ListNameCull>Cull priority</ASM.ListNameCull>

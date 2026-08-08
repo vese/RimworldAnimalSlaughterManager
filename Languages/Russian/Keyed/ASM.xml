@@ -179,6 +179,12 @@
   <ASM.TraitListPresets>Пресеты списка...</ASM.TraitListPresets>
 
   <ASM.KindPresetsTitle>Пресеты для вида: {0}</ASM.KindPresetsTitle>
+  <ASM.PresetTitleAll>Пресеты настроек забоя</ASM.PresetTitleAll>
+  <ASM.PresetTitleKind>Пресеты настроек вида: {0}</ASM.PresetTitleKind>
+  <ASM.PresetTitleKeep>Пресеты защиты: {0}</ASM.PresetTitleKeep>
+  <ASM.PresetTitleForceCull>Пресеты принудительного забоя: {0}</ASM.PresetTitleForceCull>
+  <ASM.PresetTitleCull>Пресеты приоритетного забоя: {0}</ASM.PresetTitleCull>
+  <ASM.PresetTitleSpare>Пресеты запаса: {0}</ASM.PresetTitleSpare>
   <ASM.ListPresetsTitle>Пресеты списка: {0} ({1})</ASM.ListPresetsTitle>
   <ASM.ListNameKeep>Разведение</ASM.ListNameKeep>
   <ASM.ListNameCull>Приоритет забоя</ASM.ListNameCull>
