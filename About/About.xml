@@ -6,7 +6,33 @@
   <supportedVersions>
     <li>1.6</li>
   </supportedVersions>
-  <description>Animal Slaughter Manager расширяет встроенный авто-забой животных (вкладка «Животные»).
+  <description>Animal Slaughter Manager extends the built-in animal auto-slaughter (Animals tab).
+
+SLAUGHTER PRIORITIES
+- Age/sex priority: for each of the four groups (adult/young × male/female), choose to slaughter oldest or youngest first.
+- Condition lists: for each group, set the slaughter order top-to-bottom — animals matching conditions higher up are slaughtered last, lower down — first. Conditions: pregnancy, bond, traits (presence/absence, inheritability), diseases, training (untrained/trained/fully trained), positive/negative traits.
+- Global age settings: define default age behavior for all kinds at once.
+
+SPECIAL RULES
+- Protection: keep a set number of animals with a given trait, protected from slaughter.
+- Force slaughter: always slaughter animals with given traits, regardless of herd size, except those protected by traits or individually.
+- Three-state pregnant column: never slaughter / defer until birth / slaughter normally.
+
+ADDITIONAL
+- Individual protection: a gizmo on the animal excludes it from auto-slaughter.
+- Protection column on the Pets tab.
+- Manager table in the style of the vanilla slaughter window (∞-limits, settings indicators).
+- Presets at three levels (all kinds / per kind / per list).
+- Egg-layer integration (egg-carrying animals counted as "pregnant").
+
+COMPATIBILITY
+- Animal Traits System (optional) — animal trait support for priorities and protection. Without ATS the mod works, but the trait section is unavailable.
+
+Source: https://github.com/vese/RimworldAnimalSlaughterManager
+
+---
+
+Animal Slaughter Manager расширяет встроенный авто-забой животных (вкладка «Животные»).
 
 ПРИОРИТЕТЫ ЗАБОЯ
 - Приоритет по полу и возрасту: для каждой из четырёх групп (взрослые/молодые × самцы/самки) можно указать, забивать сначала старших или молодых.
