@@ -43,6 +43,21 @@ namespace ASM
             }
         }
 
+        private static bool? _hasTraitDefs;
+        /// <summary>True when at least one animal-trait def is actually defined (i.e. ATS trait
+        /// CONTENT is loaded). The ATS dependency stub alone defines no traits, so this — not
+        /// <see cref="IsATSActive"/> — is the precise "are traits usable" signal used to show/hide
+        /// trait-related UI. Cached once; defs don't change after load.</summary>
+        public static bool HasAvailableTraits
+        {
+            get
+            {
+                if (_hasTraitDefs == null)
+                    _hasTraitDefs = DefDatabase<HediffDef>.AllDefs.Any(IsAnimalTraitDef);
+                return _hasTraitDefs.Value;
+            }
+        }
+
         public static bool IsAnimalTraitDef(HediffDef def) =>
             def != null && def.defName != null
             && def.defName.StartsWith(TraitPrefix)
