@@ -13,6 +13,7 @@ namespace ASM
     /// requires HomeFaction == player and a non-Dryad animal, so these never appear on human
     /// colonists.
     /// </summary>
+    [StaticConstructorOnStartup]
     [HarmonyPatch(typeof(Pawn), nameof(Pawn.GetGizmos))]
     public static class Patch_PawnGizmos
     {
@@ -20,6 +21,15 @@ namespace ASM
         private static Texture2D _settingsIcon;
         private static Texture2D ProtectIcon => _protectIcon ?? (_protectIcon = ContentFinder<Texture2D>.Get("UI/Icons/ASM/Shield"));
         private static Texture2D SettingsIcon => _settingsIcon ?? (_settingsIcon = ContentFinder<Texture2D>.Get("UI/Icons/ASM/Settings"));
+
+        // Pre-load the gizmo icons on the main thread during mod init. Satisfies RimWorld's
+        // StaticConstructorOnStartup asset-loading requirement (avoids the "probably needs a
+        // StaticConstructorOnStartup attribute" warning for the Texture2D fields above).
+        static Patch_PawnGizmos()
+        {
+            _protectIcon = ContentFinder<Texture2D>.Get("UI/Icons/ASM/Shield");
+            _settingsIcon = ContentFinder<Texture2D>.Get("UI/Icons/ASM/Settings");
+        }
 
         public static void Postfix(Pawn __instance, ref IEnumerable<Gizmo> __result)
         {
