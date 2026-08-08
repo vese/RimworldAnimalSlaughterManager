@@ -133,7 +133,8 @@ namespace ASM
                     var keepNow = SelectToKeep(kindPawns, tt);
                     foreach (var p in keepNow)
                         reserved.Add(p);
-                    Log.Message($"[ASM] keep-trait kind={kv.Key.defName} trait={tt.trait.defName} filter={tt.inheritMode} traitInheritable={AnimalTraitsAccess.IsInheritable(tt.trait)} keepCount={tt.keepCount} ageScope={tt.ageScope} genderScope={tt.genderScope} reserved={keepNow.Count}");
+                    if (ASMMod.Settings?.enableLogging == true)
+                        Log.Message($"[ASM] keep-trait kind={kv.Key.defName} trait={tt.trait.defName} filter={tt.inheritMode} traitInheritable={AnimalTraitsAccess.IsInheritable(tt.trait)} keepCount={tt.keepCount} ageScope={tt.ageScope} genderScope={tt.genderScope} reserved={keepNow.Count}");
                 }
             }
 

@@ -122,6 +122,8 @@
   <ASM.CondConflictTip>{0} конфликтует с: {1}</ASM.CondConflictTip>
   <ASM.PriorityHelp>Условия в списке задают очерёдность забоя сверху вниз: животные, подходящие по условия вверху, забиваются последними, внизу — первыми. Оставшиеся сортируются по возрасту из настроек выше.</ASM.PriorityHelp>
   <ASM.AlertConditionLabel>Конфликты в приоритетах забоя</ASM.AlertConditionLabel>
+  <ASM.SettingLogging>Подробное логирование</ASM.SettingLogging>
+  <ASM.SettingLoggingDesc>Записывать в лог отладочную информацию о резервировании защиты по чертам. По умолчанию выключено.</ASM.SettingLoggingDesc>
   <ASM.AlertConditionDesc>У некоторых видов есть дубликаты или противоречивые условия в списках приоритетов забоя:</ASM.AlertConditionDesc>
   <ASM.CondAddDisease>Болезнь...</ASM.CondAddDisease>
   <ASM.CondAddTraining>Тренировка...</ASM.CondAddTraining>

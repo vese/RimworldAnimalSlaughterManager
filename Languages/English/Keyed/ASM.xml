@@ -122,6 +122,8 @@
   <ASM.CondConflictTip>{0} conflicts with: {1}</ASM.CondConflictTip>
   <ASM.PriorityHelp>Conditions in the list set the slaughter order top-to-bottom: animals matching conditions higher up are slaughtered last, lower down — first. Remaining animals are sorted by age from the settings above.</ASM.PriorityHelp>
   <ASM.AlertConditionLabel>Slaughter priority conflicts</ASM.AlertConditionLabel>
+  <ASM.SettingLogging>Verbose logging</ASM.SettingLogging>
+  <ASM.SettingLoggingDesc>Log debug info about keep-trait reservation. Off by default.</ASM.SettingLoggingDesc>
   <ASM.AlertConditionDesc>Some animal kinds have duplicate or contradictory conditions in their slaughter priority lists:</ASM.AlertConditionDesc>
   <ASM.CondAddDisease>Disease...</ASM.CondAddDisease>
   <ASM.CondAddTraining>Training...</ASM.CondAddTraining>
