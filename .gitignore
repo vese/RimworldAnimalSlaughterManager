@@ -3,3 +3,4 @@
 Assemblies/*.pdb
 Assemblies/*.xml
 .vs/
+/.env
