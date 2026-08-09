@@ -21,8 +21,8 @@ if exist "%DEST%\About\PublishedFileId.txt" copy /y "%DEST%\About\PublishedFileI
 rd /s /q "%DEST%"
 set "SOURCE=%~dp0About"
 xcopy "%SOURCE%" "%DEST%\About\" /e /i /h /k /y /r
-set "SOURCE=%~dp0Assemblies"
-xcopy "%SOURCE%" "%DEST%\Assemblies\" /e /i /h /k /y /r
+set "SOURCE=%~dp01.6\Assemblies"
+xcopy "%SOURCE%" "%DEST%\1.6\Assemblies\" /e /i /h /k /y /r
 set "SOURCE=%~dp0Defs"
 xcopy "%SOURCE%" "%DEST%\Defs\" /e /i /h /k /y /r
 set "SOURCE=%~dp0Languages"
