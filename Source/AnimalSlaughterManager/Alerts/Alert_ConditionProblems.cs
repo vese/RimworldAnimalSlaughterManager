@@ -6,86 +6,110 @@ using ASM.Windows;
 using RimWorld;
 using Verse;
 
-namespace ASM.Alerts
+namespace ASM.Alerts;
+
+/// <summary>
+/// Persistent alert (top-right, red) shown when any kind has duplicate or contradictory
+/// conditions in its per-bucket priority lists. Clicking opens the first problem kind's
+/// settings window.
+/// </summary>
+public class Alert_ConditionProblems : Alert
 {
-    /// <summary>
-    /// Persistent alert (top-right, red) shown when any kind has duplicate or contradictory
-    /// conditions in its per-bucket priority lists. Clicking opens the first problem kind's
-    /// settings window.
-    /// </summary>
-    public class Alert_ConditionProblems : Alert
+    public Alert_ConditionProblems()
     {
-        public Alert_ConditionProblems()
+        defaultPriority = AlertPriority.Critical;
+    }
+
+    private readonly List<KeyValuePair<ThingDef, int>> problemKinds = [];
+
+    public override AlertReport GetReport()
+    {
+        if (Find.CurrentMap == null)
         {
-            defaultPriority = AlertPriority.Critical;
+            return AlertReport.Inactive;
         }
 
-        private List<KeyValuePair<ThingDef, int>> problemKinds = new List<KeyValuePair<ThingDef, int>>();
+        var comp = Find.CurrentMap.GetComponent<ASM_MapComp>();
 
-        public override AlertReport GetReport()
+        if (comp == null || comp.kindSettings == null || comp.kindSettings.Count == 0)
         {
-            if (Find.CurrentMap == null) return AlertReport.Inactive;
-            var comp = Find.CurrentMap.GetComponent<ASM_MapComp>();
-            if (comp == null || comp.kindSettings == null || comp.kindSettings.Count == 0)
-                return AlertReport.Inactive;
+            return AlertReport.Inactive;
+        }
 
-            problemKinds.Clear();
-            foreach (var kv in comp.kindSettings)
+        problemKinds.Clear();
+
+        foreach (var kv in comp.kindSettings)
+        {
+            if (kv.Value == null)
             {
-                if (kv.Value == null) continue;
-                int issues = CountProblems(kv.Value);
-                if (issues > 0)
-                    problemKinds.Add(new KeyValuePair<ThingDef, int>(kv.Key, issues));
+                continue;
             }
-            return problemKinds.Count > 0 ? AlertReport.Active : AlertReport.Inactive;
-        }
 
-        public override string GetLabel()
-        {
-            return ASMKeys.AlertConditionLabel.Translate();
-        }
+            var issues = CountProblems(kv.Value);
 
-        public override TaggedString GetExplanation()
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine(ASMKeys.AlertConditionDesc.Translate());
-            foreach (var pk in problemKinds)
-                sb.AppendLine("  " + pk.Key.LabelCap + " (" + pk.Value + ")");
-            return sb.ToString();
-        }
-
-        protected override void OnClick()
-        {
-            var comp = Find.CurrentMap?.GetComponent<ASM_MapComp>();
-            if (comp == null) return;
-            foreach (var kv in comp.kindSettings)
+            if (issues > 0)
             {
-                if (kv.Value == null) continue;
-                if (CountProblems(kv.Value) > 0)
-                {
-                    Find.WindowStack.Add(new Dialog_KindSlaughterSettings(comp, kv.Key));
-                    return;
-                }
+                problemKinds.Add(new KeyValuePair<ThingDef, int>(kv.Key, issues));
             }
         }
 
-        private static int CountProblems(KindSettings ks)
+        return problemKinds.Count > 0 ? AlertReport.Active : AlertReport.Inactive;
+    }
+
+    public override string GetLabel() => ASMKeys.AlertConditionLabel.Translate();
+
+    public override TaggedString GetExplanation()
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine(ASMKeys.AlertConditionDesc.Translate());
+        foreach (var pk in problemKinds)
         {
-            int n = 0;
-            n += CountList(ks.prioAdultMale);
-            n += CountList(ks.prioYoungMale);
-            n += CountList(ks.prioAdultFemale);
-            n += CountList(ks.prioYoungFemale);
-            return n;
+            sb.AppendLine("  " + pk.Key.LabelCap + " (" + pk.Value + ")");
+        }
+        return sb.ToString();
+    }
+
+    protected override void OnClick()
+    {
+        var comp = Find.CurrentMap?.GetComponent<ASM_MapComp>();
+        if (comp == null) return;
+        foreach (var kv in comp.kindSettings)
+        {
+            if (kv.Value == null) continue;
+            if (CountProblems(kv.Value) > 0)
+            {
+                Find.WindowStack.Add(new Dialog_KindSlaughterSettings(comp, kv.Key));
+                return;
+            }
+        }
+    }
+
+    private static int CountProblems(KindSettings ks)
+    {
+        int n = 0;
+        n += CountList(ks.prioAdultMale);
+        n += CountList(ks.prioYoungMale);
+        n += CountList(ks.prioAdultFemale);
+        n += CountList(ks.prioYoungFemale);
+        return n;
+    }
+
+    private static int CountList(List<SlaughterCondition> list)
+    {
+        if (list == null)
+        {
+            return 0;
         }
 
-        private static int CountList(List<SlaughterCondition> list)
+        int n = 0;
+        
+        for (int i = 0; i < list.Count; i++)
         {
-            if (list == null) return 0;
-            int n = 0;
-            for (int i = 0; i < list.Count; i++)
-                if (Dialog_KindSlaughterSettings.IsConditionProblematic(list, i)) n++;
-            return n;
+            if (Dialog_KindSlaughterSettings.IsConditionProblematic(list, i))
+            {
+                n++;
+            }
         }
+        return n;
     }
 }
