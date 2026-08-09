@@ -7,7 +7,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace ASM.Comps;
+namespace ASM;
 
 /// <summary>
 /// Access to Animal Traits System (ATS, package id <c>luved.animaltraits</c>) traits.

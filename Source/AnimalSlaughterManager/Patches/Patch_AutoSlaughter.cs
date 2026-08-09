@@ -1,10 +1,9 @@
 using System.Collections.Generic;
-using ASM.Comps;
 using HarmonyLib;
 using RimWorld;
 using Verse;
 
-namespace ASM.Patches
+namespace ASM
 {
     /// <summary>
     /// Replaces the vanilla auto-slaughter list with our recomputed one whenever any of our

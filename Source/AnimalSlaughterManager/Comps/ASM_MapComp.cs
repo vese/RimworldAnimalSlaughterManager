@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using ASM.Data;
 using RimWorld;
 using Verse;
 
-namespace ASM.Comps
+namespace ASM
 {
     /// <summary>How pregnant/egg-carrying females are treated by the slaughter threshold.</summary>
     public enum PregnantMode

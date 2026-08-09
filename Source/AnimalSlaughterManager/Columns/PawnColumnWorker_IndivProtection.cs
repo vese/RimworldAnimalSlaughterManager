@@ -1,8 +1,7 @@
-using ASM.Comps;
 using RimWorld;
 using Verse;
 
-namespace ASM.Columns;
+namespace ASM;
 
 /// <summary>
 /// Animals-tab checkbox column: toggle an animal's individual protection from

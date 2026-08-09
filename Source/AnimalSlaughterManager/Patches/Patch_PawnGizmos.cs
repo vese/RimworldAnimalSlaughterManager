@@ -1,13 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
-using ASM.Comps;
-using ASM.Windows;
 using HarmonyLib;
 using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace ASM.Patches
+namespace ASM
 {
     /// <summary>
     /// Adds the "Protect from slaughter" toggle and the per-kind "Slaughter settings" button to

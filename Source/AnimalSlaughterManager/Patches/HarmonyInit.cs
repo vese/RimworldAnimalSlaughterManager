@@ -1,7 +1,7 @@
 using HarmonyLib;
 using Verse;
 
-namespace ASM.Patches
+namespace ASM
 {
     [StaticConstructorOnStartup]
     public static class ASM_HarmonyInit

@@ -1,4 +1,4 @@
-namespace ASM.Data
+namespace ASM
 {
     /// <summary>Which sex a trait target applies to.</summary>
     public enum GenderScope

@@ -2,13 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using ASM.Comps;
-using ASM.Data;
 using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace ASM.Windows
+namespace ASM
 {
     /// <summary>
     /// Per-animal-kind slaughter settings, in two tabs:

@@ -1,11 +1,9 @@
-using ASM.Comps;
-using ASM.Windows;
 using HarmonyLib;
 using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace ASM.Patches
+namespace ASM
 {
     /// <summary>
     /// Adds a "Slaughter manager" button next to the vanilla "Manage auto-slaughter" button on

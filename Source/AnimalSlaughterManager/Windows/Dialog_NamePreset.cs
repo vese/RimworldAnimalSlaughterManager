@@ -3,7 +3,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace ASM.Windows
+namespace ASM
 {
     /// <summary>A simple modal dialog that asks the user for a preset name.</summary>
     public class Dialog_NamePreset : Window

@@ -1,7 +1,7 @@
 using RimWorld;
 using Verse;
 
-namespace ASM.Data
+namespace ASM
 {
     /// <summary>
     /// A "cull" target: animals of a kind carrying this trait are prioritized for slaughter,

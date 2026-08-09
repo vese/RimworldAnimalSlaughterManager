@@ -4,12 +4,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-using ASM.Data;
 using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace ASM.Comps
+namespace ASM
 {
     /// <summary>
     /// Export/import slaughter configuration so it can be reused across games.

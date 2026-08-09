@@ -1,9 +1,8 @@
-using ASM.Comps;
 using HarmonyLib;
 using RimWorld;
 using Verse;
 
-namespace ASM.Patches
+namespace ASM
 {
     /// <summary>
     /// Mirror the vanilla auto-slaughter dirty events so our cached list recomputes on the
