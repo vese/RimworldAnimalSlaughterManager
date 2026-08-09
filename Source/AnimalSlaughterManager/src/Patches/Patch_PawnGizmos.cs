@@ -49,16 +49,16 @@ namespace ASM
             {
                 new Command_Toggle
                 {
-                    defaultLabel = (isProtected ? "ASM.Unprotect" : "ASM.Protect").Translate(),
-                    defaultDesc = "ASM.ProtectedDesc".Translate(),
+                    defaultLabel = (isProtected ? ASMKeys.Unprotect : ASMKeys.Protect).Translate(),
+                    defaultDesc = ASMKeys.ProtectedDesc.Translate(),
                     icon = ProtectIcon,
                     isActive = () => comp.IsProtected(__instance),
                     toggleAction = () => comp.ToggleProtected(__instance),
                 },
                 new Command_Action
                 {
-                    defaultLabel = "ASM.Settings".Translate(),
-                    defaultDesc = "ASM.SettingsDesc".Translate(),
+                    defaultLabel = ASMKeys.Settings.Translate(),
+                    defaultDesc = ASMKeys.SettingsDesc.Translate(),
                     icon = SettingsIcon,
                     action = () => Find.WindowStack.Add(new Dialog_KindSlaughterSettings(comp, def)),
                 }

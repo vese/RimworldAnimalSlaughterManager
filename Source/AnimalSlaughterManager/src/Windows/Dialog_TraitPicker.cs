@@ -85,8 +85,8 @@ namespace ASM
             var statCols = rows.SelectMany(r => r.statValues.Keys).Distinct().OrderBy(s => s.label).ToList();
             var capCols = rows.SelectMany(r => r.capValues.Keys).Distinct().OrderBy(c => c.label).ToList();
 
-            columns.Add(new Col { kind = ColKind.Name, width = NameW, header = "ASM.Trait".Translate(), key = "name" });
-            columns.Add(new Col { kind = ColKind.Type, width = TypeW, header = "ASM.TypeCol".Translate(), key = "type" });
+            columns.Add(new Col { kind = ColKind.Name, width = NameW, header = ASMKeys.Trait.Translate(), key = "name" });
+            columns.Add(new Col { kind = ColKind.Type, width = TypeW, header = ASMKeys.TypeCol.Translate(), key = "type" });
             foreach (var s in statCols)
                 columns.Add(new Col { kind = ColKind.Stat, stat = s, width = ModW, header = s.LabelCap, key = s.defName });
             foreach (var c in capCols)
@@ -153,7 +153,7 @@ namespace ASM
             float fieldEnd = mid - icon - clearGap;
             searchBuffer = Widgets.TextField(new Rect(fx, searchY + 1f, fieldEnd - fx, 26f), searchBuffer);
             Rect clearBtn = new Rect(mid - icon, searchY + (searchH - icon) / 2f, icon, icon);
-            TooltipHandler.TipRegion(clearBtn, "ASM.Clear".Translate());
+            TooltipHandler.TipRegion(clearBtn, ASMKeys.Clear.Translate());
             if (Widgets.ButtonImage(clearBtn, TexButton.CloseXSmall))
                 searchBuffer = "";
 
@@ -191,7 +191,7 @@ namespace ASM
             float by = inRect.yMax - 32f;
             bool any = selected.Count > 0;
             var addBtn = new Rect(inRect.x, by, 220f, 30f);
-            if (Widgets.ButtonText(addBtn, "ASM.AddSelected".Translate(selected.Count), active: any) && any)
+            if (Widgets.ButtonText(addBtn, ASMKeys.AddSelected.Translate(selected.Count), active: any) && any)
             {
                 if (twoButtonMode)
                     onPickedFlag?.Invoke(selected.Select(d => (d, selFlags[d])).ToList());
@@ -199,7 +199,7 @@ namespace ASM
                     onPicked?.Invoke(selected.ToList());
                 Close();
             }
-            if (Widgets.ButtonText(new Rect(addBtn.xMax + 8f, by, 180f, 30f), "ASM.ShowAllColumns".Translate()))
+            if (Widgets.ButtonText(new Rect(addBtn.xMax + 8f, by, 180f, 30f), ASMKeys.ShowAllColumns.Translate()))
                 hidden.Clear();
         }
 
@@ -279,7 +279,7 @@ namespace ASM
                 // Sort button.
                 bool isSort = colIdx == sortIndex;
                 Rect sortBtn = new Rect(sub.x, sub.y, 22f, HeaderSubH);
-                TooltipHandler.TipRegion(sortBtn, "ASM.SortBy".Translate());
+                TooltipHandler.TipRegion(sortBtn, ASMKeys.SortBy.Translate());
                 if (Widgets.ButtonInvisible(sortBtn)) SetSort(colIdx);
                 Text.Anchor = TextAnchor.MiddleCenter;
                 GUI.color = isSort ? Color.cyan : new Color(1f, 1f, 1f, 0.6f);
@@ -292,7 +292,7 @@ namespace ASM
                 if (!isName)
                 {
                     Rect hideBtn = new Rect(sub.xMax - hideW, sub.y + (HeaderSubH - 16f) / 2f, 16f, 16f);
-                    TooltipHandler.TipRegion(hideBtn, "ASM.HideColumn".Translate());
+                    TooltipHandler.TipRegion(hideBtn, ASMKeys.HideColumn.Translate());
                     GUI.color = Color.red;
                     if (Widgets.ButtonImage(hideBtn, TexButton.CloseXSmall))
                     {
@@ -406,8 +406,8 @@ namespace ASM
                 float cbY = row.y + (row.height - 18f) / 2f;
                 Rect hasRect = new Rect(row.x + 2f, cbY, 18f, 18f);
                 Rect missRect = new Rect(row.x + 22f, cbY, 18f, 18f);
-                TooltipHandler.TipRegion(hasRect, "ASM.CondHasTip".Translate());
-                TooltipHandler.TipRegion(missRect, "ASM.CondMissingTip".Translate());
+                TooltipHandler.TipRegion(hasRect, ASMKeys.CondHasTip.Translate());
+                TooltipHandler.TipRegion(missRect, ASMKeys.CondMissingTip.Translate());
                 Widgets.CheckboxDraw(hasRect.x, hasRect.y, isHas, !isHas, 18f);
                 Widgets.CheckboxDraw(missRect.x, missRect.y, isMissing, !isMissing, 18f);
             }
@@ -483,7 +483,7 @@ namespace ASM
                 case ColKind.Type:
                     GUI.color = r.isBad ? new Color(1f, 0.5f, 0.5f) : new Color(0.5f, 1f, 0.5f);
                     Text.Anchor = TextAnchor.MiddleCenter;
-                    Widgets.Label(cell, (r.isBad ? "ASM.Bad" : "ASM.Good").Translate());
+                    Widgets.Label(cell, (r.isBad ? ASMKeys.Bad : ASMKeys.Good).Translate());
                     GUI.color = Color.white;
                     break;
                 case ColKind.Stat:

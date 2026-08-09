@@ -17,13 +17,13 @@ namespace ASM
             float x = rect.x + Mathf.Min(rect.width, 260f) + 8f;
             float w = 210f;
             Rect btn = new Rect(x, rect.y, w, 32f);
-            if (btn.xMax <= rect.xMax && Widgets.ButtonText(btn, "ASM.Manage".Translate()))
+            if (btn.xMax <= rect.xMax && Widgets.ButtonText(btn, ASMKeys.Manage.Translate()))
             {
                 var map = Find.CurrentMap;
                 if (map != null)
                     Find.WindowStack.Add(new Dialog_SlaughterManager(map.GetComponent<ASM_MapComp>()));
             }
-            TooltipHandler.TipRegion(btn, "ASM.ManageDesc".Translate());
+            TooltipHandler.TipRegion(btn, ASMKeys.ManageDesc.Translate());
         }
     }
 }

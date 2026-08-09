@@ -81,11 +81,11 @@ namespace ASM
             switch (scope)
             {
                 case PresetScope.Kind:
-                    return "ASM.PresetTitleKind".Translate(kindLabel);
+                    return ASMKeys.PresetTitleKind.Translate(kindLabel);
                 case PresetScope.List:
                     return ListTitle(listKind, kindLabel);
                 default:
-                    return "ASM.PresetTitleAll".Translate();
+                    return ASMKeys.PresetTitleAll.Translate();
             }
         }
 
@@ -93,10 +93,10 @@ namespace ASM
         {
             switch (lk)
             {
-                case TraitListKind.Keep: return "ASM.PresetTitleKeep".Translate(kindLabel);
-                case TraitListKind.ForceCull: return "ASM.PresetTitleForceCull".Translate(kindLabel);
-                case TraitListKind.Cull: return "ASM.PresetTitleCull".Translate(kindLabel);
-                default: return "ASM.PresetTitleSpare".Translate(kindLabel);
+                case TraitListKind.Keep: return ASMKeys.PresetTitleKeep.Translate(kindLabel);
+                case TraitListKind.ForceCull: return ASMKeys.PresetTitleForceCull.Translate(kindLabel);
+                case TraitListKind.Cull: return ASMKeys.PresetTitleCull.Translate(kindLabel);
+                default: return ASMKeys.PresetTitleSpare.Translate(kindLabel);
             }
         }
 
@@ -106,11 +106,11 @@ namespace ASM
             switch (scope)
             {
                 case PresetScope.Kind:
-                    return "ASM.KindPresetsTitle".Translate(kindLabel);
+                    return ASMKeys.KindPresetsTitle.Translate(kindLabel);
                 case PresetScope.List:
-                    return "ASM.ListPresetsTitle".Translate(ListName(), kindLabel);
+                    return ASMKeys.ListPresetsTitle.Translate(ListName(), kindLabel);
                 default:
-                    return "ASM.Presets".Translate();
+                    return ASMKeys.Presets.Translate();
             }
         }
 
@@ -118,10 +118,10 @@ namespace ASM
         {
             switch (listKind)
             {
-                case TraitListKind.Keep: return "ASM.ListNameKeep".Translate();
-                case TraitListKind.Cull: return "ASM.ListNameCull".Translate();
-                case TraitListKind.Spare: return "ASM.ListNameSpare".Translate();
-                default: return "ASM.ListNameForceCull".Translate();
+                case TraitListKind.Keep: return ASMKeys.ListNameKeep.Translate();
+                case TraitListKind.Cull: return ASMKeys.ListNameCull.Translate();
+                case TraitListKind.Spare: return ASMKeys.ListNameSpare.Translate();
+                default: return ASMKeys.ListNameForceCull.Translate();
             }
         }
 
@@ -129,7 +129,7 @@ namespace ASM
         {
             Text.Font = GameFont.Small;
 
-            float btnW = Mathf.Max(96f, Text.CalcSize("ASM.SavePreset".Translate()).x + 18f);
+            float btnW = Mathf.Max(96f, Text.CalcSize(ASMKeys.SavePreset.Translate()).x + 18f);
 
             // --- Top: search row, one Gap below the title. Magnifier + filter field spanning the left
             // half with a clear ✕ right after it; scope-type toggles fill the right half (skipped for
@@ -144,7 +144,7 @@ namespace ASM
             float fieldEnd = mid - icon - clearGap;
             filterBuffer = Widgets.TextField(new Rect(fieldX, y + 1f, fieldEnd - fieldX, 26f), filterBuffer);
             Rect clearBtn = new Rect(mid - icon, y + (topH - icon) / 2f, icon, icon);
-            TooltipHandler.TipRegion(clearBtn, "ASM.Clear".Translate());
+            TooltipHandler.TipRegion(clearBtn, ASMKeys.Clear.Translate());
             if (Widgets.ButtonImage(clearBtn, TexButton.CloseXSmall))
                 filterBuffer = "";
             if (!showToggles) { y += topH + Gap; }
@@ -177,7 +177,7 @@ namespace ASM
             {
                 GUI.color = Color.gray;
                 Widgets.Label(new Rect(view.x, cy + 4f, view.width, 24f),
-                    filterBuffer.Trim().NullOrEmpty() ? "ASM.NoPresets".Translate() : "ASM.NoPresetsFiltered".Translate());
+                    filterBuffer.Trim().NullOrEmpty() ? ASMKeys.NoPresets.Translate() : ASMKeys.NoPresetsFiltered.Translate());
                 GUI.color = Color.white;
                 cy += 28f;
             }
@@ -199,7 +199,7 @@ namespace ASM
             float sy = inRect.yMax - saveRowH + 2f;
             GUI.enabled = hasData;
             nameBuffer = Widgets.TextField(new Rect(inRect.x, sy, inRect.width - btnW - gap, 26f), nameBuffer);
-            if (Widgets.ButtonText(new Rect(inRect.xMax - btnW, sy, btnW, 26f), "ASM.SavePreset".Translate(), active: canSave) && canSave)
+            if (Widgets.ButtonText(new Rect(inRect.xMax - btnW, sy, btnW, 26f), ASMKeys.SavePreset.Translate(), active: canSave) && canSave)
                 TrySave();
             GUI.enabled = true;
         }
@@ -208,9 +208,9 @@ namespace ASM
 
         private static float ScopeToggleWidth(PresetScope s)
         {
-            string mark = s == PresetScope.All ? "ASM.PresetAllMark".Translate()
-                        : s == PresetScope.Kind ? "ASM.PresetKindMark".Translate()
-                        : "ASM.PresetListMark".Translate();
+            string mark = s == PresetScope.All ? ASMKeys.PresetAllMark.Translate()
+                        : s == PresetScope.Kind ? ASMKeys.PresetKindMark.Translate()
+                        : ASMKeys.PresetListMark.Translate();
             const float iconS = 20f;
             return iconS + 4f + Text.CalcSize(mark).x + 8f;
         }
@@ -222,9 +222,9 @@ namespace ASM
         {
             if (!ScopeVisible(s)) return;
             bool on = ScopeShown(s);
-            string mark = s == PresetScope.All ? "ASM.PresetAllMark".Translate()
-                        : s == PresetScope.Kind ? "ASM.PresetKindMark".Translate()
-                        : "ASM.PresetListMark".Translate();
+            string mark = s == PresetScope.All ? ASMKeys.PresetAllMark.Translate()
+                        : s == PresetScope.Kind ? ASMKeys.PresetKindMark.Translate()
+                        : ASMKeys.PresetListMark.Translate();
             const float iconS = 20f;
             float labelW = Text.CalcSize(mark).x;
             float tw = iconS + 4f + labelW + 8f;
@@ -288,9 +288,9 @@ namespace ASM
 
             // Columns always reserved right-to-left. Overwrite (left of Load) only shown
             // for same-scope rows when there is data to overwrite with.
-            float loadW = Mathf.Max(96f, Text.CalcSize("ASM.LoadPreset".Translate()).x + 18f);
-            float overW = Mathf.Max(96f, Text.CalcSize("ASM.OverwritePreset".Translate()).x + 18f);
-            float extraW = Mathf.Max(60f, Text.CalcSize("ASM.PresetAllMark".Translate()).x + 6f);
+            float loadW = Mathf.Max(96f, Text.CalcSize(ASMKeys.LoadPreset.Translate()).x + 18f);
+            float overW = Mathf.Max(96f, Text.CalcSize(ASMKeys.OverwritePreset.Translate()).x + 18f);
+            float extraW = Mathf.Max(60f, Text.CalcSize(ASMKeys.PresetAllMark.Translate()).x + 6f);
             const float delW = 26f, dateW = 86f, gap = 6f;
 
             float right = row.xMax;
@@ -333,29 +333,29 @@ namespace ASM
             // Overwrite button (left of Load, same-scope rows with data only).
             if (!crossLevel && HasSomethingToSave())
             {
-                if (Widgets.ButtonText(overBtn, "ASM.OverwritePreset".Translate()))
+                if (Widgets.ButtonText(overBtn, ASMKeys.OverwritePreset.Translate()))
                 {
                     var n = captured;
-                    Find.WindowStack.Add(new Dialog_MessageBox("ASM.ConfirmOverwrite".Translate(n.name),
-                        "ASM.OverwritePreset".Translate(), () => OverwriteEntry(n),
+                    Find.WindowStack.Add(new Dialog_MessageBox(ASMKeys.ConfirmOverwrite.Translate(n.name),
+                        ASMKeys.OverwritePreset.Translate(), () => OverwriteEntry(n),
                         "No".Translate()) { doCloseX = true });
                 }
             }
 
             if (crossLevel) TooltipHandler.TipRegion(row, CrossLevelTip(e));
 
-            if (Widgets.ButtonText(loadBtn, "ASM.LoadPreset".Translate()))
+            if (Widgets.ButtonText(loadBtn, ASMKeys.LoadPreset.Translate()))
                 ApplyEntry(captured);
             if (deletable)
             {
-                TooltipHandler.TipRegion(delRect, "ASM.DeletePreset".Translate());
+                TooltipHandler.TipRegion(delRect, ASMKeys.DeletePreset.Translate());
                 if (Widgets.ButtonImage(delRect, TexButton.Delete))
                 {
                     var n = captured;
                     string confirm = scope == PresetScope.List
-                        ? "ASM.ConfirmDeleteList".Translate(n.name)
-                        : scope == PresetScope.Kind ? "ASM.ConfirmDeleteKind".Translate(n.name) : "ASM.ConfirmDelete".Translate(n.name);
-                    Find.WindowStack.Add(new Dialog_MessageBox(confirm, "ASM.DeletePreset".Translate(), () => PresetIO.Delete(n),
+                        ? ASMKeys.ConfirmDeleteList.Translate(n.name)
+                        : scope == PresetScope.Kind ? ASMKeys.ConfirmDeleteKind.Translate(n.name) : ASMKeys.ConfirmDelete.Translate(n.name);
+                    Find.WindowStack.Add(new Dialog_MessageBox(confirm, ASMKeys.DeletePreset.Translate(), () => PresetIO.Delete(n),
                         "No".Translate()) { doCloseX = true });
                 }
             }
@@ -364,8 +364,8 @@ namespace ASM
         // e.g. "[Все виды] " for an All-scope preset shown in a Kind/List context.
         private string CrossLevelMark(PresetEntry e)
         {
-            if (e.scope == PresetScope.All) return "ASM.PresetAllMark".Translate();
-            if (e.scope == PresetScope.Kind) return "ASM.PresetKindMark".Translate();
+            if (e.scope == PresetScope.All) return ASMKeys.PresetAllMark.Translate();
+            if (e.scope == PresetScope.Kind) return ASMKeys.PresetKindMark.Translate();
             return null;
         }
 
@@ -373,12 +373,12 @@ namespace ASM
         {
             string kindLabel = kind != null ? kind.LabelCap.ToString() : "";
             if (scope == PresetScope.Kind && e.scope == PresetScope.All)
-                return "ASM.TipAllToKind".Translate(kindLabel);
+                return ASMKeys.TipAllToKind.Translate(kindLabel);
             if (scope == PresetScope.List)
             {
                 string ln = ListName();
-                if (e.scope == PresetScope.All) return "ASM.TipAllToList".Translate(ln, kindLabel);
-                if (e.scope == PresetScope.Kind) return "ASM.TipKindToList".Translate(ln, kindLabel);
+                if (e.scope == PresetScope.All) return ASMKeys.TipAllToList.Translate(ln, kindLabel);
+                if (e.scope == PresetScope.Kind) return ASMKeys.TipKindToList.Translate(ln, kindLabel);
             }
             return null;
         }
@@ -404,7 +404,7 @@ namespace ASM
                 case PresetScope.Kind: PresetIO.ExportKind(name, kind, Settings); break;
                 default: PresetIO.ExportList(name, listKind.Value, kind, TargetList); break;
             }
-            Messages.Message("ASM.PresetOverwritten".Translate(name), MessageTypeDefOf.TaskCompletion, false);
+            Messages.Message(ASMKeys.PresetOverwritten.Translate(name), MessageTypeDefOf.TaskCompletion, false);
         }
 
         private void OverwriteEntry(PresetEntry e)
@@ -415,7 +415,7 @@ namespace ASM
                 case PresetScope.Kind: PresetIO.ExportKind(e.name, kind, Settings); break;
                 default: PresetIO.ExportList(e.name, listKind.Value, kind, TargetList); break;
             }
-            Messages.Message("ASM.PresetOverwritten".Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
+            Messages.Message(ASMKeys.PresetOverwritten.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
         }
 
         private void TrySave()
@@ -428,7 +428,7 @@ namespace ASM
                 case PresetScope.Kind: PresetIO.ExportKind(name, kind, Settings); break;
                 default: PresetIO.ExportList(name, listKind.Value, kind, TargetList); break;
             }
-            Messages.Message("ASM.PresetSaved".Translate(name), MessageTypeDefOf.TaskCompletion, false);
+            Messages.Message(ASMKeys.PresetSaved.Translate(name), MessageTypeDefOf.TaskCompletion, false);
             nameBuffer = "";
         }
 
@@ -450,9 +450,9 @@ namespace ASM
                     break;
             }
             if (ok)
-                Messages.Message("ASM.PresetLoaded".Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
+                Messages.Message(ASMKeys.PresetLoaded.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
             else
-                Messages.Message("ASM.PresetNoSlice".Translate(kind.LabelCap), MessageTypeDefOf.RejectInput, false);
+                Messages.Message(ASMKeys.PresetNoSlice.Translate(kind.LabelCap), MessageTypeDefOf.RejectInput, false);
         }
     }
 }

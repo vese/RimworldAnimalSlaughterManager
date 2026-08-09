@@ -39,7 +39,7 @@ namespace ASM
             doCloseX = true;
             draggable = true;
             resizeable = true;
-            optionalTitle = "ASM.CondPresetTitle".Translate(BucketLabel(bucket));
+            optionalTitle = ASMKeys.CondPresetTitle.Translate(BucketLabel(bucket));
         }
 
         private bool HasData => targetList != null && targetList.Count > 0;
@@ -48,17 +48,17 @@ namespace ASM
         {
             switch (b)
             {
-                case CondBucket.AdultMale: return "ASM.AdultMales".Translate();
-                case CondBucket.YoungMale: return "ASM.YoungMales".Translate();
-                case CondBucket.AdultFemale: return "ASM.AdultFemales".Translate();
-                default: return "ASM.YoungFemales".Translate();
+                case CondBucket.AdultMale: return ASMKeys.AdultMales.Translate();
+                case CondBucket.YoungMale: return ASMKeys.YoungMales.Translate();
+                case CondBucket.AdultFemale: return ASMKeys.AdultFemales.Translate();
+                default: return ASMKeys.YoungFemales.Translate();
             }
         }
 
         public override void DoWindowContents(Rect inRect)
         {
             Text.Font = GameFont.Small;
-            float btnW = Mathf.Max(96f, Text.CalcSize("ASM.SavePreset".Translate()).x + 18f);
+            float btnW = Mathf.Max(96f, Text.CalcSize(ASMKeys.SavePreset.Translate()).x + 18f);
 
             // --- Top: search row + scope toggles, right-aligned ---
             float y = inRect.y + Gap;
@@ -80,7 +80,7 @@ namespace ASM
             float fieldEnd = toggleX - icon - clearGap;
             filterBuffer = Widgets.TextField(new Rect(fieldX, y + 1f, fieldEnd - fieldX, 26f), filterBuffer);
             Rect clearBtn = new Rect(toggleX - icon - clearGap + clearGap, y + (topH - icon) / 2f, icon, icon);
-            TooltipHandler.TipRegion(clearBtn, "ASM.Clear".Translate());
+            TooltipHandler.TipRegion(clearBtn, ASMKeys.Clear.Translate());
             if (Widgets.ButtonImage(clearBtn, TexButton.CloseXSmall))
                 filterBuffer = "";
             y += topH + Gap;
@@ -99,7 +99,7 @@ namespace ASM
             {
                 GUI.color = Color.gray;
                 Widgets.Label(new Rect(view.x, cy + 4f, view.width, 24f),
-                    filterBuffer.Trim().NullOrEmpty() ? "ASM.NoPresets".Translate() : "ASM.NoPresetsFiltered".Translate());
+                    filterBuffer.Trim().NullOrEmpty() ? ASMKeys.NoPresets.Translate() : ASMKeys.NoPresetsFiltered.Translate());
                 GUI.color = Color.white;
                 cy += 28f;
             }
@@ -119,24 +119,24 @@ namespace ASM
             bool canSave = HasData && !nameBuffer.Trim().NullOrEmpty();
             GUI.enabled = HasData;
             nameBuffer = Widgets.TextField(new Rect(inRect.x, sy, inRect.width - btnW - Gap, 26f), nameBuffer);
-            if (Widgets.ButtonText(new Rect(inRect.xMax - btnW, sy, btnW, 26f), "ASM.SavePreset".Translate(), active: canSave) && canSave)
+            if (Widgets.ButtonText(new Rect(inRect.xMax - btnW, sy, btnW, 26f), ASMKeys.SavePreset.Translate(), active: canSave) && canSave)
                 TrySave();
             GUI.enabled = true;
         }
 
         private static float ScopeToggleWidth(PresetScope s)
         {
-            string mark = s == PresetScope.All ? "ASM.PresetAllMark".Translate()
-                        : s == PresetScope.Kind ? "ASM.PresetKindMark".Translate()
-                        : "ASM.PresetListMark".Translate();
+            string mark = s == PresetScope.All ? ASMKeys.PresetAllMark.Translate()
+                        : s == PresetScope.Kind ? ASMKeys.PresetKindMark.Translate()
+                        : ASMKeys.PresetListMark.Translate();
             return 20f + 4f + Text.CalcSize(mark).x + 8f;
         }
 
         private static void DrawScopeToggle(float x, float y, float w, PresetScope s, ref bool on)
         {
-            string mark = s == PresetScope.All ? "ASM.PresetAllMark".Translate()
-                        : s == PresetScope.Kind ? "ASM.PresetKindMark".Translate()
-                        : "ASM.PresetListMark".Translate();
+            string mark = s == PresetScope.All ? ASMKeys.PresetAllMark.Translate()
+                        : s == PresetScope.Kind ? ASMKeys.PresetKindMark.Translate()
+                        : ASMKeys.PresetListMark.Translate();
             Rect r = new Rect(x, y + 1f, w, 26f);
             Widgets.DrawHighlightIfMouseover(r);
             Rect iconRect = new Rect(r.x, r.y + (r.height - 20f) / 2f, 20f, 20f);
@@ -178,8 +178,8 @@ namespace ASM
             bool isKindOrAll = e.scope == PresetScope.Kind || e.scope == PresetScope.All;
             bool canOverwrite = isCondPreset && sameBucket && HasData;
             if (index % 2 == 1) Widgets.DrawAltRect(row);
-            float loadW = Mathf.Max(96f, Text.CalcSize("ASM.LoadPreset".Translate()).x + 18f);
-            float overW = Mathf.Max(96f, Text.CalcSize("ASM.OverwritePreset".Translate()).x + 18f);
+            float loadW = Mathf.Max(96f, Text.CalcSize(ASMKeys.LoadPreset.Translate()).x + 18f);
+            float overW = Mathf.Max(96f, Text.CalcSize(ASMKeys.OverwritePreset.Translate()).x + 18f);
             const float delW = 26f, dateW = 86f, gap = 6f;
             // Mark width: wide enough for the longest bucket label (e.g. "Молодые самки").
             Text.Font = GameFont.Tiny;
@@ -203,7 +203,7 @@ namespace ASM
 
             // Mark column: scope mark for cross-scope/cross-bucket (reserved even if empty).
             string mark = null;
-            if (isKindOrAll) mark = e.scope == PresetScope.All ? "ASM.PresetAllMark".Translate() : "ASM.PresetKindMark".Translate();
+            if (isKindOrAll) mark = e.scope == PresetScope.All ? ASMKeys.PresetAllMark.Translate() : ASMKeys.PresetKindMark.Translate();
             else if (isCondPreset && !sameBucket) mark = BucketLabel(e.condBucket.Value);
             if (mark != null)
             {
@@ -226,26 +226,26 @@ namespace ASM
             if (canOverwrite)
             {
                 var captured0 = e;
-                if (Widgets.ButtonText(overRect, "ASM.OverwritePreset".Translate()))
+                if (Widgets.ButtonText(overRect, ASMKeys.OverwritePreset.Translate()))
                 {
                     var n = captured0;
-                    Find.WindowStack.Add(new Dialog_MessageBox("ASM.ConfirmOverwrite".Translate(n.name),
-                        "ASM.OverwritePreset".Translate(), () => OverwriteEntry(n),
+                    Find.WindowStack.Add(new Dialog_MessageBox(ASMKeys.ConfirmOverwrite.Translate(n.name),
+                        ASMKeys.OverwritePreset.Translate(), () => OverwriteEntry(n),
                         "No".Translate()) { doCloseX = true });
                 }
             }
 
-            if (isKindOrAll) TooltipHandler.TipRegion(row, "ASM.CondPresetCrossBucket".Translate(e.scope.ToString()));
+            if (isKindOrAll) TooltipHandler.TipRegion(row, ASMKeys.CondPresetCrossBucket.Translate(e.scope.ToString()));
 
             var captured = e;
-            if (Widgets.ButtonText(loadBtn, "ASM.LoadPreset".Translate()))
+            if (Widgets.ButtonText(loadBtn, ASMKeys.LoadPreset.Translate()))
                 ApplyEntry(captured);
-            TooltipHandler.TipRegion(delRect, "ASM.DeletePreset".Translate());
+            TooltipHandler.TipRegion(delRect, ASMKeys.DeletePreset.Translate());
             if (Widgets.ButtonImage(delRect, TexButton.Delete))
             {
                 var n = captured;
-                Find.WindowStack.Add(new Dialog_MessageBox("ASM.ConfirmDelete".Translate(n.name),
-                    "ASM.DeletePreset".Translate(), () => PresetIO.Delete(n),
+                Find.WindowStack.Add(new Dialog_MessageBox(ASMKeys.ConfirmDelete.Translate(n.name),
+                    ASMKeys.DeletePreset.Translate(), () => PresetIO.Delete(n),
                     "No".Translate()) { doCloseX = true });
             }
         }
@@ -255,20 +255,20 @@ namespace ASM
             string name = (nameBuffer ?? "").Trim();
             if (name.NullOrEmpty()) return;
             PresetIO.ExportConditions(name, bucket, targetList);
-            Messages.Message("ASM.PresetSaved".Translate(name), MessageTypeDefOf.TaskCompletion, false);
+            Messages.Message(ASMKeys.PresetSaved.Translate(name), MessageTypeDefOf.TaskCompletion, false);
             nameBuffer = "";
         }
 
         private void OverwriteByName(string name)
         {
             PresetIO.ExportConditions(name, bucket, targetList);
-            Messages.Message("ASM.PresetOverwritten".Translate(name), MessageTypeDefOf.TaskCompletion, false);
+            Messages.Message(ASMKeys.PresetOverwritten.Translate(name), MessageTypeDefOf.TaskCompletion, false);
         }
 
         private void OverwriteEntry(PresetEntry e)
         {
             PresetIO.ExportConditions(e.name, bucket, targetList);
-            Messages.Message("ASM.PresetOverwritten".Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
+            Messages.Message(ASMKeys.PresetOverwritten.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
         }
 
         private void ApplyEntry(PresetEntry e)
@@ -281,7 +281,7 @@ namespace ASM
                     targetList.Clear();
                     targetList.AddRange(loaded);
                     comp.MarkDirty();
-                    Messages.Message("ASM.PresetLoaded".Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
+                    Messages.Message(ASMKeys.PresetLoaded.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
                 }
             }
             else
@@ -294,15 +294,15 @@ namespace ASM
                     {
                         var dto = (SlaughterPresetDto)ser.Deserialize(r);
                         KindDto kd = dto.Kinds.FirstOrDefault();
-                        if (kd == null) { Messages.Message("ASM.PresetNoSlice".Translate(""), MessageTypeDefOf.RejectInput, false); return; }
+                        if (kd == null) { Messages.Message(ASMKeys.PresetNoSlice.Translate(""), MessageTypeDefOf.RejectInput, false); return; }
                         List<ConditionDto> source = bucket == CondBucket.AdultMale ? kd.PrioAdultMale
                             : bucket == CondBucket.YoungMale ? kd.PrioYoungMale
                             : bucket == CondBucket.AdultFemale ? kd.PrioAdultFemale : kd.PrioYoungFemale;
-                        if (source == null || source.Count == 0) { Messages.Message("ASM.PresetNoSlice".Translate(""), MessageTypeDefOf.RejectInput, false); return; }
+                        if (source == null || source.Count == 0) { Messages.Message(ASMKeys.PresetNoSlice.Translate(""), MessageTypeDefOf.RejectInput, false); return; }
                         targetList.Clear();
                         foreach (var cd in source) targetList.Add(cd.ToCondition());
                         comp.MarkDirty();
-                        Messages.Message("ASM.PresetLoaded".Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
+                        Messages.Message(ASMKeys.PresetLoaded.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
                     }
                 }
                 catch { }

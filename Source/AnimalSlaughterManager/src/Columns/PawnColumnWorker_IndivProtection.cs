@@ -21,8 +21,8 @@ namespace ASM
                 comp.ToggleProtected(pawn);
         }
 
-        protected override string GetTip(Pawn pawn) => "ASM.ProtectHeaderTip".Translate();
+        protected override string GetTip(Pawn pawn) => ASMKeys.ProtectHeaderTip.Translate();
 
-        protected override string GetHeaderTip(PawnTable table) => "ASM.ProtectHeaderTip".Translate();
+        protected override string GetHeaderTip(PawnTable table) => ASMKeys.ProtectHeaderTip.Translate();
     }
 }

@@ -170,10 +170,10 @@ namespace ASM
             const float btnH = 26f, gap = 6f;
             float right = x + w - 24f; // keep clear of the window close-X in the top-right corner
             bool showHeaderButtons = currentTab != 2; // hidden on General tab
-            string resetTabKey = currentTab == 0 ? "ASM.ResetPriorities" : "ASM.ResetSpecialRules";
-            float presetW = Mathf.Max(120f, Text.CalcSize("ASM.KindPresets".Translate()).x + 18f);
+            string resetTabKey = currentTab == 0 ? ASMKeys.ResetPriorities : ASMKeys.ResetSpecialRules;
+            float presetW = Mathf.Max(120f, Text.CalcSize(ASMKeys.KindPresets.Translate()).x + 18f);
             float resetTabW = Mathf.Max(120f, Text.CalcSize(resetTabKey.Translate()).x + 18f);
-            float resetAllW = Mathf.Max(140f, Text.CalcSize("ASM.ResetKind".Translate()).x + 18f);
+            float resetAllW = Mathf.Max(140f, Text.CalcSize(ASMKeys.ResetKind.Translate()).x + 18f);
             float labelRight = showHeaderButtons ? right - resetAllW - resetTabW - presetW - 3f * gap : right;
             Rect resetAllBtn = new Rect(right - resetAllW, y + 1f, resetAllW, btnH);
             right -= resetAllW + gap;
@@ -189,11 +189,11 @@ namespace ASM
 
             if (showHeaderButtons)
             {
-                if (Widgets.ButtonText(presetBtn, "ASM.KindPresets".Translate()))
+                if (Widgets.ButtonText(presetBtn, ASMKeys.KindPresets.Translate()))
                     Find.WindowStack.Add(new Dialog_PresetBrowser(comp, PresetScope.Kind, animalDef, null));
                 if (Widgets.ButtonText(resetTabBtn, resetTabKey.Translate()))
                     ResetCurrentTab();
-                if (Widgets.ButtonText(resetAllBtn, "ASM.ResetKind".Translate()))
+                if (Widgets.ButtonText(resetAllBtn, ASMKeys.ResetKind.Translate()))
                 {
                     settings.Reset();
                     settings.malePref = comp.globalMalePref;
@@ -211,9 +211,9 @@ namespace ASM
             y += TabBarH;
             TabDrawer.DrawTabs(new Rect(x, y, w, TabBarH), new List<TabRecord>
             {
-                new TabRecord("ASM.TabPriorities".Translate(), () => currentTab = 0, currentTab == 0),
-                new TabRecord("ASM.TabExceptions".Translate(), () => currentTab = 1, currentTab == 1),
-                new TabRecord("ASM.TabGeneral".Translate(), () => currentTab = 2, currentTab == 2),
+                new TabRecord(ASMKeys.TabPriorities.Translate(), () => currentTab = 0, currentTab == 0),
+                new TabRecord(ASMKeys.TabExceptions.Translate(), () => currentTab = 1, currentTab == 1),
+                new TabRecord(ASMKeys.TabGeneral.Translate(), () => currentTab = 2, currentTab == 2),
             });
             y += TabGap;
 
@@ -276,10 +276,10 @@ namespace ASM
 
         private void DrawPrioritiesTab(float x, float y, float w, float listH)
         {
-            y = DrawPrefRow(x, y, w, "ASM.AdultMales", true, true);
-            y = DrawPrefRow(x, y, w, "ASM.YoungMales", true, false);
-            y = DrawPrefRow(x, y, w, "ASM.AdultFemales", false, true);
-            y = DrawPrefRow(x, y, w, "ASM.YoungFemales", false, false);
+            y = DrawPrefRow(x, y, w, ASMKeys.AdultMales, true, true);
+            y = DrawPrefRow(x, y, w, ASMKeys.YoungMales, true, false);
+            y = DrawPrefRow(x, y, w, ASMKeys.AdultFemales, false, true);
+            y = DrawPrefRow(x, y, w, ASMKeys.YoungFemales, false, false);
             y += 8f;
 
             // Distinct double-line separator above the help text (thicker than section dividers).
@@ -288,7 +288,7 @@ namespace ASM
             // Gray help text — same style as other tabs.
             GUI.color = Color.gray;
             Text.Font = GameFont.Tiny;
-            Widgets.Label(new Rect(x, y, w, 36f), "ASM.PriorityHelp".Translate());
+            Widgets.Label(new Rect(x, y, w, 36f), ASMKeys.PriorityHelp.Translate());
             GUI.color = Color.white;
             Text.Font = GameFont.Small;
             y += 36f;
@@ -296,35 +296,35 @@ namespace ASM
             // 2×2 grid with dividers between all sections + vertical divider between columns.
             float halfW = (w - 12f) / 2f;
             float x2 = x + halfW + 12f;
-            DrawConditionSection(x, y, halfW, listH, "ASM.AdultMales", settings.prioAdultMale, ref condScroll1, ref condListH1, ref condGroup1, true, true);
+            DrawConditionSection(x, y, halfW, listH, ASMKeys.AdultMales, settings.prioAdultMale, ref condScroll1, ref condListH1, ref condGroup1, true, true);
             // Vertical divider between columns.
             Color vdPrev = GUI.color;
             GUI.color = new Color(1f, 1f, 1f, 0.25f);
             Widgets.DrawLineVertical(x + halfW + 6f, y, listH + CondSectionH);
             GUI.color = vdPrev;
-            DrawConditionSection(x2, y, halfW, listH, "ASM.YoungMales", settings.prioYoungMale, ref condScroll2, ref condListH2, ref condGroup2, true, false);
+            DrawConditionSection(x2, y, halfW, listH, ASMKeys.YoungMales, settings.prioYoungMale, ref condScroll2, ref condListH2, ref condGroup2, true, false);
             y += CondSectionH + listH;
             y = DrawBlockDivider(x, y, w);
-            DrawConditionSection(x, y, halfW, listH, "ASM.AdultFemales", settings.prioAdultFemale, ref condScroll3, ref condListH3, ref condGroup3, false, true);
+            DrawConditionSection(x, y, halfW, listH, ASMKeys.AdultFemales, settings.prioAdultFemale, ref condScroll3, ref condListH3, ref condGroup3, false, true);
             // Vertical divider between female columns.
             GUI.color = new Color(1f, 1f, 1f, 0.25f);
             Widgets.DrawLineVertical(x + halfW + 6f, y, listH + CondSectionH);
             GUI.color = vdPrev;
-            DrawConditionSection(x2, y, halfW, listH, "ASM.YoungFemales", settings.prioYoungFemale, ref condScroll4, ref condListH4, ref condGroup4, false, false);
+            DrawConditionSection(x2, y, halfW, listH, ASMKeys.YoungFemales, settings.prioYoungFemale, ref condScroll4, ref condListH4, ref condGroup4, false, false);
         }
 
         // ---- General tab: 4 age×sex prefs + cross-kind propagation ----
 
         private void DrawGeneralTab(float x, float y, float w, float listH)
         {
-            y = DrawGeneralPrefRow(x, y, w, "ASM.AdultMales", true, true);
-            y = DrawGeneralPrefRow(x, y, w, "ASM.YoungMales", true, false);
-            y = DrawGeneralPrefRow(x, y, w, "ASM.AdultFemales", false, true);
-            y = DrawGeneralPrefRow(x, y, w, "ASM.YoungFemales", false, false);
+            y = DrawGeneralPrefRow(x, y, w, ASMKeys.AdultMales, true, true);
+            y = DrawGeneralPrefRow(x, y, w, ASMKeys.YoungMales, true, false);
+            y = DrawGeneralPrefRow(x, y, w, ASMKeys.AdultFemales, false, true);
+            y = DrawGeneralPrefRow(x, y, w, ASMKeys.YoungFemales, false, false);
             y += 8f;
             GUI.color = Color.gray;
             Text.Font = GameFont.Tiny;
-            Widgets.Label(new Rect(x, y, w, 40f), "ASM.GeneralTabHelp".Translate());
+            Widgets.Label(new Rect(x, y, w, 40f), ASMKeys.GeneralTabHelp.Translate());
             GUI.color = Color.white;
             Text.Font = GameFont.Small;
         }
@@ -337,9 +337,9 @@ namespace ASM
             Text.Anchor = TextAnchor.UpperLeft;
             float bw = 200f;
             var cur = comp.GetGlobalPref(male, adult);
-            if (ChoiceButton(new Rect(row.x + 190f, row.y + 3f, bw, row.height - 6f), "ASM.OldestFirst".Translate(), cur == SlaughterPreference.OldestFirst))
+            if (ChoiceButton(new Rect(row.x + 190f, row.y + 3f, bw, row.height - 6f), ASMKeys.OldestFirst.Translate(), cur == SlaughterPreference.OldestFirst))
                 SetGeneralPref(male, adult, SlaughterPreference.OldestFirst);
-            if (ChoiceButton(new Rect(row.x + 190f + bw + 8f, row.y + 3f, bw, row.height - 6f), "ASM.YoungestFirst".Translate(), cur == SlaughterPreference.YoungestFirst))
+            if (ChoiceButton(new Rect(row.x + 190f + bw + 8f, row.y + 3f, bw, row.height - 6f), ASMKeys.YoungestFirst.Translate(), cur == SlaughterPreference.YoungestFirst))
                 SetGeneralPref(male, adult, SlaughterPreference.YoungestFirst);
             return row.yMax;
         }
@@ -454,12 +454,12 @@ namespace ASM
                 if (issues > 0)
                     problems.Add(name + " (" + issues + ")");
             }
-            CheckList("ASM.AdultMales".Translate(), settings.prioAdultMale);
-            CheckList("ASM.YoungMales".Translate(), settings.prioYoungMale);
-            CheckList("ASM.AdultFemales".Translate(), settings.prioAdultFemale);
-            CheckList("ASM.YoungFemales".Translate(), settings.prioYoungFemale);
+            CheckList(ASMKeys.AdultMales.Translate(), settings.prioAdultMale);
+            CheckList(ASMKeys.YoungMales.Translate(), settings.prioYoungMale);
+            CheckList(ASMKeys.AdultFemales.Translate(), settings.prioAdultFemale);
+            CheckList(ASMKeys.YoungFemales.Translate(), settings.prioYoungFemale);
             if (problems.Count == 0) return null;
-            return "ASM.ValidationProblems".Translate(animalDef.LabelCap, string.Join(", ", problems));
+            return ASMKeys.ValidationProblems.Translate(animalDef.LabelCap, string.Join(", ", problems));
         }
 
         // Condition list preset menu: save, load (replace), import from kind/all.
@@ -471,9 +471,9 @@ namespace ASM
 
         private void InheritDropdown(Rect rect, SlaughterCondition cond)
         {
-            string label = cond.inheritMode == InheritableFilter.Inheritable ? "ASM.InhInheritable".Translate()
-                         : cond.inheritMode == InheritableFilter.NonInheritable ? "ASM.InhNonInheritable".Translate()
-                         : "ASM.InhBoth".Translate();
+            string label = cond.inheritMode == InheritableFilter.Inheritable ? ASMKeys.InhInheritable.Translate()
+                         : cond.inheritMode == InheritableFilter.NonInheritable ? ASMKeys.InhNonInheritable.Translate()
+                         : ASMKeys.InhBoth.Translate();
             if (Widgets.ButtonText(rect, label))
             {
                 var opts = new List<FloatMenuOption>();
@@ -485,7 +485,7 @@ namespace ASM
 
         private static string InhLabel(InheritableFilter s)
         {
-            switch (s) { case InheritableFilter.Inheritable: return "ASM.InhInheritable".Translate(); case InheritableFilter.NonInheritable: return "ASM.InhNonInheritable".Translate(); default: return "ASM.InhBoth".Translate(); }
+            switch (s) { case InheritableFilter.Inheritable: return ASMKeys.InhInheritable.Translate(); case InheritableFilter.NonInheritable: return ASMKeys.InhNonInheritable.Translate(); default: return ASMKeys.InhBoth.Translate(); }
         }
 
         private void OpenConditionPresetMenu(List<SlaughterCondition> list, bool male, bool adult)
@@ -493,8 +493,8 @@ namespace ASM
             var bucket = BucketOf(male, adult);
             var opts = new List<FloatMenuOption>();
             // Save
-            opts.Add(new FloatMenuOption("ASM.CondPresetSave".Translate(),
-                () => Find.WindowStack.Add(new Dialog_NamePreset(name => { PresetIO.ExportConditions(name, bucket, list); Messages.Message("ASM.PresetSaved".Translate(name), MessageTypeDefOf.TaskCompletion, false); }))));
+            opts.Add(new FloatMenuOption(ASMKeys.CondPresetSave.Translate(),
+                () => Find.WindowStack.Add(new Dialog_NamePreset(name => { PresetIO.ExportConditions(name, bucket, list); Messages.Message(ASMKeys.PresetSaved.Translate(name), MessageTypeDefOf.TaskCompletion, false); }))));
             // Load from condition presets
             var condPresets = PresetIO.ListConditionPresets(bucket);
             foreach (var pe in condPresets)
@@ -503,25 +503,25 @@ namespace ASM
                 string label = captured.name;
                 if (captured.condBucket != null && captured.condBucket != bucket)
                     label += " (" + captured.condBucket + ")";
-                opts.Add(new FloatMenuOption("ASM.PresetLoad".Translate() + ": " + label,
+                opts.Add(new FloatMenuOption(ASMKeys.LoadPreset.Translate() + ": " + label,
                     () =>
                     {
                         var loaded = PresetIO.ApplyConditions(captured);
-                        if (loaded != null) { list.Clear(); list.AddRange(loaded); comp.MarkDirty(); Messages.Message("ASM.PresetLoaded".Translate(captured.name), MessageTypeDefOf.TaskCompletion, false); }
+                        if (loaded != null) { list.Clear(); list.AddRange(loaded); comp.MarkDirty(); Messages.Message(ASMKeys.PresetLoaded.Translate(captured.name), MessageTypeDefOf.TaskCompletion, false); }
                     }));
             }
             // Import from kind presets (extract the matching bucket)
             foreach (var pe in PresetIO.ListPresets(PresetScope.Kind))
             {
                 var captured = pe;
-                opts.Add(new FloatMenuOption("ASM.CondImportKind".Translate() + ": " + captured.name,
+                opts.Add(new FloatMenuOption(ASMKeys.CondImportKind.Translate() + ": " + captured.name,
                     () => ImportBucketFromPreset(list, captured, male, adult)));
             }
             // Import from all presets
             foreach (var pe in PresetIO.ListPresets(PresetScope.All))
             {
                 var captured = pe;
-                opts.Add(new FloatMenuOption("ASM.CondImportAll".Translate() + ": " + captured.name,
+                opts.Add(new FloatMenuOption(ASMKeys.CondImportAll.Translate() + ": " + captured.name,
                     () => ImportBucketFromPreset(list, captured, male, adult)));
             }
             Find.WindowStack.Add(new FloatMenu(opts));
@@ -538,11 +538,11 @@ namespace ASM
                     var kd = dto.Kinds.FirstOrDefault();
                     if (kd == null) return;
                     List<ConditionDto> source = male ? (adult ? kd.PrioAdultMale : kd.PrioYoungMale) : (adult ? kd.PrioAdultFemale : kd.PrioYoungFemale);
-                    if (source == null || source.Count == 0) { Messages.Message("ASM.PresetNoSlice".Translate(animalDef.LabelCap), MessageTypeDefOf.RejectInput, false); return; }
+                    if (source == null || source.Count == 0) { Messages.Message(ASMKeys.PresetNoSlice.Translate(animalDef.LabelCap), MessageTypeDefOf.RejectInput, false); return; }
                     list.Clear();
                     foreach (var cd in source) list.Add(cd.ToCondition());
                     comp.MarkDirty();
-                    Messages.Message("ASM.PresetLoaded".Translate(entry.name), MessageTypeDefOf.TaskCompletion, false);
+                    Messages.Message(ASMKeys.PresetLoaded.Translate(entry.name), MessageTypeDefOf.TaskCompletion, false);
                 }
             }
             catch { }
@@ -566,13 +566,13 @@ namespace ASM
             Text.Font = GameFont.Small;
             float iconX = x + titleW;
             Rect copyBtn = new Rect(iconX, y + 3f, iconS, iconS);
-            TooltipHandler.TipRegion(copyBtn, "ASM.CopyConditions".Translate());
+            TooltipHandler.TipRegion(copyBtn, ASMKeys.CopyConditions.Translate());
             if (Widgets.ButtonImage(copyBtn, TexButton.Copy))
                 clipboard = list.Select(c => c.Clone()).ToList();
             if (HasClipboard)
             {
                 Rect pasteBtn = new Rect(iconX + iconS + gap, y + 3f, iconS, iconS);
-                TooltipHandler.TipRegion(pasteBtn, "ASM.PasteConditions".Translate());
+                TooltipHandler.TipRegion(pasteBtn, ASMKeys.PasteConditions.Translate());
                 if (Widgets.ButtonImage(pasteBtn, TexButton.Paste))
                 {
                     list.Clear();
@@ -583,20 +583,20 @@ namespace ASM
             y += 30f;
 
             // Row 2: add, clear, presets (left-aligned).
-            float clearW = Mathf.Max(90f, Text.CalcSize("ASM.ClearList".Translate()).x + 16f);
-            float addW = Mathf.Max(100f, Text.CalcSize("ASM.AddCondition".Translate()).x + 16f);
-            float presetW = Mathf.Max(80f, Text.CalcSize("ASM.CondPresets".Translate()).x + 16f);
+            float clearW = Mathf.Max(90f, Text.CalcSize(ASMKeys.ClearList.Translate()).x + 16f);
+            float addW = Mathf.Max(100f, Text.CalcSize(ASMKeys.AddCondition.Translate()).x + 16f);
+            float presetW = Mathf.Max(80f, Text.CalcSize(ASMKeys.CondPresets.Translate()).x + 16f);
             float bx = x;
             Rect addBtn = new Rect(bx, y, addW, btnH); bx += addW + gap;
             Rect clearBtn = new Rect(bx, y, clearW, btnH); bx += clearW + gap;
             Rect presetBtn = new Rect(bx, y, presetW, btnH);
 
-            if (Widgets.ButtonText(addBtn, "ASM.AddCondition".Translate()))
+            if (Widgets.ButtonText(addBtn, ASMKeys.AddCondition.Translate()))
                 OpenAddConditionMenu(list, male, adult);
-            if (Widgets.ButtonText(presetBtn, "ASM.CondPresets".Translate()))
+            if (Widgets.ButtonText(presetBtn, ASMKeys.CondPresets.Translate()))
                 Find.WindowStack.Add(new Dialog_ConditionPresetBrowser(comp, BucketOf(male, adult), list));
             GUI.enabled = list.Count > 0;
-            if (Widgets.ButtonText(clearBtn, "ASM.ClearList".Translate())) { list.Clear(); comp.MarkDirty(); }
+            if (Widgets.ButtonText(clearBtn, ASMKeys.ClearList.Translate())) { list.Clear(); comp.MarkDirty(); }
             GUI.enabled = true;
             y += btnH + 4f;
 
@@ -657,7 +657,7 @@ namespace ASM
             Widgets.Label(new Rect(labelRect.x + 4f, labelRect.y, labelRect.width - 6f, labelRect.height), cond.Label);
             Text.WordWrap = wrap;
             Text.Anchor = TextAnchor.UpperLeft;
-            TooltipHandler.TipRegion(labelRect, "ASM.CondToggleTip".Translate());
+            TooltipHandler.TipRegion(labelRect, ASMKeys.CondToggleTip.Translate());
 
             // Trait-only: inherit dropdown + copy button.
             if (hasExtras)
@@ -666,7 +666,7 @@ namespace ASM
                 Rect inheritBtn = new Rect(ex, row.y + 3f, 100f, 24f);
                 InheritDropdown(inheritBtn, cond);
                 Rect copyRowBtn = new Rect(inheritBtn.xMax + gap, row.y + (row.height - CopyIconS) / 2f, CopyIconS, CopyIconS);
-                TooltipHandler.TipRegion(copyRowBtn, "ASM.Copy".Translate());
+                TooltipHandler.TipRegion(copyRowBtn, ASMKeys.Copy.Translate());
                 if (Widgets.ButtonImage(copyRowBtn, TexButton.Copy))
                     list.Insert(index + 1, cond.Clone());
             }
@@ -679,8 +679,8 @@ namespace ASM
                 GUI.color = Color.white;
                 var conflicts = FindConflicts(list, index);
                 TooltipHandler.TipRegion(warnRect, conflicts != null
-                    ? "ASM.CondConflictTip".Translate(cond.Label, conflicts)
-                    : "ASM.CondProblemTip".Translate(cond.Label));
+                    ? ASMKeys.CondConflictTip.Translate(cond.Label, conflicts)
+                    : ASMKeys.CondProblemTip.Translate(cond.Label));
             }
             if (RemoveButton(row)) { list.RemoveAt(index); comp.MarkDirty(); }
         }
@@ -690,28 +690,28 @@ namespace ASM
             var opts = new List<FloatMenuOption>();
             if (!male && adult)
             {
-                opts.Add(new FloatMenuOption("ASM.CondPregnantHas".Translate(), () => { list.Add(new SlaughterCondition(CondType.Pregnancy) { has = true }); comp.MarkDirty(); }));
-                opts.Add(new FloatMenuOption("ASM.CondPregnantMissing".Translate(), () => { list.Add(new SlaughterCondition(CondType.Pregnancy) { has = false }); comp.MarkDirty(); }));
+                opts.Add(new FloatMenuOption(ASMKeys.CondPregnantHas.Translate(), () => { list.Add(new SlaughterCondition(CondType.Pregnancy) { has = true }); comp.MarkDirty(); }));
+                opts.Add(new FloatMenuOption(ASMKeys.CondPregnantMissing.Translate(), () => { list.Add(new SlaughterCondition(CondType.Pregnancy) { has = false }); comp.MarkDirty(); }));
             }
-            opts.Add(new FloatMenuOption("ASM.CondBondHas".Translate(), () => { list.Add(new SlaughterCondition(CondType.Bond) { has = true }); comp.MarkDirty(); }));
-            opts.Add(new FloatMenuOption("ASM.CondBondMissing".Translate(), () => { list.Add(new SlaughterCondition(CondType.Bond) { has = false }); comp.MarkDirty(); }));
-            opts.Add(new FloatMenuOption("ASM.CondDiseaseAnyHas".Translate(), () => { list.Add(new SlaughterCondition(CondType.DiseaseAny) { has = true }); comp.MarkDirty(); }));
-            opts.Add(new FloatMenuOption("ASM.CondDiseaseAnyMissing".Translate(), () => { list.Add(new SlaughterCondition(CondType.DiseaseAny) { has = false }); comp.MarkDirty(); }));
+            opts.Add(new FloatMenuOption(ASMKeys.CondBondHas.Translate(), () => { list.Add(new SlaughterCondition(CondType.Bond) { has = true }); comp.MarkDirty(); }));
+            opts.Add(new FloatMenuOption(ASMKeys.CondBondMissing.Translate(), () => { list.Add(new SlaughterCondition(CondType.Bond) { has = false }); comp.MarkDirty(); }));
+            opts.Add(new FloatMenuOption(ASMKeys.CondDiseaseAnyHas.Translate(), () => { list.Add(new SlaughterCondition(CondType.DiseaseAny) { has = true }); comp.MarkDirty(); }));
+            opts.Add(new FloatMenuOption(ASMKeys.CondDiseaseAnyMissing.Translate(), () => { list.Add(new SlaughterCondition(CondType.DiseaseAny) { has = false }); comp.MarkDirty(); }));
             // Trait options only when ATS trait content is actually loaded (the ATS dependency stub
             // alone defines no traits).
             if (AnimalTraitsAccess.HasAvailableTraits)
             {
-                opts.Add(new FloatMenuOption("ASM.CondAddTrait".Translate(), () => Find.WindowStack.Add(new Dialog_TraitPicker(picked => { foreach (var (d, has) in picked) list.Add(new SlaughterCondition(CondType.Trait) { trait = d, has = has }); comp.MarkDirty(); }))));
-                opts.Add(new FloatMenuOption("ASM.CondPositiveHas".Translate(), () => { list.Add(new SlaughterCondition(CondType.HasPositiveTrait) { has = true }); comp.MarkDirty(); }));
-                opts.Add(new FloatMenuOption("ASM.CondPositiveMissing".Translate(), () => { list.Add(new SlaughterCondition(CondType.HasPositiveTrait) { has = false }); comp.MarkDirty(); }));
-                opts.Add(new FloatMenuOption("ASM.CondNegativeHas".Translate(), () => { list.Add(new SlaughterCondition(CondType.HasNegativeTrait) { has = true }); comp.MarkDirty(); }));
-                opts.Add(new FloatMenuOption("ASM.CondNegativeMissing".Translate(), () => { list.Add(new SlaughterCondition(CondType.HasNegativeTrait) { has = false }); comp.MarkDirty(); }));
+                opts.Add(new FloatMenuOption(ASMKeys.CondAddTrait.Translate(), () => Find.WindowStack.Add(new Dialog_TraitPicker(picked => { foreach (var (d, has) in picked) list.Add(new SlaughterCondition(CondType.Trait) { trait = d, has = has }); comp.MarkDirty(); }))));
+                opts.Add(new FloatMenuOption(ASMKeys.CondPositiveHas.Translate(), () => { list.Add(new SlaughterCondition(CondType.HasPositiveTrait) { has = true }); comp.MarkDirty(); }));
+                opts.Add(new FloatMenuOption(ASMKeys.CondPositiveMissing.Translate(), () => { list.Add(new SlaughterCondition(CondType.HasPositiveTrait) { has = false }); comp.MarkDirty(); }));
+                opts.Add(new FloatMenuOption(ASMKeys.CondNegativeHas.Translate(), () => { list.Add(new SlaughterCondition(CondType.HasNegativeTrait) { has = true }); comp.MarkDirty(); }));
+                opts.Add(new FloatMenuOption(ASMKeys.CondNegativeMissing.Translate(), () => { list.Add(new SlaughterCondition(CondType.HasNegativeTrait) { has = false }); comp.MarkDirty(); }));
             }
-            opts.Add(new FloatMenuOption("ASM.CondAddDisease".Translate(), () => OpenDefSubmenu(list, CondType.Disease, DefDatabase<HediffDef>.AllDefs.Where(d => d.makesSickThought).OrderBy(d => d.LabelCap.ToString()), true)));
-            opts.Add(new FloatMenuOption("ASM.CondAddTraining".Translate(), () => OpenTrainingSubmenu(list)));
-            opts.Add(new FloatMenuOption("ASM.CondTrainingNone".Translate(), () => { list.Add(new SlaughterCondition(CondType.TrainingNone)); comp.MarkDirty(); }));
-            opts.Add(new FloatMenuOption("ASM.CondTrainingPartial".Translate(), () => { list.Add(new SlaughterCondition(CondType.TrainingPartial)); comp.MarkDirty(); }));
-            opts.Add(new FloatMenuOption("ASM.CondTrainingFull".Translate(), () => { list.Add(new SlaughterCondition(CondType.TrainingFull)); comp.MarkDirty(); }));
+            opts.Add(new FloatMenuOption(ASMKeys.CondAddDisease.Translate(), () => OpenDefSubmenu(list, CondType.Disease, DefDatabase<HediffDef>.AllDefs.Where(d => d.makesSickThought).OrderBy(d => d.LabelCap.ToString()), true)));
+            opts.Add(new FloatMenuOption(ASMKeys.CondAddTraining.Translate(), () => OpenTrainingSubmenu(list)));
+            opts.Add(new FloatMenuOption(ASMKeys.CondTrainingNone.Translate(), () => { list.Add(new SlaughterCondition(CondType.TrainingNone)); comp.MarkDirty(); }));
+            opts.Add(new FloatMenuOption(ASMKeys.CondTrainingPartial.Translate(), () => { list.Add(new SlaughterCondition(CondType.TrainingPartial)); comp.MarkDirty(); }));
+            opts.Add(new FloatMenuOption(ASMKeys.CondTrainingFull.Translate(), () => { list.Add(new SlaughterCondition(CondType.TrainingFull)); comp.MarkDirty(); }));
             Find.WindowStack.Add(new FloatMenu(opts));
         }
 
@@ -727,10 +727,10 @@ namespace ASM
                 string label = captured.LabelCap.ToString();
                 if (dupLabels.Contains(label))
                     label += " (" + captured.defName + ")";
-                opts.Add(new FloatMenuOption("ASM.CondHasSub".Translate(label),
+                opts.Add(new FloatMenuOption(ASMKeys.CondHasSub.Translate(label),
                     () => { list.Add(MakeCond(ct, captured, true)); comp.MarkDirty(); }));
                 if (offerMissing)
-                    opts.Add(new FloatMenuOption("ASM.CondMissingSub".Translate(label),
+                    opts.Add(new FloatMenuOption(ASMKeys.CondMissingSub.Translate(label),
                         () => { list.Add(MakeCond(ct, captured, false)); comp.MarkDirty(); }));
             }
             Find.WindowStack.Add(new FloatMenu(opts));
@@ -762,8 +762,8 @@ namespace ASM
                     opts.Add(avail
                         ? new FloatMenuOption(key.Translate(captured.LabelCap), () => { list.Add(MakeCond(CondType.Training, captured, has)); comp.MarkDirty(); }, icon, col)
                         : new GrayFloatMenuOption(key.Translate(captured.LabelCap), () => { list.Add(MakeCond(CondType.Training, captured, has)); comp.MarkDirty(); }, icon, col, col));
-                Add("ASM.CondTrainingLearnedSub", true);
-                Add("ASM.CondTrainingNotSub", false);
+                Add(ASMKeys.CondTrainingLearnedSub, true);
+                Add(ASMKeys.CondTrainingNotSub, false);
             }
             Find.WindowStack.Add(new FloatMenu(opts));
         }
@@ -786,13 +786,13 @@ namespace ASM
 
         private void DrawExceptionsTab(float x, float y, float w, float listH)
         {
-            y = DrawTraitSection(x, y, w, listH, "ASM.KeepTraits", "ASM.KeepTraitsHelp", TraitListKind.Keep,
+            y = DrawTraitSection(x, y, w, listH, ASMKeys.KeepTraits, ASMKeys.KeepTraitsHelp, TraitListKind.Keep,
                 settings.keepTraits, ref keepScroll, ref keepListHeight, ref keepGroup, DrawKeepRow,
                 list => { foreach (var d in list) settings.keepTraits.Add(NewKeep(d)); comp.MarkDirty(); });
 
             y = DrawBlockDivider(x, y, w);
 
-            y = DrawTraitSection(x, y, w, listH, "ASM.ForceCullTraits", "ASM.ForceCullTraitsHelp", TraitListKind.ForceCull,
+            y = DrawTraitSection(x, y, w, listH, ASMKeys.ForceCullTraits, ASMKeys.ForceCullTraitsHelp, TraitListKind.ForceCull,
                 settings.forceCullTraits, ref forceCullScroll, ref forceCullListHeight, ref forceCullGroup, DrawForceCullRow,
                 list => { foreach (var d in list) settings.forceCullTraits.Add(NewCull(d)); comp.MarkDirty(); });
         }
@@ -833,9 +833,9 @@ namespace ASM
             Text.Anchor = TextAnchor.UpperLeft;
             float bw = 200f;
             var cur = settings.GetPref(male, adult);
-            if (ChoiceButton(new Rect(row.x + 190f, row.y + 3f, bw, row.height - 6f), "ASM.OldestFirst".Translate(), cur == SlaughterPreference.OldestFirst))
+            if (ChoiceButton(new Rect(row.x + 190f, row.y + 3f, bw, row.height - 6f), ASMKeys.OldestFirst.Translate(), cur == SlaughterPreference.OldestFirst))
             { settings.SetPref(male, adult, SlaughterPreference.OldestFirst); comp.MarkDirty(); }
-            if (ChoiceButton(new Rect(row.x + 190f + bw + 8f, row.y + 3f, bw, row.height - 6f), "ASM.YoungestFirst".Translate(), cur == SlaughterPreference.YoungestFirst))
+            if (ChoiceButton(new Rect(row.x + 190f + bw + 8f, row.y + 3f, bw, row.height - 6f), ASMKeys.YoungestFirst.Translate(), cur == SlaughterPreference.YoungestFirst))
             { settings.SetPref(male, adult, SlaughterPreference.YoungestFirst); comp.MarkDirty(); }
             return row.yMax;
         }
@@ -850,11 +850,11 @@ namespace ASM
 
             // Section title on the left; on the right a clear-list button, the add-trait button, and a
             // single list-preset button (which both saves and loads — one window covers export/import).
-            string addKey = "ASM.AddTrait";
+            string addKey = ASMKeys.AddTrait;
             const float gap = 6f;
-            float presetW = Mathf.Max(96f, Text.CalcSize("ASM.TraitListPresets".Translate()).x + 18f);
+            float presetW = Mathf.Max(96f, Text.CalcSize(ASMKeys.TraitListPresets.Translate()).x + 18f);
             float addW = Mathf.Max(120f, Text.CalcSize(addKey.Translate()).x + 18f);
-            float clearW = Mathf.Max(96f, Text.CalcSize("ASM.ClearList".Translate()).x + 18f);
+            float clearW = Mathf.Max(96f, Text.CalcSize(ASMKeys.ClearList.Translate()).x + 18f);
             Rect presetBtn = new Rect(x + w - presetW, y + 2f, presetW, 26f);
             Rect clearBtn = new Rect(presetBtn.x - gap - clearW, y + 2f, clearW, 26f);
             Rect addBtn = new Rect(clearBtn.x - gap - addW, y + 2f, addW, 26f);
@@ -868,20 +868,20 @@ namespace ASM
             if (Widgets.ButtonText(addBtn, addKey.Translate()))
                 Find.WindowStack.Add(new Dialog_TraitPicker(onAdd));
             var capListKind = listKind;
-            if (Widgets.ButtonText(presetBtn, "ASM.TraitListPresets".Translate()))
+            if (Widgets.ButtonText(presetBtn, ASMKeys.TraitListPresets.Translate()))
                 Find.WindowStack.Add(new Dialog_PresetBrowser(comp, PresetScope.List, animalDef, capListKind));
             // Clear the whole list at once (greyed out / disabled while the list is empty).
             GUI.enabled = list.Count > 0;
-            if (Widgets.ButtonText(clearBtn, "ASM.ClearList".Translate())) { list.Clear(); comp.MarkDirty(); }
+            if (Widgets.ButtonText(clearBtn, ASMKeys.ClearList.Translate())) { list.Clear(); comp.MarkDirty(); }
             GUI.enabled = true;
-            TooltipHandler.TipRegion(clearBtn, "ASM.ClearList".Translate());
+            TooltipHandler.TipRegion(clearBtn, ASMKeys.ClearList.Translate());
             y += 30f;
 
             if (!AnimalTraitsAccess.HasAvailableTraits)
             {
                 GUI.color = Color.yellow;
                 Text.Font = GameFont.Tiny;
-                Widgets.Label(new Rect(x, y, w, 20f), "ASM.ATSNotDetected".Translate());
+                Widgets.Label(new Rect(x, y, w, 20f), ASMKeys.ATSNotDetected.Translate());
                 GUI.color = Color.white;
                 Text.Font = GameFont.Small;
                 y += 24f;
@@ -927,12 +927,12 @@ namespace ASM
         private static float DrawColumnHeaders(float x, float y, bool isKeep)
         {
             Text.Anchor = TextAnchor.MiddleCenter;
-            Header(x + TraitX, y, TraitWidth(isKeep), "ASM.Trait");
+            Header(x + TraitX, y, TraitWidth(isKeep), ASMKeys.Trait);
             if (isKeep)
-                Header(x + KeepColX, y, KeepColW, "ASM.Keep");
-            Header(x + AgeX, y, AgeW, "ASM.AgeScope");
-            Header(x + GenderX, y, GenderW, "ASM.GenderScope");
-            Header(x + InhX, y, InhW, "ASM.InheritMode");
+                Header(x + KeepColX, y, KeepColW, ASMKeys.Keep);
+            Header(x + AgeX, y, AgeW, ASMKeys.AgeScope);
+            Header(x + GenderX, y, GenderW, ASMKeys.GenderScope);
+            Header(x + InhX, y, InhW, ASMKeys.InheritMode);
             Text.Anchor = TextAnchor.UpperLeft;
             return y + 20f;
         }
@@ -968,7 +968,7 @@ namespace ASM
             Dropdown(row, InhX, InhW, InheritLabel(tt.inheritMode), val => { tt.inheritMode = val; comp.MarkDirty(); });
 
             Rect copyBtn = new Rect(row.xMax - 26f - 4f - CopyIconS, row.y + (row.height - CopyIconS) / 2f, CopyIconS, CopyIconS);
-            TooltipHandler.TipRegion(copyBtn, "ASM.Copy".Translate());
+            TooltipHandler.TipRegion(copyBtn, ASMKeys.Copy.Translate());
             if (Widgets.ButtonImage(copyBtn, TexButton.Copy))
                 settings.keepTraits.Insert(index + 1, new TraitTarget(tt.trait) { keepCount = tt.keepCount, ageScope = tt.ageScope, genderScope = tt.genderScope, inheritMode = tt.inheritMode });
             if (RemoveButton(row)) { settings.keepTraits.RemoveAt(index); comp.MarkDirty(); }
@@ -990,7 +990,7 @@ namespace ASM
             Dropdown(row, InhX, InhW, InheritLabel(ct.inheritMode), val => { ct.inheritMode = val; comp.MarkDirty(); });
 
             Rect copyBtn = new Rect(row.xMax - 26f - 4f - CopyIconS, row.y + (row.height - CopyIconS) / 2f, CopyIconS, CopyIconS);
-            TooltipHandler.TipRegion(copyBtn, "ASM.Copy".Translate());
+            TooltipHandler.TipRegion(copyBtn, ASMKeys.Copy.Translate());
             if (Widgets.ButtonImage(copyBtn, TexButton.Copy))
                 list.Insert(index + 1, new CullTrait(ct.trait) { ageScope = ct.ageScope, genderScope = ct.genderScope, inheritMode = ct.inheritMode });
             if (RemoveButton(row)) { list.RemoveAt(index); comp.MarkDirty(); }
@@ -1016,7 +1016,7 @@ namespace ASM
         private static bool RemoveButton(Rect row)
         {
             Rect b = new Rect(row.xMax - 26f, row.y + (row.height - 18f) / 2f, 18f, 18f);
-            TooltipHandler.TipRegion(b, "ASM.RemoveTrait".Translate());
+            TooltipHandler.TipRegion(b, ASMKeys.RemoveTrait.Translate());
             GUI.color = Color.red;
             bool click = Widgets.ButtonImage(b, TexButton.CloseXSmall);
             GUI.color = Color.white;
@@ -1080,15 +1080,15 @@ namespace ASM
 
         private static string AgeLabel(AgeScope s)
         {
-            switch (s) { case AgeScope.Adult: return "ASM.AgeAdult".Translate(); case AgeScope.Young: return "ASM.AgeYoung".Translate(); default: return "ASM.AgeBoth".Translate(); }
+            switch (s) { case AgeScope.Adult: return ASMKeys.AgeAdult.Translate(); case AgeScope.Young: return ASMKeys.AgeYoung.Translate(); default: return ASMKeys.AgeBoth.Translate(); }
         }
         private static string GenderLabel(GenderScope s)
         {
-            switch (s) { case GenderScope.Male: return "ASM.GenderMale".Translate(); case GenderScope.Female: return "ASM.GenderFemale".Translate(); default: return "ASM.GenderAny".Translate(); }
+            switch (s) { case GenderScope.Male: return ASMKeys.GenderMale.Translate(); case GenderScope.Female: return ASMKeys.GenderFemale.Translate(); default: return ASMKeys.GenderAny.Translate(); }
         }
         private static string InheritLabel(InheritableFilter s)
         {
-            switch (s) { case InheritableFilter.Inheritable: return "ASM.InhInheritable".Translate(); case InheritableFilter.NonInheritable: return "ASM.InhNonInheritable".Translate(); default: return "ASM.InhBoth".Translate(); }
+            switch (s) { case InheritableFilter.Inheritable: return ASMKeys.InhInheritable.Translate(); case InheritableFilter.NonInheritable: return ASMKeys.InhNonInheritable.Translate(); default: return ASMKeys.InhBoth.Translate(); }
         }
     }
 }

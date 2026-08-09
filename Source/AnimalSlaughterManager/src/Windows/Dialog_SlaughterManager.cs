@@ -57,7 +57,7 @@ namespace ASM
             Rect outRect = new Rect(inRect.x, inRect.y + 12f, inRect.width, inRect.height - 52f);
             DrawTable(outRect);
 
-            if (Widgets.ButtonText(new Rect(inRect.x, inRect.yMax - 32f, inRect.width, 30f), "ASM.ManagePresets".Translate()))
+            if (Widgets.ButtonText(new Rect(inRect.x, inRect.yMax - 32f, inRect.width, 30f), ASMKeys.ManagePresets.Translate()))
                 Find.WindowStack.Add(new Dialog_PresetBrowser(comp, PresetScope.All, null, null));
         }
 
@@ -100,7 +100,7 @@ namespace ASM
             (XYFC, XYFM + WCol - XYFC, "AnimalFemaleYoung"),
             (XPregC, XPregT + WToggle - XPregC, "AnimalPregnant"),
             (XBondC, XBondT + WToggle - XBondC, "AnimalBonded"),
-            (XProtT, WProt + WProt, "ASM.Protection"),
+            (XProtT, WProt + WProt, ASMKeys.Protection),
         };
 
         // (x, width, labelKey, tipKey).
@@ -121,8 +121,8 @@ namespace ASM
             (XPregT, WToggle, "AllowSlaughter", "AutoSlaughterHeaderTooltipAllowSlaughterPregnant"),
             (XBondC, WCol, "AutoSlaugtherHeaderColCurrent", "AutoSlaughterHeaderTooltipCurrentBonded"),
             (XBondT, WToggle, "AllowSlaughter", "AutoSlaughterHeaderTooltipAllowSlaughterBonded"),
-            (XProtT, WProt, "ASM.ProtTraits", "ASM.TipTraits"),
-            (XProtI, WProt, "ASM.ProtIndivSub", "ASM.TipIndiv"),
+            (XProtT, WProt, ASMKeys.ProtTraits, ASMKeys.TipTraits),
+            (XProtI, WProt, ASMKeys.ProtIndivSub, ASMKeys.TipIndiv),
         };
 
         private void DrawHeader(Rect r)
@@ -184,9 +184,9 @@ namespace ASM
             if (hasProtection || hasForceCull || hasPriority)
             {
                 var parts = new List<string>();
-                if (hasPriority) parts.Add("ASM.IndicatorPriority".Translate());
-                if (hasForceCull) parts.Add("ASM.IndicatorForceCull".Translate());
-                if (hasProtection) parts.Add("ASM.IndicatorProtection".Translate());
+                if (hasPriority) parts.Add(ASMKeys.IndicatorPriority.Translate());
+                if (hasForceCull) parts.Add(ASMKeys.IndicatorForceCull.Translate());
+                if (hasProtection) parts.Add(ASMKeys.IndicatorProtection.Translate());
                 TooltipHandler.TipRegion(nameRect, string.Join("\n", parts));
             }
 
@@ -209,7 +209,7 @@ namespace ASM
             CountCol(row, XProtT, comp.CountKeptByTraits(def), absent);
             CountCol(row, XProtI, comp.CountIndividuallyProtected(def), absent);
 
-            if (Widgets.ButtonText(new Rect(row.x + XConfig, row.y + 2f, WConfig, row.height - 4f), "ASM.ConfigureKind".Translate()))
+            if (Widgets.ButtonText(new Rect(row.x + XConfig, row.y + 2f, WConfig, row.height - 4f), ASMKeys.ConfigureKind.Translate()))
                 Find.WindowStack.Add(new Dialog_KindSlaughterSettings(comp, def));
 
             // Name is drawn last so the full text (shown only on hover) can sit on top of the
@@ -270,7 +270,7 @@ namespace ASM
             GUI.color = Color.white;
             float numW = Text.CalcSize(count.ToString()).x;
             Rect icon = new Rect(cell.center.x - numW / 2f - 2f - 16f, row.y + (row.height - 16f) / 2f, 16f, 16f);
-            TooltipHandler.TipRegion(icon, "ASM.EggLayInfo".Translate(eggDef.LabelCap, eggProps.eggLayIntervalDays.ToString("0.##")));
+            TooltipHandler.TipRegion(icon, ASMKeys.EggLayInfo.Translate(eggDef.LabelCap, eggProps.eggLayIntervalDays.ToString("0.##")));
             Widgets.ThingIcon(icon, eggDef);
         }
 
@@ -351,9 +351,9 @@ namespace ASM
         {
             switch (mode)
             {
-                case PregnantMode.Defer: return "ASM.PregDefer".Translate();
-                case PregnantMode.Always: return "ASM.PregAlways".Translate();
-                default: return "ASM.PregNever".Translate();
+                case PregnantMode.Defer: return ASMKeys.PregDefer.Translate();
+                case PregnantMode.Always: return ASMKeys.PregAlways.Translate();
+                default: return ASMKeys.PregNever.Translate();
             }
         }
 

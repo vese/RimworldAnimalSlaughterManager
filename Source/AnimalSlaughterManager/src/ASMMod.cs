@@ -20,7 +20,7 @@ namespace ASM
         {
             Listing_Standard list = new Listing_Standard();
             list.Begin(inRect);
-            list.CheckboxLabeled("ASM.SettingLogging".Translate(), ref Settings.enableLogging, "ASM.SettingLoggingDesc".Translate());
+            list.CheckboxLabeled(ASMKeys.SettingLogging.Translate(), ref Settings.enableLogging, ASMKeys.SettingLoggingDesc.Translate());
             list.End();
         }
 

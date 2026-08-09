@@ -80,17 +80,17 @@ namespace ASM
             {
                 switch (type)
                 {
-                    case CondType.Pregnancy: return has ? "ASM.CondPregnantHas".Translate() : "ASM.CondPregnantMissing".Translate();
-                    case CondType.Bond: return has ? "ASM.CondBondHas".Translate() : "ASM.CondBondMissing".Translate();
-                    case CondType.DiseaseAny: return has ? "ASM.CondDiseaseAnyHas".Translate() : "ASM.CondDiseaseAnyMissing".Translate();
-                    case CondType.Trait: return (has ? "ASM.CondHas" : "ASM.CondMissing").Translate(DefName(trait));
-                    case CondType.Disease: return (has ? "ASM.CondHas" : "ASM.CondMissing").Translate(DiseaseLabel(disease));
-                    case CondType.Training: return (has ? "ASM.CondTrainingLearned" : "ASM.CondTrainingNot").Translate(DefName(trainable));
-                    case CondType.TrainingNone: return "ASM.CondTrainingNone".Translate();
-                    case CondType.TrainingPartial: return "ASM.CondTrainingPartial".Translate();
-                    case CondType.TrainingFull: return "ASM.CondTrainingFull".Translate();
-                    case CondType.HasPositiveTrait: return has ? "ASM.CondPositiveHas".Translate() : "ASM.CondPositiveMissing".Translate();
-                    case CondType.HasNegativeTrait: return has ? "ASM.CondNegativeHas".Translate() : "ASM.CondNegativeMissing".Translate();
+                    case CondType.Pregnancy: return has ? ASMKeys.CondPregnantHas.Translate() : ASMKeys.CondPregnantMissing.Translate();
+                    case CondType.Bond: return has ? ASMKeys.CondBondHas.Translate() : ASMKeys.CondBondMissing.Translate();
+                    case CondType.DiseaseAny: return has ? ASMKeys.CondDiseaseAnyHas.Translate() : ASMKeys.CondDiseaseAnyMissing.Translate();
+                    case CondType.Trait: return (has ? ASMKeys.CondHas : ASMKeys.CondMissing).Translate(DefName(trait));
+                    case CondType.Disease: return (has ? ASMKeys.CondHas : ASMKeys.CondMissing).Translate(DiseaseLabel(disease));
+                    case CondType.Training: return (has ? ASMKeys.CondTrainingLearned : ASMKeys.CondTrainingNot).Translate(DefName(trainable));
+                    case CondType.TrainingNone: return ASMKeys.CondTrainingNone.Translate();
+                    case CondType.TrainingPartial: return ASMKeys.CondTrainingPartial.Translate();
+                    case CondType.TrainingFull: return ASMKeys.CondTrainingFull.Translate();
+                    case CondType.HasPositiveTrait: return has ? ASMKeys.CondPositiveHas.Translate() : ASMKeys.CondPositiveMissing.Translate();
+                    case CondType.HasNegativeTrait: return has ? ASMKeys.CondNegativeHas.Translate() : ASMKeys.CondNegativeMissing.Translate();
                 }
                 return type.ToString();
             }

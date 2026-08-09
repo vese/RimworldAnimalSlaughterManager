@@ -19,7 +19,7 @@ namespace ASM
             doCloseX = true;
             draggable = true;
             absorbInputAroundWindow = true;
-            optionalTitle = "ASM.PresetNameTitle".Translate();
+            optionalTitle = ASMKeys.PresetNameTitle.Translate();
         }
 
         public override void DoWindowContents(Rect inRect)
@@ -29,7 +29,7 @@ namespace ASM
             nameBuffer = Widgets.TextField(new Rect(inRect.x, y, inRect.width, 28f), nameBuffer);
             y += 36f;
             bool canSave = !nameBuffer.Trim().NullOrEmpty();
-            if (Widgets.ButtonText(new Rect(inRect.xMax - 120f, y, 120f, 28f), "ASM.SavePreset".Translate(), active: canSave) && canSave)
+            if (Widgets.ButtonText(new Rect(inRect.xMax - 120f, y, 120f, 28f), ASMKeys.SavePreset.Translate(), active: canSave) && canSave)
             {
                 onSave(nameBuffer.Trim());
                 Close();

@@ -39,13 +39,13 @@ namespace ASM
 
         public override string GetLabel()
         {
-            return "ASM.AlertConditionLabel".Translate();
+            return ASMKeys.AlertConditionLabel.Translate();
         }
 
         public override TaggedString GetExplanation()
         {
             var sb = new StringBuilder();
-            sb.AppendLine("ASM.AlertConditionDesc".Translate());
+            sb.AppendLine(ASMKeys.AlertConditionDesc.Translate());
             foreach (var pk in problemKinds)
                 sb.AppendLine("  " + pk.Key.LabelCap + " (" + pk.Value + ")");
             return sb.ToString();
