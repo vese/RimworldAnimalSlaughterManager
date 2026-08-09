@@ -2,11 +2,9 @@
 <LanguageData>
   <ASM.Settings>Slaughter settings</ASM.Settings>
   <ASM.SettingsDesc>Configure age/sex priority and trait-based breeding for this animal kind.</ASM.SettingsDesc>
-  <ASM.Protected>Protected from slaughter</ASM.Protected>
   <ASM.ProtectedDesc>This animal is excluded from auto-slaughter.</ASM.ProtectedDesc>
   <ASM.Protect>Protect from slaughter</ASM.Protect>
   <ASM.Unprotect>Allow slaughter</ASM.Unprotect>
-  <ASM.WindowTitle>Slaughter settings: {0}</ASM.WindowTitle>
 
   <ASM.AdultMales>Adult males</ASM.AdultMales>
   <ASM.AdultFemales>Adult females</ASM.AdultFemales>
@@ -17,8 +15,6 @@
 
   <ASM.KeepTraits>Protect from slaughter</ASM.KeepTraits>
   <ASM.KeepTraitsHelp>Protect a set number of animals with this trait from auto-slaughter.</ASM.KeepTraitsHelp>
-  <ASM.CullTraits>Prioritize for slaughter</ASM.CullTraits>
-  <ASM.CullTraitsHelp>Slaughter animals with these traits first when the herd exceeds its limits.</ASM.CullTraitsHelp>
   <ASM.Trait>Trait</ASM.Trait>
   <ASM.Keep>Keep</ASM.Keep>
   <ASM.AgeScope>Age</ASM.AgeScope>
@@ -30,19 +26,14 @@
   <ASM.InhInheritable>Inheritable</ASM.InhInheritable>
   <ASM.InhNonInheritable>Non-inheritable</ASM.InhNonInheritable>
   <ASM.AddTrait>Add trait</ASM.AddTrait>
-  <ASM.Remove>X</ASM.Remove>
   <ASM.ATSNotDetected>Animal Traits System not detected — install it to use trait targets.</ASM.ATSNotDetected>
-  <ASM.None>None</ASM.None>
 
-  <ASM.Reset>Reset to defaults</ASM.Reset>
 
   <ASM.Manage>Slaughter manager</ASM.Manage>
   <ASM.ManageDesc>Open the Animal Slaughter Manager settings (age/sex priority, breeding, cull traits, presets).</ASM.ManageDesc>
-  <ASM.GlobalTitle>Animal Slaughter Manager</ASM.GlobalTitle>
   <ASM.ConfigureKind>Configure</ASM.ConfigureKind>
 
   <ASM.Presets>Presets</ASM.Presets>
-  <ASM.PresetName>Preset name</ASM.PresetName>
   <ASM.SavePreset>Save</ASM.SavePreset>
   <ASM.LoadPreset>Load</ASM.LoadPreset>
   <ASM.DeletePreset>Delete</ASM.DeletePreset>
@@ -57,14 +48,6 @@
   <ASM.GenderAny>Any</ASM.GenderAny>
   <ASM.GenderMale>Male</ASM.GenderMale>
   <ASM.GenderFemale>Female</ASM.GenderFemale>
-  <ASM.Total>Total</ASM.Total>
-  <ASM.Limits>Limits</ASM.Limits>
-  <ASM.MaxTotal>Total</ASM.MaxTotal>
-  <ASM.MaxMales>Males</ASM.MaxMales>
-  <ASM.MaxFemales>Females</ASM.MaxFemales>
-  <ASM.MaxMalesYoung>Males young</ASM.MaxMalesYoung>
-  <ASM.MaxFemalesYoung>Females young</ASM.MaxFemalesYoung>
-  <ASM.Pregnant>Pregnant</ASM.Pregnant>
   <ASM.PregNever>Never slaughter pregnant</ASM.PregNever>
   <ASM.PregDefer>Don't slaughter pregnant until they give birth — they count toward the limit, but a pregnant female marked for slaughter is kept until birth and doesn't take a kept slot</ASM.PregDefer>
   <ASM.PregAlways>Slaughter pregnant normally</ASM.PregAlways>
@@ -84,10 +67,6 @@
   <ASM.CondTrainingNot>Untrained: {0}</ASM.CondTrainingNot>
   <ASM.CondTrainingLearnedSub>{0} — trained</ASM.CondTrainingLearnedSub>
   <ASM.CondTrainingNotSub>{0} — untrained</ASM.CondTrainingNotSub>
-  <ASM.CondTrainingAnyHas>Any training</ASM.CondTrainingAnyHas>
-  <ASM.CondTrainingAnyMissing>No training</ASM.CondTrainingAnyMissing>
-  <ASM.CondTrainingAllHas>Fully trained</ASM.CondTrainingAllHas>
-  <ASM.CondTrainingAllMissing>Not fully trained</ASM.CondTrainingAllMissing>
   <ASM.CondTrainingNone>Untrained</ASM.CondTrainingNone>
   <ASM.CondTrainingPartial>Trained</ASM.CondTrainingPartial>
   <ASM.CondTrainingFull>Fully trained</ASM.CondTrainingFull>
@@ -106,17 +85,9 @@
   <ASM.CondPresetTitle>Priority presets: {0}</ASM.CondPresetTitle>
   <ASM.CondPresetCrossBucket>Saved from bucket: {0}</ASM.CondPresetCrossBucket>
   <ASM.CondToggleTip>Click to toggle has/missing</ASM.CondToggleTip>
-  <ASM.CondAddTraitHas>Trait (has)...</ASM.CondAddTraitHas>
-  <ASM.CondAddTraitMissing>Trait (missing)...</ASM.CondAddTraitMissing>
   <ASM.CondAddTrait>Trait...</ASM.CondAddTrait>
   <ASM.CondHasTip>Has this trait</ASM.CondHasTip>
   <ASM.CondMissingTip>Missing this trait</ASM.CondMissingTip>
-  <ASM.CondStatAbove>{0} above {1}</ASM.CondStatAbove>
-  <ASM.CondStatBelow>{0} below {1}</ASM.CondStatBelow>
-  <ASM.CondAddStatAbove>Stat above...</ASM.CondAddStatAbove>
-  <ASM.CondAddStatBelow>Stat below...</ASM.CondAddStatBelow>
-  <ASM.CondMissingPartHas>Missing body part</ASM.CondMissingPartHas>
-  <ASM.CondMissingPartMissing>All limbs intact</ASM.CondMissingPartMissing>
   <ASM.ValidationProblems>{0}: condition list issues — {1}</ASM.ValidationProblems>
   <ASM.CondProblemTip>Conflict or duplicate: {0}</ASM.CondProblemTip>
   <ASM.CondConflictTip>{0} conflicts with: {1}</ASM.CondConflictTip>
@@ -127,29 +98,14 @@
   <ASM.AlertConditionDesc>Some animal kinds have duplicate or contradictory conditions in their slaughter priority lists:</ASM.AlertConditionDesc>
   <ASM.CondAddDisease>Disease...</ASM.CondAddDisease>
   <ASM.CondAddTraining>Training...</ASM.CondAddTraining>
-  <ASM.Unavailable>unavailable</ASM.Unavailable>
   <ASM.TabGeneral>General</ASM.TabGeneral>
-  <ASM.DefaultAgePref>Default age direction for slaughter</ASM.DefaultAgePref>
-  <ASM.ConfirmApplyAgePref>Apply this change to other kinds where this setting was already customized?</ASM.ConfirmApplyAgePref>
-  <ASM.ConfirmApplyPref>Apply this change to other kinds where this setting was already customized?</ASM.ConfirmApplyPref>
   <ASM.GeneralTabHelp>These settings define the default age-based slaughter order for all kinds at once.</ASM.GeneralTabHelp>
-  <ASM.Bonded>Bonded</ASM.Bonded>
   <ASM.ManagePresets>Manage presets...</ASM.ManagePresets>
   <ASM.ConfirmDelete>Delete preset '{0}'?</ASM.ConfirmDelete>
-  <ASM.Kind>Animal</ASM.Kind>
   <ASM.Copy>Copy</ASM.Copy>
-  <ASM.Now>Now</ASM.Now>
-  <ASM.Threshold>Max</ASM.Threshold>
-  <ASM.ProtByTraits>Protected by traits</ASM.ProtByTraits>
-  <ASM.ProtIndiv>Individually prot.</ASM.ProtIndiv>
   <ASM.Protection>Protection</ASM.Protection>
-  <ASM.Slaughter>Cull</ASM.Slaughter>
   <ASM.ProtTraits>Traits</ASM.ProtTraits>
   <ASM.ProtIndivSub>Indiv.</ASM.ProtIndivSub>
-  <ASM.TipName>Animal kind</ASM.TipName>
-  <ASM.TipNow>Current count</ASM.TipNow>
-  <ASM.TipMax>Maximum to keep (-1 = no limit)</ASM.TipMax>
-  <ASM.TipSlaughter>Allow slaughtering these animals</ASM.TipSlaughter>
   <ASM.TipTraits>Protected by breeding trait targets</ASM.TipTraits>
   <ASM.TipIndiv>Individually protected</ASM.TipIndiv>
   <ASM.IndicatorPriority>◆ Slaughter priority set (age/sex, cull and spare traits)</ASM.IndicatorPriority>
@@ -164,15 +120,11 @@
   <ASM.TypeCol>Type</ASM.TypeCol>
   <ASM.AddSelected>Add selected ({0})</ASM.AddSelected>
   <ASM.ShowAllColumns>Show all columns</ASM.ShowAllColumns>
-  <ASM.SpareTraits>Less priority for slaughter</ASM.SpareTraits>
-  <ASM.SpareTraitsHelp>Animals of this kind with these traits are slaughtered last.</ASM.SpareTraitsHelp>
   <ASM.RemoveTrait>Remove trait</ASM.RemoveTrait>
   <ASM.ClearList>Clear list</ASM.ClearList>
   <ASM.SortBy>Sort by this column</ASM.SortBy>
   <ASM.HideColumn>Hide column</ASM.HideColumn>
 
-  <ASM.ResetTab>Reset tab</ASM.ResetTab>
-  <ASM.ResetAll>Reset all tabs</ASM.ResetAll>
   <ASM.ResetPriorities>Reset priorities</ASM.ResetPriorities>
   <ASM.ResetSpecialRules>Reset special rules</ASM.ResetSpecialRules>
   <ASM.ResetKind>Reset kind settings</ASM.ResetKind>
@@ -191,7 +143,6 @@
   <ASM.ListNameCull>Cull priority</ASM.ListNameCull>
   <ASM.ListNameSpare>Spare</ASM.ListNameSpare>
   <ASM.ListNameForceCull>Force cull</ASM.ListNameForceCull>
-  <ASM.FilterPreset>Filter</ASM.FilterPreset>
   <ASM.Clear>Clear</ASM.Clear>
   <ASM.NoPresetsFiltered>No matches</ASM.NoPresetsFiltered>
   <ASM.PresetAllMark>[All]</ASM.PresetAllMark>

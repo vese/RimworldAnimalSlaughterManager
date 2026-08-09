@@ -2,11 +2,9 @@
 <LanguageData>
   <ASM.Settings>Настройки забоя</ASM.Settings>
   <ASM.SettingsDesc>Настроить приоритет по возрасту/полу и разведение по чертам для этого вида.</ASM.SettingsDesc>
-  <ASM.Protected>Защищён от забоя</ASM.Protected>
   <ASM.ProtectedDesc>Это животное исключено из авто-забоя.</ASM.ProtectedDesc>
   <ASM.Protect>Защитить от забоя</ASM.Protect>
   <ASM.Unprotect>Разрешить забой</ASM.Unprotect>
-  <ASM.WindowTitle>Настройки забоя: {0}</ASM.WindowTitle>
 
   <ASM.AdultMales>Взрослые самцы</ASM.AdultMales>
   <ASM.AdultFemales>Взрослые самки</ASM.AdultFemales>
@@ -17,8 +15,6 @@
 
   <ASM.KeepTraits>Защита от забоя</ASM.KeepTraits>
   <ASM.KeepTraitsHelp>Защитить заданное количество животных с указанной чертой от авто-забоя.</ASM.KeepTraitsHelp>
-  <ASM.CullTraits>Приоритетны для забоя</ASM.CullTraits>
-  <ASM.CullTraitsHelp>Забивать животных с этими чертами в первую очередь при превышении лимитов поголовья.</ASM.CullTraitsHelp>
   <ASM.Trait>Черта</ASM.Trait>
   <ASM.Keep>Оставлять</ASM.Keep>
   <ASM.AgeScope>Возраст</ASM.AgeScope>
@@ -30,19 +26,14 @@
   <ASM.InhInheritable>Наследуемая</ASM.InhInheritable>
   <ASM.InhNonInheritable>Не наследуемая</ASM.InhNonInheritable>
   <ASM.AddTrait>Добавить черту</ASM.AddTrait>
-  <ASM.Remove>X</ASM.Remove>
   <ASM.ATSNotDetected>Animal Traits System не обнаружен — установите его для работы целей по чертам.</ASM.ATSNotDetected>
-  <ASM.None>Нет</ASM.None>
 
-  <ASM.Reset>Сбросить настройки</ASM.Reset>
 
   <ASM.Manage>Менеджер забоя</ASM.Manage>
   <ASM.ManageDesc>Открыть настройки Animal Slaughter Manager (приоритет по возрасту/полу, разведение, черты для забоя, пресеты).</ASM.ManageDesc>
-  <ASM.GlobalTitle>Менеджер забоя животных</ASM.GlobalTitle>
   <ASM.ConfigureKind>Настроить</ASM.ConfigureKind>
 
   <ASM.Presets>Пресеты</ASM.Presets>
-  <ASM.PresetName>Название пресета</ASM.PresetName>
   <ASM.SavePreset>Сохранить</ASM.SavePreset>
   <ASM.LoadPreset>Загрузить</ASM.LoadPreset>
   <ASM.DeletePreset>Удалить</ASM.DeletePreset>
@@ -57,14 +48,6 @@
   <ASM.GenderAny>Любой</ASM.GenderAny>
   <ASM.GenderMale>Самцы</ASM.GenderMale>
   <ASM.GenderFemale>Самки</ASM.GenderFemale>
-  <ASM.Total>Всего</ASM.Total>
-  <ASM.Limits>Лимиты</ASM.Limits>
-  <ASM.MaxTotal>Всего</ASM.MaxTotal>
-  <ASM.MaxMales>Самцы</ASM.MaxMales>
-  <ASM.MaxFemales>Самки</ASM.MaxFemales>
-  <ASM.MaxMalesYoung>Самцы (мол.)</ASM.MaxMalesYoung>
-  <ASM.MaxFemalesYoung>Самки (мол.)</ASM.MaxFemalesYoung>
-  <ASM.Pregnant>Беремен.</ASM.Pregnant>
   <ASM.PregNever>Не забивать беременных</ASM.PregNever>
   <ASM.PregDefer>Не забивать беременных до родов — учитываются в пороге, но выбранная для забоя беременная не забивается до родов и не занимает место в лимите</ASM.PregDefer>
   <ASM.PregAlways>Забивать беременных как обычно</ASM.PregAlways>
@@ -84,10 +67,6 @@
   <ASM.CondTrainingNot>Не обучено: {0}</ASM.CondTrainingNot>
   <ASM.CondTrainingLearnedSub>{0} — обучено</ASM.CondTrainingLearnedSub>
   <ASM.CondTrainingNotSub>{0} — не обучено</ASM.CondTrainingNotSub>
-  <ASM.CondTrainingAnyHas>Любая тренировка</ASM.CondTrainingAnyHas>
-  <ASM.CondTrainingAnyMissing>Без тренировки</ASM.CondTrainingAnyMissing>
-  <ASM.CondTrainingAllHas>Полностью обучено</ASM.CondTrainingAllHas>
-  <ASM.CondTrainingAllMissing>Не полностью обучено</ASM.CondTrainingAllMissing>
   <ASM.CondTrainingNone>Не обучено</ASM.CondTrainingNone>
   <ASM.CondTrainingPartial>Обучено</ASM.CondTrainingPartial>
   <ASM.CondTrainingFull>Полностью обучено</ASM.CondTrainingFull>
@@ -106,17 +85,9 @@
   <ASM.CondPresetTitle>Пресеты приоритетов: {0}</ASM.CondPresetTitle>
   <ASM.CondPresetCrossBucket>Сохранено из корзины: {0}</ASM.CondPresetCrossBucket>
   <ASM.CondToggleTip>Клик переключает есть/нет</ASM.CondToggleTip>
-  <ASM.CondAddTraitHas>Черта (наличие)...</ASM.CondAddTraitHas>
-  <ASM.CondAddTraitMissing>Черта (отсутствие)...</ASM.CondAddTraitMissing>
   <ASM.CondAddTrait>Черта...</ASM.CondAddTrait>
   <ASM.CondHasTip>Есть черта</ASM.CondHasTip>
   <ASM.CondMissingTip>Нет черты</ASM.CondMissingTip>
-  <ASM.CondStatAbove>{0} больше {1}</ASM.CondStatAbove>
-  <ASM.CondStatBelow>{0} меньше {1}</ASM.CondStatBelow>
-  <ASM.CondAddStatAbove>Характеристика больше...</ASM.CondAddStatAbove>
-  <ASM.CondAddStatBelow>Характеристика меньше...</ASM.CondAddStatBelow>
-  <ASM.CondMissingPartHas>Отсутствует конечность</ASM.CondMissingPartHas>
-  <ASM.CondMissingPartMissing>Все конечности на месте</ASM.CondMissingPartMissing>
   <ASM.ValidationProblems>{0}: проблемы в списках условий — {1}</ASM.ValidationProblems>
   <ASM.CondProblemTip>Конфликт или дубликат: {0}</ASM.CondProblemTip>
   <ASM.CondConflictTip>{0} конфликтует с: {1}</ASM.CondConflictTip>
@@ -127,29 +98,14 @@
   <ASM.AlertConditionDesc>У некоторых видов есть дубликаты или противоречивые условия в списках приоритетов забоя:</ASM.AlertConditionDesc>
   <ASM.CondAddDisease>Болезнь...</ASM.CondAddDisease>
   <ASM.CondAddTraining>Тренировка...</ASM.CondAddTraining>
-  <ASM.Unavailable>недоступно</ASM.Unavailable>
   <ASM.TabGeneral>Общие</ASM.TabGeneral>
-  <ASM.DefaultAgePref>Каких по возрасту забивать первыми</ASM.DefaultAgePref>
-  <ASM.ConfirmApplyAgePref>Применить изменение к видам, где настройка уже была изменена?</ASM.ConfirmApplyAgePref>
-  <ASM.ConfirmApplyPref>Применить изменение к видам, где эта настройка уже была изменена?</ASM.ConfirmApplyPref>
   <ASM.GeneralTabHelp>Эти настройки задают дефолтное поведение для выбора животных на забой по возрасту для всех видов сразу.</ASM.GeneralTabHelp>
-  <ASM.Bonded>Привяз.</ASM.Bonded>
   <ASM.ManagePresets>Управление пресетами...</ASM.ManagePresets>
   <ASM.ConfirmDelete>Удалить пресет «{0}»?</ASM.ConfirmDelete>
-  <ASM.Kind>Животное</ASM.Kind>
   <ASM.Copy>Скопировать</ASM.Copy>
-  <ASM.Now>Сейчас</ASM.Now>
-  <ASM.Threshold>Порог</ASM.Threshold>
-  <ASM.ProtByTraits>Защищено чертами</ASM.ProtByTraits>
-  <ASM.ProtIndiv>Индивидуально</ASM.ProtIndiv>
   <ASM.Protection>Защита</ASM.Protection>
-  <ASM.Slaughter>Забить</ASM.Slaughter>
   <ASM.ProtTraits>Чертами</ASM.ProtTraits>
   <ASM.ProtIndivSub>Индивид.</ASM.ProtIndivSub>
-  <ASM.TipName>Вид животного</ASM.TipName>
-  <ASM.TipNow>Текущее количество</ASM.TipNow>
-  <ASM.TipMax>Макс. количество для содержания (−1 = без лимита)</ASM.TipMax>
-  <ASM.TipSlaughter>Разрешить забивать таких животных</ASM.TipSlaughter>
   <ASM.TipTraits>Защищены целями разведения по чертам</ASM.TipTraits>
   <ASM.TipIndiv>Защищены индивидуально</ASM.TipIndiv>
   <ASM.IndicatorPriority>◆ Настроены приоритеты забоя (возраст/пол, приоритетные и неприоритетные черты)</ASM.IndicatorPriority>
@@ -164,15 +120,11 @@
   <ASM.TypeCol>Тип</ASM.TypeCol>
   <ASM.AddSelected>Добавить выбранные ({0})</ASM.AddSelected>
   <ASM.ShowAllColumns>Показать все колонки</ASM.ShowAllColumns>
-  <ASM.SpareTraits>Менее приоритетные для забоя</ASM.SpareTraits>
-  <ASM.SpareTraitsHelp>Животные этого вида с этими чертами забиваются в последнюю очередь.</ASM.SpareTraitsHelp>
   <ASM.RemoveTrait>Удалить черту</ASM.RemoveTrait>
   <ASM.ClearList>Очистить список</ASM.ClearList>
   <ASM.SortBy>Сортировать по этой колонке</ASM.SortBy>
   <ASM.HideColumn>Скрыть колонку</ASM.HideColumn>
 
-  <ASM.ResetTab>Сбросить вкладку</ASM.ResetTab>
-  <ASM.ResetAll>Сбросить все вкладки</ASM.ResetAll>
   <ASM.ResetPriorities>Сброс приоритетов</ASM.ResetPriorities>
   <ASM.ResetSpecialRules>Сброс особых правил</ASM.ResetSpecialRules>
   <ASM.ResetKind>Сброс настроек вида</ASM.ResetKind>
@@ -191,7 +143,6 @@
   <ASM.ListNameCull>Приоритет забоя</ASM.ListNameCull>
   <ASM.ListNameSpare>Запас</ASM.ListNameSpare>
   <ASM.ListNameForceCull>Принуд. забой</ASM.ListNameForceCull>
-  <ASM.FilterPreset>Фильтр</ASM.FilterPreset>
   <ASM.Clear>Очистить</ASM.Clear>
   <ASM.NoPresetsFiltered>Ничего не найдено</ASM.NoPresetsFiltered>
   <ASM.PresetAllMark>[Все виды]</ASM.PresetAllMark>
