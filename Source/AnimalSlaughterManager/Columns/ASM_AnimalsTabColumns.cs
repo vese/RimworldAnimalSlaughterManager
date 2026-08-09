@@ -4,8 +4,8 @@ using Verse;
 namespace ASM;
 
 /// <summary>
-/// Inserts ASM's protection + slaughter-status columns into the vanilla Animals/Pets
-/// tab table, right after the vanilla Slaughter column.
+/// Inserts ASM's individual-protection column into the vanilla Animals/Pets tab table,
+/// right after the vanilla Slaughter column.
 /// </summary>
 [StaticConstructorOnStartup]
 public static class ASM_AnimalsTabColumns

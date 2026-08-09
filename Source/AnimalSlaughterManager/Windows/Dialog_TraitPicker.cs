@@ -68,6 +68,13 @@ namespace ASM
         private const float HeaderH = HeaderTopH + HeaderSubH;
         private const float RowH = 28f;
 
+        // Cached UI tint colors (struct, but cached to avoid rebuilding each draw + dedup).
+        private static readonly Color NegativeColor = new Color(1f, 0.5f, 0.5f);
+        private static readonly Color PositiveColor = new Color(0.5f, 1f, 0.5f);
+        private static readonly Color SortColumnTint = new Color(1f, 1f, 1f, 0.6f);
+        private static readonly Color RowAltTint = new Color(1f, 1f, 1f, 0.45f);
+        private static readonly Color DarkPanelBg = new Color(0.16f, 0.16f, 0.16f, 0.97f);
+
         public override Vector2 InitialSize => new Vector2(1120f, 640f);
 
         public Dialog_TraitPicker(Action<List<HediffDef>> onPicked)
@@ -282,7 +289,7 @@ namespace ASM
                 TooltipHandler.TipRegion(sortBtn, ASMKeys.SortBy.Translate());
                 if (Widgets.ButtonInvisible(sortBtn)) SetSort(colIdx);
                 Text.Anchor = TextAnchor.MiddleCenter;
-                GUI.color = isSort ? Color.cyan : new Color(1f, 1f, 1f, 0.6f);
+                GUI.color = isSort ? Color.cyan : SortColumnTint;
                 Widgets.Label(sortBtn, isSort ? (sortAsc ? "▲" : "▼") : "↕");
                 GUI.color = Color.white;
                 Text.Anchor = TextAnchor.UpperLeft;
@@ -309,7 +316,7 @@ namespace ASM
                     // starts a drag from the table (see LateWindowOnGUI), so no ClaimDragHandle needed.
                     Rect drag = new Rect(sortBtn.xMax, sub.y, Mathf.Max(sub.xMax - hideW - sortBtn.xMax, 8f), HeaderSubH);
                     ReorderableWidget.Reorderable(colGroup, drag);
-                    GUI.color = new Color(1f, 1f, 1f, 0.45f);
+                    GUI.color = RowAltTint;
                     Text.Anchor = TextAnchor.MiddleCenter;
                     Widgets.Label(drag, "↔");
                     Text.Anchor = TextAnchor.UpperLeft;
@@ -343,7 +350,7 @@ namespace ASM
                     if (textW > tc.rect.width)
                     {
                         Rect overRect = new Rect(tc.rect.x, tc.rect.y, textW, tc.rect.height);
-                        GUI.color = new Color(0.16f, 0.16f, 0.16f, 0.97f);
+                        GUI.color = DarkPanelBg;
                         GUI.DrawTexture(overRect, Texture2D.whiteTexture);
                         GUI.color = tc.idx == sortIndex ? Color.cyan : Color.white;
                         bool wrap = Text.WordWrap;
@@ -481,7 +488,7 @@ namespace ASM
                     TooltipHandler.TipRegion(cell, AnimalTraitsAccess.TraitTip(r.def));
                     break;
                 case ColKind.Type:
-                    GUI.color = r.isBad ? new Color(1f, 0.5f, 0.5f) : new Color(0.5f, 1f, 0.5f);
+                    GUI.color = r.isBad ? NegativeColor : PositiveColor;
                     Text.Anchor = TextAnchor.MiddleCenter;
                     Widgets.Label(cell, (r.isBad ? ASMKeys.Bad : ASMKeys.Good).Translate());
                     GUI.color = Color.white;
@@ -490,7 +497,7 @@ namespace ASM
                     Text.Anchor = TextAnchor.MiddleCenter;
                     if (r.statStrings.TryGetValue(col.stat, out string sv))
                     {
-                        GUI.color = r.statValues[col.stat] >= 0 ? new Color(0.5f, 1f, 0.5f) : new Color(1f, 0.5f, 0.5f);
+                        GUI.color = r.statValues[col.stat] >= 0 ? PositiveColor : NegativeColor;
                         Widgets.Label(cell, sv);
                         GUI.color = Color.white;
                     }
@@ -499,7 +506,7 @@ namespace ASM
                     Text.Anchor = TextAnchor.MiddleCenter;
                     if (r.capStrings.TryGetValue(col.cap, out string cv))
                     {
-                        GUI.color = r.capValues[col.cap] >= 0 ? new Color(0.5f, 1f, 0.5f) : new Color(1f, 0.5f, 0.5f);
+                        GUI.color = r.capValues[col.cap] >= 0 ? PositiveColor : NegativeColor;
                         Widgets.Label(cell, cv);
                         GUI.color = Color.white;
                     }

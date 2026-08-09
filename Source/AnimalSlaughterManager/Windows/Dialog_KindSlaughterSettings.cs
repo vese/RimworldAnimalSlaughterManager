@@ -40,6 +40,12 @@ namespace ASM
         private static List<SlaughterCondition> clipboard;
         private int currentTab; // 0 = Priorities, 1 = Special rules
 
+        // Shared UI tint colors — cached as static fields (avoids rebuilding the struct every draw
+        // and dedups repeated literals).
+        private static readonly Color FaintDivider = new Color(1f, 1f, 1f, 0.25f);
+        private static readonly Color BoldDivider = new Color(1f, 1f, 1f, 0.5f);
+        private static readonly Color ForceCullTint = new Color(0.5f, 0.15f, 0.15f, 0.5f);
+
         // Unified column x-offsets (relative to row.x), shared by all four row kinds so columns
         // line up within a tab. Keep rows additionally fill the keep-count column.
         private const float GripX = 0f, GripW = 22f;
@@ -226,7 +232,7 @@ namespace ASM
         private static float DrawBlockDivider(float x, float y, float w)
         {
             Color prev = GUI.color;
-            GUI.color = new Color(1f, 1f, 1f, 0.25f);
+            GUI.color = FaintDivider;
             Widgets.DrawLineHorizontal(x, y + DividerGap / 2f, w);
             GUI.color = prev;
             return y + DividerGap;
@@ -267,7 +273,7 @@ namespace ASM
         private static float DrawSectionSeparator(float x, float y, float w)
         {
             Color prev = GUI.color;
-            GUI.color = new Color(1f, 1f, 1f, 0.5f);
+            GUI.color = BoldDivider;
             Widgets.DrawLineHorizontal(x, y + DividerGap / 2f, w);
             Widgets.DrawLineHorizontal(x, y + DividerGap / 2f + 2f, w);
             GUI.color = prev;
@@ -299,7 +305,7 @@ namespace ASM
             DrawConditionSection(x, y, halfW, listH, ASMKeys.AdultMales, settings.prioAdultMale, ref condScroll1, ref condListH1, ref condGroup1, true, true);
             // Vertical divider between columns.
             Color vdPrev = GUI.color;
-            GUI.color = new Color(1f, 1f, 1f, 0.25f);
+            GUI.color = FaintDivider;
             Widgets.DrawLineVertical(x + halfW + 6f, y, listH + CondSectionH);
             GUI.color = vdPrev;
             DrawConditionSection(x2, y, halfW, listH, ASMKeys.YoungMales, settings.prioYoungMale, ref condScroll2, ref condListH2, ref condGroup2, true, false);
@@ -307,7 +313,7 @@ namespace ASM
             y = DrawBlockDivider(x, y, w);
             DrawConditionSection(x, y, halfW, listH, ASMKeys.AdultFemales, settings.prioAdultFemale, ref condScroll3, ref condListH3, ref condGroup3, false, true);
             // Vertical divider between female columns.
-            GUI.color = new Color(1f, 1f, 1f, 0.25f);
+            GUI.color = FaintDivider;
             Widgets.DrawLineVertical(x + halfW + 6f, y, listH + CondSectionH);
             GUI.color = vdPrev;
             DrawConditionSection(x2, y, halfW, listH, ASMKeys.YoungFemales, settings.prioYoungFemale, ref condScroll4, ref condListH4, ref condGroup4, false, false);
@@ -627,7 +633,7 @@ namespace ASM
             // Validation: red tint on problematic rows.
             if (IsConditionProblematic(list, index))
             {
-                GUI.color = new Color(0.5f, 0.15f, 0.15f, 0.5f);
+                GUI.color = ForceCullTint;
                 GUI.DrawTexture(row, Texture2D.whiteTexture);
                 GUI.color = Color.white;
             }
@@ -1025,7 +1031,7 @@ namespace ASM
 
         private static void Grip(Rect row)
         {
-            GUI.color = new Color(1f, 1f, 1f, 0.5f);
+            GUI.color = BoldDivider;
             Text.Anchor = TextAnchor.MiddleCenter;
             Widgets.Label(new Rect(row.x + GripX, row.y, GripW, row.height), "≡");
             Text.Anchor = TextAnchor.UpperLeft;

@@ -97,9 +97,12 @@ public static class AnimalTraitsAccess
         return p.health?.hediffSet?.HasHediff(def) ?? false;
     }
 
+    private static readonly Color BadTraitColor = new Color(1f, 0.7f, 0.7f);
+    private static readonly Color GoodTraitColor = new Color(0.7f, 1f, 0.7f);
+
     /// <summary>Green for beneficial traits, red for detrimental ones (vanilla HediffDef.isBad).</summary>
     public static Color TraitColor(HediffDef def) =>
-        def == null ? Color.white : (def.isBad ? new Color(1f, 0.7f, 0.7f) : new Color(0.7f, 1f, 0.7f));
+        def == null ? Color.white : (def.isBad ? BadTraitColor : GoodTraitColor);
 
     /// <summary>Human-readable summary of what a trait does: description + stat/capacity modifiers.</summary>
     public static string TraitTip(HediffDef def)
@@ -214,8 +217,10 @@ public static class AnimalTraitsAccess
                 return Convert.ToInt32(field.GetValue(ext)) > 0;
             }
         }
-        catch
-        { }
+        catch (Exception ex)
+        {
+            Log.Error($"[ASM] IsInheritable failed for {def?.defName ?? "null"}: {ex}");
+        }
 
         return false;
     }
@@ -257,7 +262,10 @@ public static class AnimalTraitsAccess
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Log.Error($"[ASM] GetCullTraitDefNames failed: {ex}");
+        }
 
         return result;
     }
