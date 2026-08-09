@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using ASM.Comps;
 using RimWorld;
 using Verse;
 
-namespace ASM
+namespace ASM.Data
 {
     public enum CondType
     {

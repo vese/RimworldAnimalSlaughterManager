@@ -1,9 +1,12 @@
 using System.Collections.Generic;
 using System.Text;
+using ASM.Comps;
+using ASM.Data;
+using ASM.Windows;
 using RimWorld;
 using Verse;
 
-namespace ASM
+namespace ASM.Alerts
 {
     /// <summary>
     /// Persistent alert (top-right, red) shown when any kind has duplicate or contradictory

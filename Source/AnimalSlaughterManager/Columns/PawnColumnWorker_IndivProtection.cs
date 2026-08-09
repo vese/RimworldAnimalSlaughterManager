@@ -1,7 +1,8 @@
+using ASM.Comps;
 using RimWorld;
 using Verse;
 
-namespace ASM
+namespace ASM.Columns
 {
     /// <summary>Animals-tab checkbox column: toggle an animal's individual protection from
     /// auto-slaughter (ASM_MapComp.protectedPawnIDs). Header uses the shield texture

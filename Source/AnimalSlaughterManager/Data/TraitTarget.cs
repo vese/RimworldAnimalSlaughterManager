@@ -1,7 +1,7 @@
 using RimWorld;
 using Verse;
 
-namespace ASM
+namespace ASM.Data
 {
     /// <summary>
     /// A breeding ("keep") target: keep a number of animals of a kind that carry an ATS trait,

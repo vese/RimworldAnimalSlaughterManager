@@ -2,11 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using ASM.Comps;
+using ASM.Data;
 using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace ASM
+namespace ASM.Windows
 {
     /// <summary>
     /// Unified preset manager for all three scopes:

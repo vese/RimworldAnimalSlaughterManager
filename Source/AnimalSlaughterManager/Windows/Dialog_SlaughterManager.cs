@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ASM.Comps;
 using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace ASM
+namespace ASM.Windows
 {
     /// <summary>
     /// Global Animal Slaughter Manager as a table that mirrors the vanilla slaughter-management

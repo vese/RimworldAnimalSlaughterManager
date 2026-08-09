@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
+using ASM.Comps;
+using ASM.Data;
 using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace ASM
+namespace ASM.Windows
 {
     /// <summary>
     /// Preset browser for a single condition-list bucket. Mirrors Dialog_PresetBrowser's layout

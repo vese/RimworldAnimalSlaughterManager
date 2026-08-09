@@ -1,7 +1,7 @@
 using RimWorld;
 using Verse;
 
-namespace ASM
+namespace ASM.Columns
 {
     /// <summary>Inserts ASM's protection + slaughter-status columns into the vanilla Animals/Pets
     /// tab table, right after the vanilla Slaughter column.</summary>

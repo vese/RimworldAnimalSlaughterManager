@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ASM.Comps;
 using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace ASM
+namespace ASM.Windows
 {
     /// <summary>
     /// Animal Traits System trait picker: a sortable table (good/bad + one column per stat/

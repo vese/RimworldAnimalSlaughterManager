@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <!-- RimWorld 1.6 mods target .NET Framework 4.7.2 (Unity 2022.3 / Mono). -->
   <PropertyGroup>

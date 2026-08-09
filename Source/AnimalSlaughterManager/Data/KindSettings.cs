@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Verse;
 
-namespace ASM
+namespace ASM.Data
 {
     /// <summary>
     /// Per-animal-kind slaughter settings, layered on top of vanilla AutoSlaughterConfig.
