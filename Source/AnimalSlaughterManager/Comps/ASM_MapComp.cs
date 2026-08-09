@@ -191,7 +191,7 @@ namespace ASM.Comps
             var all = new List<Pawn>();
             // Precompute each pawn's slaughter tie-breaker signals once (pregnancy, good/bad trait
             // counts, sickness) so the per-bucket sort doesn't re-scan hediffs per comparison.
-            var traitDefs = AnimalTraitsAccess.KnownTraitDefs().ToList();
+            var traitDefs = AnimalTraitsAccess.KnownTraitDefs.ToList();
             var vitals = new Dictionary<Pawn, PawnVitals>();
             PregnantMode pregMode = ResolvePregnantMode(config.animal, config.allowSlaughterPregnant);
 

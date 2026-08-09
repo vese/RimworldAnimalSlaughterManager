@@ -82,7 +82,7 @@ namespace ASM.Windows
             resizeable = true;
             absorbInputAroundWindow = true;
 
-            rows = AnimalTraitsAccess.KnownTraitDefs().Select(MakeRow).ToList();
+            rows = AnimalTraitsAccess.KnownTraitDefs.Select(MakeRow).ToList();
             var statCols = rows.SelectMany(r => r.statValues.Keys).Distinct().OrderBy(s => s.label).ToList();
             var capCols = rows.SelectMany(r => r.capValues.Keys).Distinct().OrderBy(c => c.label).ToList();
 

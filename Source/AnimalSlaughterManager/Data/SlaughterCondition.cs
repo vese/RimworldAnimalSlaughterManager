@@ -167,7 +167,7 @@ namespace ASM.Data
         // isBad=true → negative traits; isBad=false → positive traits.
         private static bool HasGoodBadTrait(Pawn p, bool isBad)
         {
-            foreach (var def in AnimalTraitsAccess.KnownTraitDefs())
+            foreach (var def in AnimalTraitsAccess.KnownTraitDefs)
             {
                 if (AnimalTraitsAccess.HasTrait(p, def) && def.isBad == isBad)
                     return true;

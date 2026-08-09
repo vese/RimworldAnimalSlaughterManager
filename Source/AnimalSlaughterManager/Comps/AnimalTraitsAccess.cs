@@ -42,29 +42,31 @@ public static class AnimalTraitsAccess
         }
     }
 
-    private static bool? _hasTraitDefs;
-
-    /// <summary>
-    /// True when at least one animal-trait def is actually defined (i.e. ATS trait
-    /// CONTENT is loaded). The ATS dependency stub alone defines no traits, so this — not
-    /// <see cref="IsATSActive"/> — is the precise "are traits usable" signal used to show/hide
-    /// trait-related UI. Cached once; defs don't change after load.
-    /// </summary>
-    public static bool HasAvailableTraits
-    {
-        get
-        {
-            _hasTraitDefs ??= DefDatabase<HediffDef>.AllDefs.Any(IsAnimalTraitDef);
-            return _hasTraitDefs.Value;
-        }
-    }
+    private static List<HediffDef> _knownTraitDefs;
 
     public static bool IsAnimalTraitDef(HediffDef def) =>
         def != null && def.defName != null && def.defName.StartsWith(TraitPrefix) && def.defName != CommonMarker && def.defName != ReferenceTrait;
 
-    /// <summary>All ATS trait defs, for the settings dropdown.</summary>
-    public static IEnumerable<HediffDef> KnownTraitDefs() =>
-        DefDatabase<HediffDef>.AllDefs.Where(IsAnimalTraitDef).OrderBy(d => d.label);
+    /// <summary>
+    /// All ATS trait defs, sorted by label. Cached on first access — defs are immutable after load,
+    /// so the scan runs exactly once. First access is always post-load (UI/gameplay paths), never
+    /// during def resolution. The ATS dependency stub alone defines no traits, so a non-empty list
+    /// is the precise "are traits usable" signal (more precise than <see cref="IsATSActive"/>).
+    /// </summary>
+    public static IReadOnlyList<HediffDef> KnownTraitDefs
+    {
+        get
+        {
+            if (_knownTraitDefs == null)
+                _knownTraitDefs = DefDatabase<HediffDef>.AllDefs
+                    .Where(IsAnimalTraitDef).OrderBy(d => d.label).ToList();
+            return _knownTraitDefs;
+        }
+    }
+
+    /// <summary>True when at least one animal-trait def is actually defined (ATS trait content
+    /// loaded). Reuses the <see cref="KnownTraitDefs"/> cache — a single DefDatabase scan total.</summary>
+    public static bool HasAvailableTraits => KnownTraitDefs.Count > 0;
 
     public static bool HasTrait(Pawn p, HediffDef def)
     {
