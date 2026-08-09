@@ -26,7 +26,9 @@ ADDITIONAL
 - Egg-layer integration (egg-carrying animals counted as "pregnant").
 
 COMPATIBILITY
-- Animal Traits System (optional) — animal trait support for priorities and protection. Without ATS the mod works, but the trait section is unavailable.
+- Animal Traits System / ATS Expanded (optional): full animal-trait support for slaughter priorities and protection. The trait options appear only when ATS traits are loaded.
+- Any mod that adds new animal traits to ATS is supported automatically — traits are detected at runtime, no extra setup needed.
+- Without ATS the mod works fully; only trait-related options are hidden.
 
 ADDING / REMOVING FROM A SAVE
 - Safe to add to an existing colony at any time.
@@ -56,7 +58,9 @@ Animal Slaughter Manager расширяет встроенный авто-заб
 - Интеграция с яйцекладущими животными (учёт несущих яйцо как «беременных»).
 
 СОВМЕСТИМОСТЬ
-- Animal Traits System (опционально) — поддержка черт животных для приоритетов и защиты. Без ATS мод работает, просто раздел черт недоступен.
+- Animal Traits System / ATS Expanded (опционально): полная поддержка черт животных для приоритетов забоя и защиты. Опции черт появляются только когда черты ATS загружены.
+- Любой мод, добавляющий новые черты животных для ATS, поддерживается автоматически — черты определяются во время работы, дополнительная настройка не нужна.
+- Без ATS мод полностью работает; скрыты только опции, связанные с чертами.
 
 ДОБАВЛЕНИЕ / УДАЛЕНИЕ С СЕЙВА
 - Можно безопасно добавлять в существующую колонию в любой момент.
