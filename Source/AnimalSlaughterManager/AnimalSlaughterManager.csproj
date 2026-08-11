@@ -25,4 +25,8 @@
     <PackageReference Include="Lib.Harmony" Version="2.*" PrivateAssets="all" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\" />
+  </ItemGroup>
+
 </Project>

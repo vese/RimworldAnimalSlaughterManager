@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using ASM;
+using ASM;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -358,7 +360,7 @@ namespace ASM
             else { if (adult) comp.globalFemalePref = pref; else comp.globalFemaleYoungPref = pref; }
             foreach (var kv in comp.kindSettings)
                 if (kv.Value != null)
-                    kv.Value.SetPref(male, adult, pref);
+                    kv.Value.preferenceSettings.SetPref(male, adult, pref);
             comp.MarkDirty();
         }
 
@@ -477,21 +479,21 @@ namespace ASM
 
         private void InheritDropdown(Rect rect, SlaughterCondition cond)
         {
-            string label = cond.inheritMode == InheritableFilter.Inheritable ? ASMKeys.InhInheritable.Translate()
-                         : cond.inheritMode == InheritableFilter.NonInheritable ? ASMKeys.InhNonInheritable.Translate()
+            string label = cond.inheritMode == TraitInheritability.Inheritable ? ASMKeys.InhInheritable.Translate()
+                         : cond.inheritMode == TraitInheritability.NonInheritable ? ASMKeys.InhNonInheritable.Translate()
                          : ASMKeys.InhBoth.Translate();
             if (Widgets.ButtonText(rect, label))
             {
                 var opts = new List<FloatMenuOption>();
-                foreach (InheritableFilter s in (InheritableFilter[])Enum.GetValues(typeof(InheritableFilter)))
+                foreach (TraitInheritability s in (TraitInheritability[])Enum.GetValues(typeof(TraitInheritability)))
                 { var c = s; opts.Add(new FloatMenuOption(InhLabel(s), () => { cond.inheritMode = c; comp.MarkDirty(); })); }
                 Find.WindowStack.Add(new FloatMenu(opts));
             }
         }
 
-        private static string InhLabel(InheritableFilter s)
+        private static string InhLabel(TraitInheritability s)
         {
-            switch (s) { case InheritableFilter.Inheritable: return ASMKeys.InhInheritable.Translate(); case InheritableFilter.NonInheritable: return ASMKeys.InhNonInheritable.Translate(); default: return ASMKeys.InhBoth.Translate(); }
+            switch (s) { case TraitInheritability.Inheritable: return ASMKeys.InhInheritable.Translate(); case TraitInheritability.NonInheritable: return ASMKeys.InhNonInheritable.Translate(); default: return ASMKeys.InhBoth.Translate(); }
         }
 
         private void OpenConditionPresetMenu(List<SlaughterCondition> list, bool male, bool adult)
@@ -803,31 +805,31 @@ namespace ASM
                 list => { foreach (var d in list) settings.forceCullTraits.Add(NewCull(d)); comp.MarkDirty(); });
         }
 
-        private static TraitTarget NewKeep(HediffDef d) => new TraitTarget(d) { inheritMode = InheritableFilter.Both, ageScope = AgeScope.Both, genderScope = GenderScope.Any, keepCount = 1 };
-        private static CullTrait NewCull(HediffDef d) => new CullTrait(d) { inheritMode = InheritableFilter.Both, ageScope = AgeScope.Both, genderScope = GenderScope.Any };
+        private static TraitProtectRule NewKeep(HediffDef d) => new TraitProtectRule(d) { inheritMode = TraitInheritability.Both, ageScope = AgeScope.Both, genderScope = GenderScope.Any, keepCount = 1 };
+        private static TraitRule NewCull(HediffDef d) => new TraitRule(d) { inheritMode = TraitInheritability.Both, ageScope = AgeScope.Both, genderScope = GenderScope.Any };
 
         // Replace the clicked keep row: one picked trait → swap in place; several → one row per picked
         // trait, each cloning the clicked row's keep count / age / gender / inheritability.
-        private void ReplaceKeepTraits(List<TraitTarget> list, TraitTarget clicked, List<HediffDef> picked)
+        private void ReplaceKeepTraits(List<TraitProtectRule> list, TraitProtectRule clicked, List<HediffDef> picked)
         {
             if (picked == null || picked.Count == 0) return;
             if (picked.Count == 1) { clicked.trait = picked[0]; comp.MarkDirty(); return; }
             int idx = list.IndexOf(clicked);
             if (idx < 0) idx = list.Count; else list.RemoveAt(idx);
             for (int k = 0; k < picked.Count; k++)
-                list.Insert(idx + k, new TraitTarget(picked[k]) { keepCount = clicked.keepCount, ageScope = clicked.ageScope, genderScope = clicked.genderScope, inheritMode = clicked.inheritMode });
+                list.Insert(idx + k, new TraitProtectRule(picked[k]) { keepCount = clicked.keepCount, ageScope = clicked.ageScope, genderScope = clicked.genderScope, inheritMode = clicked.inheritMode });
             comp.MarkDirty();
         }
 
         // Same for a cull/spare/forceCull row (no keep count).
-        private void ReplaceCullTraits(List<CullTrait> list, CullTrait clicked, List<HediffDef> picked)
+        private void ReplaceCullTraits(List<TraitRule> list, TraitRule clicked, List<HediffDef> picked)
         {
             if (picked == null || picked.Count == 0) return;
             if (picked.Count == 1) { clicked.trait = picked[0]; comp.MarkDirty(); return; }
             int idx = list.IndexOf(clicked);
             if (idx < 0) idx = list.Count; else list.RemoveAt(idx);
             for (int k = 0; k < picked.Count; k++)
-                list.Insert(idx + k, new CullTrait(picked[k]) { ageScope = clicked.ageScope, genderScope = clicked.genderScope, inheritMode = clicked.inheritMode });
+                list.Insert(idx + k, new TraitRule(picked[k]) { ageScope = clicked.ageScope, genderScope = clicked.genderScope, inheritMode = clicked.inheritMode });
             comp.MarkDirty();
         }
 
@@ -838,11 +840,11 @@ namespace ASM
             Widgets.Label(new Rect(row.x, row.y, 180f, row.height), labelKey.Translate());
             Text.Anchor = TextAnchor.UpperLeft;
             float bw = 200f;
-            var cur = settings.GetPref(male, adult);
+            var cur = settings.preferenceSettings.GetPref(male, adult);
             if (ChoiceButton(new Rect(row.x + 190f, row.y + 3f, bw, row.height - 6f), ASMKeys.OldestFirst.Translate(), cur == SlaughterPreference.OldestFirst))
-            { settings.SetPref(male, adult, SlaughterPreference.OldestFirst); comp.MarkDirty(); }
+            { settings.preferenceSettings.SetPref(male, adult, SlaughterPreference.OldestFirst); comp.MarkDirty(); }
             if (ChoiceButton(new Rect(row.x + 190f + bw + 8f, row.y + 3f, bw, row.height - 6f), ASMKeys.YoungestFirst.Translate(), cur == SlaughterPreference.YoungestFirst))
-            { settings.SetPref(male, adult, SlaughterPreference.YoungestFirst); comp.MarkDirty(); }
+            { settings.preferenceSettings.SetPref(male, adult, SlaughterPreference.YoungestFirst); comp.MarkDirty(); }
             return row.yMax;
         }
 
@@ -976,7 +978,7 @@ namespace ASM
             Rect copyBtn = new Rect(row.xMax - 26f - 4f - CopyIconS, row.y + (row.height - CopyIconS) / 2f, CopyIconS, CopyIconS);
             TooltipHandler.TipRegion(copyBtn, ASMKeys.Copy.Translate());
             if (Widgets.ButtonImage(copyBtn, TexButton.Copy))
-                settings.keepTraits.Insert(index + 1, new TraitTarget(tt.trait) { keepCount = tt.keepCount, ageScope = tt.ageScope, genderScope = tt.genderScope, inheritMode = tt.inheritMode });
+                settings.keepTraits.Insert(index + 1, new TraitProtectRule(tt.trait) { keepCount = tt.keepCount, ageScope = tt.ageScope, genderScope = tt.genderScope, inheritMode = tt.inheritMode });
             if (RemoveButton(row)) { settings.keepTraits.RemoveAt(index); comp.MarkDirty(); }
         }
 
@@ -984,7 +986,7 @@ namespace ASM
         private void DrawSpareRow(Rect row, int index) => DrawCullLikeRow(row, index, settings.spareTraits);
         private void DrawForceCullRow(Rect row, int index) => DrawCullLikeRow(row, index, settings.forceCullTraits);
 
-        private void DrawCullLikeRow(Rect row, int index, List<CullTrait> list)
+        private void DrawCullLikeRow(Rect row, int index, List<TraitRule> list)
         {
             var ct = list[index];
             Grip(row);
@@ -998,7 +1000,7 @@ namespace ASM
             Rect copyBtn = new Rect(row.xMax - 26f - 4f - CopyIconS, row.y + (row.height - CopyIconS) / 2f, CopyIconS, CopyIconS);
             TooltipHandler.TipRegion(copyBtn, ASMKeys.Copy.Translate());
             if (Widgets.ButtonImage(copyBtn, TexButton.Copy))
-                list.Insert(index + 1, new CullTrait(ct.trait) { ageScope = ct.ageScope, genderScope = ct.genderScope, inheritMode = ct.inheritMode });
+                list.Insert(index + 1, new TraitRule(ct.trait) { ageScope = ct.ageScope, genderScope = ct.genderScope, inheritMode = ct.inheritMode });
             if (RemoveButton(row)) { list.RemoveAt(index); comp.MarkDirty(); }
         }
 
@@ -1073,12 +1075,12 @@ namespace ASM
             }
         }
 
-        private static void Dropdown(Rect row, float x, float w, string currentLabel, Action<InheritableFilter> onPick)
+        private static void Dropdown(Rect row, float x, float w, string currentLabel, Action<TraitInheritability> onPick)
         {
             if (Widgets.ButtonText(new Rect(row.x + x, row.y + 3f, w, 24f), currentLabel))
             {
                 var opts = new List<FloatMenuOption>();
-                foreach (InheritableFilter s in (InheritableFilter[])Enum.GetValues(typeof(InheritableFilter)))
+                foreach (TraitInheritability s in (TraitInheritability[])Enum.GetValues(typeof(TraitInheritability)))
                 { var c = s; opts.Add(new FloatMenuOption(InheritLabel(s), () => onPick(c))); }
                 Find.WindowStack.Add(new FloatMenu(opts));
             }
@@ -1092,9 +1094,9 @@ namespace ASM
         {
             switch (s) { case GenderScope.Male: return ASMKeys.GenderMale.Translate(); case GenderScope.Female: return ASMKeys.GenderFemale.Translate(); default: return ASMKeys.GenderAny.Translate(); }
         }
-        private static string InheritLabel(InheritableFilter s)
+        private static string InheritLabel(TraitInheritability s)
         {
-            switch (s) { case InheritableFilter.Inheritable: return ASMKeys.InhInheritable.Translate(); case InheritableFilter.NonInheritable: return ASMKeys.InhNonInheritable.Translate(); default: return ASMKeys.InhBoth.Translate(); }
+            switch (s) { case TraitInheritability.Inheritable: return ASMKeys.InhInheritable.Translate(); case TraitInheritability.NonInheritable: return ASMKeys.InhNonInheritable.Translate(); default: return ASMKeys.InhBoth.Translate(); }
         }
     }
 }

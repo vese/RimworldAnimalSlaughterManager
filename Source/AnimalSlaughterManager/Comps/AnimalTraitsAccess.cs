@@ -23,10 +23,13 @@ namespace ASM;
 /// </summary>
 public static class AnimalTraitsAccess
 {
-    public const string ATSPackageId = "luved.animaltraits";
+    private const string ATSPackageId = "luved.animaltraits";
     private const string TraitPrefix = "AnimalTrait_";
     private const string CommonMarker = "AnimalTrait_Common";
     private const string ReferenceTrait = "AnimalTrait_StatReference"; // ATS sample trait listing every stat — not a real trait.
+
+    private static readonly Color BadTraitColor = new(1f, 0.7f, 0.7f);
+    private static readonly Color GoodTraitColor = new(0.7f, 1f, 0.7f);
 
     private static bool _atsResolved;
     public static Type? AtsGameComponentType
@@ -87,7 +90,7 @@ public static class AnimalTraitsAccess
     /// </summary>
     public static bool HasAvailableTraits => KnownTraitDefs.Count > 0;
 
-    public static bool HasTrait(Pawn p, HediffDef def)
+    public static bool HasTrait(Pawn? p, HediffDef? def)
     {
         if (p == null || def == null)
         {
@@ -96,9 +99,6 @@ public static class AnimalTraitsAccess
 
         return p.health?.hediffSet?.HasHediff(def) ?? false;
     }
-
-    private static readonly Color BadTraitColor = new Color(1f, 0.7f, 0.7f);
-    private static readonly Color GoodTraitColor = new Color(0.7f, 1f, 0.7f);
 
     /// <summary>Green for beneficial traits, red for detrimental ones (vanilla HediffDef.isBad).</summary>
     public static Color TraitColor(HediffDef def) =>

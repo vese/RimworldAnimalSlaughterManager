@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
+using ASM;
+using ASM;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -232,9 +234,9 @@ namespace ASM
             var result = new List<TraitDto>();
             foreach (var item in list)
             {
-                if (isKeep && item is TraitTarget tt)
+                if (isKeep && item is TraitProtectRule tt)
                     result.Add(TraitDto.From(tt));
-                else if (!isKeep && item is CullTrait ct)
+                else if (!isKeep && item is TraitRule ct)
                     result.Add(TraitDto.From(ct));
             }
             return result;
@@ -342,47 +344,47 @@ namespace ASM
             return new KindDto
             {
                 animal = def.defName,
-                malePref = k.malePref.ToString(),
-                femalePref = k.femalePref.ToString(),
-                maleYoungPref = k.maleYoungPref.ToString(),
-                femaleYoungPref = k.femaleYoungPref.ToString(),
-                KeepTraits = k.keepTraits.Select(TraitDto.From).ToList(),
-                CullTraits = k.cullTraits.Select(TraitDto.From).ToList(),
-                SpareTraits = k.spareTraits.Select(TraitDto.From).ToList(),
-                ForceCullTraits = k.forceCullTraits.Select(TraitDto.From).ToList(),
-                defaultAgePref = k.defaultAgePref.ToString(),
-                PrioAdultMale = k.prioAdultMale.Select(ConditionDto.From).ToList(),
-                PrioYoungMale = k.prioYoungMale.Select(ConditionDto.From).ToList(),
-                PrioAdultFemale = k.prioAdultFemale.Select(ConditionDto.From).ToList(),
-                PrioYoungFemale = k.prioYoungFemale.Select(ConditionDto.From).ToList()
+                malePref = k.preferenceSettings.malePref.ToString(),
+                femalePref = k.preferenceSettings.femalePref.ToString(),
+                maleYoungPref = k.preferenceSettings.maleYoungPref.ToString(),
+                femaleYoungPref = k.preferenceSettings.femaleYoungPref.ToString(),
+                KeepTraits = k.traitsSettings.keepTraits.Select(TraitDto.From).ToList(),
+                CullTraits = k.traitsSettings.cullTraits.Select(TraitDto.From).ToList(),
+                SpareTraits = k.traitsSettings.spareTraits.Select(TraitDto.From).ToList(),
+                ForceCullTraits = k.traitsSettings.forceCullTraits.Select(TraitDto.From).ToList(),
+                defaultAgePref = k.preferenceSettings.defaultAgePref.ToString(),
+                PrioAdultMale = k.prioritySettings.prioAdultMale.Select(ConditionDto.From).ToList(),
+                PrioYoungMale = k.prioritySettings.prioYoungMale.Select(ConditionDto.From).ToList(),
+                PrioAdultFemale = k.prioritySettings.prioAdultFemale.Select(ConditionDto.From).ToList(),
+                PrioYoungFemale = k.prioritySettings.prioYoungFemale.Select(ConditionDto.From).ToList()
             };
         }
 
         public void ApplyTo(KindSettings ks)
         {
             ks.Reset();
-            Enum.TryParse(malePref, out ks.malePref);
-            Enum.TryParse(femalePref, out ks.femalePref);
-            Enum.TryParse(maleYoungPref, out ks.maleYoungPref);
-            Enum.TryParse(femaleYoungPref, out ks.femaleYoungPref);
+            Enum.TryParse(malePref, out ks.preferenceSettings.malePref);
+            Enum.TryParse(femalePref, out ks.preferenceSettings.femalePref);
+            Enum.TryParse(maleYoungPref, out ks.preferenceSettings.maleYoungPref);
+            Enum.TryParse(femaleYoungPref, out ks.preferenceSettings.femaleYoungPref);
             if (KeepTraits != null)
                 foreach (var t in KeepTraits.Select(t => t.ToTarget()))
-                    if (t != null) ks.keepTraits.Add(t);
+                    if (t != null) ks.traitsSettings.keepTraits.Add(t);
             if (CullTraits != null)
                 foreach (var c in CullTraits.Select(t => t.ToCull()))
-                    if (c != null) ks.cullTraits.Add(c);
+                    if (c != null) ks.traitsSettings.cullTraits.Add(c);
             if (SpareTraits != null)
                 foreach (var c in SpareTraits.Select(t => t.ToCull()))
-                    if (c != null) ks.spareTraits.Add(c);
+                    if (c != null) ks.traitsSettings.spareTraits.Add(c);
             if (ForceCullTraits != null)
                 foreach (var c in ForceCullTraits.Select(t => t.ToCull()))
-                    if (c != null) ks.forceCullTraits.Add(c);
+                    if (c != null) ks.traitsSettings.forceCullTraits.Add(c);
             if (!string.IsNullOrEmpty(defaultAgePref))
-                Enum.TryParse(defaultAgePref, out ks.defaultAgePref);
-            if (PrioAdultMale != null) foreach (var c in PrioAdultMale) ks.prioAdultMale.Add(c.ToCondition());
-            if (PrioYoungMale != null) foreach (var c in PrioYoungMale) ks.prioYoungMale.Add(c.ToCondition());
-            if (PrioAdultFemale != null) foreach (var c in PrioAdultFemale) ks.prioAdultFemale.Add(c.ToCondition());
-            if (PrioYoungFemale != null) foreach (var c in PrioYoungFemale) ks.prioYoungFemale.Add(c.ToCondition());
+                Enum.TryParse(defaultAgePref, out ks.preferenceSettings.defaultAgePref);
+            if (PrioAdultMale != null) foreach (var c in PrioAdultMale) ks.prioritySettings.prioAdultMale.Add(c.ToCondition());
+            if (PrioYoungMale != null) foreach (var c in PrioYoungMale) ks.prioritySettings.prioYoungMale.Add(c.ToCondition());
+            if (PrioAdultFemale != null) foreach (var c in PrioAdultFemale) ks.prioritySettings.prioAdultFemale.Add(c.ToCondition());
+            if (PrioYoungFemale != null) foreach (var c in PrioYoungFemale) ks.prioritySettings.prioYoungFemale.Add(c.ToCondition());
         }
     }
 
@@ -394,7 +396,7 @@ namespace ASM
         [XmlAttribute] public string genderScope = "Any";
         [XmlAttribute] public string inheritMode = "Both";
 
-        public static TraitDto From(TraitTarget t) => new TraitDto
+        public static TraitDto From(TraitProtectRule t) => new TraitDto
         {
             trait = t.trait?.defName,
             keepCount = t.keepCount,
@@ -403,7 +405,7 @@ namespace ASM
             inheritMode = t.inheritMode.ToString()
         };
 
-        public static TraitDto From(CullTrait c) => new TraitDto
+        public static TraitDto From(TraitRule c) => new TraitDto
         {
             trait = c.trait?.defName,
             ageScope = c.ageScope.ToString(),
@@ -411,22 +413,22 @@ namespace ASM
             inheritMode = c.inheritMode.ToString()
         };
 
-        public TraitTarget ToTarget()
+        public TraitProtectRule ToTarget()
         {
             var h = DefDatabase<HediffDef>.GetNamed(trait, false);
             if (h == null) return null;
-            var t = new TraitTarget(h) { keepCount = keepCount };
+            var t = new TraitProtectRule(h) { keepCount = keepCount };
             Enum.TryParse(ageScope, out t.ageScope);
             Enum.TryParse(genderScope, out t.genderScope);
             Enum.TryParse(inheritMode, out t.inheritMode);
             return t;
         }
 
-        public CullTrait ToCull()
+        public TraitRule ToCull()
         {
             var h = DefDatabase<HediffDef>.GetNamed(trait, false);
             if (h == null) return null;
-            var c = new CullTrait(h);
+            var c = new TraitRule(h);
             Enum.TryParse(ageScope, out c.ageScope);
             Enum.TryParse(genderScope, out c.genderScope);
             Enum.TryParse(inheritMode, out c.inheritMode);
@@ -463,7 +465,7 @@ namespace ASM
                 trait = string.IsNullOrEmpty(trait) ? null : DefDatabase<HediffDef>.GetNamedSilentFail(trait),
                 disease = string.IsNullOrEmpty(disease) ? null : DefDatabase<HediffDef>.GetNamedSilentFail(disease),
                 trainable = string.IsNullOrEmpty(trainable) ? null : DefDatabase<TrainableDef>.GetNamedSilentFail(trainable),
-                inheritMode = string.IsNullOrEmpty(inheritMode) ? InheritableFilter.Both : (InheritableFilter)Enum.Parse(typeof(InheritableFilter), inheritMode)
+                inheritMode = string.IsNullOrEmpty(inheritMode) ? TraitInheritability.Both : (TraitInheritability)Enum.Parse(typeof(TraitInheritability), inheritMode)
             };
         }
     }

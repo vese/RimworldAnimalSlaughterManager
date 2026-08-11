@@ -1,0 +1,94 @@
+using RimWorld;
+using System;
+using Verse;
+
+namespace ASM;
+
+public class TrainingGeneralPriorityRule : BasePriorityRule
+{
+    public TrainingGeneralType type = TrainingGeneralType.Partial;
+
+    public override string Label => type switch
+    {
+        TrainingGeneralType.None => ASMKeys.CondTrainingNone.Translate(),
+        TrainingGeneralType.Partial => ASMKeys.CondTrainingPartial.Translate(),
+        TrainingGeneralType.Full => ASMKeys.CondTrainingFull.Translate(),
+        _ => throw new NotImplementedException(),
+    };
+
+    public override BasePriorityRule Clone() => new TrainingGeneralPriorityRule() { type = type };
+
+    public override bool Matches(Pawn? p) => type switch
+    {
+        TrainingGeneralType.None => !HasAnyTraining(p),
+        TrainingGeneralType.Partial => HasAnyTraining(p) && !AllTrained(p),
+        TrainingGeneralType.Full => AllTrained(p),
+        _ => throw new NotImplementedException(),
+    };
+
+    public override void ExposeData()
+    {
+        Scribe_Values.Look(ref type, "type", TrainingGeneralType.Partial);
+    }
+
+    private static bool HasAnyTraining(Pawn? p)
+    {
+        var tracker = p?.training;
+
+        if (tracker == null)
+        {
+            return false;
+        }
+
+        foreach (var td in TrainableUtility.TrainableDefsInListOrder)
+        {
+            if (tracker.HasLearned(td))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool AllTrained(Pawn? p)
+    {
+        var tracker = p?.training;
+
+        if (tracker == null)
+        {
+            return false;
+        }
+
+        var trainability = p?.RaceProps?.trainability;
+
+        if (trainability == null || trainability == TrainabilityDefOf.None)
+        {
+            return false;
+        }
+
+        var any = false;
+
+        foreach (var td in TrainableUtility.TrainableDefsInListOrder)
+        {
+            if (td.requiredTrainability == null)
+            {
+                continue;
+            }
+
+            if (td.requiredTrainability.intelligenceOrder > trainability.intelligenceOrder)
+            {
+                continue;
+            }
+
+            any = true;
+
+            if (!tracker.HasLearned(td))
+            {
+                return false;
+            }
+        }
+
+        return any;
+    }
+}

@@ -69,10 +69,19 @@ public class Alert_ConditionProblems : Alert
     protected override void OnClick()
     {
         var comp = Find.CurrentMap?.GetComponent<ASM_MapComp>();
-        if (comp == null) return;
+
+        if (comp == null)
+        {
+            return;
+        }
+
         foreach (var kv in comp.kindSettings)
         {
-            if (kv.Value == null) continue;
+            if (kv.Value == null)
+            {
+                continue;
+            }
+
             if (CountProblems(kv.Value) > 0)
             {
                 Find.WindowStack.Add(new Dialog_KindSlaughterSettings(comp, kv.Key));
@@ -84,10 +93,10 @@ public class Alert_ConditionProblems : Alert
     private static int CountProblems(KindSettings ks)
     {
         int n = 0;
-        n += CountList(ks.prioAdultMale);
-        n += CountList(ks.prioYoungMale);
-        n += CountList(ks.prioAdultFemale);
-        n += CountList(ks.prioYoungFemale);
+        n += CountList(ks.prioritySettings.prioAdultMale);
+        n += CountList(ks.prioritySettings.prioYoungMale);
+        n += CountList(ks.prioritySettings.prioAdultFemale);
+        n += CountList(ks.prioritySettings.prioYoungFemale);
         return n;
     }
 

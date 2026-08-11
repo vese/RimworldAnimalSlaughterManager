@@ -1,0 +1,41 @@
+using Verse;
+
+namespace ASM;
+
+/// <summary>
+/// Per-animal-kind slaughter settings, layered on top of vanilla AutoSlaughterConfig.
+/// Slaughter priority is split into four sex×age buckets (matching vanilla's buckets).
+/// </summary>
+public class KindSettings : IExposable
+{
+    public KindPreferenceSettings preferenceSettings = new();
+    public KindPrioritySettings prioritySettings = new();
+    public KindTraitsSettings traitsSettings = new();
+
+
+    /// <summary>True when this kind deviates from vanilla behaviour and must be recomputed.</summary>
+    public bool Customized => preferenceSettings.Customized || prioritySettings.Customized || traitsSettings.Customized;
+
+    /// <summary>Priority customization: sex×age (older/younger) prefs, condition lists, or cull/spare trait lists.</summary>
+    public bool HasPrioritySettings => preferenceSettings.Customized || prioritySettings.Customized || traitsSettings.HasPrioritySettings;
+
+    /// <summary>Protection customization: breeding ("keep") trait targets (protect from slaughter).</summary>
+    public bool HasProtectionSettings => traitsSettings.HasProtectionSettings;
+
+    /// <summary>Force-slaughter customization: cull matching animals regardless of count/limits.</summary>
+    public bool HasForceCullSettings => traitsSettings.HasForceCullSettings;
+
+    public void Reset()
+    {
+        preferenceSettings.Reset();
+        prioritySettings.Reset();
+        traitsSettings.Reset();
+    }
+
+    public void ExposeData()
+    {
+        preferenceSettings.ExposeData();
+        prioritySettings.ExposeData();
+        traitsSettings.ExposeData();
+    }
+}
