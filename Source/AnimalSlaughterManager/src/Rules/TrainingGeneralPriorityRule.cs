@@ -6,12 +6,13 @@ namespace ASM;
 
 public class TrainingGeneralPriorityRule : BasePriorityRule
 {
-    public TrainingGeneralType type = TrainingGeneralType.Partial;
+    public TrainingGeneralType type = TrainingGeneralType.PartialOrFull;
 
     public override string Label => type switch
     {
         TrainingGeneralType.None => ASMKeys.CondTrainingNone.Translate(),
         TrainingGeneralType.Partial => ASMKeys.CondTrainingPartial.Translate(),
+        TrainingGeneralType.PartialOrFull => throw new NotImplementedException(),
         TrainingGeneralType.Full => ASMKeys.CondTrainingFull.Translate(),
         _ => throw new NotImplementedException(),
     };
@@ -22,14 +23,18 @@ public class TrainingGeneralPriorityRule : BasePriorityRule
     {
         TrainingGeneralType.None => !HasAnyTraining(p),
         TrainingGeneralType.Partial => HasAnyTraining(p) && !AllTrained(p),
+        TrainingGeneralType.PartialOrFull => HasAnyTraining(p),
         TrainingGeneralType.Full => AllTrained(p),
         _ => throw new NotImplementedException(),
     };
 
     public override void ExposeData()
     {
-        Scribe_Values.Look(ref type, "type", TrainingGeneralType.Partial);
+        Scribe_Values.Look(ref type, "type", TrainingGeneralType.PartialOrFull);
     }
+
+    // TODO: for PartialOrFull and Partial, Full
+    public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is TrainingGeneralPriorityRule rule && type == rule.type;
 
     private static bool HasAnyTraining(Pawn? p)
     {

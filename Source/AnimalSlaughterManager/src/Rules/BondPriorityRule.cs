@@ -17,4 +17,6 @@ public class BondPriorityRule : BasePriorityRule
     {
         Scribe_Values.Look(ref has, "has", true);
     }
+
+    public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is BondPriorityRule;
 }

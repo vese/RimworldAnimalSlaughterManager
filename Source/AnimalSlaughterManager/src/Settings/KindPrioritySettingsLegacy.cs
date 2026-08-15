@@ -63,11 +63,11 @@ public class KindPrioritySettingsLegacy
         },
         CondType.TrainingNone => new TrainingGeneralPriorityRule
         {
-            type = slaughterCondition.has ? TrainingGeneralType.None : TrainingGeneralType.Partial
+            type = slaughterCondition.has ? TrainingGeneralType.None : TrainingGeneralType.PartialOrFull
         },
         CondType.TrainingPartial => new TrainingGeneralPriorityRule
         {
-            type = slaughterCondition.has ? TrainingGeneralType.Partial : TrainingGeneralType.None
+            type = slaughterCondition.has ? TrainingGeneralType.PartialOrFull : TrainingGeneralType.None
         },
         CondType.TrainingFull => new TrainingGeneralPriorityRule
         {

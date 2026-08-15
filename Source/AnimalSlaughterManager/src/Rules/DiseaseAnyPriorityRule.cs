@@ -18,6 +18,8 @@ public class DiseaseAnyPriorityRule : BasePriorityRule
         Scribe_Values.Look(ref has, "has", true);
     }
 
+    public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is DiseaseAnyPriorityRule;
+
     private static bool IsSick(Pawn? p)
     {
         var hediffs = p?.health?.hediffSet?.hediffs;

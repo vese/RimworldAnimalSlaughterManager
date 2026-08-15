@@ -70,6 +70,10 @@ public class TraitGeneralPriorityRule : BasePriorityRule
         Scribe_Values.Look(ref inheritability, "inheritability", TraitInheritability.Both);
     }
 
+    public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is TraitGeneralPriorityRule rule &&
+        // TODO: for Both
+        type == rule.type && inheritability == rule.inheritability;
+
     private static bool HasTrait(Pawn? p, bool? isBad = null)
     {
         foreach (var def in AnimalTraitsAccess.KnownTraitDefs)

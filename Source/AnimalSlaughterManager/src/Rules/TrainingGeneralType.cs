@@ -4,5 +4,6 @@ public enum TrainingGeneralType
 {
     None = 0,
     Partial = 1,
-    Full = 2
+    PartialOrFull = 2,
+    Full = 3
 }

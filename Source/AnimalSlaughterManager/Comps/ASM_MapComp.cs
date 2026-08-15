@@ -34,13 +34,39 @@ public class ASM_MapComp : MapComponent
     public SlaughterPreference GetGlobalPref(bool male, bool adult) =>
         male ? (adult ? globalMalePref : globalMaleYoungPref) : (adult ? globalFemalePref : globalFemaleYoungPref);
 
+    public void SetGlobalPref(bool male, bool adult, SlaughterPreference value)
+    {
+        if (male)
+        {
+            if (adult)
+            {
+                globalMalePref = value;
+            }
+            else
+            {
+                globalMaleYoungPref = value;
+            }
+        }
+        else
+        {
+            if (adult)
+            {
+                globalFemalePref = value;
+            }
+            else
+            {
+                globalFemaleYoungPref = value;
+            }
+        }
+    }
+
     // True if this kind has per-kind pref overrides or condition lists (differs from the global defaults).
     public bool KindHasCustomPrefs(ThingDef def)
     {
         if (!kindSettings.TryGetValue(def, out var ks) || ks == null) return false;
         return ks.preferenceSettings.malePref != globalMalePref || ks.preferenceSettings.femalePref != globalFemalePref ||
                ks.preferenceSettings.maleYoungPref != globalMaleYoungPref || ks.preferenceSettings.femaleYoungPref != globalFemaleYoungPref ||
-               ks.prioritySettings.AnyPriorityConditions();
+               ks.prioritySettings.HasRules;
     }
 
     public KindSettings GetSettings(ThingDef def)

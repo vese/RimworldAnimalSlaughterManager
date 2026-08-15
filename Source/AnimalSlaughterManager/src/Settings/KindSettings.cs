@@ -14,10 +14,10 @@ public class KindSettings : IExposable
 
 
     /// <summary>True when this kind deviates from vanilla behaviour and must be recomputed.</summary>
-    public bool Customized => preferenceSettings.Customized || prioritySettings.Customized || traitsSettings.Customized;
+    public bool Customized => preferenceSettings.Customized || prioritySettings.HasRules || traitsSettings.Customized;
 
     /// <summary>Priority customization: sex×age (older/younger) prefs, condition lists, or cull/spare trait lists.</summary>
-    public bool HasPrioritySettings => preferenceSettings.Customized || prioritySettings.Customized || traitsSettings.HasPrioritySettings;
+    public bool HasPrioritySettings => preferenceSettings.Customized || prioritySettings.HasRules || traitsSettings.HasPrioritySettings;
 
     /// <summary>Protection customization: breeding ("keep") trait targets (protect from slaughter).</summary>
     public bool HasProtectionSettings => traitsSettings.HasProtectionSettings;

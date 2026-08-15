@@ -22,6 +22,7 @@ public class KindPreferenceSettings
 
     public void Reset()
     {
+        // TODO: use global preferences
         malePref = femalePref = maleYoungPref = femaleYoungPref = SlaughterPreference.OldestFirst;
         defaultAgePref = SlaughterPreference.OldestFirst;
     }

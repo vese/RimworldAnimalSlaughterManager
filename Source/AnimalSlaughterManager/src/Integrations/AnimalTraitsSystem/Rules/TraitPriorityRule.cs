@@ -24,6 +24,10 @@ public class TraitPriorityRule : BasePriorityRule
         Scribe_Values.Look(ref inheritMode, "inheritMode", TraitInheritability.Both);
     }
 
+    public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is TraitPriorityRule rule &&
+        // TODO: for TraitInheritability.Both and other any
+        trait?.defName == rule.trait?.defName && inheritMode == rule.inheritMode;
+
     private static string DefName(Def? d) => d == null ? Constants.MissingLabel : d.LabelCap.ToString();
 
     private static bool InheritMatch(HediffDef trait, TraitInheritability mode) => mode switch

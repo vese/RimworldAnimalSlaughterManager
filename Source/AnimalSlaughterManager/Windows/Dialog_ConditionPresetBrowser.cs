@@ -17,7 +17,7 @@ namespace ASM
     {
         private readonly ASM_MapComp comp;
         private readonly CondBucket bucket;
-        private readonly List<SlaughterCondition> targetList;
+        private readonly List<BasePriorityRule> targetList;
 
         private Vector2 scroll;
         private float listHeight = 9999f;
@@ -31,10 +31,10 @@ namespace ASM
 
         public override Vector2 InitialSize => new Vector2(820f, 600f);
 
-        public Dialog_ConditionPresetBrowser(ASM_MapComp comp, CondBucket bucket, List<SlaughterCondition> targetList)
+        public Dialog_ConditionPresetBrowser(ASM_MapComp comp, bool male, bool adult, List<BasePriorityRule> targetList)
         {
             this.comp = comp;
-            this.bucket = bucket;
+            bucket = male ? (adult ? CondBucket.AdultMale : CondBucket.YoungMale) : (adult ? CondBucket.AdultFemale : CondBucket.YoungFemale);
             this.targetList = targetList;
             doCloseX = true;
             draggable = true;

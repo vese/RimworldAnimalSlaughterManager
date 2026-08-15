@@ -22,5 +22,7 @@ public class TrainingPriorityRule : BasePriorityRule
         Scribe_Defs.Look(ref trainable, "trainable");
     }
 
+    public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is TrainingPriorityRule rule && trainable?.defName == rule.trainable?.defName;
+
     private static string DefName(Def? d) => d == null ? Constants.MissingLabel : d.LabelCap.ToString();
 }

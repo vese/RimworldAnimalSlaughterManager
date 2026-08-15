@@ -22,6 +22,8 @@ public class DiseasePriorityRule : BasePriorityRule
         Scribe_Defs.Look(ref disease, "disease");
     }
 
+    public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is DiseasePriorityRule rule && disease?.defName == rule.disease?.defName;
+
     // If multiple disease defs share the same label, append the defName for disambiguation.
     private static string DiseaseLabel(HediffDef? disease)
     {
