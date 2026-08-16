@@ -102,6 +102,8 @@ public class KindPrioritySettings
         return messages.Count > 0 ? string.Join(", ", messages) : null;
     }
 
+    public List<List<string>> Validate(bool male, bool adult) => ruleSets[(male, adult)].Validate();
+
     public List<BasePriorityRule> GetPriorityRules(bool male, bool adult) => ruleSets[(male, adult)].rules;
 
     public bool HasRules => ruleSets.Values.All(x => x.HasRules);

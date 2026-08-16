@@ -1,5 +1,6 @@
 using RimWorld;
 using System;
+using System.Security.Policy;
 using Verse;
 
 namespace ASM;
@@ -35,6 +36,15 @@ public class TrainingGeneralPriorityRule : BasePriorityRule
 
     // TODO: for PartialOrFull and Partial, Full
     public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is TrainingGeneralPriorityRule rule && type == rule.type;
+
+    public override void ChangeVariant() => type = type switch
+    {
+        TrainingGeneralType.None => TrainingGeneralType.Partial,
+        TrainingGeneralType.Partial => TrainingGeneralType.PartialOrFull,
+        TrainingGeneralType.PartialOrFull => TrainingGeneralType.Full,
+        TrainingGeneralType.Full => TrainingGeneralType.None,
+        _ => throw new NotImplementedException(),
+    };
 
     private static bool HasAnyTraining(Pawn? p)
     {

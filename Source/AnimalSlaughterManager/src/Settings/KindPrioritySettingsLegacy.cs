@@ -82,7 +82,7 @@ public class KindPrioritySettingsLegacy
         {
             has = slaughterCondition.has,
             trait = slaughterCondition.trait,
-            inheritMode = slaughterCondition.inheritMode
+            inheritability = slaughterCondition.inheritMode
         },
         CondType.HasPositiveTrait => new TraitGeneralPriorityRule
         {

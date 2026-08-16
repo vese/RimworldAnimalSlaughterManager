@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using RimWorld;
 using Verse;
@@ -90,32 +91,8 @@ public class Alert_ConditionProblems : Alert
         }
     }
 
-    private static int CountProblems(KindSettings ks)
-    {
-        int n = 0;
-        n += CountList(ks.prioritySettings.prioAdultMale);
-        n += CountList(ks.prioritySettings.prioYoungMale);
-        n += CountList(ks.prioritySettings.prioAdultFemale);
-        n += CountList(ks.prioritySettings.prioYoungFemale);
-        return n;
-    }
-
-    private static int CountList(List<SlaughterCondition> list)
-    {
-        if (list == null)
-        {
-            return 0;
-        }
-
-        int n = 0;
-        
-        for (int i = 0; i < list.Count; i++)
-        {
-            if (Dialog_KindSlaughterSettings.IsConditionProblematic(list, i))
-            {
-                n++;
-            }
-        }
-        return n;
-    }
+    // TODO: do method in KindPrioritySettings
+    private static int CountProblems(KindSettings ks) => ks.prioritySettings.ruleSets.Keys
+        .Select(key => ks.prioritySettings.Validate(key.Male, key.Adult))
+        .Sum(x => x.Count(errors => errors is not null && errors.Count > 0));
 }

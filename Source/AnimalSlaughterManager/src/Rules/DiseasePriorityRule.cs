@@ -24,6 +24,8 @@ public class DiseasePriorityRule : BasePriorityRule
 
     public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is DiseasePriorityRule rule && disease?.defName == rule.disease?.defName;
 
+    public override void ChangeVariant() => has = !has;
+
     // If multiple disease defs share the same label, append the defName for disambiguation.
     private static string DiseaseLabel(HediffDef? disease)
     {

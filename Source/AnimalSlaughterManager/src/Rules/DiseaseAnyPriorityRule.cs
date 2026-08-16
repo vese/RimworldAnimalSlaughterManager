@@ -20,6 +20,8 @@ public class DiseaseAnyPriorityRule : BasePriorityRule
 
     public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is DiseaseAnyPriorityRule;
 
+    public override void ChangeVariant() => has = !has;
+
     private static bool IsSick(Pawn? p)
     {
         var hediffs = p?.health?.hediffSet?.hediffs;

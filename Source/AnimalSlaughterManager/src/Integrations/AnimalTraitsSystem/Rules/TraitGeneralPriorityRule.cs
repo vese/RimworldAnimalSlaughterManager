@@ -1,6 +1,7 @@
 using RimWorld;
 using System;
 using Verse;
+using Verse.Sound;
 
 namespace ASM;
 
@@ -9,6 +10,8 @@ public class TraitGeneralPriorityRule : BasePriorityRule
     public bool has = true;
     public TraitType type = TraitType.Both;
     public TraitInheritability inheritability = TraitInheritability.Both;
+
+    public override bool HasExtraParameters { get; } = true;
 
     public override string Label => type switch
     {
@@ -73,6 +76,22 @@ public class TraitGeneralPriorityRule : BasePriorityRule
     public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is TraitGeneralPriorityRule rule &&
         // TODO: for Both
         type == rule.type && inheritability == rule.inheritability;
+
+    public override void ChangeVariant()
+    {
+        has = !has;
+
+        if (has)
+        {
+            type = type switch
+            {
+                TraitType.Both => TraitType.Positive,
+                TraitType.Positive => TraitType.Negative,
+                TraitType.Negative => TraitType.Both,
+                _ => throw new NotImplementedException(),
+            };
+        }
+    }
 
     private static bool HasTrait(Pawn? p, bool? isBad = null)
     {
