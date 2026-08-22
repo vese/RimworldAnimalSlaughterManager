@@ -58,7 +58,7 @@ namespace ASM
             DrawTable(outRect);
 
             if (Widgets.ButtonText(new Rect(inRect.x, inRect.yMax - 32f, inRect.width, 30f), ASMKeys.ManagePresets.Translate()))
-                Find.WindowStack.Add(new Dialog_PresetBrowser(comp, PresetScope.All, null, null));
+                Find.WindowStack.Add(new Dialog_PresetBrowser(comp, PresetScope.All, null/*, null*/));
         }
 
         private void DrawTable(Rect outRect)

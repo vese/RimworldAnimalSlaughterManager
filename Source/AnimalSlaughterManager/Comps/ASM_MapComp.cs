@@ -137,11 +137,11 @@ public class ASM_MapComp : MapComponent
         foreach (var kv in kindSettings)
         {
             var ks = kv.Value;
-            if (ks?.traitsSettings.keepTraits == null || ks.traitsSettings.keepTraits.Count == 0) continue;
+            if (ks?.traitsSettings.protectRuleSet.HasRules == null || !ks.traitsSettings.protectRuleSet.HasRules) continue;
             var kindPawns = new List<Pawn>();
             foreach (var pa in map.mapPawns.SpawnedColonyAnimals)
                 if (pa.def == kv.Key) kindPawns.Add(pa);
-            foreach (var tt in ks.traitsSettings.keepTraits)
+            foreach (var tt in ks.traitsSettings.protectRuleSet.rules)
             {
                 if (tt?.trait == null || tt.keepCount <= 0) continue;
                 var keepNow = SelectToKeep(kindPawns, tt);
@@ -181,7 +181,7 @@ public class ASM_MapComp : MapComponent
         foreach (var kv in kindSettings)
         {
             var ks = kv.Value;
-            if (ks?.traitsSettings.forceCullTraits == null || ks.traitsSettings.forceCullTraits.Count == 0) continue;
+            if (ks?.traitsSettings.forceCullRuleSet == null || !ks.traitsSettings.forceCullRuleSet.HasRules) continue;
             foreach (var pawn in map.mapPawns.SpawnedColonyAnimals)
             {
                 if (pawn.def != kv.Key) continue;
@@ -443,8 +443,8 @@ public class ASM_MapComp : MapComponent
 
     private static bool HasForceCullTrait(Pawn p, KindSettings ks)
     {
-        if (ks?.traitsSettings.forceCullTraits == null) return false;
-        foreach (var ct in ks.traitsSettings.forceCullTraits)
+        if (ks?.traitsSettings.forceCullRuleSet == null) return false;
+        foreach (var ct in ks.traitsSettings.forceCullRuleSet.rules)
             if (ct.trait != null && AnimalTraitsAccess.HasTrait(p, ct.trait)
                 && AgeMatches(p, ct.ageScope) && GenderMatches(p, ct.genderScope)
                 && InheritableMatches(ct.trait, ct.inheritMode))
@@ -513,13 +513,13 @@ public class ASM_MapComp : MapComponent
     /// <summary>Animals of this kind that match a breeding ("keep") trait target and are protected from slaughter.</summary>
     public int CountKeptByTraits(ThingDef def)
     {
-        if (!kindSettings.TryGetValue(def, out var ks) || ks?.traitsSettings.keepTraits == null || ks.traitsSettings.keepTraits.Count == 0)
+        if (!kindSettings.TryGetValue(def, out var ks) || ks?.traitsSettings.protectRuleSet == null || !ks.traitsSettings.protectRuleSet.HasRules)
             return 0;
         int n = 0;
         foreach (var pa in map.mapPawns.SpawnedColonyAnimals)
         {
             if (pa.def != def) continue;
-            foreach (var tt in ks.traitsSettings.keepTraits)
+            foreach (var tt in ks.traitsSettings.protectRuleSet.rules)
             {
                 if (tt.trait != null && AnimalTraitsAccess.HasTrait(pa, tt.trait)
                     && AgeMatches(pa, tt.ageScope) && GenderMatches(pa, tt.genderScope)

@@ -27,7 +27,7 @@ public class KindSlaughterSettingsDialogSpecialRulesTab(KindTraitsSettings trait
 
     private static void OpenKindPresetsWindow(ASM_MapComp comp, ThingDef animalDef, KindSettings _)
     {
-        Find.WindowStack.Add(new Dialog_PresetBrowser(comp, PresetScope.Kind, animalDef, null));
+        Find.WindowStack.Add(new Dialog_PresetBrowser(comp, PresetScope.Kind, animalDef/*, null*/));
     }
 
     private static void ResetTabSettings(ASM_MapComp comp, ThingDef animalDef, KindSettings settings)
