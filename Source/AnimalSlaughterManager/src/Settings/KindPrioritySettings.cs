@@ -32,7 +32,7 @@ public class PriorityRuleSet
             // the settings don't fill up with no-op "?" rows. (This does not silence RimWorld's
             // own "Could not load reference" log for hediffs still on the pawns — that is the
             // base game resolving the save, outside this mod's control.)
-            rules.RemoveAll(c => c == null || c.HasNullDef);
+            rules.RemoveAll(c => c is null || c.HasNullDef);
         }
     }
 

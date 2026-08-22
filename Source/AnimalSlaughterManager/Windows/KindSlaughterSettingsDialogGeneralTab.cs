@@ -10,7 +10,7 @@ public class KindSlaughterSettingsDialogGeneralTab : BaseKindSlaughterSettingsTa
 
     public KindSlaughterSettingsDialogGeneralTab()
     {
-        preferenceSettingsPanel = new PreferenceSettingsPanel(GapX, GapY, ButtonHeight, ButtonPaddingX);
+        preferenceSettingsPanel = new PreferenceSettingsPanel(UIConstants.GapX, UIConstants.GapY, UIConstants.ButtonHeight, UIConstants.ButtonPaddingX);
     }
 
     protected override void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings settings, ASM_MapComp comp, ThingDef animalDef)

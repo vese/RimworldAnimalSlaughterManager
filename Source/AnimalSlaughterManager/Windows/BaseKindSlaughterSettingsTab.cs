@@ -8,28 +8,20 @@ namespace ASM;
 
 public abstract class BaseKindSlaughterSettingsTab : IKindSlaughterSettingsDialogTab
 {
-    protected const float ScrollbarWidth = 16f;
-    protected const float GapX = 6f;
-    public const float GapY = 8f;
     public static float HeaderHeight => Text.LineHeightOf(GameFont.Medium);
     protected const float HeaderIconSize = 28f;
     protected const float HeaderMarginRight = 12f; // margin from the window close-X in the top-right corner
-    protected const float LabelMarginLeft = HeaderIconSize + GapX;
-    protected static float MediumTextHeight => Text.LineHeightOf(GameFont.Medium);
-    protected const float ButtonHeight = 26f;
-    protected const float ButtonMinWidth = 120f;
-    protected const float ButtonPaddingX = 18f;
-    protected static readonly float ButtonMarginTop = (HeaderHeight - ButtonHeight) / 2; //centered vertically
+    protected const float LabelMarginLeft = HeaderIconSize + UIConstants.GapX;
+    protected static readonly float ButtonMarginTop = (HeaderHeight - UIConstants.ButtonHeight) / 2; //centered vertically
     public const float TabBarHeight = 32f;
     protected const float DividerGap = 2f;
     protected static readonly Color DividerColor = new(1f, 1f, 1f, 0.25f);
-    protected const float IconSize = 22f;
 
     protected Vector2 topScroll;
 
     protected virtual List<(string Text, Action<ASM_MapComp, ThingDef, KindSettings> Action)> HeaderButtons { get; } = [];
     protected virtual float ContentMinHeight { get; } = 0f;
-    protected virtual float WindowMinHeight => HeaderHeight + GapY + TabBarHeight + GapY + ContentMinHeight;
+    protected virtual float WindowMinHeight => HeaderHeight + UIConstants.GapY + TabBarHeight + UIConstants.GapY + ContentMinHeight;
 
     public abstract TaggedString Name { get; }
 
@@ -53,16 +45,16 @@ public abstract class BaseKindSlaughterSettingsTab : IKindSlaughterSettingsDialo
     {
         var top = y;
         DrawHeader(x, top, width, comp, animalDef, settings);
-        top += HeaderHeight + GapY;
+        top += HeaderHeight + UIConstants.GapY;
 
         // Tab strip. TabDrawer draws the tab buttons in the 32px band ABOVE the base rect (they
         // hang from the rect's top edge upward), so reserve that band here and put the base rect
         // at its bottom edge — otherwise the tabs render upward into the kind-name header.
         top += TabBarHeight;
         drawTabBar(x, top, width, TabBarHeight);
-        top += +GapY;
+        top += UIConstants.GapY;
 
-        var contentHeight = height - (HeaderHeight + GapY + TabBarHeight + GapY);
+        var contentHeight = height - (HeaderHeight + UIConstants.GapY + TabBarHeight + UIConstants.GapY);
         DrawTabContent(x, top, width, contentHeight, settings, comp, animalDef);
     }
 
@@ -78,10 +70,10 @@ public abstract class BaseKindSlaughterSettingsTab : IKindSlaughterSettingsDialo
         foreach (var button in HeaderButtons)
         {
             var buttonText = button.Text.Translate();
-            var buttonWidth = Mathf.Max(ButtonMinWidth, Text.CalcSize(buttonText).x + ButtonPaddingX);
-            var buttonRect = new Rect(right - buttonWidth, y + ButtonMarginTop, buttonWidth, ButtonHeight);
+            var buttonWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(buttonText).x + UIConstants.ButtonPaddingX);
+            var buttonRect = new Rect(right - buttonWidth, y + ButtonMarginTop, buttonWidth, UIConstants.ButtonHeight);
             buttons.Add((buttonText, buttonRect, button.Action));
-            right -= buttonWidth + GapX;
+            right -= buttonWidth + UIConstants.GapX;
         }
 
         Text.Font = GameFont.Medium;
@@ -101,7 +93,7 @@ public abstract class BaseKindSlaughterSettingsTab : IKindSlaughterSettingsDialo
         }
     }
 
-    protected abstract void DrawTabContent(float x, float y, float w, float contentHeight, KindSettings settings, ASM_MapComp comp, ThingDef animalDef);
+    protected abstract void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings settings, ASM_MapComp comp, ThingDef animalDef);
 
     protected static void DrawDivider(float x, float y, float width)
     {

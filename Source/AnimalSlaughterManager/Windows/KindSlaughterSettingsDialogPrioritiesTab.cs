@@ -8,13 +8,99 @@ using Verse;
 
 namespace ASM;
 
+public class ListSectionState
+{
+    public Vector2 scroll;
+    public int group;
+}
+
+public static class UIConstants
+{
+    public const float IconSize = 22f;
+    public const float GapX = 6f;
+    public const float GapY = 8f;
+    public const float ButtonHeight = 26f;
+    public const float ButtonMinWidth = 120f;
+    public const float ButtonPaddingX = 18f;
+    public const float ScrollbarWidth = 16f;
+    public static float MediumTextHeight => Text.LineHeightOf(GameFont.Medium);
+}
+
+public static class KindSlaughterSettingsTabListHelper
+{
+    public const float ListMinHeight = 150f;
+    public const float ListGapY = 2f;
+    public const float ListRowPaddingX = 4f;
+    private static readonly Color ListDividerColor = new(1f, 1f, 1f, 0.5f);
+
+    public static void ReorderList(IList list, int from, int to)
+    {
+        if (from < 0 || from >= list.Count || to < 0 || to > list.Count || from == to)
+        {
+            return;
+        }
+
+        var item = list[from];
+
+        list.RemoveAt(from);
+
+        if (from < to)
+        {
+            list.Insert(to - 1, item);
+        }
+        else
+        {
+            list.Insert(to, item);
+        }
+    }
+
+    public static float DrawGrip(float x, float y, float height)
+    {
+        var anchor = Text.Anchor;
+        var color = GUI.color;
+        Text.Anchor = TextAnchor.MiddleCenter;
+        GUI.color = ListDividerColor;
+
+        Widgets.Label(new Rect(x, y, UIConstants.IconSize, height), "≡");
+
+        Text.Anchor = anchor;
+        GUI.color = color;
+
+        return UIConstants.IconSize;
+    }
+
+    // Red X remove icon, like the clear buttons in the manager table.
+    public static bool RemoveButton(Rect buttonRect, string tooltipKey)
+    {
+        TooltipHandler.TipRegion(buttonRect, tooltipKey.Translate());
+
+        GUI.color = Color.red;
+
+        var click = Widgets.ButtonImage(buttonRect, TexButton.CloseXSmall);
+
+        return click;
+    }
+    public static bool CopyButton(Rect buttonRect, string tooltipKey)
+    {
+        TooltipHandler.TipRegion(buttonRect, tooltipKey.Translate());
+
+        GUI.color = Color.white;
+
+        var click = Widgets.ButtonImage(buttonRect, TexButton.Copy);
+
+        return click;
+    }
+}
+
 public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSettingsTab
 {
-    private const float ListMinHeight = 150f;
+    private static List<BasePriorityRule>? clipboard;
 
     public PreferenceSettingsPanel preferenceSettingsPanel;
 
     public override TaggedString Name => ASMKeys.TabPriorities.Translate();
+
+    private bool HasClipboard => clipboard != null && clipboard.Count > 0;
 
     protected override List<(string Text, Action<ASM_MapComp, ThingDef, KindSettings> Action)> HeaderButtons { get; } =
     [
@@ -25,7 +111,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
 
     public KindSlaughterSettingsDialogPrioritiesTab()
     {
-        preferenceSettingsPanel = new PreferenceSettingsPanel(GapX, GapY, ButtonHeight, ButtonPaddingX);
+        preferenceSettingsPanel = new PreferenceSettingsPanel(UIConstants.GapX, UIConstants.GapY, UIConstants.ButtonHeight, UIConstants.ButtonPaddingX);
     }
 
     private static void OpenKindPresetsWindow(ASM_MapComp comp, ThingDef animalDef, KindSettings _)
@@ -69,49 +155,46 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
         comp.MarkDirty();
     }
 
-    private readonly List<PreferenceListState> PreferenceListStates = [.. KindPrioritySettings.ruleSetsNames.Select(x => new PreferenceListState())];
-
-    public class PreferenceListState
-    {
-        public Vector2 scroll;
-        public float contentHeight;
-        public int group;
-    }
+    private readonly List<ListSectionState> ListsStates = [.. KindPrioritySettings.ruleSetsNames.Select(x => new ListSectionState())];
 
     protected override void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings settings, ASM_MapComp comp, ThingDef animalDef)
     {
         var top = preferenceSettingsPanel.Draw(x, y, width, settings, comp, SetPreference, ASMKeys.PriorityHelp);
 
-        top += GapY;
+        top += UIConstants.GapY;
 
         top += DrawDoubleDivider(x, top, width);
 
-        top += GapY;
+        top += UIConstants.GapY;
 
         var halfWidth = width / 2;
         var center = x + halfWidth;
         var firstColumnX = x;
-        var secondColumnX = center + GapX;
-        var listWidth = halfWidth - GapX;
-        var listsSectionHeight = contentHeight - (top - y);
-        var listHeight = MathF.Max(ListMinHeight, (listsSectionHeight - GapY - GapY) / 2);
+        var secondColumnX = center + UIConstants.GapX;
+        var listWidth = halfWidth - UIConstants.GapX;
+        var listsSectionHeight = contentHeight - (top - y) - UIConstants.GapY;
+        // TODO: const
+        var listCountInRow = 2;
+        // TODO: const
+        var listsRowsCount = Mathf.Floor(KindPrioritySettings.ruleSetsNames.Count / (float)listCountInRow);
+        var listHeight = MathF.Max(KindSlaughterSettingsTabListHelper.ListMinHeight, (listsSectionHeight - (listsRowsCount - 1) * 2 * UIConstants.GapY) / listsRowsCount);
         var verticalDividerTop = top;
 
-        for (var i = 0; i < KindPrioritySettings.ruleSetsNames.Count; i += 2)
+        for (var i = 0; i < KindPrioritySettings.ruleSetsNames.Count; i += listCountInRow)
         {
             if (i > 0)
             {
-                top += GapY;
+                top += listHeight + UIConstants.GapY;
 
                 DrawDivider(x, top, width);
 
-                top += listHeight + GapY;
+                top += UIConstants.GapY;
             }
 
             var key = KindPrioritySettings.ruleSetsNames.Keys.ElementAt(i);
             var title = KindPrioritySettings.ruleSetsNames.Values.ElementAt(i).Translate();
             var setting = settings.prioritySettings.GetPriorityRules(key.Male, key.Adult);
-            var listState = PreferenceListStates[i];
+            var listState = ListsStates[i];
             var validation = settings.prioritySettings.Validate(key.Male, key.Adult);
             DrawConditionSection(firstColumnX, top, listWidth, listHeight, title, setting, ref listState, key.Male, key.Adult, comp, animalDef, validation);
 
@@ -120,7 +203,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
                 key = KindPrioritySettings.ruleSetsNames.Keys.ElementAt(i + 1);
                 title = KindPrioritySettings.ruleSetsNames.Values.ElementAt(i + 1).Translate();
                 setting = settings.prioritySettings.GetPriorityRules(key.Male, key.Adult);
-                listState = PreferenceListStates[i];
+                listState = ListsStates[i];
                 validation = settings.prioritySettings.Validate(key.Male, key.Adult);
                 DrawConditionSection(secondColumnX, top, listWidth, listHeight, title, setting, ref listState, key.Male, key.Adult, comp, animalDef, validation);
             }
@@ -130,20 +213,14 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
         Widgets.DrawLineVertical(center, verticalDividerTop, listsSectionHeight);
     }
 
-    private static List<BasePriorityRule>? clipboard;
-
-    private bool HasClipboard => clipboard != null && clipboard.Count > 0;
-    private const float ListGapY = 2f;
-    private static readonly Color ListDividerColor = new(1f, 1f, 1f, 0.5f);
-
     private void DrawConditionSection(float x, float y, float listWidth, float listHeight, TaggedString title,
-        List<BasePriorityRule> list, ref PreferenceListState listState, bool male, bool adult, ASM_MapComp comp, ThingDef animalDef, List<List<string>> validation)
+        List<BasePriorityRule> list, ref ListSectionState listState, bool male, bool adult, ASM_MapComp comp, ThingDef animalDef, List<List<string>> validation)
     {
         // Row 1: title (left) + copy + paste icons right after the title.
         var left = x;
         var top = y;
-        var titleWidth = Text.CalcSize(title).x + GapX;
-        var titleHeight = MediumTextHeight;
+        var titleWidth = Text.CalcSize(title).x + UIConstants.GapX;
+        var titleHeight = UIConstants.MediumTextHeight;
 
         GUI.color = Color.white;
         Text.Font = GameFont.Medium;
@@ -152,8 +229,9 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
         Widgets.Label(new Rect(x, top, titleWidth, titleHeight), title);
 
         left += titleWidth;
-        var buttonSize = IconSize;
-        var buttonPaddingTop = (titleHeight - IconSize) / 2;
+
+        var buttonSize = UIConstants.IconSize;
+        var buttonPaddingTop = (titleHeight - UIConstants.IconSize) / 2;
         var buttonTop = top + buttonPaddingTop;
         var copyButtonRect = new Rect(left, buttonTop, buttonSize, buttonSize);
 
@@ -167,7 +245,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
             clipboard = [.. list.Select(c => c.Clone())];
         }
 
-        left += buttonSize + GapX;
+        left += buttonSize + UIConstants.GapX;
 
         if (HasClipboard)
         {
@@ -194,67 +272,69 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
         left = x;
 
         var addButtonText = ASMKeys.AddCondition.Translate();
-        var addButtonWidth = Mathf.Max(ButtonMinWidth, Text.CalcSize(addButtonText).x + ButtonPaddingX);
-        var clearButtonText = ASMKeys.ClearList.Translate();
-        var clearButtonWidth = Mathf.Max(ButtonMinWidth, Text.CalcSize(clearButtonText).x + ButtonPaddingX);
+        var addButtonWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(addButtonText).x + UIConstants.ButtonPaddingX);
         var presetButtonText = ASMKeys.CondPresets.Translate();
-        var presetButtonWidth = Mathf.Max(ButtonMinWidth, Text.CalcSize(presetButtonText).x + ButtonPaddingX);
+        var presetButtonWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(presetButtonText).x + UIConstants.ButtonPaddingX);
+        var clearButtonText = ASMKeys.ClearList.Translate();
+        var clearButtonWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(clearButtonText).x + UIConstants.ButtonPaddingX);
 
-        Rect addBtn = new Rect(left, top, addButtonWidth, ButtonHeight);
-        left += addButtonWidth + GapX;
-        Rect clearBtn = new Rect(left, top, clearButtonWidth, ButtonHeight);
-        left += clearButtonWidth + GapX;
-        Rect presetBtn = new Rect(left, top, presetButtonWidth, ButtonHeight);
+        Rect addBtn = new Rect(left, top, addButtonWidth, UIConstants.ButtonHeight);
+        left += addButtonWidth + UIConstants.GapX;
+        Rect presetBtn = new Rect(left, top, presetButtonWidth, UIConstants.ButtonHeight);
+        left += presetButtonWidth + UIConstants.GapX;
+        Rect clearBtn = new Rect(left, top, clearButtonWidth, UIConstants.ButtonHeight);
 
         if (Widgets.ButtonText(addBtn, addButtonText))
         {
             OpenAddConditionMenu(list, male, adult, comp, animalDef);
         }
 
-        if (Widgets.ButtonText(presetBtn, ASMKeys.CondPresets.Translate()))
+        if (Widgets.ButtonText(presetBtn, presetButtonText))
         {
             Find.WindowStack.Add(new Dialog_ConditionPresetBrowser(comp, male, adult, list));
         }
 
         GUI.enabled = list.Count > 0;
 
-        if (Widgets.ButtonText(clearBtn, ASMKeys.ClearList.Translate()))
+        if (Widgets.ButtonText(clearBtn, clearButtonText))
         {
+            // TODO: changes in list in settings class, use ReadonlyList
             list.Clear();
             comp.MarkDirty();
         }
 
         GUI.enabled = true;
 
-        top += ButtonHeight + GapY;
+        top += UIConstants.ButtonHeight + UIConstants.GapY;
 
         // List
         left = x;
 
         var outRect = new Rect(left, top, listWidth, listHeight);
-        var view = new Rect(left, top, listWidth - ScrollbarWidth, outRect.height/*TODO: need this? Mathf.Max(listState.contentHeight, outRect.height)*/);
+        var view = new Rect(left, top, listWidth - UIConstants.ScrollbarWidth, outRect.height/*TODO: need this? Mathf.Max(listState.contentHeight, outRect.height)*/);
 
         Widgets.BeginScrollView(outRect, ref listState.scroll, view);
 
         if (Event.current.type == EventType.Repaint)
         {
-            listState.group = ReorderableWidget.NewGroup((a, b) => ReorderList(list, a, b), ReorderableDirection.Vertical, outRect);
+            // TODO: changes in list in settings class, use ReadonlyList
+            listState.group = ReorderableWidget.NewGroup((a, b) => KindSlaughterSettingsTabListHelper.ReorderList(list, a, b), ReorderableDirection.Vertical, outRect);
         }
 
         for (int i = 0; i < list.Count; i++)
         {
-            var row = new Rect(view.x, top, view.width, MediumTextHeight);
+            var row = new Rect(view.x, top, view.width, UIConstants.MediumTextHeight);
             
             if (i % 2 == 1)
             {
                 Widgets.DrawAltRect(row);
             }
 
-            ReorderableWidget.Reorderable(listState.group, new Rect(row.x, row.y, IconSize, row.height));
+            ReorderableWidget.Reorderable(listState.group, new Rect(row.x, row.y, UIConstants.IconSize, row.height));
             
             DrawConditionRow(row, list, i, validation, comp);
 
-            top += row.height + ListGapY;
+            top += row.height + KindSlaughterSettingsTabListHelper.ListGapY;
         }
 
         //TODO: need this?
@@ -262,8 +342,6 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
 
         Widgets.EndScrollView();
     }
-
-    private const float ListRowPaddingX = 4f;
 
     private void DrawConditionRow(Rect row, List<BasePriorityRule> list, int index, List<List<string>> validation, ASM_MapComp comp)
     {
@@ -278,24 +356,29 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
             //GUI.color = Color.white;
         }
 
-        DrawGrip(row);
+        var left = row.x;
+        var top = row.y;
 
-        var labelWidth = row.width - IconSize - IconSize - IconSize;
+        left += KindSlaughterSettingsTabListHelper.DrawGrip(left, top, row.height);
+        left += UIConstants.GapX;
+
+        var labelWidth = row.width - UIConstants.IconSize - UIConstants.IconSize - UIConstants.IconSize;
         var condition = list[index];
 
         if (condition.HasExtraParameters)
         {
-            labelWidth -= ButtonMinWidth;//todo
+            labelWidth -= UIConstants.ButtonMinWidth;// TODO: size (min of max from names length or half of available width)
         }
 
         Text.Anchor = TextAnchor.MiddleLeft;
         GUI.color = Color.white;
 
-        var labelRect = new Rect(row.x + IconSize, row.y + (MediumTextHeight - ButtonHeight) / 2, labelWidth, ButtonHeight);
+        top = row.y + (UIConstants.MediumTextHeight - UIConstants.ButtonHeight) / 2;
+        var labelButtonRect = new Rect(left, top, labelWidth, UIConstants.ButtonHeight);
 
-        Widgets.DrawHighlightIfMouseover(labelRect);
+        Widgets.DrawHighlightIfMouseover(labelButtonRect);
 
-        if (Widgets.ButtonInvisible(labelRect))
+        if (Widgets.ButtonInvisible(labelButtonRect))
         {
             condition.ChangeVariant();
             comp.MarkDirty();
@@ -304,13 +387,18 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
         var wrap = Text.WordWrap;
         Text.WordWrap = false;
 
-        Widgets.Label(new Rect(labelRect.x + ListRowPaddingX, labelRect.y, labelRect.width - ListRowPaddingX, labelRect.height), condition.Label);
+        var labelRect = new Rect(
+            labelButtonRect.x + KindSlaughterSettingsTabListHelper.ListRowPaddingX,
+            labelButtonRect.y,
+            labelButtonRect.width - KindSlaughterSettingsTabListHelper.ListRowPaddingX,
+            labelButtonRect.height);
+        Widgets.Label(labelRect, condition.Label);
 
         Text.WordWrap = wrap;
 
         Text.Anchor = TextAnchor.UpperLeft;
 
-        TooltipHandler.TipRegion(labelRect, ASMKeys.CondToggleTip.Translate());
+        TooltipHandler.TipRegion(labelButtonRect, ASMKeys.CondToggleTip.Translate());
 
         // TODO:
         // Trait-only: inherit dropdown + copy button.
@@ -347,7 +435,11 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
         // Warning icon for problematic conditions.
         if (rowValidation is not null && rowValidation.Count > 0)
         {
-            var warnRect = new Rect(row.xMax - GapX - IconSize - IconSize, row.y + (row.height - IconSize) / 2, IconSize, IconSize);
+            var warnRect = new Rect(
+                row.xMax - UIConstants.GapX - UIConstants.IconSize - UIConstants.IconSize,
+                row.y + (row.height - UIConstants.IconSize) / 2,
+                UIConstants.IconSize,
+                UIConstants.IconSize);
 
             GUI.color = Color.yellow;
 
@@ -364,8 +456,13 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
             TooltipHandler.TipRegion(warnRect, tipText);
         }
 
-        if (RemoveButton(row))
+        top = row.y + (row.height - UIConstants.IconSize) / 2f;
+        left = row.xMax - UIConstants.IconSize;
+        var removeButtonRect = new Rect(left, top, UIConstants.IconSize, UIConstants.IconSize);
+
+        if (KindSlaughterSettingsTabListHelper.RemoveButton(removeButtonRect, ASMKeys.RemoveTrait))
         {
+            // TODO: changes in list in settings class, use ReadonlyList
             list.RemoveAt(index);
             comp.MarkDirty();
         }
@@ -549,47 +646,5 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
             GUI.color = prev;
             return click;
         }
-    }
-
-    private static void ReorderList(IList list, int from, int to)
-    {
-        if (from < 0 || from >= list.Count || to < 0 || to > list.Count || from == to)
-        {
-            return;
-        }
-
-        var item = list[from];
-
-        list.RemoveAt(from);
-        
-        if (from < to)
-        {
-            list.Insert(to - 1, item);
-        }
-        else
-        {
-            list.Insert(to, item);
-        }
-    }
-
-    private static void DrawGrip(Rect row)
-    {
-        GUI.color = ListDividerColor;
-        Text.Anchor = TextAnchor.MiddleCenter;
-        Widgets.Label(new Rect(row.x, row.y, IconSize, row.height), "≡");
-    }
-
-    // Red X remove icon, like the clear buttons in the manager table.
-    private static bool RemoveButton(Rect row)
-    {
-        var buttonRect = new Rect(row.xMax - IconSize - GapX, row.y + (row.height - IconSize) / 2f, IconSize, IconSize);
-
-        TooltipHandler.TipRegion(buttonRect, ASMKeys.RemoveTrait.Translate());
-
-        GUI.color = Color.red;
-
-        var click = Widgets.ButtonImage(buttonRect, TexButton.CloseXSmall);
-
-        return click;
     }
 }

@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Linq;
 using Verse;
 
 namespace ASM;
@@ -6,19 +8,28 @@ namespace ASM;
 /// A "cull" target: animals of a kind carrying this trait are prioritized for slaughter,
 /// optionally scoped by age, sex, and the trait's inheritability.
 /// </summary>
-public class TraitRule : IExposable
+public class TraitRule : ITraitRule, IExposable
 {
     public HediffDef? trait;
     public AgeScope ageScope = AgeScope.Both;
     public GenderScope genderScope = GenderScope.Any;
     public TraitInheritability inheritMode = TraitInheritability.Both;
 
+    public bool HasNullDef => trait is null;
+
     public TraitRule() { }
     public TraitRule(HediffDef t) { trait = t; }
 
-    public string Label => trait != null ? trait.LabelCap : Constants.MissingLabel;
+    public ITraitRule Copy() => trait is null ? new TraitRule() : new TraitRule(trait);
 
-    public void ExposeData()
+    public void SetTrait(HediffDef newTrait)
+    {
+        trait = newTrait;
+    }
+
+    public string Label => trait is null ? Constants.MissingLabel : trait.LabelCap;
+
+    public virtual void ExposeData()
     {
         Scribe_Defs.Look(ref trait, "trait");
         Scribe_Values.Look(ref ageScope, "ageScope", AgeScope.Both);

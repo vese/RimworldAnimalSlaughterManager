@@ -27,12 +27,13 @@ namespace ASM
     /// no overwrite button or no scope mark. Presets are sorted newest-first and can be filtered by
     /// name and by scope type. The save row is disabled when there is nothing to save or no name typed.
     /// </summary>
-    public class Dialog_PresetBrowser : Window
+    public class Dialog_PresetBrowser<T> : Window where T : ITraitRule
     {
         private readonly ASM_MapComp comp;
         private readonly PresetScope scope;
         private readonly ThingDef kind;
-        private readonly TraitListKind? listKind;
+        //private readonly TraitListKind? listKind;
+        private readonly IEditableTraitsRuleSet<T>? ruleSet;
 
         private Vector2 scroll;
         private float listHeight = 9999f;
@@ -46,29 +47,30 @@ namespace ASM
 
         private int ContextRank => scope == PresetScope.All ? 3 : scope == PresetScope.Kind ? 2 : 1;
         private KindSettings Settings => comp.GetSettings(kind);
-        private IList TargetList
-        {
-            get
-            {
-                var s = Settings;
-                switch (listKind)
-                {
-                    case TraitListKind.Keep: return s.keepTraits;
-                    case TraitListKind.Cull: return s.cullTraits;
-                    case TraitListKind.Spare: return s.spareTraits;
-                    default: return s.forceCullTraits;
-                }
-            }
-        }
+        //private IList TargetList
+        //{
+        //    get
+        //    {
+        //        var s = Settings;
+        //        switch (listKind)
+        //        {
+        //            case TraitListKind.Keep: return s.keepTraits;
+        //            case TraitListKind.Cull: return s.cullTraits;
+        //            case TraitListKind.Spare: return s.spareTraits;
+        //            default: return s.forceCullTraits;
+        //        }
+        //    }
+        //}
 
         public override Vector2 InitialSize => new Vector2(820f, 600f);
 
-        public Dialog_PresetBrowser(ASM_MapComp comp, PresetScope scope, ThingDef kind, TraitListKind? listKind)
+        public Dialog_PresetBrowser(ASM_MapComp comp, PresetScope scope, ThingDef kind/*, TraitListKind? listKind*/, IEditableTraitsRuleSet<T>? ruleSet)
         {
             this.comp = comp;
             this.scope = scope;
             this.kind = kind;
-            this.listKind = listKind;
+            //this.listKind = listKind;
+            this.ruleSet = ruleSet;
             doCloseX = true;
             draggable = true;
             resizeable = true;
@@ -390,7 +392,7 @@ namespace ASM
             {
                 case PresetScope.All: return comp.kindSettings.Values.Any(k => k != null && k.Customized);
                 case PresetScope.Kind: return Settings.Customized;
-                default: return TargetList.Count > 0;
+                default: return rules?.Count > 0;
             }
         }
 
@@ -402,7 +404,7 @@ namespace ASM
             {
                 case PresetScope.All: PresetIO.ExportAll(name, comp); break;
                 case PresetScope.Kind: PresetIO.ExportKind(name, kind, Settings); break;
-                default: PresetIO.ExportList(name, listKind.Value, kind, TargetList); break;
+                default: PresetIO.ExportList(name, listKind.Value, kind, rules); break;
             }
             Messages.Message(ASMKeys.PresetOverwritten.Translate(name), MessageTypeDefOf.TaskCompletion, false);
         }
@@ -413,7 +415,7 @@ namespace ASM
             {
                 case PresetScope.All: PresetIO.ExportAll(e.name, comp); break;
                 case PresetScope.Kind: PresetIO.ExportKind(e.name, kind, Settings); break;
-                default: PresetIO.ExportList(e.name, listKind.Value, kind, TargetList); break;
+                default: PresetIO.ExportList(e.name, listKind.Value, kind, rules); break;
             }
             Messages.Message(ASMKeys.PresetOverwritten.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
         }
@@ -426,7 +428,7 @@ namespace ASM
             {
                 case PresetScope.All: PresetIO.ExportAll(name, comp); break;
                 case PresetScope.Kind: PresetIO.ExportKind(name, kind, Settings); break;
-                default: PresetIO.ExportList(name, listKind.Value, kind, TargetList); break;
+                default: PresetIO.ExportList(name, listKind.Value, kind, rules); break;
             }
             Messages.Message(ASMKeys.PresetSaved.Translate(name), MessageTypeDefOf.TaskCompletion, false);
             nameBuffer = "";
@@ -445,7 +447,7 @@ namespace ASM
                     comp.MarkDirty();
                     break;
                 default:
-                    ok = PresetIO.ApplyList(e, listKind.Value, kind, TargetList);
+                    ok = PresetIO.ApplyList(e, listKind.Value, kind, rules);
                     comp.MarkDirty();
                     break;
             }

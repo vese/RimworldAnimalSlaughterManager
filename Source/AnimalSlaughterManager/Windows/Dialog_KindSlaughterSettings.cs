@@ -30,12 +30,7 @@ public class Dialog_KindSlaughterSettings : Window
     private readonly ASM_MapComp comp;
     private readonly ThingDef animalDef;
     private readonly KindSettings settings;
-    private readonly List<IKindSlaughterSettingsDialogTab> tabs =
-    [
-        new KindSlaughterSettingsDialogPrioritiesTab(),
-        new KindSlaughterSettingsDialogSpecialRulesTab(),
-        new KindSlaughterSettingsDialogGeneralTab()
-    ];
+    private readonly List<IKindSlaughterSettingsDialogTab> tabs;
     private IKindSlaughterSettingsDialogTab currentTab;
 
     public override Vector2 InitialSize => new(WindowWidth, Screen.height * 0.85f);
@@ -53,6 +48,12 @@ public class Dialog_KindSlaughterSettings : Window
         // lists reorder cleanly.
         draggable = false;
         resizeable = true;
+        tabs =
+        [
+            new KindSlaughterSettingsDialogPrioritiesTab(),
+            new KindSlaughterSettingsDialogSpecialRulesTab(settings.traitsSettings),
+            new KindSlaughterSettingsDialogGeneralTab()
+        ];
         currentTab = tabs.First();
     }
 
@@ -80,7 +81,7 @@ public class Dialog_KindSlaughterSettings : Window
     {
         var width = inRect.xMax - inRect.x;
         var height = inRect.yMax + inRect.y;
-        GUI.DragWindow(new Rect(inRect.x, inRect.y, width, BaseKindSlaughterSettingsTab.HeaderHeight + BaseKindSlaughterSettingsTab.TabBarHeight + BaseKindSlaughterSettingsTab.GapY + BaseKindSlaughterSettingsTab.GapY)); // top frame
+        GUI.DragWindow(new Rect(inRect.x, inRect.y, width, BaseKindSlaughterSettingsTab.HeaderHeight + BaseKindSlaughterSettingsTab.TabBarHeight + UIConstants.GapY + UIConstants.GapY)); // top frame
         // TODO
         //GUI.DragWindow(new Rect(0, winH - m, winW, m));                             // bottom frame
         //GUI.DragWindow(new Rect(0, 0, m, winH));                                    // left frame

@@ -7,7 +7,7 @@ namespace ASM;
 /// optionally scoped by age, sex, and the trait's inheritability. When inheritable, the
 /// selection biases toward keeping a breeding pair.
 /// </summary>
-public class TraitProtectRule : IExposable
+public class TraitProtectRule : ITraitRule, IExposable
 {
     public HediffDef? trait;
     public int keepCount = 1;
@@ -15,12 +15,21 @@ public class TraitProtectRule : IExposable
     public GenderScope genderScope = GenderScope.Any;
     public TraitInheritability inheritMode = TraitInheritability.Both;
 
+    public bool HasNullDef => trait is null;
+
     public TraitProtectRule() { }
     public TraitProtectRule(HediffDef t) { trait = t; }
 
-    public string Label => trait != null ? trait.LabelCap : Constants.MissingLabel;
+    public ITraitRule Copy() => trait is null ? new TraitProtectRule() : new TraitProtectRule(trait);
 
-    public void ExposeData()
+    public void SetTrait(HediffDef newTrait)
+    {
+        trait = newTrait;
+    }
+
+    public string Label => trait is null ? Constants.MissingLabel : trait.LabelCap;
+
+    public virtual void ExposeData()
     {
         Scribe_Defs.Look(ref trait, "trait");
         Scribe_Values.Look(ref keepCount, "keepCount", 1);
