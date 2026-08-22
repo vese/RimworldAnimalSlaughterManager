@@ -49,7 +49,7 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
 
         if (Widgets.ButtonText(presetBtn, presetButtonText))
         {
-            Find.WindowStack.Add(new Dialog_PresetBrowser<T>(comp, PresetScope.List, animalDef, ruleSet));
+            Find.WindowStack.Add(new Dialog_PresetBrowser/*<T>*/(comp, PresetScope.List, animalDef/*, ruleSet*/));
         }
 
         GUI.enabled = ruleSet.HasRules;
