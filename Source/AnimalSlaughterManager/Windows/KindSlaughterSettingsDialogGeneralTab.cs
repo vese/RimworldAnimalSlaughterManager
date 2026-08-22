@@ -6,7 +6,7 @@ public class KindSlaughterSettingsDialogGeneralTab : BaseKindSlaughterSettingsTa
 {
     public PreferenceSettingsPanel preferenceSettingsPanel;
 
-    public TaggedString Name => ASMKeys.TabGeneral.Translate();
+    public override TaggedString Name => ASMKeys.TabGeneral.Translate();
 
     public KindSlaughterSettingsDialogGeneralTab()
     {

@@ -9,7 +9,7 @@ namespace ASM;
 
 public class KindSlaughterSettingsDialogSpecialRulesTab : BaseKindSlaughterSettingsTab
 {
-    public TaggedString Name => ASMKeys.TabExceptions.Translate();
+    public override TaggedString Name => ASMKeys.TabExceptions.Translate();
 
     protected override List<(string Text, Action<ASM_MapComp, ThingDef, KindSettings> Action)> HeaderButtons { get; } =
     [
@@ -42,8 +42,8 @@ public class KindSlaughterSettingsDialogSpecialRulesTab : BaseKindSlaughterSetti
 
         comp.MarkDirty();
     }
-
-    protected override void DrawTabContent(float x, float y, float w, float contentHeight)
+    
+    protected override void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings settings, ASM_MapComp comp, ThingDef animalDef)
     {
         y = DrawTraitSection(x, y, w, listH, ASMKeys.KeepTraits, ASMKeys.KeepTraitsHelp, TraitListKind.Keep,
             settings.keepTraits, ref keepScroll, ref keepListHeight, ref keepGroup, DrawKeepRow,

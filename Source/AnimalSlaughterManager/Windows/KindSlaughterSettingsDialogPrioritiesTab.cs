@@ -14,7 +14,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
 
     public PreferenceSettingsPanel preferenceSettingsPanel;
 
-    public TaggedString Name => ASMKeys.TabPriorities.Translate();
+    public override TaggedString Name => ASMKeys.TabPriorities.Translate();
 
     protected override List<(string Text, Action<ASM_MapComp, ThingDef, KindSettings> Action)> HeaderButtons { get; } =
     [
