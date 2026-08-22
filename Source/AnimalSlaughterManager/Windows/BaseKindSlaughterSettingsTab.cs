@@ -33,7 +33,7 @@ public abstract class BaseKindSlaughterSettingsTab : IKindSlaughterSettingsDialo
         }
         else
         {
-            var width = inRect.width - ScrollbarWidth;
+            var width = inRect.width - UIConstants.ScrollbarWidth;
             Rect view = new Rect(inRect.x, inRect.y, width, WindowMinHeight);
             Widgets.BeginScrollView(inRect, ref topScroll, view);
             DrawWindow(view.x, view.y, width, inRect.height, comp, animalDef, settings, drawTabBar);
