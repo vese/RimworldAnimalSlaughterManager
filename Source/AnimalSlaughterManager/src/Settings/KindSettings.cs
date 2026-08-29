@@ -9,17 +9,15 @@ namespace ASM;
 public class KindSettings : IExposable
 {
     public KindPreferenceSettings preferenceSettings;
-    public KindPrioritySettings prioritySettings;
-    public KindTraitsSettings traitsSettings;
+    public KindPrioritySettings prioritySettings = new();
+    public KindTraitsSettings traitsSettings = new();
 
     public KindSettings()
     {
         preferenceSettings = new();
-        prioritySettings = new();
-        traitsSettings = new();
     }
 
-    public KindSettings(GlobalSettings globals) : this()
+    public KindSettings(GlobalSettings globals)
     {
         preferenceSettings = new(globals.preferenceSettings);
     }
