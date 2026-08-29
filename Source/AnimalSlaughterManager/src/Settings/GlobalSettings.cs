@@ -13,13 +13,13 @@ public class GlobalSettings : IExposable
     /// Global default age-direction prefs. Per-kind prefs (KindSettings.preferenceSettings)
     /// override these on the Priorities tab.
     /// </summary>
-    public KindPreferenceSettings preferenceSettings = new();
+    public GlobalPreferenceSettings preferenceSettings = new();
 
     public void Reset() => preferenceSettings.Reset();
 
     public void ExposeData()
     {
         // Flat save keys ("globalMalePref", …) — part of the on-disk save format.
-        preferenceSettings.ExposeGlobalData();
+        preferenceSettings.ExposeData();
     }
 }

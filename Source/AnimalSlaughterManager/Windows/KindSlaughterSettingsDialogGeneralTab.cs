@@ -8,7 +8,7 @@ public class KindSlaughterSettingsDialogGeneralTab : BaseKindSlaughterSettingsTa
 
     public override TaggedString Name => ASMKeys.TabGeneral.Translate();
 
-    public KindSlaughterSettingsDialogGeneralTab(ASM_MapComp comp, KindPreferenceSettings settings)
+    public KindSlaughterSettingsDialogGeneralTab(ASM_MapComp comp, GlobalPreferenceSettings settings)
     {
         void SetPreference(bool male, bool adult, SlaughterPreference value)
         {

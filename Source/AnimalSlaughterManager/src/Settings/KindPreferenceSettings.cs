@@ -3,78 +3,29 @@ using Verse;
 
 namespace ASM;
 
-public class KindPreferenceSettings
+/// <summary>Per-kind preference settings (Priorities tab). Save keys: "malePref", …</summary>
+public class KindPreferenceSettings : PreferenceSettings
 {
-    public SlaughterPreference malePref = SlaughterPreference.OldestFirst;
-    public SlaughterPreference maleYoungPref = SlaughterPreference.OldestFirst;
-    public SlaughterPreference femalePref = SlaughterPreference.OldestFirst;
-    public SlaughterPreference femaleYoungPref = SlaughterPreference.OldestFirst;
     [Obsolete]
     public SlaughterPreference defaultAgePref = SlaughterPreference.OldestFirst;
 
-    /// <summary>True when this kind deviates from vanilla behaviour and must be recomputed.</summary>
-    public bool Customized =>
-        malePref is SlaughterPreference.YoungestFirst ||
-        femalePref is SlaughterPreference.YoungestFirst ||
-        maleYoungPref is SlaughterPreference.YoungestFirst ||
-        femaleYoungPref is SlaughterPreference.YoungestFirst ||
-        defaultAgePref is SlaughterPreference.YoungestFirst;
+    protected override string MalePrefKey => "malePref";
+    protected override string FemalePrefKey => "femalePref";
+    protected override string MaleYoungPrefKey => "maleYoungPref";
+    protected override string FemaleYoungPrefKey => "femaleYoungPref";
 
-    public void Reset()
+    public override bool Customized => base.Customized || defaultAgePref is SlaughterPreference.YoungestFirst;
+
+    public override void Reset()
     {
         // TODO: use global preferences
-        malePref = femalePref = maleYoungPref = femaleYoungPref = SlaughterPreference.OldestFirst;
+        base.Reset();
         defaultAgePref = SlaughterPreference.OldestFirst;
     }
 
-    public SlaughterPreference GetPref(bool male, bool adult) =>
-        male ? (adult ? malePref : maleYoungPref) : (adult ? femalePref : femaleYoungPref);
-
-    public void SetPref(bool male, bool adult, SlaughterPreference p)
+    public override void ExposeData()
     {
-        if (male)
-        {
-            if (adult)
-            {
-                malePref = p;
-            }
-            else
-            {
-                maleYoungPref = p;
-            }
-        }
-        else
-        {
-            if (adult)
-            {
-                femalePref = p;
-            }
-            else
-            {
-                femaleYoungPref = p;
-            }
-        }
-    }
-
-    public void ExposeData()
-    {
-        Scribe_Values.Look(ref malePref, "malePref", SlaughterPreference.OldestFirst);
-        Scribe_Values.Look(ref femalePref, "femalePref", SlaughterPreference.OldestFirst);
-        Scribe_Values.Look(ref maleYoungPref, "maleYoungPref", SlaughterPreference.OldestFirst);
-        Scribe_Values.Look(ref femaleYoungPref, "femaleYoungPref", SlaughterPreference.OldestFirst);
+        base.ExposeData();
         Scribe_Values.Look(ref defaultAgePref, "defaultAgePref", SlaughterPreference.OldestFirst);
-    }
-
-    /// <summary>
-    /// Serializes the map-wide (global) preference settings under the flat keys
-    /// ("globalMalePref", …) directly in the parent node. Called manually (delegated),
-    /// like KindSettings does for its sub-settings, so the keys stay at the same XML level.
-    /// </summary>
-    public void ExposeGlobalData()
-    {
-        Scribe_Values.Look(ref malePref, "globalMalePref", SlaughterPreference.OldestFirst);
-        Scribe_Values.Look(ref femalePref, "globalFemalePref", SlaughterPreference.OldestFirst);
-        Scribe_Values.Look(ref maleYoungPref, "globalMaleYoungPref", SlaughterPreference.OldestFirst);
-        Scribe_Values.Look(ref femaleYoungPref, "globalFemaleYoungPref", SlaughterPreference.OldestFirst);
     }
 }
