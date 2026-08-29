@@ -25,13 +25,13 @@ public abstract class PreferenceSettings
     protected abstract string MaleYoungPrefKey { get; }
     protected abstract string FemaleYoungPrefKey { get; }
 
-    public virtual bool Customized =>
+    public bool Customized =>
         malePref is SlaughterPreference.YoungestFirst ||
         femalePref is SlaughterPreference.YoungestFirst ||
         maleYoungPref is SlaughterPreference.YoungestFirst ||
         femaleYoungPref is SlaughterPreference.YoungestFirst;
 
-    public virtual void Reset()
+    public void Reset()
     {
         malePref = femalePref = maleYoungPref = femaleYoungPref = SlaughterPreference.OldestFirst;
     }
