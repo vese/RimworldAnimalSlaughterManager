@@ -16,7 +16,7 @@ public class KindSettings : IExposable
 
     public KindSettings(GlobalSettings globals)
     {
-        preferenceSettings.Reset(globals.preferenceSettings);
+        preferenceSettings = new(globals.preferenceSettings);
     }
 
 

@@ -5,6 +5,16 @@ namespace ASM;
 /// <summary>Age-direction preferences for the four sex×age buckets; descendants provide the save keys.</summary>
 public abstract class PreferenceSettings
 {
+    public PreferenceSettings() { }
+
+    public PreferenceSettings(PreferenceSettings source)
+    {
+        malePref = source.malePref;
+        femalePref = source.femalePref;
+        maleYoungPref = source.maleYoungPref;
+        femaleYoungPref = source.femaleYoungPref;
+    }
+
     public SlaughterPreference malePref = SlaughterPreference.OldestFirst;
     public SlaughterPreference maleYoungPref = SlaughterPreference.OldestFirst;
     public SlaughterPreference femalePref = SlaughterPreference.OldestFirst;
