@@ -24,7 +24,16 @@ public class ASM_MapComp : MapComponent
     public bool dirty = true;
     public List<Pawn> cachedList = new List<Pawn>();
 
-    public ASM_MapComp(Map map) : base(map) { }
+    public ASM_MapComp(Map map) : base(map)
+    {
+        SettingsChanges.Changed += MarkDirty;
+    }
+
+    public override void MapRemoved()
+    {
+        base.MapRemoved();
+        SettingsChanges.Changed -= MarkDirty;
+    }
 
     public bool AnyCustomization => protectedPawnIDs.Count > 0 || kindSettings.Values.Any(k => k.Customized) || pregnantModes.Count > 0;
 

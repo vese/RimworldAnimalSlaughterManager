@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Verse;
 
 namespace ASM;
@@ -8,18 +9,16 @@ public class KindSlaughterSettingsDialogGeneralTab : BaseKindSlaughterSettingsTa
 
     public override TaggedString Name => ASMKeys.TabGeneral.Translate();
 
-    public KindSlaughterSettingsDialogGeneralTab(ASM_MapComp comp, GlobalSettings settings)
+    public KindSlaughterSettingsDialogGeneralTab(Dictionary<ThingDef, KindSettings> kindSettings, GlobalSettings settings)
     {
         void SetPreference(bool male, bool adult, SlaughterPreference value)
         {
-            if (settings.preferenceSettings.Get(male, adult) == value)
-            {
-                return;
-            }
-
             settings.preferenceSettings.Set(male, adult, value);
-            // TODO: use static class with events
-            comp.MarkDirty();
+
+            foreach (var ks in kindSettings.Values)
+            {
+                ks?.preferenceSettings?.Set(male, adult, value);
+            }
         }
 
         preferenceSettingsPanel = new(settings.preferenceSettings, SetPreference, ASMKeys.GeneralTabHelp);
