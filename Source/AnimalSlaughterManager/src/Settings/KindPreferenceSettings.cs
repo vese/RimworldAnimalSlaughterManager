@@ -3,7 +3,6 @@ using Verse;
 
 namespace ASM;
 
-/// <summary>Per-kind preference settings (Priorities tab). Save keys: "malePref", …</summary>
 public class KindPreferenceSettings : PreferenceSettings
 {
     [Obsolete]

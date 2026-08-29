@@ -2,10 +2,7 @@ using Verse;
 
 namespace ASM;
 
-/// <summary>
-/// Age-direction preference settings for the four sex×age buckets. Descendants pick the
-/// on-disk save keys, so the same fields serialize under scope-specific names.
-/// </summary>
+/// <summary>Age-direction preferences for the four sex×age buckets; descendants provide the save keys.</summary>
 public abstract class PreferenceSettings
 {
     public SlaughterPreference malePref = SlaughterPreference.OldestFirst;
@@ -18,7 +15,6 @@ public abstract class PreferenceSettings
     protected abstract string MaleYoungPrefKey { get; }
     protected abstract string FemaleYoungPrefKey { get; }
 
-    /// <summary>True when any pref deviates from vanilla behaviour (oldest first).</summary>
     public virtual bool Customized =>
         malePref is SlaughterPreference.YoungestFirst ||
         femalePref is SlaughterPreference.YoungestFirst ||
