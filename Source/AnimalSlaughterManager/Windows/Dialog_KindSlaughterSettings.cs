@@ -50,7 +50,7 @@ public class Dialog_KindSlaughterSettings : Window
         resizeable = true;
         tabs =
         [
-            new KindSlaughterSettingsDialogPrioritiesTab(settings),
+            new KindSlaughterSettingsDialogPrioritiesTab(comp, animalDef, settings),
             new KindSlaughterSettingsDialogSpecialRulesTab(settings.traitsSettings),
             new KindSlaughterSettingsDialogGeneralTab(comp.kindSettings, comp.globalSettings)
         ];

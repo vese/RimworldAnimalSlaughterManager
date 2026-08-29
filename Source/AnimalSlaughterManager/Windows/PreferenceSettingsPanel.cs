@@ -21,9 +21,7 @@ public class PreferenceSettingsPanel(PreferenceSettings settings, Action<bool, b
 
     public float Draw(float x, float y, float width)
     {
-        var top = y;
-
-        top = DrawPreferenceRows(x, top);
+        var top = DrawPreferenceRows(x, y);
 
         top += UIConstants.GapY;
 

@@ -112,7 +112,7 @@ public class KindPrioritySettings
 
     public List<List<string>> Validate(bool male, bool adult) => ruleSets[(male, adult)].Validate();
 
-    public List<BasePriorityRule> GetPriorityRules(bool male, bool adult) => ruleSets[(male, adult)].rules;
+    public List<BasePriorityRule> Get(bool male, bool adult) => ruleSets[(male, adult)].rules;
 
     public bool HasRules => ruleSets.Values.All(x => x.HasRules);
 

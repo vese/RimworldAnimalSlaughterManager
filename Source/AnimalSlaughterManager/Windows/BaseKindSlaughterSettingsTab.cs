@@ -2,6 +2,7 @@ using RimWorld;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Analytics;
 using Verse;
 
 namespace ASM;
@@ -97,8 +98,10 @@ public abstract class BaseKindSlaughterSettingsTab : IKindSlaughterSettingsDialo
 
     protected static void DrawDivider(float x, float y, float width)
     {
+        var color = GUI.color;
         GUI.color = DividerColor;
         Widgets.DrawLineHorizontal(x, y, width);
+        GUI.color = color;
     }
 
     protected static float DrawDoubleDivider(float x, float y, float width)
@@ -108,5 +111,13 @@ public abstract class BaseKindSlaughterSettingsTab : IKindSlaughterSettingsDialo
         top += DividerGap;
         DrawDivider(x, top, width);
         return top;
+    }
+
+    protected static void DrawVerticalDivider(float x, float y, float height)
+    {
+        var color = GUI.color;
+        GUI.color = DividerColor;
+        Widgets.DrawLineVertical(x, y, height);
+        GUI.color = color;
     }
 }

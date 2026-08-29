@@ -5,9 +5,9 @@ namespace ASM;
 
 public class KindSlaughterSettingsDialogGeneralTab : BaseKindSlaughterSettingsTab
 {
-    public PreferenceSettingsPanel preferenceSettingsPanel;
-
     public override TaggedString Name => ASMKeys.TabGeneral.Translate();
+
+    private readonly PreferenceSettingsPanel preferenceSettingsPanel;
 
     public KindSlaughterSettingsDialogGeneralTab(Dictionary<ThingDef, KindSettings> kindSettings, GlobalSettings settings)
     {

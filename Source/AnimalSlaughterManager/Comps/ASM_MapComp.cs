@@ -220,10 +220,10 @@ public class ASM_MapComp : MapComponent
             else { all.Add(pawn); }
         }
 
-        SortBucket(males, PrefOf(ks, true, true), ks, vitals, ks?.prioritySettings.GetPriorityRules(true, true));
-        SortBucket(females, PrefOf(ks, false, true), ks, vitals, ks?.prioritySettings.GetPriorityRules(false, true));
-        SortBucket(malesYoung, PrefOf(ks, true, false), ks, vitals, ks?.prioritySettings.GetPriorityRules(true, false));
-        SortBucket(femalesYoung, PrefOf(ks, false, false), ks, vitals, ks?.prioritySettings.GetPriorityRules(false, false));
+        SortBucket(males, PrefOf(ks, true, true), ks, vitals, ks?.prioritySettings.Get(true, true));
+        SortBucket(females, PrefOf(ks, false, true), ks, vitals, ks?.prioritySettings.Get(false, true));
+        SortBucket(malesYoung, PrefOf(ks, true, false), ks, vitals, ks?.prioritySettings.Get(true, false));
+        SortBucket(femalesYoung, PrefOf(ks, false, false), ks, vitals, ks?.prioritySettings.Get(false, false));
         if (pregMode == PregnantMode.Always)
         {
             pregnant.SortByDescending(p => PregnancyProgress(p));

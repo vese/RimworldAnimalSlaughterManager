@@ -94,15 +94,15 @@ public static class KindSlaughterSettingsTabListHelper
     }
 }
 
-public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSettingsTab
+public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef animalDef, KindSettings settings) : BaseKindSlaughterSettingsTab
 {
+    private const int ListsCountInRow = 2;
+
+    private static readonly float ListsRowsCount = Mathf.Ceil(KindPrioritySettings.keys.Count / (float)ListsCountInRow);
+
     private static List<BasePriorityRule>? clipboard;
 
-    public PreferenceSettingsPanel preferenceSettingsPanel;
-
     public override TaggedString Name => ASMKeys.TabPriorities.Translate();
-
-    private bool HasClipboard => clipboard != null && clipboard.Count > 0;
 
     protected override List<(string Text, Action<ASM_MapComp, ThingDef, KindSettings> Action)> HeaderButtons { get; } =
     [
@@ -111,57 +111,39 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
         (ASMKeys.ResetKind, ResetAllSettings),
     ];
 
-    public KindSlaughterSettingsDialogPrioritiesTab(KindSettings settings)
-    {
-        preferenceSettingsPanel = new(settings.preferenceSettings, settings.preferenceSettings.Set, ASMKeys.PriorityHelp);
-    }
+    private bool HasClipboard => clipboard != null && clipboard.Count > 0;
 
-    private static void OpenKindPresetsWindow(ASM_MapComp comp, ThingDef animalDef, KindSettings _)
-    {
-        Find.WindowStack.Add(new Dialog_PresetBrowser(comp, PresetScope.Kind, animalDef/*, null*/));
-    }
+    private readonly PreferenceSettingsPanel preferenceSettingsPanel = new(settings.preferenceSettings, settings.preferenceSettings.Set, ASMKeys.PriorityHelp);
 
-    private static void ResetTabSettings(ASM_MapComp comp, ThingDef animalDef, KindSettings settings)
-    {
-        settings.preferenceSettings.Reset(comp.globalSettings.preferenceSettings);
-        settings.prioritySettings.Reset();
+    private readonly List<ListSectionState> listsStates = [.. KindPrioritySettings.keys.Select(x => new ListSectionState())];
 
-        comp.MarkDirty();
-    }
-
-    private static void ResetAllSettings(ASM_MapComp comp, ThingDef animalDef, KindSettings settings)
-    {
-        settings.Reset(comp.globalSettings);
-
-        comp.MarkDirty();
-    }
-
-    private readonly List<ListSectionState> ListsStates = [.. KindPrioritySettings.ruleSetsNames.Select(x => new ListSectionState())];
-
-    protected override void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings settings, ASM_MapComp comp, ThingDef animalDef)
+    protected override void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings _settings, ASM_MapComp _comp, ThingDef _animalDef)
     {
         var top = preferenceSettingsPanel.Draw(x, y, width);
 
         top += UIConstants.GapY;
 
-        top += DrawDoubleDivider(x, top, width);
+        top = DrawDoubleDivider(x, top, width);
 
         top += UIConstants.GapY;
 
+        DrawConditionSections(x, top, width, contentHeight);
+    }
+
+    private void DrawConditionSections(float x, float y, float width, float contentHeight)
+    {
+        // TODO: use ListsCountInRow instead of 2 columns
+        var top = y;
         var halfWidth = width / 2;
         var center = x + halfWidth;
         var firstColumnX = x;
         var secondColumnX = center + UIConstants.GapX;
         var listWidth = halfWidth - UIConstants.GapX;
-        var listsSectionHeight = contentHeight - (top - y) - UIConstants.GapY;
-        // TODO: const
-        var listCountInRow = 2;
-        // TODO: const
-        var listsRowsCount = Mathf.Floor(KindPrioritySettings.ruleSetsNames.Count / (float)listCountInRow);
-        var listHeight = MathF.Max(KindSlaughterSettingsTabListHelper.ListMinHeight, (listsSectionHeight - (listsRowsCount - 1) * 2 * UIConstants.GapY) / listsRowsCount);
+        var listsSectionHeight = contentHeight - (top - y);
+        var listHeight = MathF.Max(KindSlaughterSettingsTabListHelper.ListMinHeight, (listsSectionHeight - (ListsRowsCount - 1) * 2 * UIConstants.GapY) / ListsRowsCount);
         var verticalDividerTop = top;
 
-        for (var i = 0; i < KindPrioritySettings.ruleSetsNames.Count; i += listCountInRow)
+        for (var i = 0; i < KindPrioritySettings.keys.Count; i += ListsCountInRow)
         {
             if (i > 0)
             {
@@ -172,10 +154,10 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
                 top += UIConstants.GapY;
             }
 
-            var key = KindPrioritySettings.ruleSetsNames.Keys.ElementAt(i);
-            var title = KindPrioritySettings.ruleSetsNames.Values.ElementAt(i).Translate();
-            var setting = settings.prioritySettings.GetPriorityRules(key.Male, key.Adult);
-            var listState = ListsStates[i];
+            var key = KindPrioritySettings.keys[i];
+            var title = KindPrioritySettings.ruleSetsNames[key].Translate();
+            var setting = settings.prioritySettings.Get(key.Male, key.Adult);
+            var listState = listsStates[i];
             var validation = settings.prioritySettings.Validate(key.Male, key.Adult);
             DrawConditionSection(firstColumnX, top, listWidth, listHeight, title, setting, ref listState, key.Male, key.Adult, comp, animalDef, validation);
 
@@ -183,15 +165,14 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
             {
                 key = KindPrioritySettings.ruleSetsNames.Keys.ElementAt(i + 1);
                 title = KindPrioritySettings.ruleSetsNames.Values.ElementAt(i + 1).Translate();
-                setting = settings.prioritySettings.GetPriorityRules(key.Male, key.Adult);
-                listState = ListsStates[i];
+                setting = settings.prioritySettings.Get(key.Male, key.Adult);
+                listState = listsStates[i];
                 validation = settings.prioritySettings.Validate(key.Male, key.Adult);
                 DrawConditionSection(secondColumnX, top, listWidth, listHeight, title, setting, ref listState, key.Male, key.Adult, comp, animalDef, validation);
             }
         }
 
-        GUI.color = DividerColor;
-        Widgets.DrawLineVertical(center, verticalDividerTop, listsSectionHeight);
+        DrawVerticalDivider(center, verticalDividerTop, listsSectionHeight);
     }
 
     private void DrawConditionSection(float x, float y, float listWidth, float listHeight, TaggedString title,
@@ -606,6 +587,26 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
             Add(ASMKeys.CondTrainingNotSub, false);
         }
         Find.WindowStack.Add(new FloatMenu(options));
+    }
+
+    private static void OpenKindPresetsWindow(ASM_MapComp comp, ThingDef animalDef, KindSettings _)
+    {
+        Find.WindowStack.Add(new Dialog_PresetBrowser(comp, PresetScope.Kind, animalDef/*, null*/));
+    }
+
+    private static void ResetTabSettings(ASM_MapComp comp, ThingDef animalDef, KindSettings settings)
+    {
+        settings.preferenceSettings.Reset(comp.globalSettings.preferenceSettings);
+        settings.prioritySettings.Reset();
+
+        comp.MarkDirty();
+    }
+
+    private static void ResetAllSettings(ASM_MapComp comp, ThingDef animalDef, KindSettings settings)
+    {
+        settings.Reset(comp.globalSettings);
+
+        comp.MarkDirty();
     }
 
     // TODO: move to file
