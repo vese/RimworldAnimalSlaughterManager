@@ -53,8 +53,6 @@ public abstract class PreferenceSettings
     public SlaughterPreference Get(bool male, bool adult) =>
         male ? (adult ? malePref : maleYoungPref) : (adult ? femalePref : femaleYoungPref);
 
-    public SettingsChanges Changes { get; set; } = new();
-
     public void Set(bool male, bool adult, SlaughterPreference p)
     {
         if (male)
@@ -80,7 +78,7 @@ public abstract class PreferenceSettings
             }
         }
 
-        Changes.Raise();
+        SettingsChanges.Raise();
     }
 
     public void ExposeData()
