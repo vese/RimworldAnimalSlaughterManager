@@ -30,6 +30,15 @@ public class ASM_MapComp : MapComponent
     {
         changes.Changed += MarkDirty;
         globalSettings = new GlobalSettings(changes);
+        globalSettings.preferenceSettings.PrefChanged += PropagateGlobalPref;
+    }
+
+    private void PropagateGlobalPref(bool male, bool adult, SlaughterPreference value)
+    {
+        foreach (var ks in kindSettings.Values)
+        {
+            ks?.preferenceSettings?.Set(male, adult, value);
+        }
     }
 
     public bool AnyCustomization => protectedPawnIDs.Count > 0 || kindSettings.Values.Any(k => k.Customized) || pregnantModes.Count > 0;
