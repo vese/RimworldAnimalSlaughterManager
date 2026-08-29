@@ -150,6 +150,8 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
                 top += UIConstants.GapY;
             }
 
+            var left = x;
+
             for (var column = 0; column < ListsCountInRow && i + column < KindPrioritySettings.keys.Count; column++)
             {
                 var key = KindPrioritySettings.keys[i + column];
@@ -157,8 +159,10 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
                 var setting = settings.prioritySettings.Get(key.Male, key.Adult);
                 var listState = listsStates[i + column];
                 var validation = settings.prioritySettings.Validate(key.Male, key.Adult);
-                var columnX = x + column * (listWidth + gapBetweenLists);
-                DrawConditionSection(columnX, top, listWidth, listHeight, title, setting, ref listState, key.Male, key.Adult, comp, animalDef, validation);
+
+                DrawConditionSection(left, top, listWidth, listHeight, title, setting, ref listState, key.Male, key.Adult, comp, animalDef, validation);
+
+                left += listWidth + gapBetweenLists;
             }
         }
 
