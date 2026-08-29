@@ -52,7 +52,7 @@ public class Dialog_KindSlaughterSettings : Window
         [
             new KindSlaughterSettingsDialogPrioritiesTab(comp, settings),
             new KindSlaughterSettingsDialogSpecialRulesTab(settings.traitsSettings),
-            new KindSlaughterSettingsDialogGeneralTab(comp, comp.globalSettings.preferenceSettings)
+            new KindSlaughterSettingsDialogGeneralTab(comp, comp.globalSettings)
         ];
         currentTab = tabs.First();
     }

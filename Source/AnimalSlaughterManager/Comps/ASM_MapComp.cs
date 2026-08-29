@@ -32,18 +32,13 @@ public class ASM_MapComp : MapComponent
     public bool KindHasCustomPrefs(ThingDef def)
     {
         if (!kindSettings.TryGetValue(def, out var ks) || ks == null) return false;
-        return ks.preferenceSettings.malePref != globalSettings.preferenceSettings.malePref || ks.preferenceSettings.femalePref != globalSettings.preferenceSettings.femalePref ||
-               ks.preferenceSettings.maleYoungPref != globalSettings.preferenceSettings.maleYoungPref || ks.preferenceSettings.femaleYoungPref != globalSettings.preferenceSettings.femaleYoungPref ||
-               ks.prioritySettings.HasRules;
+        return !ks.preferenceSettings.Matches(globalSettings.preferenceSettings) || ks.prioritySettings.HasRules;
     }
 
     public KindSettings GetSettings(ThingDef def)
     {
         if (!kindSettings.TryGetValue(def, out var s))
-        {
-            s = new KindSettings(globalSettings.preferenceSettings);
-            kindSettings[def] = s;
-        }
+            kindSettings[def] = new KindSettings(globalSettings);
         return s;
     }
 

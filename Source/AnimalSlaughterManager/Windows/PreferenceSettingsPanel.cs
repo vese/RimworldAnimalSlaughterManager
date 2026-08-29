@@ -49,7 +49,7 @@ public class PreferenceSettingsPanel(PreferenceSettings settings, Action<bool, b
 
             var key = KindPrioritySettings.keys[i];
             var label = labels[i];
-            var value = settings.GetPref(key.Male, key.Adult);
+            var value = settings.Get(key.Male, key.Adult);
 
             void setValue(SlaughterPreference value) => setPreference(key.Male, key.Adult, value);
 

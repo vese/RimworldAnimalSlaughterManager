@@ -34,10 +34,16 @@ public abstract class PreferenceSettings
         femaleYoungPref = source.femaleYoungPref;
     }
 
-    public SlaughterPreference GetPref(bool male, bool adult) =>
+    public bool Matches(PreferenceSettings other) =>
+        malePref == other.malePref &&
+        femalePref == other.femalePref &&
+        maleYoungPref == other.maleYoungPref &&
+        femaleYoungPref == other.femaleYoungPref;
+
+    public SlaughterPreference Get(bool male, bool adult) =>
         male ? (adult ? malePref : maleYoungPref) : (adult ? femalePref : femaleYoungPref);
 
-    public void SetPref(bool male, bool adult, SlaughterPreference p)
+    public void Set(bool male, bool adult, SlaughterPreference p)
     {
         if (male)
         {

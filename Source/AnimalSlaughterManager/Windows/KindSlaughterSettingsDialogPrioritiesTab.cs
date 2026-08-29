@@ -115,12 +115,12 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
     {
         void SetPreference(bool male, bool adult, SlaughterPreference value)
         {
-            if (settings.preferenceSettings.GetPref(male, adult) == value)
+            if (settings.preferenceSettings.Get(male, adult) == value)
             {
                 return;
             }
 
-            settings.preferenceSettings.SetPref(male, adult, value);
+            settings.preferenceSettings.Set(male, adult, value);
             comp.MarkDirty();
         }
 
@@ -142,9 +142,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
 
     private static void ResetAllSettings(ASM_MapComp comp, ThingDef animalDef, KindSettings settings)
     {
-        settings.preferenceSettings.Reset(comp.globalSettings.preferenceSettings);
-        settings.prioritySettings.Reset();
-        settings.traitsSettings.Reset();
+        settings.Reset(comp.globalSettings);
 
         comp.MarkDirty();
     }

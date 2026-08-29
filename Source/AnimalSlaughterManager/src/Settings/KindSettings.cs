@@ -14,9 +14,9 @@ public class KindSettings : IExposable
 
     public KindSettings() { }
 
-    public KindSettings(PreferenceSettings globals)
+    public KindSettings(GlobalSettings globals)
     {
-        preferenceSettings.Reset(globals);
+        preferenceSettings.Reset(globals.preferenceSettings);
     }
 
 
@@ -32,6 +32,13 @@ public class KindSettings : IExposable
     public void Reset()
     {
         preferenceSettings.Reset();
+        prioritySettings.Reset();
+        traitsSettings.Reset();
+    }
+
+    public void Reset(GlobalSettings globals)
+    {
+        preferenceSettings.Reset(globals.preferenceSettings);
         prioritySettings.Reset();
         traitsSettings.Reset();
     }

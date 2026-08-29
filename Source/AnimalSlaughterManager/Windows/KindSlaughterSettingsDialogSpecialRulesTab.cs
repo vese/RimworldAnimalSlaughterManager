@@ -39,9 +39,7 @@ public class KindSlaughterSettingsDialogSpecialRulesTab(KindTraitsSettings trait
 
     private static void ResetAllSettings(ASM_MapComp comp, ThingDef animalDef, KindSettings settings)
     {
-        settings.preferenceSettings.Reset(comp.globalSettings.preferenceSettings);
-        settings.prioritySettings.Reset();
-        settings.traitsSettings.Reset();
+        settings.Reset(comp.globalSettings);
 
         comp.MarkDirty();
     }
