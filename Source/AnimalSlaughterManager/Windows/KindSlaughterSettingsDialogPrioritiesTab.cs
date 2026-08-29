@@ -135,10 +135,10 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
     private static void ResetTabSettings(ASM_MapComp comp, ThingDef animalDef, KindSettings settings)
     {
         // TODO: settings.preferenceSettings.Reset()
-        settings.preferenceSettings.malePref = comp.globalMalePref;
-        settings.preferenceSettings.femalePref = comp.globalFemalePref;
-        settings.preferenceSettings.maleYoungPref = comp.globalMaleYoungPref;
-        settings.preferenceSettings.femaleYoungPref = comp.globalFemaleYoungPref;
+        settings.preferenceSettings.malePref = comp.globalPreferenceSettings.malePref;
+        settings.preferenceSettings.femalePref = comp.globalPreferenceSettings.femalePref;
+        settings.preferenceSettings.maleYoungPref = comp.globalPreferenceSettings.maleYoungPref;
+        settings.preferenceSettings.femaleYoungPref = comp.globalPreferenceSettings.femaleYoungPref;
         settings.prioritySettings.Reset();
 
         comp.MarkDirty();
@@ -147,10 +147,10 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
     private static void ResetAllSettings(ASM_MapComp comp, ThingDef animalDef, KindSettings settings)
     {
         // TODO: settings.preferenceSettings.Reset()
-        settings.preferenceSettings.malePref = comp.globalMalePref;
-        settings.preferenceSettings.femalePref = comp.globalFemalePref;
-        settings.preferenceSettings.maleYoungPref = comp.globalMaleYoungPref;
-        settings.preferenceSettings.femaleYoungPref = comp.globalFemaleYoungPref;
+        settings.preferenceSettings.malePref = comp.globalPreferenceSettings.malePref;
+        settings.preferenceSettings.femalePref = comp.globalPreferenceSettings.femalePref;
+        settings.preferenceSettings.maleYoungPref = comp.globalPreferenceSettings.maleYoungPref;
+        settings.preferenceSettings.femaleYoungPref = comp.globalPreferenceSettings.femaleYoungPref;
         settings.prioritySettings.Reset();
         settings.traitsSettings.Reset();
 

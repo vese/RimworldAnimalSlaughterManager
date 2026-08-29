@@ -64,4 +64,18 @@ public class KindPreferenceSettings
         Scribe_Values.Look(ref femaleYoungPref, "femaleYoungPref", SlaughterPreference.OldestFirst);
         Scribe_Values.Look(ref defaultAgePref, "defaultAgePref", SlaughterPreference.OldestFirst);
     }
+
+    /// <summary>
+    /// Serializes the map-wide (global) preference settings under their legacy flat keys
+    /// ("globalMalePref", …) directly in the parent node — the exact keys older saves used,
+    /// so existing saves load unchanged (no migration needed). Called manually (delegated),
+    /// like KindSettings does for its sub-settings, so the keys stay at the same XML level.
+    /// </summary>
+    public void ExposeGlobalData()
+    {
+        Scribe_Values.Look(ref malePref, "globalMalePref", SlaughterPreference.OldestFirst);
+        Scribe_Values.Look(ref femalePref, "globalFemalePref", SlaughterPreference.OldestFirst);
+        Scribe_Values.Look(ref maleYoungPref, "globalMaleYoungPref", SlaughterPreference.OldestFirst);
+        Scribe_Values.Look(ref femaleYoungPref, "globalFemaleYoungPref", SlaughterPreference.OldestFirst);
+    }
 }
