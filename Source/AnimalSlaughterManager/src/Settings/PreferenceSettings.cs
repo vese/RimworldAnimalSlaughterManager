@@ -55,7 +55,7 @@ public abstract class PreferenceSettings
 
     public SettingsChanges Changes { get; set; } = new();
 
-    public virtual void Set(bool male, bool adult, SlaughterPreference p)
+    public void Set(bool male, bool adult, SlaughterPreference p)
     {
         if (male)
         {
