@@ -23,9 +23,11 @@ public class PreferenceSettingsPanel(KindPreferenceSettings settings, Action<boo
     {
         var top = y;
 
-        top += DrawPreferenceRows(x, top);
+        top = DrawPreferenceRows(x, top);
+
         top += UIConstants.GapY;
-        top += DrawHelp(x, top, width, helpTextKey);
+
+        top = DrawHelp(x, top, width, helpTextKey);
 
         return top;
     }
@@ -40,6 +42,11 @@ public class PreferenceSettingsPanel(KindPreferenceSettings settings, Action<boo
 
         for (var i = 0; i < KindPrioritySettings.keys.Count; i++)
         {
+            if (i > 0)
+            {
+                top += UIConstants.GapY;
+            }
+
             var key = KindPrioritySettings.keys[i];
             var label = labels[i];
             var value = settings.GetPref(key.Male, key.Adult);
@@ -47,8 +54,6 @@ public class PreferenceSettingsPanel(KindPreferenceSettings settings, Action<boo
             void setValue(SlaughterPreference value) => setPreference(key.Male, key.Adult, value);
 
             top += DrawPreferenceRow(x, top, labelWidth, label, buttonsWidth, buttons, value, setValue);
-
-            top += UIConstants.GapY;
         }
 
         return top;
@@ -115,6 +120,6 @@ public class PreferenceSettingsPanel(KindPreferenceSettings settings, Action<boo
         GUI.color = color;
         Text.Font = font;
 
-        return helpHeight;
+        return y + helpHeight;
     }
 }
