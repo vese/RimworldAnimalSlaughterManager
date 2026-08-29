@@ -39,7 +39,8 @@ public class ASM_MapComp : MapComponent
     {
         if (!kindSettings.TryGetValue(def, out var s))
         {
-            kindSettings[def] = new KindSettings(globalSettings);
+            s = new KindSettings(globalSettings);
+            kindSettings[def] = s;
         }
 
         return s;
