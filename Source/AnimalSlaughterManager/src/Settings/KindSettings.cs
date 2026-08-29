@@ -17,9 +17,9 @@ public class KindSettings : IExposable
         preferenceSettings = new();
     }
 
-    public KindSettings(GlobalSettings globals)
+    public KindSettings(SettingsChanges changes, GlobalSettings globals)
     {
-        preferenceSettings = new(globals.preferenceSettings);
+        preferenceSettings = new(changes, globals.preferenceSettings);
     }
 
 

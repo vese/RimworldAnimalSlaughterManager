@@ -8,21 +8,9 @@ public class KindSlaughterSettingsDialogGeneralTab : BaseKindSlaughterSettingsTa
 
     public override TaggedString Name => ASMKeys.TabGeneral.Translate();
 
-    public KindSlaughterSettingsDialogGeneralTab(ASM_MapComp comp, GlobalSettings settings)
+    public KindSlaughterSettingsDialogGeneralTab(GlobalSettings settings)
     {
-        void SetPreference(bool male, bool adult, SlaughterPreference value)
-        {
-            if (settings.preferenceSettings.Get(male, adult) == value)
-            {
-                return;
-            }
-
-            settings.preferenceSettings.Set(male, adult, value);
-            // TODO: use static class with events
-            comp.MarkDirty();
-        }
-
-        preferenceSettingsPanel = new(settings.preferenceSettings, SetPreference, ASMKeys.GeneralTabHelp);
+        preferenceSettingsPanel = new(settings.preferenceSettings, settings.preferenceSettings.Set, ASMKeys.GeneralTabHelp);
     }
 
     protected override void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings _settings, ASM_MapComp _comp, ThingDef _animalDef)

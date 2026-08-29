@@ -4,7 +4,10 @@ public class KindPreferenceSettings : PreferenceSettings
 {
     public KindPreferenceSettings() { }
 
-    public KindPreferenceSettings(PreferenceSettings source) : base(source) { }
+    public KindPreferenceSettings(SettingsChanges changes, PreferenceSettings source) : base(source)
+    {
+        Changes = changes;
+    }
 
     protected override string MalePrefKey => "malePref";
     protected override string FemalePrefKey => "femalePref";

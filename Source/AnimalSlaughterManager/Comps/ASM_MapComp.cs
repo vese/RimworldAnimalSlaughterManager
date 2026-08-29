@@ -19,12 +19,18 @@ public class ASM_MapComp : MapComponent
     public Dictionary<ThingDef, PregnantMode> pregnantModes = new Dictionary<ThingDef, PregnantMode>();
 
     // Global slaughter settings (General tab) — the counterpart of kindSettings.
-    public GlobalSettings globalSettings = new();
+    public GlobalSettings globalSettings;
+
+    public SettingsChanges changes = new();
 
     public bool dirty = true;
     public List<Pawn> cachedList = new List<Pawn>();
 
-    public ASM_MapComp(Map map) : base(map) { }
+    public ASM_MapComp(Map map) : base(map)
+    {
+        changes.Changed += MarkDirty;
+        globalSettings = new GlobalSettings(changes);
+    }
 
     public bool AnyCustomization => protectedPawnIDs.Count > 0 || kindSettings.Values.Any(k => k.Customized) || pregnantModes.Count > 0;
 
@@ -39,7 +45,7 @@ public class ASM_MapComp : MapComponent
     {
         if (!kindSettings.TryGetValue(def, out var s))
         {
-            s = new KindSettings(globalSettings);
+            s = new KindSettings(changes, globalSettings);
             kindSettings[def] = s;
         }
 
@@ -76,6 +82,15 @@ public class ASM_MapComp : MapComponent
             if (kindSettings == null) kindSettings = new Dictionary<ThingDef, KindSettings>();
             if (protectedPawnIDs == null) protectedPawnIDs = new HashSet<int>();
             if (pregnantModes == null) pregnantModes = new Dictionary<ThingDef, PregnantMode>();
+            // Deep-loaded settings were built by parameterless constructors, each with its own
+            // SettingsChanges — point them at the shared one so Set marks the map dirty.
+            foreach (var ks in kindSettings.Values)
+            {
+                if (ks?.preferenceSettings != null)
+                {
+                    ks.preferenceSettings.Changes = changes;
+                }
+            }
         }
     }
 
