@@ -8,26 +8,29 @@ public class KindSlaughterSettingsDialogGeneralTab : BaseKindSlaughterSettingsTa
 
     public override TaggedString Name => ASMKeys.TabGeneral.Translate();
 
-    public KindSlaughterSettingsDialogGeneralTab()
+    public KindSlaughterSettingsDialogGeneralTab(ASM_MapComp comp, KindPreferenceSettings settings)
     {
-        preferenceSettingsPanel = new PreferenceSettingsPanel(UIConstants.GapX, UIConstants.GapY, UIConstants.ButtonHeight, UIConstants.ButtonPaddingX);
-    }
-
-    protected override void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings settings, ASM_MapComp comp, ThingDef animalDef)
-    {
-        // TODO: pass global settings
-        preferenceSettingsPanel.Draw(x, y, width, settings, comp, SetPreference, ASMKeys.GeneralTabHelp);
-    }
-
-    private void SetPreference(KindSettings settings, ASM_MapComp comp, bool male, bool adult, SlaughterPreference value)
-    {
-        if (comp.GetGlobalPref(male, adult) == value)
+        void SetPreference(bool male, bool adult, SlaughterPreference value)
         {
-            return;
+            // TODO: create global settings class
+            if (comp.GetGlobalPref(male, adult) == value)
+            {
+                return;
+            }
+
+            comp.SetGlobalPref(male, adult, value);
+            // TODO: need this?
+            settings.SetPref(male, adult, value);
+            // TODO: use static class with events
+            comp.MarkDirty();
         }
 
-        comp.SetGlobalPref(male, adult, value);
-        settings.preferenceSettings.SetPref(male, adult, value);
-        comp.MarkDirty();
+        preferenceSettingsPanel = new(settings, SetPreference, ASMKeys.GeneralTabHelp);
+    }
+
+    protected override void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings _settings, ASM_MapComp _comp, ThingDef _animalDef)
+    {
+        // TODO: pass global settings
+        preferenceSettingsPanel.Draw(x, y, width);
     }
 }

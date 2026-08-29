@@ -92,6 +92,14 @@ public class KindPrioritySettings
         { (false, false), ASMKeys.YoungFemales }
     };
 
+    public static readonly List<(bool Male, bool Adult)> keys =
+    [
+        (true, true),
+        (true, false),
+        (false, true),
+        (false, false)
+    ];
+
     public string? GetErrorsCountsMessage()
     {
         var messages = ruleSets.Keys

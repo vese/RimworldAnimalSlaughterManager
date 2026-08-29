@@ -21,8 +21,10 @@ public static class UIConstants
     public const float GapY = 8f;
     public const float ButtonHeight = 26f;
     public const float ButtonMinWidth = 120f;
-    public const float ButtonPaddingX = 18f;
+    public const float ButtonPaddingY = 4f;
+    public const float ButtonPaddingX = 16f;
     public const float ScrollbarWidth = 16f;
+    public static float SmallTextHeight => Text.LineHeightOf(GameFont.Small);
     public static float MediumTextHeight => Text.LineHeightOf(GameFont.Medium);
 }
 
@@ -109,9 +111,20 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
         (ASMKeys.ResetKind, ResetAllSettings),
     ];
 
-    public KindSlaughterSettingsDialogPrioritiesTab()
+    public KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, KindSettings settings)
     {
-        preferenceSettingsPanel = new PreferenceSettingsPanel(UIConstants.GapX, UIConstants.GapY, UIConstants.ButtonHeight, UIConstants.ButtonPaddingX);
+        void SetPreference(bool male, bool adult, SlaughterPreference value)
+        {
+            if (settings.preferenceSettings.GetPref(male, adult) == value)
+            {
+                return;
+            }
+
+            settings.preferenceSettings.SetPref(male, adult, value);
+            comp.MarkDirty();
+        }
+
+        preferenceSettingsPanel = new(settings.preferenceSettings, SetPreference, ASMKeys.PriorityHelp);
     }
 
     private static void OpenKindPresetsWindow(ASM_MapComp comp, ThingDef animalDef, KindSettings _)
@@ -144,22 +157,11 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
         comp.MarkDirty();
     }
 
-    private void SetPreference(KindSettings settings, ASM_MapComp comp, bool male, bool adult, SlaughterPreference value)
-    {
-        if (settings.preferenceSettings.GetPref(male, adult) == value)
-        {
-            return;
-        }
-
-        settings.preferenceSettings.SetPref(male, adult, value);
-        comp.MarkDirty();
-    }
-
     private readonly List<ListSectionState> ListsStates = [.. KindPrioritySettings.ruleSetsNames.Select(x => new ListSectionState())];
 
     protected override void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings settings, ASM_MapComp comp, ThingDef animalDef)
     {
-        var top = preferenceSettingsPanel.Draw(x, y, width, settings, comp, SetPreference, ASMKeys.PriorityHelp);
+        var top = preferenceSettingsPanel.Draw(x, y, width);
 
         top += UIConstants.GapY;
 
@@ -324,14 +326,14 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
         for (int i = 0; i < list.Count; i++)
         {
             var row = new Rect(view.x, top, view.width, UIConstants.MediumTextHeight);
-            
+
             if (i % 2 == 1)
             {
                 Widgets.DrawAltRect(row);
             }
 
             ReorderableWidget.Reorderable(listState.group, new Rect(row.x, row.y, UIConstants.IconSize, row.height));
-            
+
             DrawConditionRow(row, list, i, validation, comp);
 
             top += row.height + KindSlaughterSettingsTabListHelper.ListGapY;
@@ -450,7 +452,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
             // TODO:
             //var conflicts = FindConflicts(list, index);
             var tipText = //conflicts != null ?
-                //ASMKeys.CondConflictTip.Translate(cond.Label, conflicts) :
+                          //ASMKeys.CondConflictTip.Translate(cond.Label, conflicts) :
                 ASMKeys.CondProblemTip.Translate(condition.Label);
 
             TooltipHandler.TipRegion(warnRect, tipText);
@@ -527,7 +529,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
             () => { list.Add(new DiseaseAnyPriorityRule() { has = true }); comp.MarkDirty(); }));
         options.Add(new FloatMenuOption(ASMKeys.CondDiseaseAnyMissing.Translate(),
             () => { list.Add(new DiseaseAnyPriorityRule() { has = false }); comp.MarkDirty(); }));
-        
+
         options.Add(new FloatMenuOption(ASMKeys.CondAddTraining.Translate(),
             () => OpenTrainingSubmenu(list, animalDef, comp)));
         options.Add(new FloatMenuOption(ASMKeys.CondTrainingNone.Translate(),
@@ -619,7 +621,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
                     () => { list.Add(new TrainingPriorityRule() { has = has, trainable = def }); comp.MarkDirty(); }, icon, col) :
                     new GrayFloatMenuOption(key.Translate(def.LabelCap),
                     () => { list.Add(new TrainingPriorityRule() { has = has, trainable = def }); comp.MarkDirty(); }, icon, col, col));
-            
+
             Add(ASMKeys.CondTrainingLearnedSub, true);
             // TODO: 1 option
             Add(ASMKeys.CondTrainingNotSub, false);

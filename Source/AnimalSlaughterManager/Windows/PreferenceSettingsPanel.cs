@@ -7,69 +7,114 @@ using Verse;
 
 namespace ASM;
 
-public class PreferenceSettingsPanel(float gapX, float gapY, float buttonHeight, float buttonPaddingX)
+public class PreferenceSettingsPanel(KindPreferenceSettings settings, Action<bool, bool, SlaughterPreference> setPreference/*TODO: use settings.SetPref*/, string helpTextKey)
 {
-    private static readonly Dictionary<string, SlaughterPreference> PreferenceChoices = new()
-    {
-        { ASMKeys.OldestFirst, SlaughterPreference.OldestFirst },
-        { ASMKeys.YoungestFirst, SlaughterPreference.YoungestFirst }
-    };
+    private const string selectedButtonTextPrefix = "[✓] ";
+    private const string notSelectedButtonTextPrefix = "[   ] ";
+    private static float ButtonPrefixWidth => MathF.Max(Text.CalcSize(selectedButtonTextPrefix).x, Text.CalcSize(notSelectedButtonTextPrefix).x);
 
-    public float Draw(float x, float y, float width,
-        KindSettings settings,
-        ASM_MapComp comp,
-        Action<KindSettings, ASM_MapComp, bool, bool, SlaughterPreference> setPreference,
-        string helpTextKey)
+    private static readonly List<(string TextKey, SlaughterPreference Value)> PreferenceChoices =
+    [
+        (ASMKeys.OldestFirst, SlaughterPreference.OldestFirst),
+        (ASMKeys.YoungestFirst, SlaughterPreference.YoungestFirst)
+    ];
+
+    public float Draw(float x, float y, float width)
     {
-        var preferences = KindPrioritySettings.ruleSetsNames.Select(x => (x.Key, Text: x.Value.Translate()));
-        var labelWidth = preferences.Max(x => Text.CalcSize(x.Text).x);
         var top = y;
 
-        GUI.color = Color.white;
-        Text.Font = GameFont.Small;
-        Text.Anchor = TextAnchor.MiddleLeft;
-
-        foreach (var preference in preferences)
-        {
-            DrawPreferenceRow(x, top, labelWidth, preference.Text,
-                settings.preferenceSettings.GetPref(preference.Key.Male, preference.Key.Adult),
-                (value) => setPreference(settings, comp, preference.Key.Male, preference.Key.Adult, value));
-
-            top += buttonHeight + gapY;
-        }
-
-        var helpText = helpTextKey.Translate();
-        var helpHeight = Text.CalcHeight(helpText, width);
-
-        GUI.color = Color.gray;
-        Text.Font = GameFont.Tiny;
-
-        Widgets.Label(new Rect(x, top, width, helpHeight), helpText);
-
-        top += helpHeight;
+        top += DrawPreferenceRows(x, top);
+        top += UIConstants.GapY;
+        top += DrawHelp(x, top, width, helpTextKey);
 
         return top;
     }
 
-    private void DrawPreferenceRow(float x, float y, float textWidth, TaggedString label, SlaughterPreference setting, Action<SlaughterPreference> setPreference)
+    private float DrawPreferenceRows(float x, float y)
     {
-        Widgets.Label(new Rect(x, y, textWidth, buttonHeight), label);
+        var top = y;
+        var labels = KindPrioritySettings.ruleSetsNames.Values.Select(x => x.Translate()).ToList();
+        var labelWidth = labels.Max(x => Text.CalcSize(x).x);
+        var buttons = PreferenceChoices.Select(x => (Text: x.TextKey.Translate(), x.Value)).ToList();
+        var buttonsWidth = buttons.Max(x => Text.CalcSize(x.Text).x) + ButtonPrefixWidth + UIConstants.ButtonPaddingX;
 
-        var choices = PreferenceChoices.Select(x => (Text: x.Key.Translate(), Setting: x.Value));
-        var buttonsWidth = choices.Max(x => Text.CalcSize(x.Text).x) + buttonPaddingX;
-        var left = x + textWidth + gapX;
-
-        foreach (var choice in choices)
+        for (var i = 0; i < KindPrioritySettings.keys.Count; i++)
         {
-            if (ChoiceButton(new Rect(x + textWidth + gapX, y, buttonsWidth, buttonHeight), choice.Text, setting == choice.Setting))
-            {
-                setPreference(choice.Setting);
-            }
+            var key = KindPrioritySettings.keys[i];
+            var label = labels[i];
+            var value = settings.GetPref(key.Male, key.Adult);
 
-            left += buttonsWidth + gapX;
+            void setValue(SlaughterPreference value) => setPreference(key.Male, key.Adult, value);
+
+            top += DrawPreferenceRow(x, top, labelWidth, label, buttonsWidth, buttons, value, setValue);
+
+            top += UIConstants.GapY;
         }
+
+        return top;
     }
 
-    private static bool ChoiceButton(Rect r, string label, bool selected) =>
-        Widgets.ButtonText(r, (selected ? "[✓] " : "[  ] ") + label);
+    private float DrawPreferenceRow(
+        float x,
+        float y,
+        float labelWidth,
+        TaggedString label,
+        float buttonsWidth,
+        List<(TaggedString Text, SlaughterPreference Value)> buttons,
+        SlaughterPreference currentValue,
+        Action<SlaughterPreference> setValue)
+    {
+        var color = GUI.color;
+        var font = Text.Font;
+        var anchor = Text.Anchor;
+        GUI.color = Color.white;
+        Text.Font = GameFont.Small;
+        Text.Anchor = TextAnchor.MiddleLeft;
+
+        var height = Text.LineHeight + UIConstants.ButtonPaddingY;
+        var left = x;
+
+        Widgets.Label(new Rect(left, y, labelWidth, height), label);
+
+        left += labelWidth + UIConstants.GapX;
+
+        foreach (var button in buttons)
+        {
+            var buttonRect = new Rect(left, y, buttonsWidth, height);
+            var buttonText = GetButtonText(button.Text, currentValue == button.Value);
+
+            if (Widgets.ButtonText(buttonRect, buttonText))
+            {
+                setValue(button.Value);
+            }
+
+            left += buttonsWidth + UIConstants.GapX;
+        }
+
+        GUI.color = color;
+        Text.Font = font;
+        Text.Anchor = anchor;
+
+        return height;
+    }
+
+    private static string GetButtonText(string text, bool selected) => (selected ? selectedButtonTextPrefix : notSelectedButtonTextPrefix) + text;
+
+    private float DrawHelp(float x, float y, float width, string helpTextKey)
+    {
+        var color = GUI.color;
+        var font = Text.Font;
+        GUI.color = Color.gray;
+        Text.Font = GameFont.Tiny;
+
+        var helpText = helpTextKey.Translate();
+        var helpHeight = Text.CalcHeight(helpText, width);
+
+        Widgets.Label(new Rect(x, y, width, helpHeight), helpText);
+
+        GUI.color = color;
+        Text.Font = font;
+
+        return helpHeight;
+    }
 }

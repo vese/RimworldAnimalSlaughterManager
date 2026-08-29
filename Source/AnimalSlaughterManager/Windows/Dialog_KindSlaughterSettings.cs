@@ -50,9 +50,9 @@ public class Dialog_KindSlaughterSettings : Window
         resizeable = true;
         tabs =
         [
-            new KindSlaughterSettingsDialogPrioritiesTab(),
+            new KindSlaughterSettingsDialogPrioritiesTab(comp, settings),
             new KindSlaughterSettingsDialogSpecialRulesTab(settings.traitsSettings),
-            new KindSlaughterSettingsDialogGeneralTab()
+            new KindSlaughterSettingsDialogGeneralTab(comp, settings.preferenceSettings) // TODO: comp.GetGlobalPref
         ];
         currentTab = tabs.First();
     }
