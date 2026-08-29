@@ -79,7 +79,7 @@ public abstract class PreferenceSettings
         }
     }
 
-    public virtual void ExposeData()
+    public void ExposeData()
     {
         Scribe_Values.Look(ref malePref, MalePrefKey, SlaughterPreference.OldestFirst);
         Scribe_Values.Look(ref femalePref, FemalePrefKey, SlaughterPreference.OldestFirst);
