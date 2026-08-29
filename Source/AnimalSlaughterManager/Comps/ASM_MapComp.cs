@@ -29,6 +29,12 @@ public class ASM_MapComp : MapComponent
         SettingsChanges.Changed += MarkDirty;
     }
 
+    public override void MapRemoved()
+    {
+        base.MapRemoved();
+        SettingsChanges.Changed -= MarkDirty;
+    }
+
     public bool AnyCustomization => protectedPawnIDs.Count > 0 || kindSettings.Values.Any(k => k.Customized) || pregnantModes.Count > 0;
 
     // True if this kind has per-kind pref overrides or condition lists (differs from the global defaults).
