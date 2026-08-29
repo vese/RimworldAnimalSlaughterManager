@@ -132,13 +132,9 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
     private void DrawConditionSections(float x, float y, float width, float contentHeight)
     {
-        // TODO: use ListsCountInRow instead of 2 columns
         var top = y;
-        var halfWidth = width / 2;
-        var center = x + halfWidth;
-        var firstColumnX = x;
-        var secondColumnX = center + UIConstants.GapX;
-        var listWidth = halfWidth - UIConstants.GapX;
+        var columnWidth = width / ListsCountInRow;
+        var listWidth = columnWidth - UIConstants.GapX;
         var listsSectionHeight = contentHeight - (top - y);
         var listHeight = MathF.Max(KindSlaughterSettingsTabListHelper.ListMinHeight, (listsSectionHeight - (ListsRowsCount - 1) * 2 * UIConstants.GapY) / ListsRowsCount);
         var verticalDividerTop = top;
@@ -154,25 +150,22 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
                 top += UIConstants.GapY;
             }
 
-            var key = KindPrioritySettings.keys[i];
-            var title = KindPrioritySettings.ruleSetsNames[key].Translate();
-            var setting = settings.prioritySettings.Get(key.Male, key.Adult);
-            var listState = listsStates[i];
-            var validation = settings.prioritySettings.Validate(key.Male, key.Adult);
-            DrawConditionSection(firstColumnX, top, listWidth, listHeight, title, setting, ref listState, key.Male, key.Adult, comp, animalDef, validation);
-
-            if (i + 1 < KindPrioritySettings.ruleSetsNames.Count)
+            for (var column = 0; column < ListsCountInRow && i + column < KindPrioritySettings.keys.Count; column++)
             {
-                key = KindPrioritySettings.ruleSetsNames.Keys.ElementAt(i + 1);
-                title = KindPrioritySettings.ruleSetsNames.Values.ElementAt(i + 1).Translate();
-                setting = settings.prioritySettings.Get(key.Male, key.Adult);
-                listState = listsStates[i];
-                validation = settings.prioritySettings.Validate(key.Male, key.Adult);
-                DrawConditionSection(secondColumnX, top, listWidth, listHeight, title, setting, ref listState, key.Male, key.Adult, comp, animalDef, validation);
+                var key = KindPrioritySettings.keys[i + column];
+                var title = KindPrioritySettings.ruleSetsNames[key].Translate();
+                var setting = settings.prioritySettings.Get(key.Male, key.Adult);
+                var listState = listsStates[i + column];
+                var validation = settings.prioritySettings.Validate(key.Male, key.Adult);
+                var columnX = x + column * (columnWidth + UIConstants.GapX);
+                DrawConditionSection(columnX, top, listWidth, listHeight, title, setting, ref listState, key.Male, key.Adult, comp, animalDef, validation);
             }
         }
 
-        DrawVerticalDivider(center, verticalDividerTop, listsSectionHeight);
+        for (var column = 1; column < ListsCountInRow; column++)
+        {
+            DrawVerticalDivider(x + column * columnWidth, verticalDividerTop, listsSectionHeight);
+        }
     }
 
     private void DrawConditionSection(float x, float y, float listWidth, float listHeight, TaggedString title,
