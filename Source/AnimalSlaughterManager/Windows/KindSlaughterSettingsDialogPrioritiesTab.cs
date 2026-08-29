@@ -133,8 +133,8 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
     private void DrawConditionSections(float x, float y, float width, float contentHeight)
     {
         var top = y;
-        var columnWidth = width / ListsCountInRow;
-        var listWidth = columnWidth - UIConstants.GapX;
+        var gapBetweenLists = 2 * UIConstants.GapX;
+        var listWidth = (width - (ListsCountInRow - 1) * gapBetweenLists) / ListsCountInRow;
         var listsSectionHeight = contentHeight - (top - y);
         var listHeight = MathF.Max(KindSlaughterSettingsTabListHelper.ListMinHeight, (listsSectionHeight - (ListsRowsCount - 1) * 2 * UIConstants.GapY) / ListsRowsCount);
         var verticalDividerTop = top;
@@ -157,14 +157,14 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
                 var setting = settings.prioritySettings.Get(key.Male, key.Adult);
                 var listState = listsStates[i + column];
                 var validation = settings.prioritySettings.Validate(key.Male, key.Adult);
-                var columnX = x + column * columnWidth;
+                var columnX = x + column * (listWidth + gapBetweenLists);
                 DrawConditionSection(columnX, top, listWidth, listHeight, title, setting, ref listState, key.Male, key.Adult, comp, animalDef, validation);
             }
         }
 
         for (var column = 1; column < ListsCountInRow; column++)
         {
-            DrawVerticalDivider(x + column * columnWidth - UIConstants.GapX / 2, verticalDividerTop, listsSectionHeight);
+            DrawVerticalDivider(x + column * (listWidth + gapBetweenLists) - UIConstants.GapX, verticalDividerTop, listsSectionHeight);
         }
     }
 
