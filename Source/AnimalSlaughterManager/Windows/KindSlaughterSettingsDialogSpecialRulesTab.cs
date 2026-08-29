@@ -40,10 +40,10 @@ public class KindSlaughterSettingsDialogSpecialRulesTab(KindTraitsSettings trait
     private static void ResetAllSettings(ASM_MapComp comp, ThingDef animalDef, KindSettings settings)
     {
         // TODO: settings.preferenceSettings.Reset()
-        settings.preferenceSettings.malePref = comp.globalPreferenceSettings.malePref;
-        settings.preferenceSettings.femalePref = comp.globalPreferenceSettings.femalePref;
-        settings.preferenceSettings.maleYoungPref = comp.globalPreferenceSettings.maleYoungPref;
-        settings.preferenceSettings.femaleYoungPref = comp.globalPreferenceSettings.femaleYoungPref;
+        settings.preferenceSettings.malePref = comp.globalSettings.preferenceSettings.malePref;
+        settings.preferenceSettings.femalePref = comp.globalSettings.preferenceSettings.femalePref;
+        settings.preferenceSettings.maleYoungPref = comp.globalSettings.preferenceSettings.maleYoungPref;
+        settings.preferenceSettings.femaleYoungPref = comp.globalSettings.preferenceSettings.femaleYoungPref;
         settings.prioritySettings.Reset();
         settings.traitsSettings.Reset();
 
