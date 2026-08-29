@@ -8,7 +8,6 @@ public class GlobalSettings : IExposable
     /// <summary>Global default age-direction prefs; per-kind prefs override these.</summary>
     public GlobalPreferenceSettings preferenceSettings = new();
 
-
     public void Reset() => preferenceSettings.Reset();
 
     public void ExposeData()

@@ -19,7 +19,7 @@ public class ASM_MapComp : MapComponent
     public Dictionary<ThingDef, PregnantMode> pregnantModes = new Dictionary<ThingDef, PregnantMode>();
 
     // Global slaughter settings (General tab) — the counterpart of kindSettings.
-    public GlobalSettings globalSettings;
+    public GlobalSettings globalSettings = new();
 
     public bool dirty = true;
     public List<Pawn> cachedList = new List<Pawn>();
@@ -27,7 +27,6 @@ public class ASM_MapComp : MapComponent
     public ASM_MapComp(Map map) : base(map)
     {
         SettingsChanges.Changed += MarkDirty;
-        globalSettings = new GlobalSettings();
     }
 
     public bool AnyCustomization => protectedPawnIDs.Count > 0 || kindSettings.Values.Any(k => k.Customized) || pregnantModes.Count > 0;

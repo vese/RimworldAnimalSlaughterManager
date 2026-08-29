@@ -55,6 +55,11 @@ public abstract class PreferenceSettings
 
     public void Set(bool male, bool adult, SlaughterPreference p)
     {
+        if (Get(male, adult) == p)
+        {
+            return;
+        }
+
         if (male)
         {
             if (adult)
