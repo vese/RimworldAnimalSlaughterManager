@@ -30,12 +30,6 @@ public class ASM_MapComp : MapComponent
 
     public bool AnyCustomization => protectedPawnIDs.Count > 0 || kindSettings.Values.Any(k => k.Customized) || pregnantModes.Count > 0;
 
-    public SlaughterPreference GetGlobalPref(bool male, bool adult) =>
-        globalSettings.preferenceSettings.GetPref(male, adult);
-
-    public void SetGlobalPref(bool male, bool adult, SlaughterPreference value) =>
-        globalSettings.preferenceSettings.SetPref(male, adult, value);
-
     // True if this kind has per-kind pref overrides or condition lists (differs from the global defaults).
     public bool KindHasCustomPrefs(ThingDef def)
     {

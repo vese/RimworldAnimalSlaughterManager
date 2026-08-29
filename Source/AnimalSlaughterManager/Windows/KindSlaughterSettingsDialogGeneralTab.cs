@@ -12,12 +12,12 @@ public class KindSlaughterSettingsDialogGeneralTab : BaseKindSlaughterSettingsTa
     {
         void SetPreference(bool male, bool adult, SlaughterPreference value)
         {
-            if (comp.GetGlobalPref(male, adult) == value)
+            if (settings.GetPref(male, adult) == value)
             {
                 return;
             }
 
-            comp.SetGlobalPref(male, adult, value);
+            settings.SetPref(male, adult, value);
             // TODO: use static class with events
             comp.MarkDirty();
         }
