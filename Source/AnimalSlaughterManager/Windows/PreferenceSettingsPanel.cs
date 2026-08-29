@@ -7,7 +7,7 @@ using Verse;
 
 namespace ASM;
 
-public class PreferenceSettingsPanel(KindPreferenceSettings settings, Action<bool, bool, SlaughterPreference> setPreference/*TODO: use settings.SetPref*/, string helpTextKey)
+public class PreferenceSettingsPanel(PreferenceSettings settings, Action<bool, bool, SlaughterPreference> setPreference/*TODO: use settings.SetPref*/, string helpTextKey)
 {
     private const string selectedButtonTextPrefix = "[✓] ";
     private const string notSelectedButtonTextPrefix = "[   ] ";
@@ -49,7 +49,7 @@ public class PreferenceSettingsPanel(KindPreferenceSettings settings, Action<boo
 
             var key = KindPrioritySettings.keys[i];
             var label = labels[i];
-            var value = settings.GetPref(key.Male, key.Adult);
+            var value = settings.Get(key.Male, key.Adult);
 
             void setValue(SlaughterPreference value) => setPreference(key.Male, key.Adult, value);
 

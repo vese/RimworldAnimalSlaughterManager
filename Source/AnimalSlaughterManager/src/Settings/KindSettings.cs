@@ -8,9 +8,19 @@ namespace ASM;
 /// </summary>
 public class KindSettings : IExposable
 {
-    public KindPreferenceSettings preferenceSettings = new();
+    public KindPreferenceSettings preferenceSettings;
     public KindPrioritySettings prioritySettings = new();
     public KindTraitsSettings traitsSettings = new();
+
+    public KindSettings()
+    {
+        preferenceSettings = new();
+    }
+
+    public KindSettings(GlobalSettings globals)
+    {
+        preferenceSettings = new(globals.preferenceSettings);
+    }
 
 
     /// <summary>True when this kind deviates from vanilla behaviour and must be recomputed.</summary>
@@ -25,6 +35,13 @@ public class KindSettings : IExposable
     public void Reset()
     {
         preferenceSettings.Reset();
+        prioritySettings.Reset();
+        traitsSettings.Reset();
+    }
+
+    public void Reset(GlobalSettings globals)
+    {
+        preferenceSettings.Reset(globals.preferenceSettings);
         prioritySettings.Reset();
         traitsSettings.Reset();
     }

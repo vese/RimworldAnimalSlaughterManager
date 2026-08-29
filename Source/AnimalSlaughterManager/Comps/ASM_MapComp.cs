@@ -18,11 +18,8 @@ public class ASM_MapComp : MapComponent
     public HashSet<int> protectedPawnIDs = new HashSet<int>();
     public Dictionary<ThingDef, PregnantMode> pregnantModes = new Dictionary<ThingDef, PregnantMode>();
 
-    // Global default age-direction prefs (General tab). Per-kind prefs override these on the Priorities tab.
-    public SlaughterPreference globalMalePref = SlaughterPreference.OldestFirst;
-    public SlaughterPreference globalFemalePref = SlaughterPreference.OldestFirst;
-    public SlaughterPreference globalMaleYoungPref = SlaughterPreference.OldestFirst;
-    public SlaughterPreference globalFemaleYoungPref = SlaughterPreference.OldestFirst;
+    // Global slaughter settings (General tab) — the counterpart of kindSettings.
+    public GlobalSettings globalSettings = new();
 
     public bool dirty = true;
     public List<Pawn> cachedList = new List<Pawn>();
@@ -31,56 +28,21 @@ public class ASM_MapComp : MapComponent
 
     public bool AnyCustomization => protectedPawnIDs.Count > 0 || kindSettings.Values.Any(k => k.Customized) || pregnantModes.Count > 0;
 
-    public SlaughterPreference GetGlobalPref(bool male, bool adult) =>
-        male ? (adult ? globalMalePref : globalMaleYoungPref) : (adult ? globalFemalePref : globalFemaleYoungPref);
-
-    public void SetGlobalPref(bool male, bool adult, SlaughterPreference value)
-    {
-        if (male)
-        {
-            if (adult)
-            {
-                globalMalePref = value;
-            }
-            else
-            {
-                globalMaleYoungPref = value;
-            }
-        }
-        else
-        {
-            if (adult)
-            {
-                globalFemalePref = value;
-            }
-            else
-            {
-                globalFemaleYoungPref = value;
-            }
-        }
-    }
-
     // True if this kind has per-kind pref overrides or condition lists (differs from the global defaults).
     public bool KindHasCustomPrefs(ThingDef def)
     {
         if (!kindSettings.TryGetValue(def, out var ks) || ks == null) return false;
-        return ks.preferenceSettings.malePref != globalMalePref || ks.preferenceSettings.femalePref != globalFemalePref ||
-               ks.preferenceSettings.maleYoungPref != globalMaleYoungPref || ks.preferenceSettings.femaleYoungPref != globalFemaleYoungPref ||
-               ks.prioritySettings.HasRules;
+        return !ks.preferenceSettings.Matches(globalSettings.preferenceSettings) || ks.prioritySettings.HasRules;
     }
 
     public KindSettings GetSettings(ThingDef def)
     {
         if (!kindSettings.TryGetValue(def, out var s))
         {
-            s = new KindSettings();
-            // New kinds inherit the global defaults, not hardcoded OldestFirst.
-            s.preferenceSettings.malePref = globalMalePref;
-            s.preferenceSettings.femalePref = globalFemalePref;
-            s.preferenceSettings.maleYoungPref = globalMaleYoungPref;
-            s.preferenceSettings.femaleYoungPref = globalFemaleYoungPref;
+            s = new KindSettings(globalSettings);
             kindSettings[def] = s;
         }
+
         return s;
     }
 
@@ -108,10 +70,7 @@ public class ASM_MapComp : MapComponent
         Scribe_Collections.Look(ref kindSettings, "kindSettings", LookMode.Def, LookMode.Deep);
         Scribe_Collections.Look(ref protectedPawnIDs, "protectedPawnIDs", LookMode.Value);
         Scribe_Collections.Look(ref pregnantModes, "pregnantModes", LookMode.Def, LookMode.Value);
-        Scribe_Values.Look(ref globalMalePref, "globalMalePref", SlaughterPreference.OldestFirst);
-        Scribe_Values.Look(ref globalFemalePref, "globalFemalePref", SlaughterPreference.OldestFirst);
-        Scribe_Values.Look(ref globalMaleYoungPref, "globalMaleYoungPref", SlaughterPreference.OldestFirst);
-        Scribe_Values.Look(ref globalFemaleYoungPref, "globalFemaleYoungPref", SlaughterPreference.OldestFirst);
+        globalSettings.ExposeData();
         if (Scribe.mode == LoadSaveMode.PostLoadInit)
         {
             if (kindSettings == null) kindSettings = new Dictionary<ThingDef, KindSettings>();
