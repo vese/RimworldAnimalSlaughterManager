@@ -41,12 +41,7 @@ public class ASM_MapComp : MapComponent
     {
         if (!kindSettings.TryGetValue(def, out var s))
         {
-            s = new KindSettings();
-            // New kinds inherit the global defaults, not hardcoded OldestFirst.
-            s.preferenceSettings.malePref = globalSettings.preferenceSettings.malePref;
-            s.preferenceSettings.femalePref = globalSettings.preferenceSettings.femalePref;
-            s.preferenceSettings.maleYoungPref = globalSettings.preferenceSettings.maleYoungPref;
-            s.preferenceSettings.femaleYoungPref = globalSettings.preferenceSettings.femaleYoungPref;
+            s = new KindSettings(globalSettings.preferenceSettings);
             kindSettings[def] = s;
         }
         return s;
@@ -82,7 +77,6 @@ public class ASM_MapComp : MapComponent
             if (kindSettings == null) kindSettings = new Dictionary<ThingDef, KindSettings>();
             if (protectedPawnIDs == null) protectedPawnIDs = new HashSet<int>();
             if (pregnantModes == null) pregnantModes = new Dictionary<ThingDef, PregnantMode>();
-            if (globalSettings == null) globalSettings = new GlobalSettings();
         }
     }
 

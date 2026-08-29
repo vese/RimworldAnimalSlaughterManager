@@ -26,6 +26,14 @@ public abstract class PreferenceSettings
         malePref = femalePref = maleYoungPref = femaleYoungPref = SlaughterPreference.OldestFirst;
     }
 
+    public void Reset(PreferenceSettings source)
+    {
+        malePref = source.malePref;
+        femalePref = source.femalePref;
+        maleYoungPref = source.maleYoungPref;
+        femaleYoungPref = source.femaleYoungPref;
+    }
+
     public SlaughterPreference GetPref(bool male, bool adult) =>
         male ? (adult ? malePref : maleYoungPref) : (adult ? femalePref : femaleYoungPref);
 

@@ -12,6 +12,13 @@ public class KindSettings : IExposable
     public KindPrioritySettings prioritySettings = new();
     public KindTraitsSettings traitsSettings = new();
 
+    public KindSettings() { }
+
+    public KindSettings(PreferenceSettings globals)
+    {
+        preferenceSettings.Reset(globals);
+    }
+
 
     /// <summary>True when this kind deviates from vanilla behaviour and must be recomputed.</summary>
     public bool Customized => preferenceSettings.Customized || prioritySettings.HasRules || traitsSettings.Customized;

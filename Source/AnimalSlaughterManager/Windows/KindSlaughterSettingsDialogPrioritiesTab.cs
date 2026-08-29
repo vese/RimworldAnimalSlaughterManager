@@ -134,11 +134,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
 
     private static void ResetTabSettings(ASM_MapComp comp, ThingDef animalDef, KindSettings settings)
     {
-        // TODO: settings.preferenceSettings.Reset()
-        settings.preferenceSettings.malePref = comp.globalSettings.preferenceSettings.malePref;
-        settings.preferenceSettings.femalePref = comp.globalSettings.preferenceSettings.femalePref;
-        settings.preferenceSettings.maleYoungPref = comp.globalSettings.preferenceSettings.maleYoungPref;
-        settings.preferenceSettings.femaleYoungPref = comp.globalSettings.preferenceSettings.femaleYoungPref;
+        settings.preferenceSettings.Reset(comp.globalSettings.preferenceSettings);
         settings.prioritySettings.Reset();
 
         comp.MarkDirty();
@@ -146,11 +142,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab : BaseKindSlaughterSetting
 
     private static void ResetAllSettings(ASM_MapComp comp, ThingDef animalDef, KindSettings settings)
     {
-        // TODO: settings.preferenceSettings.Reset()
-        settings.preferenceSettings.malePref = comp.globalSettings.preferenceSettings.malePref;
-        settings.preferenceSettings.femalePref = comp.globalSettings.preferenceSettings.femalePref;
-        settings.preferenceSettings.maleYoungPref = comp.globalSettings.preferenceSettings.maleYoungPref;
-        settings.preferenceSettings.femaleYoungPref = comp.globalSettings.preferenceSettings.femaleYoungPref;
+        settings.preferenceSettings.Reset(comp.globalSettings.preferenceSettings);
         settings.prioritySettings.Reset();
         settings.traitsSettings.Reset();
 

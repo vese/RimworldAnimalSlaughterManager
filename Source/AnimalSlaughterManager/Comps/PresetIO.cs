@@ -329,7 +329,6 @@ namespace ASM
         public List<TraitDto> SpareTraits = new List<TraitDto>();
         [XmlArray("ForceCullTraits")] [XmlArrayItem("Trait")]
         public List<TraitDto> ForceCullTraits = new List<TraitDto>();
-        public string defaultAgePref;
         [XmlArray("PrioAdultMale")] [XmlArrayItem("Cond")]
         public List<ConditionDto> PrioAdultMale = new List<ConditionDto>();
         [XmlArray("PrioYoungMale")] [XmlArrayItem("Cond")]
@@ -352,7 +351,6 @@ namespace ASM
                 CullTraits = k.traitsSettings.cullTraits.Select(TraitDto.From).ToList(),
                 SpareTraits = k.traitsSettings.spareTraits.Select(TraitDto.From).ToList(),
                 //ForceCullTraits = k.traitsSettings.forceCullTraits.Select(TraitDto.From).ToList(),
-                defaultAgePref = k.preferenceSettings.defaultAgePref.ToString(),
                 //PrioAdultMale = k.prioritySettings.prioAdultMale.Select(ConditionDto.From).ToList(),
                 //PrioYoungMale = k.prioritySettings.prioYoungMale.Select(ConditionDto.From).ToList(),
                 //PrioAdultFemale = k.prioritySettings.prioAdultFemale.Select(ConditionDto.From).ToList(),
@@ -379,8 +377,6 @@ namespace ASM
             //if (ForceCullTraits != null)
             //    foreach (var c in ForceCullTraits.Select(t => t.ToCull()))
             //        if (c != null) ks.traitsSettings.forceCullTraits.Add(c);
-            if (!string.IsNullOrEmpty(defaultAgePref))
-                Enum.TryParse(defaultAgePref, out ks.preferenceSettings.defaultAgePref);
             //if (PrioAdultMale != null) foreach (var c in PrioAdultMale) ks.prioritySettings.prioAdultMale.Add(c.ToCondition());
             //if (PrioYoungMale != null) foreach (var c in PrioYoungMale) ks.prioritySettings.prioYoungMale.Add(c.ToCondition());
             //if (PrioAdultFemale != null) foreach (var c in PrioAdultFemale) ks.prioritySettings.prioAdultFemale.Add(c.ToCondition());
