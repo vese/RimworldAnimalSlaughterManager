@@ -18,9 +18,8 @@ public class ASM_MapComp : MapComponent
     public HashSet<int> protectedPawnIDs = new HashSet<int>();
     public Dictionary<ThingDef, PregnantMode> pregnantModes = new Dictionary<ThingDef, PregnantMode>();
 
-    // Global slaughter settings (General tab), extracted into their own class — the global
-    // counterpart of kindSettings. Serialized under the legacy flat keys ("globalMalePref", …),
-    // so saves made before this refactor load unchanged.
+    // Global slaughter settings (General tab) — the global counterpart of kindSettings.
+    // Serialized under flat keys ("globalMalePref", …) in this node.
     public GlobalSettings globalSettings = new();
 
     public bool dirty = true;
@@ -78,7 +77,7 @@ public class ASM_MapComp : MapComponent
         Scribe_Collections.Look(ref kindSettings, "kindSettings", LookMode.Def, LookMode.Deep);
         Scribe_Collections.Look(ref protectedPawnIDs, "protectedPawnIDs", LookMode.Value);
         Scribe_Collections.Look(ref pregnantModes, "pregnantModes", LookMode.Def, LookMode.Value);
-        // Legacy flat keys ("globalMalePref", …) — same as pre-refactor saves, so old saves load as-is.
+        // Flat save keys ("globalMalePref", …) in this node — the on-disk save format.
         globalSettings.ExposeData();
         if (Scribe.mode == LoadSaveMode.PostLoadInit)
         {

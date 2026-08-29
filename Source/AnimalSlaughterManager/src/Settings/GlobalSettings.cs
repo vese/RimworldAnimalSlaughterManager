@@ -5,7 +5,7 @@ namespace ASM;
 /// <summary>
 /// Map-wide (global) slaughter settings — the General tab. Structured like <see cref="KindSettings"/>:
 /// holds sub-settings objects, and <see cref="ExposeData"/> delegates to them, so the XML keys stay
-/// flat in the parent node (pre-refactor saves load unchanged).
+/// flat in the parent node.
 /// </summary>
 public class GlobalSettings : IExposable
 {
@@ -19,8 +19,7 @@ public class GlobalSettings : IExposable
 
     public void ExposeData()
     {
-        // Legacy flat keys ("globalMalePref", …) — the exact keys pre-refactor saves used,
-        // so existing saves load as-is (no migration needed).
+        // Flat save keys ("globalMalePref", …) — part of the on-disk save format.
         preferenceSettings.ExposeGlobalData();
     }
 }

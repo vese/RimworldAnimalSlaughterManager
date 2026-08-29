@@ -66,9 +66,8 @@ public class KindPreferenceSettings
     }
 
     /// <summary>
-    /// Serializes the map-wide (global) preference settings under their legacy flat keys
-    /// ("globalMalePref", …) directly in the parent node — the exact keys older saves used,
-    /// so existing saves load unchanged (no migration needed). Called manually (delegated),
+    /// Serializes the map-wide (global) preference settings under the flat keys
+    /// ("globalMalePref", …) directly in the parent node. Called manually (delegated),
     /// like KindSettings does for its sub-settings, so the keys stay at the same XML level.
     /// </summary>
     public void ExposeGlobalData()
