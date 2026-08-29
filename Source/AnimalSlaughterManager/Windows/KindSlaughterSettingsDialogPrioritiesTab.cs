@@ -157,14 +157,14 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
                 var setting = settings.prioritySettings.Get(key.Male, key.Adult);
                 var listState = listsStates[i + column];
                 var validation = settings.prioritySettings.Validate(key.Male, key.Adult);
-                var columnX = x + column * (columnWidth + UIConstants.GapX);
+                var columnX = x + column * columnWidth;
                 DrawConditionSection(columnX, top, listWidth, listHeight, title, setting, ref listState, key.Male, key.Adult, comp, animalDef, validation);
             }
         }
 
         for (var column = 1; column < ListsCountInRow; column++)
         {
-            DrawVerticalDivider(x + column * columnWidth, verticalDividerTop, listsSectionHeight);
+            DrawVerticalDivider(x + column * columnWidth - UIConstants.GapX / 2, verticalDividerTop, listsSectionHeight);
         }
     }
 
