@@ -181,6 +181,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         var top = DrawConditionSectionHeader(x, y, title, list);
 
         // Row 2: add, clear, presets (left-aligned).
+        top += UIConstants.GapY;
         var left = x;
 
         var addButtonText = ASMKeys.AddCondition.Translate();
@@ -297,8 +298,6 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         var left = x;
         var copyButtonRect = new Rect(left, y, height, height);
 
-        //TooltipHandler.TipRegion(copyButtonRect, ASMKeys.CopyConditions.Translate());
-
         if (Widgets.ButtonImage(copyButtonRect, TexButton.Copy, tooltip: ASMKeys.CopyConditions.Translate()))
         {
             clipboard = [.. list.Select(c => c.Clone())];
@@ -309,8 +308,6 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         if (HasClipboard)
         {
             var pasteButtonRect = new Rect(left, y, height, height);
-
-            //TooltipHandler.TipRegion(pasteButtonRect, ASMKeys.PasteConditions.Translate());
 
             if (Widgets.ButtonImage(pasteButtonRect, TexButton.Paste, tooltip: ASMKeys.PasteConditions.Translate()))
             {
