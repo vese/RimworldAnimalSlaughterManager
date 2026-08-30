@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using static Mono.Security.X509.X520;
 
 namespace ASM;
 
@@ -160,7 +161,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
                 var listState = listsStates[i + column];
                 var validation = settings.prioritySettings.Validate(key.Male, key.Adult);
 
-                DrawConditionSection(left, top, listWidth, listHeight, title, setting, ref listState, key.Male, key.Adult, comp, animalDef, validation);
+                DrawConditionSection(left, top, listWidth, listHeight, title, setting, ref listState, key.Male, key.Adult, validation);
 
                 left += listWidth + gapBetweenLists;
             }
@@ -172,63 +173,15 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         }
     }
 
+    // TODO: actions in list through settings object
     private void DrawConditionSection(float x, float y, float listWidth, float listHeight, TaggedString title,
-        List<BasePriorityRule> list, ref ListSectionState listState, bool male, bool adult, ASM_MapComp comp, ThingDef animalDef, List<List<string>> validation)
+        List<BasePriorityRule> list, ref ListSectionState listState, bool male, bool adult, List<List<string>> validation)
     {
         // Row 1: title (left) + copy + paste icons right after the title.
-        var left = x;
-        var top = y;
-        var titleWidth = Text.CalcSize(title).x + UIConstants.GapX;
-        var titleHeight = UIConstants.MediumTextHeight;
-
-        GUI.color = Color.white;
-        Text.Font = GameFont.Medium;
-        Text.Anchor = TextAnchor.MiddleLeft;
-
-        Widgets.Label(new Rect(x, top, titleWidth, titleHeight), title);
-
-        left += titleWidth;
-
-        var buttonSize = UIConstants.IconSize;
-        var buttonPaddingTop = (titleHeight - UIConstants.IconSize) / 2;
-        var buttonTop = top + buttonPaddingTop;
-        var copyButtonRect = new Rect(left, buttonTop, buttonSize, buttonSize);
-
-        Text.Anchor = TextAnchor.UpperLeft;
-        Text.Font = GameFont.Small;
-
-        TooltipHandler.TipRegion(copyButtonRect, ASMKeys.CopyConditions.Translate());
-
-        if (Widgets.ButtonImage(copyButtonRect, TexButton.Copy))
-        {
-            clipboard = [.. list.Select(c => c.Clone())];
-        }
-
-        left += buttonSize + UIConstants.GapX;
-
-        if (HasClipboard)
-        {
-            var pasteButtonRect = new Rect(left, buttonTop, buttonSize, buttonSize);
-
-            TooltipHandler.TipRegion(pasteButtonRect, ASMKeys.PasteConditions.Translate());
-
-            if (Widgets.ButtonImage(pasteButtonRect, TexButton.Paste))
-            {
-                list.Clear();
-
-                foreach (var c in clipboard!)
-                {
-                    list.Add(c.Clone());
-                }
-
-                comp.MarkDirty();
-            }
-        }
-
-        top += titleHeight;
+        var top = DrawConditionSectionHeader(x, y, title, list);
 
         // Row 2: add, clear, presets (left-aligned).
-        left = x;
+        var left = x;
 
         var addButtonText = ASMKeys.AddCondition.Translate();
         var addButtonWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(addButtonText).x + UIConstants.ButtonPaddingX);
@@ -300,6 +253,80 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         //listState.contentHeight = Mathf.Max(cy - y, outRect.height);
 
         Widgets.EndScrollView();
+    }
+
+    private float DrawConditionSectionHeader(float x, float y, TaggedString title, List<BasePriorityRule> rules)
+    {
+        var color = GUI.color;
+        GUI.color = Color.white;
+
+        var height = Text.LineHeight;
+
+        var left = DrawConditionSectionHeaderTitle(x, y, height, title);
+        DrawConditionSectionHeaderButtons(left, y, height, rules);
+
+        GUI.color = color;
+
+        return y + height;
+    }
+
+    private float DrawConditionSectionHeaderTitle(float x, float y, float height, TaggedString title)
+    {
+        var font = Text.Font;
+        var anchor = Text.Anchor;
+        Text.Font = GameFont.Medium;
+        Text.Anchor = TextAnchor.MiddleLeft;
+
+        var titleWidth = Text.CalcSize(title).x + UIConstants.GapX;
+
+        Widgets.Label(new Rect(x, y, titleWidth, height), title);
+
+        Text.Font = font;
+        Text.Anchor = anchor;
+
+        return x + titleWidth;
+    }
+
+    private void DrawConditionSectionHeaderButtons(float x, float y, float height, List<BasePriorityRule> list)
+    {
+        var font = Text.Font;
+        var anchor = Text.Anchor;
+        Text.Anchor = TextAnchor.UpperLeft;
+        Text.Font = GameFont.Small;
+
+        var left = x;
+        var copyButtonRect = new Rect(left, y, height, height);
+
+        //TooltipHandler.TipRegion(copyButtonRect, ASMKeys.CopyConditions.Translate());
+
+        if (Widgets.ButtonImage(copyButtonRect, TexButton.Copy, tooltip: ASMKeys.CopyConditions.Translate()))
+        {
+            clipboard = [.. list.Select(c => c.Clone())];
+        }
+
+        left += height + UIConstants.GapX;
+
+        if (HasClipboard)
+        {
+            var pasteButtonRect = new Rect(left, y, height, height);
+
+            //TooltipHandler.TipRegion(pasteButtonRect, ASMKeys.PasteConditions.Translate());
+
+            if (Widgets.ButtonImage(pasteButtonRect, TexButton.Paste, tooltip: ASMKeys.PasteConditions.Translate()))
+            {
+                list.Clear();
+
+                foreach (var c in clipboard!)
+                {
+                    list.Add(c.Clone());
+                }
+
+                comp.MarkDirty();
+            }
+        }
+
+        Text.Font = font;
+        Text.Anchor = anchor;
     }
 
     private void DrawConditionRow(Rect row, List<BasePriorityRule> list, int index, List<List<string>> validation, ASM_MapComp comp)
