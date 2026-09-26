@@ -220,10 +220,10 @@ public class ASM_MapComp : MapComponent
             else { all.Add(pawn); }
         }
 
-        SortBucket(males, PrefOf(ks, true, true), ks, vitals, ks?.prioritySettings.Get(true, true));
-        SortBucket(females, PrefOf(ks, false, true), ks, vitals, ks?.prioritySettings.Get(false, true));
-        SortBucket(malesYoung, PrefOf(ks, true, false), ks, vitals, ks?.prioritySettings.Get(true, false));
-        SortBucket(femalesYoung, PrefOf(ks, false, false), ks, vitals, ks?.prioritySettings.Get(false, false));
+        SortBucket(males, PrefOf(ks, true, true), vitals, ks?.prioritySettings.Get(true, true));
+        SortBucket(females, PrefOf(ks, false, true), vitals, ks?.prioritySettings.Get(false, true));
+        SortBucket(malesYoung, PrefOf(ks, true, false), vitals, ks?.prioritySettings.Get(true, false));
+        SortBucket(femalesYoung, PrefOf(ks, false, false), vitals, ks?.prioritySettings.Get(false, false));
         if (pregMode == PregnantMode.Always)
         {
             pregnant.SortByDescending(p => PregnancyProgress(p));
@@ -240,7 +240,7 @@ public class ASM_MapComp : MapComponent
         if (config.maxMales != -1) while (males.Count > Math.Max(0, config.maxMales - resM)) { var p = males.PopFront(); all.Remove(p); if (!(pregMode == PregnantMode.Defer && IsPregnantOrCarryingEgg(p))) slaughter.Add(p); }
         if (config.maxMalesYoung != -1) while (malesYoung.Count > Math.Max(0, config.maxMalesYoung - resMY)) { var p = malesYoung.PopFront(); all.Remove(p); if (!(pregMode == PregnantMode.Defer && IsPregnantOrCarryingEgg(p))) slaughter.Add(p); }
 
-        SortBucket(all, SlaughterPreference.OldestFirst, ks, vitals, null);
+        SortBucket(all, SlaughterPreference.OldestFirst, vitals, null);
         if (config.maxTotal != -1)
             while (all.Count > Math.Max(0, config.maxTotal - reservedTotal)) { var p = all.PopFront(); if (!(pregMode == PregnantMode.Defer && IsPregnantOrCarryingEgg(p))) slaughter.Add(p); }
     }
@@ -252,13 +252,11 @@ public class ASM_MapComp : MapComponent
         return adult ? ks.preferenceSettings.femalePref : ks.preferenceSettings.femaleYoungPref;
     }
 
-    /// <summary>Sort so index 0 is culled first: cull-trait carriers first, then normal,
-    /// then spare-trait carriers last. Within a tier (same sex, same age category) the order is
-    /// the trait-count/sickness tie-breakers, then the configured age direction.</summary>
-    private static void SortBucket(List<Pawn> list, SlaughterPreference pref, KindSettings ks, Dictionary<Pawn, PawnVitals> vitals, List<BasePriorityRule> conditions)
+    /// <summary>Sort so index 0 is culled first. Within a tier (same sex, same age category) the
+    /// order is the trait-count/sickness tie-breakers, then the configured age direction.</summary>
+    private static void SortBucket(List<Pawn> list, SlaughterPreference pref, Dictionary<Pawn, PawnVitals> vitals, List<BasePriorityRule> conditions)
     {
         bool useConds = conditions != null && conditions.Count > 0;
-        bool useTraits = ks != null && ((ks.traitsSettings.cullTraits != null && ks.traitsSettings.cullTraits.Count > 0) || (ks.traitsSettings.spareTraits != null && ks.traitsSettings.spareTraits.Count > 0));
         var ranks = useConds ? new Dictionary<Pawn, float>() : null;
         if (useConds)
             foreach (var p in list) ranks[p] = ConditionRank(p, conditions);
@@ -270,12 +268,6 @@ public class ASM_MapComp : MapComponent
             {
                 float ra = ranks[a], rb = ranks[b];
                 if (ra != rb) return rb.CompareTo(ra);
-            }
-            if (useTraits)
-            {
-                int sa = PriorityScore(a, ks);
-                int sb = PriorityScore(b, ks);
-                if (sa != sb) return sb.CompareTo(sa); // higher score = culled first
             }
             // Within the same sex and age category (this bucket), prefer to cull those with
             // fewer good traits, those with bad traits, and the sick ones. (Pregnancy is handled
@@ -301,14 +293,6 @@ public class ASM_MapComp : MapComponent
         for (int i = 0; i < conditions.Count; i++)
             if (conditions[i].Matches(p)) return i;
         return conditions.Count / 2f;
-    }
-
-    // cullTrait = 2 (first), normal = 1, spareTrait = 0 (last).
-    private static int PriorityScore(Pawn p, KindSettings ks)
-    {
-        if (HasCullTrait(p, ks)) return 2;
-        if (HasSpareTrait(p, ks)) return 0;
-        return 1;
     }
 
     private struct PawnVitals
@@ -385,28 +369,6 @@ public class ASM_MapComp : MapComponent
             try { return (float)EggProgressField.GetValue(egg); } catch { }
         }
         return 0f;
-    }
-
-    private static bool HasCullTrait(Pawn p, KindSettings ks)
-    {
-        if (ks?.traitsSettings.cullTraits == null) return false;
-        foreach (var ct in ks.traitsSettings.cullTraits)
-            if (ct.trait != null && AnimalTraitsAccess.HasTrait(p, ct.trait)
-                && AgeMatches(p, ct.ageScope) && GenderMatches(p, ct.genderScope)
-                && InheritableMatches(ct.trait, ct.inheritMode))
-                return true;
-        return false;
-    }
-
-    private static bool HasSpareTrait(Pawn p, KindSettings ks)
-    {
-        if (ks?.traitsSettings.spareTraits == null) return false;
-        foreach (var ct in ks.traitsSettings.spareTraits)
-            if (ct.trait != null && AnimalTraitsAccess.HasTrait(p, ct.trait)
-                && AgeMatches(p, ct.ageScope) && GenderMatches(p, ct.genderScope)
-                && InheritableMatches(ct.trait, ct.inheritMode))
-                return true;
-        return false;
     }
 
     private static bool HasForceCullTrait(Pawn p, KindSettings ks)

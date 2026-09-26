@@ -56,8 +56,6 @@ namespace ASM
         //        switch (listKind)
         //        {
         //            case TraitListKind.Keep: return s.keepTraits;
-        //            case TraitListKind.Cull: return s.cullTraits;
-        //            case TraitListKind.Spare: return s.spareTraits;
         //            default: return s.forceCullTraits;
         //        }
         //    }
@@ -122,8 +120,6 @@ namespace ASM
             //switch (listKind)
             //{
             //    case TraitListKind.Keep: return ASMKeys.ListNameKeep.Translate();
-            //    case TraitListKind.Cull: return ASMKeys.ListNameCull.Translate();
-            //    case TraitListKind.Spare: return ASMKeys.ListNameSpare.Translate();
             //    default: return ASMKeys.ListNameForceCull.Translate();
             //}
         }
