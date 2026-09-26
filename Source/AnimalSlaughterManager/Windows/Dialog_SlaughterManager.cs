@@ -206,8 +206,8 @@ namespace ASM
             PregnantModeButton(row, XPregC, XPregT + WToggle - XPregC, def, config, pregMode);
             CurCol(row, XBondC, bond, false, absent);
             PaintToggle(row, XBondT, 1, ref config.allowSlaughterBonded);
-            CountCol(row, XProtT, comp.CountKeptByTraits(def), absent);
-            CountCol(row, XProtI, comp.CountIndividuallyProtected(def), absent);
+            CountCol(row, XProtT, SlaughterListBuilder.CountKeptByTraits(comp, def), absent);
+            CountCol(row, XProtI, SlaughterListBuilder.CountIndividuallyProtected(comp, def), absent);
 
             if (Widgets.ButtonText(new Rect(row.x + XConfig, row.y + 2f, WConfig, row.height - 4f), ASMKeys.ConfigureKind.Translate()))
                 Find.WindowStack.Add(new Dialog_KindSlaughterSettings(comp, def));
@@ -375,7 +375,7 @@ namespace ASM
             foreach (var pa in map.mapPawns.SpawnedColonyAnimals)
             {
                 if (pa.def != def) continue;
-                bool isPregnant = pa.gender == Gender.Female && ASM_MapComp.IsPregnantOrCarryingEgg(pa);
+                bool isPregnant = pa.gender == Gender.Female && PawnSlaughterInfo.IsPregnantOrCarryingEgg(pa);
                 bool isBonded = pa.relations.GetDirectRelationsCount(PawnRelationDefOf.Bond) > 0;
                 if ((countPregnant || !isPregnant) && (countBonded || !isBonded))
                 {
