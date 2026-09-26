@@ -95,16 +95,34 @@ namespace ASM
 
         private static string CondFolder(CondBucket bucket) => Path.Combine(RootFolder, "List", "Conditions", bucket.ToString());
 
-        public static void ExportConditions(string name, CondBucket bucket, List<SlaughterCondition> conditions)
+        public static void ExportConditions(string name, CondBucket bucket, List<BasePriorityRule> rules)
         {
             Directory.CreateDirectory(CondFolder(bucket));
-            var dto = new ConditionPresetDto { bucket = bucket.ToString(), conditions = conditions.Select(ConditionDto.From).ToList() };
-            var ser = new XmlSerializer(typeof(ConditionPresetDto));
+            var dto = new RulePresetDto { bucket = bucket.ToString(), rules = rules.Select(PriorityRuleDto.From).ToList() };
+            var ser = new XmlSerializer(typeof(RulePresetDto));
             using (var w = new StreamWriter(Path.Combine(CondFolder(bucket), Sanitize(name) + ".xml")))
                 ser.Serialize(w, dto);
         }
 
-        public static List<SlaughterCondition> ApplyConditions(PresetEntry entry)
+        public static List<BasePriorityRule> ApplyConditions(PresetEntry entry)
+        {
+            try
+            {
+                var ser = new XmlSerializer(typeof(RulePresetDto));
+                using (var r = new StreamReader(entry.path))
+                {
+                    var dto = (RulePresetDto)ser.Deserialize(r);
+                    return dto.rules.Select(r => r.ToRule()).Where(r => r != null).ToList();
+                }
+            }
+            catch
+            {
+                return ReadLegacyConditions(entry);
+            }
+        }
+
+        // Presets saved before the priority-rule refactor stored SlaughterCondition lists.
+        private static List<BasePriorityRule> ReadLegacyConditions(PresetEntry entry)
         {
             try
             {
@@ -112,10 +130,15 @@ namespace ASM
                 using (var r = new StreamReader(entry.path))
                 {
                     var dto = (ConditionPresetDto)ser.Deserialize(r);
-                    return dto.conditions.Select(c => c.ToCondition()).ToList();
+#pragma warning disable CS0618
+                    return dto.conditions.Select(c => KindPrioritySettingsLegacy.Convert(c.ToCondition())).Where(c => c != null).ToList();
+#pragma warning restore CS0618
                 }
             }
-            catch { return null; }
+            catch
+            {
+                return null;
+            }
         }
 
         public static List<PresetEntry> ListConditionPresets(CondBucket bucket)
@@ -502,5 +525,83 @@ namespace ASM
     {
         [XmlAttribute] public string bucket;
         [XmlElement("Cond")] public List<ConditionDto> conditions = new List<ConditionDto>();
+    }
+
+    /// <summary>XML-serializable form of a priority-rule list preset (stores defNames).</summary>
+    public class RulePresetDto
+    {
+        [XmlAttribute] public string bucket;
+        [XmlElement("Rule")] public List<PriorityRuleDto> rules = new List<PriorityRuleDto>();
+    }
+
+    /// <summary>XML form of one BasePriorityRule: the rule type name plus its parameters.</summary>
+    public class PriorityRuleDto
+    {
+        private const string Pregnancy = nameof(PregnancyPriorityRule);
+        private const string Bond = nameof(BondPriorityRule);
+        private const string DiseaseAny = nameof(DiseaseAnyPriorityRule);
+        private const string Disease = nameof(DiseasePriorityRule);
+        private const string Training = nameof(TrainingPriorityRule);
+        private const string TrainingGeneral = nameof(TrainingGeneralPriorityRule);
+        private const string Trait = nameof(TraitPriorityRule);
+        private const string TraitGeneral = nameof(TraitGeneralPriorityRule);
+
+        [XmlAttribute] public string rule;
+        [XmlAttribute] public bool has = true;
+        [XmlAttribute] public string trait;
+        [XmlAttribute] public string disease;
+        [XmlAttribute] public string trainable;
+        [XmlAttribute] public string generalType;
+        [XmlAttribute] public string inheritability;
+
+        public static PriorityRuleDto From(BasePriorityRule r) => r switch
+        {
+            PregnancyPriorityRule x => new PriorityRuleDto { rule = Pregnancy, has = x.has },
+            BondPriorityRule x => new PriorityRuleDto { rule = Bond, has = x.has },
+            DiseaseAnyPriorityRule x => new PriorityRuleDto { rule = DiseaseAny, has = x.has },
+            DiseasePriorityRule x => new PriorityRuleDto { rule = Disease, has = x.has, disease = x.disease?.defName },
+            TrainingPriorityRule x => new PriorityRuleDto { rule = Training, has = x.has, trainable = x.trainable?.defName },
+            TrainingGeneralPriorityRule x => new PriorityRuleDto { rule = TrainingGeneral, generalType = x.type.ToString() },
+            TraitPriorityRule x => new PriorityRuleDto { rule = Trait, has = x.has, trait = x.trait?.defName, inheritability = x.inheritability.ToString() },
+            TraitGeneralPriorityRule x => new PriorityRuleDto { rule = TraitGeneral, has = x.has, generalType = x.type.ToString(), inheritability = x.inheritability.ToString() },
+            _ => new PriorityRuleDto { rule = "" },
+        };
+
+        public BasePriorityRule ToRule()
+        {
+            switch (rule)
+            {
+                case Pregnancy:
+                    return new PregnancyPriorityRule { has = has };
+                case Bond:
+                    return new BondPriorityRule { has = has };
+                case DiseaseAny:
+                    return new DiseaseAnyPriorityRule { has = has };
+                case Disease:
+                    return new DiseasePriorityRule { has = has, disease = DefDatabase<HediffDef>.GetNamedSilentFail(disease ?? "") };
+                case Training:
+                    return new TrainingPriorityRule { has = has, trainable = DefDatabase<TrainableDef>.GetNamedSilentFail(trainable ?? "") };
+                case TrainingGeneral:
+                    return Enum.TryParse(generalType, out TrainingGeneralType tg)
+                        ? new TrainingGeneralPriorityRule { type = tg }
+                        : null;
+                case Trait:
+                    return new TraitPriorityRule
+                    {
+                        has = has,
+                        trait = DefDatabase<HediffDef>.GetNamedSilentFail(trait ?? ""),
+                        inheritability = ParseInheritability(),
+                    };
+                case TraitGeneral:
+                    return Enum.TryParse(generalType, out TraitType tt)
+                        ? new TraitGeneralPriorityRule { has = has, type = tt, inheritability = ParseInheritability() }
+                        : null;
+                default:
+                    return null;
+            }
+        }
+
+        private TraitInheritability ParseInheritability() =>
+            Enum.TryParse(inheritability, out TraitInheritability ti) ? ti : TraitInheritability.Both;
     }
 }
