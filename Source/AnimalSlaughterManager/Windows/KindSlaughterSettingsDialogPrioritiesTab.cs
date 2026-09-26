@@ -20,18 +20,21 @@ public static class UIConstants
     public const float IconSize = 22f;
     public const float GapX = 6f;
     public const float GapY = 8f;
+    [Obsolete]
     public const float ButtonHeight = 26f;
     public const float ButtonMinWidth = 120f;
     public const float ButtonPaddingY = 4f;
     public const float ButtonPaddingX = 16f;
     public const float ScrollbarWidth = 16f;
+    public const float TextPaddingBottom = 2f;
     public static float SmallTextHeight => Text.LineHeightOf(GameFont.Small);
+    [Obsolete]
     public static float MediumTextHeight => Text.LineHeightOf(GameFont.Medium);
+    public const float ListMinHeight = 200f;
 }
 
 public static class KindSlaughterSettingsTabListHelper
 {
-    public const float ListMinHeight = 150f;
     public const float ListGapY = 2f;
     public const float ListRowPaddingX = 4f;
     private static readonly Color ListDividerColor = new(1f, 1f, 1f, 0.5f);
@@ -100,6 +103,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
     private const int ListsCountInRow = 2;
 
     private static readonly float ListsRowsCount = Mathf.Ceil(KindPrioritySettings.keys.Count / (float)ListsCountInRow);
+    private static readonly float ListsRowsGapYSum = (ListsRowsCount - 1) * 2 * UIConstants.GapY;
 
     private static List<BasePriorityRule>? clipboard;
 
@@ -128,7 +132,9 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
         top += UIConstants.GapY;
 
-        DrawConditionSections(x, top, width, contentHeight);
+        var conditionsSectionsHeight = contentHeight - (top - y);
+        
+        DrawConditionSections(x, top, width, conditionsSectionsHeight);
     }
 
     private void DrawConditionSections(float x, float y, float width, float contentHeight)
@@ -136,8 +142,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         var top = y;
         var gapBetweenLists = 2 * UIConstants.GapX;
         var listWidth = (width - (ListsCountInRow - 1) * gapBetweenLists) / ListsCountInRow;
-        var listsSectionHeight = contentHeight - (top - y);
-        var listHeight = MathF.Max(KindSlaughterSettingsTabListHelper.ListMinHeight, (listsSectionHeight - (ListsRowsCount - 1) * 2 * UIConstants.GapY) / ListsRowsCount);
+        var listHeight = MathF.Max(UIConstants.ListMinHeight, (contentHeight - ListsRowsGapYSum) / ListsRowsCount);
         var verticalDividerTop = top;
 
         for (var i = 0; i < KindPrioritySettings.keys.Count; i += ListsCountInRow)
@@ -169,7 +174,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
         for (var column = 1; column < ListsCountInRow; column++)
         {
-            DrawVerticalDivider(x + column * (listWidth + gapBetweenLists) - UIConstants.GapX, verticalDividerTop, listsSectionHeight);
+            DrawVerticalDivider(x + column * (listWidth + gapBetweenLists) - UIConstants.GapX, verticalDividerTop, contentHeight);
         }
     }
 
@@ -177,51 +182,19 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
     private void DrawConditionSection(float x, float y, float listWidth, float listHeight, TaggedString title,
         List<BasePriorityRule> list, ref ListSectionState listState, bool male, bool adult, List<List<string>> validation)
     {
+        var left = x;
+        var top = y;
+
         // Row 1: title (left) + copy + paste icons right after the title.
-        var top = DrawConditionSectionHeader(x, y, title, list);
+        top += DrawConditionSectionHeader(x, y, title, list);
 
         // Row 2: add, clear, presets (left-aligned).
         top += UIConstants.GapY;
-        var left = x;
 
-        var addButtonText = ASMKeys.AddCondition.Translate();
-        var addButtonWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(addButtonText).x + UIConstants.ButtonPaddingX);
-        var presetButtonText = ASMKeys.CondPresets.Translate();
-        var presetButtonWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(presetButtonText).x + UIConstants.ButtonPaddingX);
-        var clearButtonText = ASMKeys.ClearList.Translate();
-        var clearButtonWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(clearButtonText).x + UIConstants.ButtonPaddingX);
-
-        Rect addBtn = new Rect(left, top, addButtonWidth, UIConstants.ButtonHeight);
-        left += addButtonWidth + UIConstants.GapX;
-        Rect presetBtn = new Rect(left, top, presetButtonWidth, UIConstants.ButtonHeight);
-        left += presetButtonWidth + UIConstants.GapX;
-        Rect clearBtn = new Rect(left, top, clearButtonWidth, UIConstants.ButtonHeight);
-
-        if (Widgets.ButtonText(addBtn, addButtonText))
-        {
-            OpenAddConditionMenu(list, male, adult, comp, animalDef);
-        }
-
-        if (Widgets.ButtonText(presetBtn, presetButtonText))
-        {
-            Find.WindowStack.Add(new Dialog_ConditionPresetBrowser(comp, male, adult, list));
-        }
-
-        GUI.enabled = list.Count > 0;
-
-        if (Widgets.ButtonText(clearBtn, clearButtonText))
-        {
-            // TODO: changes in list in settings class, use ReadonlyList
-            list.Clear();
-            comp.MarkDirty();
-        }
-
-        GUI.enabled = true;
-
-        top += UIConstants.ButtonHeight + UIConstants.GapY;
+        top += DrawButtons(left, top, list, male, adult);
 
         // List
-        left = x;
+        top += UIConstants.GapY;
 
         var outRect = new Rect(left, top, listWidth, listHeight);
         var view = new Rect(left, top, listWidth - UIConstants.ScrollbarWidth, outRect.height/*TODO: need this? Mathf.Max(listState.contentHeight, outRect.height)*/);
@@ -261,31 +234,30 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         var color = GUI.color;
         GUI.color = Color.white;
 
-        var height = Text.LineHeight;
-
-        var left = DrawConditionSectionHeaderTitle(x, y, height, title);
-        DrawConditionSectionHeaderButtons(left, y, height, rules);
+        (var titleWidth, var height) = DrawConditionSectionHeaderTitle(x, y, title);
+        DrawConditionSectionHeaderButtons(x + titleWidth, y, height, rules);
 
         GUI.color = color;
 
-        return y + height;
+        return height;
     }
 
-    private float DrawConditionSectionHeaderTitle(float x, float y, float height, TaggedString title)
+    private (float width, float height) DrawConditionSectionHeaderTitle(float x, float y, TaggedString title)
     {
         var font = Text.Font;
         var anchor = Text.Anchor;
         Text.Font = GameFont.Medium;
-        Text.Anchor = TextAnchor.MiddleLeft;
+        Text.Anchor = TextAnchor.UpperLeft;
 
-        var titleWidth = Text.CalcSize(title).x + UIConstants.GapX;
+        var rectWidth = Text.CalcSize(title).x + UIConstants.GapX;
+        var rectHeight = Text.LineHeight + UIConstants.TextPaddingBottom;
 
-        Widgets.Label(new Rect(x, y, titleWidth, height), title);
+        Widgets.Label(new Rect(x, y, rectWidth, rectHeight), title);
 
         Text.Font = font;
         Text.Anchor = anchor;
 
-        return x + titleWidth;
+        return (rectWidth, rectHeight);
     }
 
     private void DrawConditionSectionHeaderButtons(float x, float y, float height, List<BasePriorityRule> list)
@@ -324,6 +296,60 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
         Text.Font = font;
         Text.Anchor = anchor;
+    }
+
+    private float DrawButtons(float x, float y, List<BasePriorityRule> list, bool male, bool adult)
+    {
+        var color = GUI.color;
+        var font = Text.Font;
+        var anchor = Text.Anchor;
+        GUI.color = Color.white;
+        Text.Font = GameFont.Small;
+        Text.Anchor = TextAnchor.MiddleLeft;
+
+        var left = x;
+        var height = Text.LineHeight + UIConstants.ButtonPaddingY;
+
+        var addButtonText = ASMKeys.AddCondition.Translate();
+        var addButtonWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(addButtonText).x + UIConstants.ButtonPaddingX);
+        var addBtn = new Rect(left, y, addButtonWidth, height);
+        left += addButtonWidth + UIConstants.GapX;
+
+        if (Widgets.ButtonText(addBtn, addButtonText))
+        {
+            OpenAddConditionMenu(list, male, adult, comp, animalDef);
+        }
+
+        var presetButtonText = ASMKeys.CondPresets.Translate();
+        var presetButtonWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(presetButtonText).x + UIConstants.ButtonPaddingX);
+        var presetBtn = new Rect(left, y, presetButtonWidth, height);
+        left += presetButtonWidth + UIConstants.GapX;
+
+        if (Widgets.ButtonText(presetBtn, presetButtonText))
+        {
+            Find.WindowStack.Add(new Dialog_ConditionPresetBrowser(comp, male, adult, list));
+        }
+
+        var clearButtonText = ASMKeys.ClearList.Translate();
+        var clearButtonWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(clearButtonText).x + UIConstants.ButtonPaddingX);
+        var clearBtn = new Rect(left, y, clearButtonWidth, height);
+
+        GUI.enabled = list.Count > 0;
+
+        if (Widgets.ButtonText(clearBtn, clearButtonText))
+        {
+            // TODO: changes in list in settings class, use ReadonlyList
+            list.Clear();
+            comp.MarkDirty();
+        }
+
+        GUI.enabled = true;
+
+        GUI.color = color;
+        Text.Font = font;
+        Text.Anchor = anchor;
+
+        return height;
     }
 
     private void DrawConditionRow(Rect row, List<BasePriorityRule> list, int index, List<List<string>> validation, ASM_MapComp comp)
