@@ -7,6 +7,7 @@ public class TraitRulesListSection(IEditableTraitsRuleSet<TraitRule> rules) : Ba
 {
     protected override string TitleKey { get; } = ASMKeys.ForceCullTraits;
     protected override string HelpKey { get; } = ASMKeys.ForceCullTraitsHelp;
+    protected override TraitListKind ListKind { get; } = TraitListKind.ForceCull;
 
     protected override float DrawHeader(float x, float y, float width)
     {

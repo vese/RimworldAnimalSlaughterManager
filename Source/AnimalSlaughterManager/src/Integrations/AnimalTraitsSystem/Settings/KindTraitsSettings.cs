@@ -10,6 +10,7 @@ public interface IEditableTraitsRuleSet<T> where T : ITraitRule
 {
     int Count { get; }
     bool HasRules { get; }
+    System.Collections.IList Rules { get; }
     void Clear();
     void Swap(int from, int to);
     T Get(int i);
@@ -26,6 +27,8 @@ public class KindTraitsRuleSet<T>(Func<IEditableTraitsRuleSet<T>, ITraitRulesLis
     public int Count => rules.Count;
 
     public bool HasRules => rules.Count > 0;
+
+    public System.Collections.IList Rules => rules;
 
     public ITraitRulesListSection<T> GetEditor() => editorFactory(this);
 
