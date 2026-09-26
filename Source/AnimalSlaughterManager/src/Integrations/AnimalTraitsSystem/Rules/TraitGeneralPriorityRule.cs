@@ -39,7 +39,7 @@ public class TraitGeneralPriorityRule : BasePriorityRule
         _ => throw new NotImplementedException(),
     };
 
-    public override BasePriorityRule Clone() => new TraitGeneralPriorityRule() { type = type, inheritability = inheritability };
+    public override BasePriorityRule Clone() => new TraitGeneralPriorityRule() { has = has, type = type, inheritability = inheritability };
 
     public override bool Matches(Pawn? p) => type switch
     {
