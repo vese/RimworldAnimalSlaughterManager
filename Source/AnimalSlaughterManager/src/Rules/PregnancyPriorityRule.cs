@@ -11,7 +11,7 @@ public class PregnancyPriorityRule : BasePriorityRule
 
     public override BasePriorityRule Clone() => new PregnancyPriorityRule() { has = has };
 
-    public override bool MatchesSignals(in AnimalSignals signals) => signals.pregnant == has;
+    public override bool Matches(Pawn? p) => ASM_MapComp.IsPregnantOrCarryingEgg(p) == has;
 
     public override void ExposeData()
     {

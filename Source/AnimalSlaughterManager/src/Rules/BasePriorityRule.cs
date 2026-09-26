@@ -15,9 +15,7 @@ public abstract class BasePriorityRule : IExposable
     public abstract BasePriorityRule Clone();
     public abstract void ExposeData();
 
-    public bool Matches(Pawn? p) => p != null && MatchesSignals(AnimalSignals.OfPawn(p));
-
-    public abstract bool MatchesSignals(in AnimalSignals signals);
+    public abstract bool Matches(Pawn? p);
 
     /// <summary>
     /// True when every animal matching <paramref name="other"/> also matches this rule

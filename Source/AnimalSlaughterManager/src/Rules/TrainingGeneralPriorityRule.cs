@@ -20,12 +20,12 @@ public class TrainingGeneralPriorityRule : BasePriorityRule
 
     public override BasePriorityRule Clone() => new TrainingGeneralPriorityRule() { type = type };
 
-    public override bool MatchesSignals(in AnimalSignals signals) => type switch
+    public override bool Matches(Pawn? p) => type switch
     {
-        TrainingGeneralType.None => signals.training == TrainingStatus.None,
-        TrainingGeneralType.Partial => signals.training == TrainingStatus.Partial,
-        TrainingGeneralType.PartialOrFull => signals.training != TrainingStatus.None,
-        TrainingGeneralType.Full => signals.training == TrainingStatus.Full,
+        TrainingGeneralType.None => !HasAnyTraining(p),
+        TrainingGeneralType.Partial => HasAnyTraining(p) && !AllTrained(p),
+        TrainingGeneralType.PartialOrFull => HasAnyTraining(p),
+        TrainingGeneralType.Full => AllTrained(p),
         _ => throw new NotImplementedException(),
     };
 

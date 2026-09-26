@@ -15,8 +15,7 @@ public class TraitPriorityRule : BasePriorityRule
 
     public override BasePriorityRule Clone() => new TraitPriorityRule() { has = has, trait = trait, inheritability = inheritability };
 
-    public override bool MatchesSignals(in AnimalSignals signals) =>
-        trait != null && signals.traits.Contains(trait.defName) == has && InheritMatch(trait, inheritability);
+    public override bool Matches(Pawn? p) => trait != null && AnimalTraitsAccess.HasTrait(p, trait) == has && InheritMatch(trait, inheritability);
 
     public override void ExposeData()
     {

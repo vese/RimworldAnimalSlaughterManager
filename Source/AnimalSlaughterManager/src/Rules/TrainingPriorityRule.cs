@@ -14,7 +14,7 @@ public class TrainingPriorityRule : BasePriorityRule
 
     public override BasePriorityRule Clone() => new TrainingPriorityRule() { has = has, trainable = trainable };
 
-    public override bool MatchesSignals(in AnimalSignals signals) => trainable != null && signals.learnedSkills.Contains(trainable.defName) == has;
+    public override bool Matches(Pawn? p) => trainable != null && (p?.training?.HasLearned(trainable) ?? false) == has;
 
     public override void ExposeData()
     {
