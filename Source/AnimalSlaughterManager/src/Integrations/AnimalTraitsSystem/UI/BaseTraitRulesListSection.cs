@@ -40,10 +40,18 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
         left = x;
         top += UIConstants.GapY;
 
-        var rowHeight = UIConstants.MediumTextHeight;
+        DrawList(left, top, listWidth, listHeight, ref listState, comp);
+
+        return listHeight;
+    }
+
+    private void DrawList(float x, float y, float listWidth, float listHeight, ref ListSectionState listState, ASM_MapComp comp)
+    {
+        var top = y;
+        var rowHeight = Text.LineHeight + UIConstants.TextPaddingBottom;
         var contentHeight = ruleSet.Count * (rowHeight + KindSlaughterSettingsTabListHelper.ListGapY);
-        var outRect = new Rect(left, top, listWidth, listHeight);
-        var view = new Rect(left, top, listWidth - UIConstants.ScrollbarWidth, Mathf.Max(contentHeight, outRect.height));
+        var outRect = new Rect(x, top, listWidth, listHeight);
+        var view = new Rect(x, top, listWidth - UIConstants.ScrollbarWidth, Mathf.Max(contentHeight, outRect.height));
 
         Widgets.BeginScrollView(outRect, ref listState.scroll, view);
 
@@ -69,8 +77,6 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
         }
 
         Widgets.EndScrollView();
-
-        return listHeight;
     }
 
     private float DrawTitle(float x, float y, float width)

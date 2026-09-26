@@ -19,13 +19,13 @@ public class TraitRulesListSection(IEditableTraitsRuleSet<TraitRule> rules) : Ba
         Text.Font = GameFont.Small;
         GUI.color = Color.white;
 
-        var labelHeight = UIConstants.SmallTextHeight;
+        var labelHeight = Text.LineHeight;
         var gripOffset = UIConstants.IconSize;
-        var rightSideWidth = UIConstants.ButtonMinWidth + UIConstants.GapX +   // age
-                             UIConstants.ButtonMinWidth + UIConstants.GapX +   // gender
-                             UIConstants.ButtonMinWidth + UIConstants.GapX +   // inheritability
-                             UIConstants.IconSize + UIConstants.GapX +         // copy
-                             UIConstants.IconSize;                             // remove
+        var rightSideWidth = UIConstants.ButtonMinWidth + UIConstants.GapX + // age
+                             UIConstants.ButtonMinWidth + UIConstants.GapX + // gender
+                             UIConstants.ButtonMinWidth + UIConstants.GapX + // inheritability
+                             UIConstants.IconSize + UIConstants.GapX + // copy
+                             UIConstants.IconSize; // remove
         var traitColumnWidth = width - gripOffset - rightSideWidth;
         var left = x + gripOffset;
 

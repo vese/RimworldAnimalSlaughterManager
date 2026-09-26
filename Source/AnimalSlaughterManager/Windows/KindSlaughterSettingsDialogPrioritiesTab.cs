@@ -27,9 +27,6 @@ public static class UIConstants
     public const float ButtonPaddingX = 16f;
     public const float ScrollbarWidth = 16f;
     public const float TextPaddingBottom = 2f;
-    public static float SmallTextHeight => Text.LineHeightOf(GameFont.Small);
-    [Obsolete]
-    public static float MediumTextHeight => Text.LineHeightOf(GameFont.Medium);
     public const float ListMinHeight = 200f;
 }
 
@@ -196,8 +193,17 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         // List
         top += UIConstants.GapY;
 
-        var outRect = new Rect(left, top, listWidth, listHeight);
-        var view = new Rect(left, top, listWidth - UIConstants.ScrollbarWidth, outRect.height/*TODO: need this? Mathf.Max(listState.contentHeight, outRect.height)*/);
+        DrawConditionList(left, top, listWidth, listHeight, list, ref listState, male, adult, validation);
+    }
+
+    private void DrawConditionList(float x, float y, float listWidth, float listHeight,
+        List<BasePriorityRule> list, ref ListSectionState listState, bool male, bool adult, List<List<string>> validation)
+    {
+        var top = y;
+        var rowHeight = Text.LineHeight + UIConstants.TextPaddingBottom;
+        var contentHeight = list.Count * (rowHeight + KindSlaughterSettingsTabListHelper.ListGapY);
+        var outRect = new Rect(x, top, listWidth, listHeight);
+        var view = new Rect(x, top, listWidth - UIConstants.ScrollbarWidth, Mathf.Max(contentHeight, outRect.height));
 
         Widgets.BeginScrollView(outRect, ref listState.scroll, view);
 
@@ -209,7 +215,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
         for (int i = 0; i < list.Count; i++)
         {
-            var row = new Rect(view.x, top, view.width, UIConstants.MediumTextHeight);
+            var row = new Rect(view.x, top, view.width, rowHeight);
 
             if (i % 2 == 1)
             {
@@ -222,9 +228,6 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
             top += row.height + KindSlaughterSettingsTabListHelper.ListGapY;
         }
-
-        //TODO: need this?
-        //listState.contentHeight = Mathf.Max(cy - y, outRect.height);
 
         Widgets.EndScrollView();
     }
@@ -382,7 +385,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         Text.Anchor = TextAnchor.MiddleLeft;
         GUI.color = Color.white;
 
-        top = row.y + (UIConstants.MediumTextHeight - UIConstants.ButtonHeight) / 2;
+        top = row.y + (row.height - UIConstants.ButtonHeight) / 2f;
         var labelButtonRect = new Rect(left, top, labelWidth, UIConstants.ButtonHeight);
 
         Widgets.DrawHighlightIfMouseover(labelButtonRect);
