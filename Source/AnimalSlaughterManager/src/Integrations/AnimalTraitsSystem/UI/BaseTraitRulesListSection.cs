@@ -18,72 +18,27 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
         // Row 1: title.
         var left = x;
         var top = y;
-        var titleHeight = UIConstants.MediumTextHeight;
 
-        GUI.color = Color.white;
-        Text.Font = GameFont.Medium;
-        Text.Anchor = TextAnchor.MiddleLeft;
-
-        Widgets.Label(new Rect(x, top, listWidth, titleHeight), TitleKey.Translate());
-
-        top += titleHeight;
+        top += DrawTitle(left, top, listWidth);
 
         // Row 2: add, clear, presets (left-aligned).
-        var addButtonText = ASMKeys.AddTrait.Translate();
-        var addButtonWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(addButtonText).x + UIConstants.ButtonPaddingX);
-        var presetButtonText = ASMKeys.TraitListPresets.Translate();
-        var presetButtonWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(presetButtonText).x + UIConstants.ButtonPaddingX);
-        var clearButtonText = ASMKeys.ClearList.Translate();
-        var clearButtonWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(clearButtonText).x + UIConstants.ButtonPaddingX);
-
-        Rect addBtn = new Rect(left, top, addButtonWidth, UIConstants.ButtonHeight);
-        left += addButtonWidth + UIConstants.GapX;
-        Rect presetBtn = new Rect(left, top, presetButtonWidth, UIConstants.ButtonHeight);
-        left += presetButtonWidth + UIConstants.GapX;
-        Rect clearBtn = new Rect(left, top, clearButtonWidth, UIConstants.ButtonHeight);
-
-        if (Widgets.ButtonText(addBtn, addButtonText))
-        {
-            Find.WindowStack.Add(new Dialog_TraitPicker(RuleSet.Add));
-        }
-
-        if (Widgets.ButtonText(presetBtn, presetButtonText))
-        {
-            Find.WindowStack.Add(new Dialog_PresetBrowser/*<T>*/(comp, PresetScope.List, animalDef/*, ruleSet*/));
-        }
-
-        GUI.enabled = ruleSet.HasRules;
-
-        if (Widgets.ButtonText(clearBtn, clearButtonText))
-        {
-            ruleSet.Clear();
-            comp.MarkDirty();
-        }
-
-        GUI.enabled = true;
-
-        top += UIConstants.ButtonHeight + UIConstants.GapY;
-
-        // Row 3: help
-        var help = HelpKey.Translate();
-        var helpHeight = Text.CalcHeight(help, listWidth);
         top += UIConstants.GapY;
 
-        GUI.color = Color.gray;
-        Text.Font = GameFont.Tiny;
+        top += DrawButtons(left, top, comp, animalDef);
 
-        Widgets.Label(new Rect(left, top, listWidth, helpHeight), help);
+        // Row 3: help
+        top += UIConstants.GapY;
 
-        top += helpHeight + UIConstants.GapY;
+        top += DrawHelp(left, top, listWidth);
 
         // Row 4: table header
-        top += DrawHeader(top, left, listWidth) + UIConstants.GapY;
+        top += UIConstants.GapY;
+
+        top += DrawHeader(top, left, listWidth);
 
         // List
         left = x;
-
-        GUI.color = Color.white;
-        Text.Font = GameFont.Small;
+        top += UIConstants.GapY;
 
         var outRect = new Rect(left, top, listWidth, listHeight);
         var view = new Rect(left, top, listWidth - UIConstants.ScrollbarWidth, outRect.height/*TODO: need this? Mathf.Max(listState.contentHeight, outRect.height)*/);
@@ -117,6 +72,96 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
         Widgets.EndScrollView();
 
         return listHeight;
+    }
+
+    private float DrawTitle(float x, float y, float width)
+    {
+        var color = GUI.color;
+        var font = Text.Font;
+        var anchor = Text.Anchor;
+        GUI.color = Color.white;
+        Text.Font = GameFont.Medium;
+        Text.Anchor = TextAnchor.UpperLeft;
+
+        var height = Text.LineHeight + UIConstants.TextPaddingBottom;
+        Widgets.Label(new Rect(x, y, width, height), TitleKey.Translate());
+
+        GUI.color = color;
+        Text.Font = font;
+        Text.Anchor = anchor;
+
+        return height;
+    }
+
+    private float DrawButtons(float x, float y, ASM_MapComp comp, ThingDef animalDef)
+    {
+        var color = GUI.color;
+        var font = Text.Font;
+        var anchor = Text.Anchor;
+        GUI.color = Color.white;
+        Text.Font = GameFont.Small;
+        Text.Anchor = TextAnchor.MiddleLeft;
+
+        var left = x;
+        var height = Text.LineHeight + UIConstants.ButtonPaddingY;
+
+        var addButtonText = ASMKeys.AddTrait.Translate();
+        var addButtonWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(addButtonText).x + UIConstants.ButtonPaddingX);
+        var addBtn = new Rect(left, y, addButtonWidth, height);
+        left += addButtonWidth + UIConstants.GapX;
+
+        if (Widgets.ButtonText(addBtn, addButtonText))
+        {
+            Find.WindowStack.Add(new Dialog_TraitPicker(RuleSet.Add));
+        }
+
+        var presetButtonText = ASMKeys.TraitListPresets.Translate();
+        var presetButtonWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(presetButtonText).x + UIConstants.ButtonPaddingX);
+        var presetBtn = new Rect(left, y, presetButtonWidth, height);
+        left += presetButtonWidth + UIConstants.GapX;
+
+        if (Widgets.ButtonText(presetBtn, presetButtonText))
+        {
+            Find.WindowStack.Add(new Dialog_PresetBrowser/*<T>*/(comp, PresetScope.List, animalDef/*, ruleSet*/));
+        }
+
+        var clearButtonText = ASMKeys.ClearList.Translate();
+        var clearButtonWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(clearButtonText).x + UIConstants.ButtonPaddingX);
+        var clearBtn = new Rect(left, y, clearButtonWidth, height);
+
+        GUI.enabled = ruleSet.HasRules;
+
+        if (Widgets.ButtonText(clearBtn, clearButtonText))
+        {
+            ruleSet.Clear();
+            comp.MarkDirty();
+        }
+
+        GUI.enabled = true;
+
+        GUI.color = color;
+        Text.Font = font;
+        Text.Anchor = anchor;
+
+        return height;
+    }
+
+    private float DrawHelp(float x, float y, float width)
+    {
+        var color = GUI.color;
+        var font = Text.Font;
+        GUI.color = Color.gray;
+        Text.Font = GameFont.Tiny;
+
+        var help = HelpKey.Translate();
+        var height = Text.CalcHeight(help, width);
+
+        Widgets.Label(new Rect(x, y, width, height), help);
+
+        GUI.color = color;
+        Text.Font = font;
+
+        return height;
     }
 
     protected abstract float DrawHeader(float x, float y, float width);

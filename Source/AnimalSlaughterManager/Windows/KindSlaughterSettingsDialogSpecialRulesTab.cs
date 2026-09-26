@@ -49,17 +49,21 @@ public class KindSlaughterSettingsDialogSpecialRulesTab(KindTraitsSettings trait
         // TODO: move in ats specific
         if (!AnimalTraitsAccess.HasAvailableTraits)
         {
-            var warningText = ASMKeys.ATSNotDetected.Translate();
-
+            var color = GUI.color;
+            var font = Text.Font;
             GUI.color = Color.yellow;
             Text.Font = GameFont.Tiny;
 
+            var warningText = ASMKeys.ATSNotDetected.Translate();
             Widgets.Label(new Rect(x, y, width, Text.CalcHeight(warningText, width)), warningText);
+
+            GUI.color = color;
+            Text.Font = font;
 
             return;
         }
 
-        var listHeight = MathF.Max(KindSlaughterSettingsTabListHelper.ListMinHeight, (contentHeight - RuleSetsGapYSum) / RuleSetsCount);
+        var listHeight = MathF.Max(UIConstants.ListMinHeight, (contentHeight - RuleSetsGapYSum) / RuleSetsCount);
         var top = y;
 
         top += protectEditor.Draw(x, top, width, listHeight, ref protectEditorState, comp, animalDef);
