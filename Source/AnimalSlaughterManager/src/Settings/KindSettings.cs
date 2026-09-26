@@ -6,7 +6,7 @@ namespace ASM;
 /// Per-animal-kind slaughter settings, layered on top of vanilla AutoSlaughterConfig.
 /// Slaughter priority is split into four sex×age buckets (matching vanilla's buckets).
 /// </summary>
-public class KindSettings : IExposable
+public class KindSettings : IExposable, IPresettable
 {
     public KindPreferenceSettings preferenceSettings;
     public KindPrioritySettings prioritySettings = new();
@@ -51,5 +51,19 @@ public class KindSettings : IExposable
         preferenceSettings.ExposeData();
         prioritySettings.ExposeData();
         traitsSettings.ExposeData();
+    }
+
+    public void Save(KindDto dto)
+    {
+        preferenceSettings.Save(dto);
+        prioritySettings.Save(dto);
+        traitsSettings.Save(dto);
+    }
+
+    public void Load(KindDto dto)
+    {
+        preferenceSettings.Load(dto);
+        prioritySettings.Load(dto);
+        traitsSettings.Load(dto);
     }
 }

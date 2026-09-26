@@ -1,9 +1,10 @@
+using System;
 using Verse;
 
 namespace ASM;
 
 /// <summary>Age-direction preferences for the four sex×age buckets; descendants provide the save keys.</summary>
-public abstract class PreferenceSettings
+public abstract class PreferenceSettings : IPresettable
 {
     public PreferenceSettings() { }
 
@@ -92,5 +93,21 @@ public abstract class PreferenceSettings
         Scribe_Values.Look(ref femalePref, FemalePrefKey, SlaughterPreference.OldestFirst);
         Scribe_Values.Look(ref maleYoungPref, MaleYoungPrefKey, SlaughterPreference.OldestFirst);
         Scribe_Values.Look(ref femaleYoungPref, FemaleYoungPrefKey, SlaughterPreference.OldestFirst);
+    }
+
+    public void Save(KindDto dto)
+    {
+        dto.malePref = malePref.ToString();
+        dto.femalePref = femalePref.ToString();
+        dto.maleYoungPref = maleYoungPref.ToString();
+        dto.femaleYoungPref = femaleYoungPref.ToString();
+    }
+
+    public void Load(KindDto dto)
+    {
+        Enum.TryParse(dto.malePref, out malePref);
+        Enum.TryParse(dto.femalePref, out femalePref);
+        Enum.TryParse(dto.maleYoungPref, out maleYoungPref);
+        Enum.TryParse(dto.femaleYoungPref, out femaleYoungPref);
     }
 }

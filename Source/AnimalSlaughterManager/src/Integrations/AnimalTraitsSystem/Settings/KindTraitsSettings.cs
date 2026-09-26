@@ -96,7 +96,7 @@ public class KindTraitsRuleSet<T>(Func<IEditableTraitsRuleSet<T>, ITraitRulesLis
     }
 }
 
-public class KindTraitsSettings
+public class KindTraitsSettings : IPresettable
 {
     // Breeding: protect these animals from slaughter.
     public KindTraitsRuleSet<TraitProtectRule> protectRuleSet = new((ruleSet) => new TraitProtectRulesListSection(ruleSet));
@@ -165,5 +165,70 @@ public class KindTraitsSettings
         //    cullTraits.RemoveAll(t => t == null || t.trait == null);
         //    spareTraits.RemoveAll(t => t == null || t.trait == null);
         //}
+    }
+
+    public void Save(KindDto dto)
+    {
+        dto.KeepTraits = protectRuleSet.rules.Select(TraitDto.From).ToList();
+        dto.ForceCullTraits = forceCullRuleSet.rules.Select(TraitDto.From).ToList();
+#pragma warning disable CS0618
+        dto.CullTraits = cullTraits.Select(TraitDto.From).ToList();
+        dto.SpareTraits = spareTraits.Select(TraitDto.From).ToList();
+#pragma warning restore CS0618
+    }
+
+    public void Load(KindDto dto)
+    {
+        protectRuleSet.rules.Clear();
+        forceCullRuleSet.rules.Clear();
+
+        if (dto.KeepTraits != null)
+        {
+            foreach (var t in dto.KeepTraits.Select(t => t.ToTarget()))
+            {
+                if (t != null)
+                {
+                    protectRuleSet.rules.Add(t);
+                }
+            }
+        }
+
+        if (dto.ForceCullTraits != null)
+        {
+            foreach (var c in dto.ForceCullTraits.Select(t => t.ToCull()))
+            {
+                if (c != null)
+                {
+                    forceCullRuleSet.rules.Add(c);
+                }
+            }
+        }
+
+#pragma warning disable CS0618
+        cullTraits.Clear();
+        spareTraits.Clear();
+
+        if (dto.CullTraits != null)
+        {
+            foreach (var c in dto.CullTraits.Select(t => t.ToCull()))
+            {
+                if (c != null)
+                {
+                    cullTraits.Add(c);
+                }
+            }
+        }
+
+        if (dto.SpareTraits != null)
+        {
+            foreach (var c in dto.SpareTraits.Select(t => t.ToCull()))
+            {
+                if (c != null)
+                {
+                    spareTraits.Add(c);
+                }
+            }
+        }
+#pragma warning restore CS0618
     }
 }

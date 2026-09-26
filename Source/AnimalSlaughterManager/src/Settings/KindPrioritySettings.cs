@@ -68,7 +68,7 @@ public class PriorityRuleSet
     }
 }
 
-public class KindPrioritySettings
+public class KindPrioritySettings : IPresettable
 {
     private const int currentDataVersion = 1;
 
@@ -121,6 +121,59 @@ public class KindPrioritySettings
         foreach (var ruleSet in ruleSets.Values)
         {
             ruleSet.Reset();
+        }
+    }
+
+    public void Save(KindDto dto)
+    {
+        dto.PrioRulesAdultMale = Get(true, true).Select(PriorityRuleDto.From).ToList();
+        dto.PrioRulesYoungMale = Get(true, false).Select(PriorityRuleDto.From).ToList();
+        dto.PrioRulesAdultFemale = Get(false, true).Select(PriorityRuleDto.From).ToList();
+        dto.PrioRulesYoungFemale = Get(false, false).Select(PriorityRuleDto.From).ToList();
+    }
+
+    public void Load(KindDto dto)
+    {
+        LoadRuleSet(dto.PrioRulesAdultMale, dto.PrioAdultMale, Get(true, true));
+        LoadRuleSet(dto.PrioRulesYoungMale, dto.PrioYoungMale, Get(true, false));
+        LoadRuleSet(dto.PrioRulesAdultFemale, dto.PrioAdultFemale, Get(false, true));
+        LoadRuleSet(dto.PrioRulesYoungFemale, dto.PrioYoungFemale, Get(false, false));
+    }
+
+    // PrioRules* — current format; the legacy ConditionDto lists cover presets saved before
+    // the priority-rule refactor.
+    private static void LoadRuleSet(List<PriorityRuleDto> rules, List<ConditionDto> legacy, List<BasePriorityRule> target)
+    {
+        target.Clear();
+
+        if (rules != null)
+        {
+            foreach (var r in rules)
+            {
+                var rule = r.ToRule();
+
+                if (rule != null)
+                {
+                    target.Add(rule);
+                }
+            }
+
+            return;
+        }
+
+        if (legacy != null)
+        {
+#pragma warning disable CS0618
+            foreach (var c in legacy)
+            {
+                var rule = KindPrioritySettingsLegacy.Convert(c.ToCondition());
+
+                if (rule != null)
+                {
+                    target.Add(rule);
+                }
+            }
+#pragma warning restore CS0618
         }
     }
 
