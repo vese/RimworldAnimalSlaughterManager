@@ -26,7 +26,7 @@ public static class UIConstants
     public const float ButtonPaddingY = 4f;
     public const float ButtonPaddingX = 16f;
     public const float ScrollbarWidth = 16f;
-    public const float TextPaddingBottom = 2f;
+    public const float TextPaddingY = 2f;
     public const float ListMinHeight = 200f;
 }
 
@@ -196,42 +196,6 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         DrawConditionList(left, top, listWidth, listHeight, list, ref listState, male, adult, validation);
     }
 
-    private void DrawConditionList(float x, float y, float listWidth, float listHeight,
-        List<BasePriorityRule> list, ref ListSectionState listState, bool male, bool adult, List<List<string>> validation)
-    {
-        var top = y;
-        var rowHeight = Text.LineHeight + UIConstants.TextPaddingBottom;
-        var contentHeight = list.Count * (rowHeight + KindSlaughterSettingsTabListHelper.ListGapY);
-        var outRect = new Rect(x, top, listWidth, listHeight);
-        var view = new Rect(x, top, listWidth - UIConstants.ScrollbarWidth, Mathf.Max(contentHeight, outRect.height));
-
-        Widgets.BeginScrollView(outRect, ref listState.scroll, view);
-
-        if (Event.current.type == EventType.Repaint)
-        {
-            // TODO: changes in list in settings class, use ReadonlyList
-            listState.group = ReorderableWidget.NewGroup((a, b) => KindSlaughterSettingsTabListHelper.ReorderList(list, a, b), ReorderableDirection.Vertical, outRect);
-        }
-
-        for (int i = 0; i < list.Count; i++)
-        {
-            var row = new Rect(view.x, top, view.width, rowHeight);
-
-            if (i % 2 == 1)
-            {
-                Widgets.DrawAltRect(row);
-            }
-
-            ReorderableWidget.Reorderable(listState.group, new Rect(row.x, row.y, UIConstants.IconSize, row.height));
-
-            DrawConditionRow(row, list, i, validation, comp);
-
-            top += row.height + KindSlaughterSettingsTabListHelper.ListGapY;
-        }
-
-        Widgets.EndScrollView();
-    }
-
     private float DrawConditionSectionHeader(float x, float y, TaggedString title, List<BasePriorityRule> rules)
     {
         var color = GUI.color;
@@ -253,7 +217,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         Text.Anchor = TextAnchor.UpperLeft;
 
         var rectWidth = Text.CalcSize(title).x + UIConstants.GapX;
-        var rectHeight = Text.LineHeight + UIConstants.TextPaddingBottom;
+        var rectHeight = Text.LineHeight + UIConstants.TextPaddingY;
 
         Widgets.Label(new Rect(x, y, rectWidth, rectHeight), title);
 
@@ -353,6 +317,42 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         Text.Anchor = anchor;
 
         return height;
+    }
+
+    private void DrawConditionList(float x, float y, float listWidth, float listHeight,
+        List<BasePriorityRule> list, ref ListSectionState listState, bool male, bool adult, List<List<string>> validation)
+    {
+        var top = y;
+        var rowHeight = Text.LineHeight + UIConstants.TextPaddingY;
+        var contentHeight = list.Count * (rowHeight + KindSlaughterSettingsTabListHelper.ListGapY);
+        var outRect = new Rect(x, top, listWidth, listHeight);
+        var view = new Rect(x, top, listWidth - UIConstants.ScrollbarWidth, Mathf.Max(contentHeight, outRect.height));
+
+        Widgets.BeginScrollView(outRect, ref listState.scroll, view);
+
+        if (Event.current.type == EventType.Repaint)
+        {
+            // TODO: changes in list in settings class, use ReadonlyList
+            listState.group = ReorderableWidget.NewGroup((a, b) => KindSlaughterSettingsTabListHelper.ReorderList(list, a, b), ReorderableDirection.Vertical, outRect);
+        }
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            var row = new Rect(view.x, top, view.width, rowHeight);
+
+            if (i % 2 == 1)
+            {
+                Widgets.DrawAltRect(row);
+            }
+
+            ReorderableWidget.Reorderable(listState.group, new Rect(row.x, row.y, UIConstants.IconSize, row.height));
+
+            DrawConditionRow(row, list, i, validation, comp);
+
+            top += row.height + KindSlaughterSettingsTabListHelper.ListGapY;
+        }
+
+        Widgets.EndScrollView();
     }
 
     private void DrawConditionRow(Rect row, List<BasePriorityRule> list, int index, List<List<string>> validation, ASM_MapComp comp)

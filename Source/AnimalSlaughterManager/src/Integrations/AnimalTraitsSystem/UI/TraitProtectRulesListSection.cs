@@ -22,11 +22,11 @@ public class TraitProtectRulesListSection(IEditableTraitsRuleSet<TraitProtectRul
         var labelHeight = Text.LineHeight;
         var gripOffset = UIConstants.IconSize;
         var rightSideWidth = UIConstants.ButtonMinWidth + UIConstants.GapX + // keep
-                             UIConstants.ButtonMinWidth + UIConstants.GapX + // age
-                             UIConstants.ButtonMinWidth + UIConstants.GapX + // gender
-                             UIConstants.ButtonMinWidth + UIConstants.GapX + // inheritability
-                             UIConstants.IconSize + UIConstants.GapX + // copy
-                             UIConstants.IconSize; // remove
+            UIConstants.ButtonMinWidth + UIConstants.GapX + // age
+            UIConstants.ButtonMinWidth + UIConstants.GapX + // gender
+            UIConstants.ButtonMinWidth + UIConstants.GapX + // inheritability
+            UIConstants.IconSize + UIConstants.GapX + // copy
+            UIConstants.IconSize; // remove
         var traitColumnWidth = width - gripOffset - rightSideWidth;
         var left = x + gripOffset;
 
