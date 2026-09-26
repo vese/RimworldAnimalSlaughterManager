@@ -41,29 +41,11 @@ public class TraitGeneralPriorityRule : BasePriorityRule
 
     public override BasePriorityRule Clone() => new TraitGeneralPriorityRule() { has = has, type = type, inheritability = inheritability };
 
-    public override bool Matches(Pawn? p) => type switch
+    public override bool MatchesSignals(in AnimalSignals signals) => type switch
     {
-        TraitType.Both => inheritability switch
-        {
-            TraitInheritability.Both => HasTrait(p) == has,
-            TraitInheritability.Inheritable => HasTrait(p) == has,
-            TraitInheritability.NonInheritable => HasTrait(p) == has,
-            _ => throw new NotImplementedException(),
-        },
-        TraitType.Positive => inheritability switch
-        {
-            TraitInheritability.Both => HasTrait(p, false) == has,
-            TraitInheritability.Inheritable => HasTrait(p, false) == has,
-            TraitInheritability.NonInheritable => HasTrait(p, false) == has,
-            _ => throw new NotImplementedException(),
-        },
-        TraitType.Negative => inheritability switch
-        {
-            TraitInheritability.Both => HasTrait(p, true) == has,
-            TraitInheritability.Inheritable => HasTrait(p, true) == has,
-            TraitInheritability.NonInheritable => HasTrait(p, true) == has,
-            _ => throw new NotImplementedException(),
-        },
+        TraitType.Both => (signals.hasPositiveTrait || signals.hasNegativeTrait) == has,
+        TraitType.Positive => signals.hasPositiveTrait == has,
+        TraitType.Negative => signals.hasNegativeTrait == has,
         _ => throw new NotImplementedException(),
     };
 

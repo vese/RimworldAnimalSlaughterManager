@@ -13,8 +13,11 @@ public abstract class BasePriorityRule : IExposable
     public virtual bool HasExtraParameters { get; } = false;
     public abstract string Label { get; }
     public abstract BasePriorityRule Clone();
-    public abstract bool Matches(Pawn? p);
     public abstract void ExposeData();
+
+    public bool Matches(Pawn? p) => p != null && MatchesSignals(AnimalSignals.OfPawn(p));
+
+    public abstract bool MatchesSignals(in AnimalSignals signals);
 
     /// <summary>
     /// True when every animal matching <paramref name="other"/> also matches this rule

@@ -11,7 +11,7 @@ public class BondPriorityRule : BasePriorityRule
 
     public override BasePriorityRule Clone() => new BondPriorityRule() { has = has };
 
-    public override bool Matches(Pawn? p) => (p?.relations?.GetDirectRelationsCount(PawnRelationDefOf.Bond) ?? 0) > 0 == has;
+    public override bool MatchesSignals(in AnimalSignals signals) => signals.bonded == has;
 
     public override void ExposeData()
     {

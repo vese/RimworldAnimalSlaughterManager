@@ -14,7 +14,7 @@ public class DiseasePriorityRule : BasePriorityRule
 
     public override BasePriorityRule Clone() => new DiseasePriorityRule() { has = has, disease = disease };
 
-    public override bool Matches(Pawn? p) => disease != null && (p?.health?.hediffSet?.HasHediff(disease) ?? false) == has;
+    public override bool MatchesSignals(in AnimalSignals signals) => disease != null && signals.diseases.Contains(disease.defName) == has;
 
     public override void ExposeData()
     {

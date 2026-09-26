@@ -87,8 +87,9 @@ public class PriorityRuleSet
 
     /// <summary>
     /// Per-rule problem messages (null when the rule is fine). Rules are matched top-to-down and
-    /// the first match wins: a rule covered by an earlier one can never fire (unreachable), and
-    /// two rules covering each other are duplicates.
+    /// the first match wins, so a rule is unreachable when the rules above it together match every
+    /// animal it could match — detected exactly by enumerating animal signal profiles. Duplicates
+    /// (identical targets) are additionally reported pairwise for a clearer message.
     /// </summary>
     public List<List<string>> Validate()
     {
@@ -103,25 +104,115 @@ public class PriorityRuleSet
         {
             for (int j = i + 1; j < rules.Count; j++)
             {
-                bool upperCoversLower = rules[i].Covers(rules[j]);
-                bool lowerCoversUpper = rules[j].Covers(rules[i]);
-
-                if (upperCoversLower && lowerCoversUpper)
+                if (rules[i].Covers(rules[j]) && rules[j].Covers(rules[i]))
                 {
                     errors[i] ??= [];
                     errors[j] ??= [];
                     errors[i]!.Add(ASMKeys.ValidationDuplicate.Translate(j + 1));
                     errors[j]!.Add(ASMKeys.ValidationDuplicate.Translate(i + 1));
                 }
-                else if (upperCoversLower)
+            }
+        }
+
+        var profiles = EnumerateProfiles();
+        bool[] reachable = new bool[rules.Count];
+
+        foreach (var profile in profiles)
+        {
+            for (int i = 0; i < rules.Count; i++)
+            {
+                if (rules[i].MatchesSignals(profile))
                 {
-                    errors[j] ??= [];
-                    errors[j]!.Add(ASMKeys.ValidationUnreachable.Translate(i + 1));
+                    // The first matching rule wins — it (and only it) is reached by this animal.
+                    reachable[i] = true;
+                    break;
                 }
             }
         }
 
+        for (int i = 0; i < rules.Count; i++)
+        {
+            if (!reachable[i])
+            {
+                errors[i] ??= [];
+                errors[i]!.Add(ASMKeys.ValidationUnreachable.Translate(JoinUpper(i)));
+            }
+        }
+
         return errors!;
+    }
+
+    private string JoinUpper(int index) => string.Join(", ", Enumerable.Range(1, index).Select(n => n.ToString()));
+
+    /// <summary>
+    /// Every animal signal combination the list's rules can distinguish: training × pregnancy ×
+    /// bond × sickness × trait polarity × the specific traits/diseases/skills the rules reference.
+    /// A rule is reachable when some profile first-matches it.
+    /// </summary>
+    private IEnumerable<AnimalSignals> EnumerateProfiles()
+    {
+        var traits = new HashSet<string>();
+        var diseases = new HashSet<string>();
+        var skills = new HashSet<string>();
+        CollectDefs(traits, diseases, skills);
+
+        // Subsets are built once and shared: matching never mutates them.
+        var traitSets = PowerSets(traits).ToArray();
+        var diseaseSets = PowerSets(diseases).ToArray();
+        var skillSets = PowerSets(skills).ToArray();
+
+        foreach (var training in new[] { TrainingStatus.None, TrainingStatus.Partial, TrainingStatus.Full })
+        foreach (var pregnant in new[] { false, true })
+        foreach (var bonded in new[] { false, true })
+        foreach (var sick in new[] { false, true })
+        foreach (var positive in new[] { false, true })
+        foreach (var negative in new[] { false, true })
+        foreach (var traitSet in traitSets)
+        foreach (var diseaseSet in diseaseSets)
+        foreach (var skillSet in skillSets)
+        {
+            yield return new AnimalSignals(pregnant, bonded, sick, positive, negative, training,
+                traitSet, diseaseSet, skillSet);
+        }
+    }
+
+    private void CollectDefs(HashSet<string> traits, HashSet<string> diseases, HashSet<string> skills)
+    {
+        foreach (var rule in rules)
+        {
+            switch (rule)
+            {
+                case TraitPriorityRule t:
+                    if (t.trait != null) traits.Add(t.trait.defName);
+                    break;
+                case DiseasePriorityRule d:
+                    if (d.disease != null) diseases.Add(d.disease.defName);
+                    break;
+                case TrainingPriorityRule tr:
+                    if (tr.trainable != null) skills.Add(tr.trainable.defName);
+                    break;
+            }
+        }
+    }
+
+    private static IEnumerable<HashSet<string>> PowerSets(HashSet<string> source)
+    {
+        var items = source.ToArray();
+
+        for (long mask = 0; mask < 1L << items.Length; mask++)
+        {
+            var set = new HashSet<string>();
+
+            for (int b = 0; b < items.Length; b++)
+            {
+                if ((mask & 1L << b) != 0)
+                {
+                    set.Add(items[b]);
+                }
+            }
+
+            yield return set;
+        }
     }
 
 }

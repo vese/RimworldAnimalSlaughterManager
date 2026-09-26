@@ -11,7 +11,7 @@ public class DiseaseAnyPriorityRule : BasePriorityRule
 
     public override BasePriorityRule Clone() => new DiseaseAnyPriorityRule() { has = has };
 
-    public override bool Matches(Pawn? p) => IsSick(p) == has;
+    public override bool MatchesSignals(in AnimalSignals signals) => signals.sick == has;
 
     public override void ExposeData()
     {
