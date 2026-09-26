@@ -13,6 +13,7 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
 
     protected abstract string HelpKey { get; }
 
+    [Obsolete]
     protected abstract TraitListKind ListKind { get; }
 
     protected abstract string PresetsTitleKey { get; }
