@@ -26,7 +26,9 @@ public static class SlaughterListBuilder
         foreach (var config in mgr.configs)
         {
             if (config == null || config.animal == null || !config.AnyLimit)
+            {
                 continue;
+            }
             comp.kindSettings.TryGetValue(config.animal, out var ks);
             CullForConfig(comp, config, ks, slaughter, reserved);
         }
@@ -102,9 +104,18 @@ public static class SlaughterListBuilder
 
         foreach (var pawn in comp.map.mapPawns.SpawnedColonyAnimals)
         {
-            if (slaughter.Contains(pawn)) continue;
-            if (!AutoSlaughterManager.CanAutoSlaughterNow(pawn)) continue;
-            if (comp.IsProtected(pawn) || reserved.Contains(pawn)) continue;
+            if (slaughter.Contains(pawn))
+            {
+                continue;
+            }
+            if (!AutoSlaughterManager.CanAutoSlaughterNow(pawn))
+            {
+                continue;
+            }
+            if (comp.IsProtected(pawn) || reserved.Contains(pawn))
+            {
+                continue;
+            }
 
             if (AnimalTraitsAccess.ShouldCull(pawn, cullSet))
             {
@@ -126,10 +137,22 @@ public static class SlaughterListBuilder
 
             foreach (var pawn in comp.map.mapPawns.SpawnedColonyAnimals)
             {
-                if (pawn.def != kv.Key) continue;
-                if (slaughter.Contains(pawn)) continue;
-                if (!AutoSlaughterManager.CanAutoSlaughterNow(pawn)) continue;
-                if (comp.IsProtected(pawn) || reserved.Contains(pawn)) continue;
+                if (pawn.def != kv.Key)
+                {
+                    continue;
+                }
+                if (slaughter.Contains(pawn))
+                {
+                    continue;
+                }
+                if (!AutoSlaughterManager.CanAutoSlaughterNow(pawn))
+                {
+                    continue;
+                }
+                if (comp.IsProtected(pawn) || reserved.Contains(pawn))
+                {
+                    continue;
+                }
 
                 if (HasForceCullTrait(pawn, ks))
                 {
@@ -159,7 +182,10 @@ public static class SlaughterListBuilder
 
         foreach (var pawn in reserved)
         {
-            if (pawn.def != config.animal) continue;
+            if (pawn.def != config.animal)
+            {
+                continue;
+            }
             bool repro = pawn.ageTracker.CurLifeStage.reproductive;
 
             if (pawn.gender == Gender.Male) { if (repro) resM++; else resMY++; }
@@ -170,11 +196,26 @@ public static class SlaughterListBuilder
 
         foreach (var pawn in comp.map.mapPawns.SpawnedColonyAnimals)
         {
-            if (pawn.def != config.animal) continue;
-            if (!AutoSlaughterManager.CanAutoSlaughterNow(pawn)) continue;
-            if (comp.IsProtected(pawn)) continue;
-            if (reserved.Contains(pawn)) continue;
-            if (!config.allowSlaughterBonded && pawn.relations.GetDirectRelationsCount(PawnRelationDefOf.Bond) > 0) continue;
+            if (pawn.def != config.animal)
+            {
+                continue;
+            }
+            if (!AutoSlaughterManager.CanAutoSlaughterNow(pawn))
+            {
+                continue;
+            }
+            if (comp.IsProtected(pawn))
+            {
+                continue;
+            }
+            if (reserved.Contains(pawn))
+            {
+                continue;
+            }
+            if (!config.allowSlaughterBonded && pawn.relations.GetDirectRelationsCount(PawnRelationDefOf.Bond) > 0)
+            {
+                continue;
+            }
 
             vitals[pawn] = VitalsOf(pawn, traitDefs);
             bool repro = pawn.ageTracker.CurLifeStage.reproductive;
@@ -194,7 +235,10 @@ public static class SlaughterListBuilder
                     // Always: into the deferred-pregnant list (appended after the sort, culled last).
                     // Defer: into the bucket proper so they count toward the limit, but spared if culled.
                     // Never: excluded from culling entirely.
-                    if (pregMode == PregnantMode.Always) pregnant.Add(pawn);
+                    if (pregMode == PregnantMode.Always)
+                    {
+                        pregnant.Add(pawn);
+                    }
                     else if (pregMode == PregnantMode.Defer) { females.Add(pawn); all.Add(pawn); }
                 }
                 else if (!repro) { femalesYoung.Add(pawn); all.Add(pawn); }
@@ -233,17 +277,25 @@ public static class SlaughterListBuilder
     public static int CountKeptByTraits(ASM_MapComp comp, ThingDef def)
     {
         if (!comp.kindSettings.TryGetValue(def, out var ks) || ks?.traitsSettings.protectRuleSet == null || !ks.traitsSettings.protectRuleSet.HasRules)
+        {
             return 0;
+        }
         int n = 0;
         foreach (var pa in comp.map.mapPawns.SpawnedColonyAnimals)
         {
-            if (pa.def != def) continue;
+            if (pa.def != def)
+            {
+                continue;
+            }
             foreach (var tt in ks.traitsSettings.protectRuleSet.rules)
             {
                 if (tt.trait != null && AnimalTraitsAccess.HasTrait(pa, tt.trait)
                     && AgeMatches(pa, tt.ageScope) && GenderMatches(pa, tt.genderScope)
                     && InheritableMatches(tt.trait, tt.inheritMode))
-                { n++; break; }
+                {
+                    n++;
+                    break;
+                }
             }
         }
         return n;
@@ -254,14 +306,25 @@ public static class SlaughterListBuilder
     {
         int n = 0;
         foreach (var pa in comp.map.mapPawns.SpawnedColonyAnimals)
-            if (pa.def == def && comp.protectedPawnIDs.Contains(pa.thingIDNumber)) n++;
+        {
+            if (pa.def == def && comp.protectedPawnIDs.Contains(pa.thingIDNumber))
+            {
+                n++;
+            }
+        }
         return n;
     }
 
     private static SlaughterPreference PrefOf(KindSettings ks, bool male, bool adult)
     {
-        if (ks == null) return SlaughterPreference.OldestFirst;
-        if (male) return adult ? ks.preferenceSettings.malePref : ks.preferenceSettings.maleYoungPref;
+        if (ks == null)
+        {
+            return SlaughterPreference.OldestFirst;
+        }
+        if (male)
+        {
+            return adult ? ks.preferenceSettings.malePref : ks.preferenceSettings.maleYoungPref;
+        }
         return adult ? ks.preferenceSettings.femalePref : ks.preferenceSettings.femaleYoungPref;
     }
 
@@ -272,7 +335,12 @@ public static class SlaughterListBuilder
         bool useConds = conditions != null && conditions.Count > 0;
         var ranks = useConds ? new Dictionary<Pawn, float>() : null;
         if (useConds)
-            foreach (var p in list) ranks[p] = ConditionRank(p, conditions);
+        {
+            foreach (var p in list)
+            {
+                ranks[p] = ConditionRank(p, conditions);
+            }
+        }
         list.Sort((a, b) =>
         {
             // Per-bucket condition list: top = keep, bottom = cull. Lower match-index = kept;
@@ -280,7 +348,10 @@ public static class SlaughterListBuilder
             if (useConds)
             {
                 float ra = ranks[a], rb = ranks[b];
-                if (ra != rb) return rb.CompareTo(ra);
+                if (ra != rb)
+                {
+                    return rb.CompareTo(ra);
+                }
             }
             // Within the same sex and age category (this bucket), prefer to cull those with
             // fewer good traits, those with bad traits, and the sick ones. (Pregnancy is handled
@@ -288,11 +359,20 @@ public static class SlaughterListBuilder
             var va = vitals[a];
             var vb = vitals[b];
             int c = va.posTraits.CompareTo(vb.posTraits);                  // fewer good traits first
-            if (c != 0) return c;
+            if (c != 0)
+            {
+                return c;
+            }
             c = vb.negTraits.CompareTo(va.negTraits);                  // more bad traits first
-            if (c != 0) return c;
+            if (c != 0)
+            {
+                return c;
+            }
             c = (vb.sick ? 1 : 0).CompareTo(va.sick ? 1 : 0);          // sick first
-            if (c != 0) return c;
+            if (c != 0)
+            {
+                return c;
+            }
             // Final decider within the category: the configured age direction.
             long aa = a.ageTracker.AgeBiologicalTicks;
             long ab = b.ageTracker.AgeBiologicalTicks;
@@ -304,7 +384,12 @@ public static class SlaughterListBuilder
     private static float ConditionRank(Pawn p, List<BasePriorityRule> conditions)
     {
         for (int i = 0; i < conditions.Count; i++)
-            if (conditions[i].Matches(p)) return i;
+        {
+            if (conditions[i].Matches(p))
+            {
+                return i;
+            }
+        }
         return conditions.Count / 2f;
     }
 
@@ -322,7 +407,10 @@ public static class SlaughterListBuilder
     {
         var v = new PawnVitals();
         var hs = p?.health?.hediffSet;
-        if (hs == null) return v;
+        if (hs == null)
+        {
+            return v;
+        }
         v.pregnant = PawnSlaughterInfo.IsPregnantOrCarryingEgg(p);
         int pos = 0, neg = 0;
         for (int i = 0; i < traitDefs.Count; i++)
@@ -330,7 +418,14 @@ public static class SlaughterListBuilder
             var def = traitDefs[i];
             if (AnimalTraitsAccess.HasTrait(p, def))
             {
-                if (def.isBad) neg++; else pos++;
+                if (def.isBad)
+                {
+                    neg++;
+                }
+                else
+                {
+                    pos++;
+                }
             }
         }
         v.posTraits = pos;
@@ -342,23 +437,36 @@ public static class SlaughterListBuilder
     private static bool IsSick(HediffSet hs)
     {
         var hediffs = hs.hediffs;
-        if (hediffs == null) return false;
+        if (hediffs == null)
+        {
+            return false;
+        }
         for (int i = 0; i < hediffs.Count; i++)
         {
             var h = hediffs[i];
-            if (h?.def != null && h.def.makesSickThought) return true;
+            if (h?.def != null && h.def.makesSickThought)
+            {
+                return true;
+            }
         }
         return false;
     }
 
     private static bool HasForceCullTrait(Pawn p, KindSettings ks)
     {
-        if (ks?.traitsSettings.forceCullRuleSet == null) return false;
+        if (ks?.traitsSettings.forceCullRuleSet == null)
+        {
+            return false;
+        }
         foreach (var ct in ks.traitsSettings.forceCullRuleSet.rules)
+        {
             if (ct.trait != null && AnimalTraitsAccess.HasTrait(p, ct.trait)
                 && AgeMatches(p, ct.ageScope) && GenderMatches(p, ct.genderScope)
                 && InheritableMatches(ct.trait, ct.inheritMode))
+            {
                 return true;
+            }
+        }
         return false;
     }
 
@@ -397,7 +505,9 @@ public static class SlaughterListBuilder
     {
         var keep = new List<Pawn>();
         if (!InheritableMatches(tt.trait, tt.inheritMode))
+        {
             return keep;
+        }
 
         var bearers = kindPawns
             .Where(p => AnimalTraitsAccess.HasTrait(p, tt.trait) && AgeMatches(p, tt.ageScope) && GenderMatches(p, tt.genderScope))
@@ -409,13 +519,25 @@ public static class SlaughterListBuilder
         {
             var male = bearers.FirstOrDefault(p => p.gender == Gender.Male && p.ageTracker.CurLifeStage.reproductive);
             var female = bearers.FirstOrDefault(p => p.gender == Gender.Female && p.ageTracker.CurLifeStage.reproductive);
-            if (male != null) keep.Add(male);
-            if (female != null) keep.Add(female);
+            if (male != null)
+            {
+                keep.Add(male);
+            }
+            if (female != null)
+            {
+                keep.Add(female);
+            }
         }
         foreach (var b in bearers)
         {
-            if (keep.Count >= tt.keepCount) break;
-            if (!keep.Contains(b)) keep.Add(b);
+            if (keep.Count >= tt.keepCount)
+            {
+                break;
+            }
+            if (!keep.Contains(b))
+            {
+                keep.Add(b);
+            }
         }
         return keep;
     }

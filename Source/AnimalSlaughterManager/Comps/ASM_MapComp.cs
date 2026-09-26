@@ -40,7 +40,10 @@ public class ASM_MapComp : MapComponent
     // True if this kind has per-kind pref overrides or condition lists (differs from the global defaults).
     public bool KindHasCustomPrefs(ThingDef def)
     {
-        if (!kindSettings.TryGetValue(def, out var ks) || ks == null) return false;
+        if (!kindSettings.TryGetValue(def, out var ks) || ks == null)
+        {
+            return false;
+        }
         return !ks.preferenceSettings.Matches(globalSettings.preferenceSettings) || ks.prioritySettings.HasRules;
     }
 
@@ -65,9 +68,14 @@ public class ASM_MapComp : MapComponent
 
     public void ToggleProtected(Pawn p)
     {
-        if (p == null) return;
+        if (p == null)
+        {
+            return;
+        }
         if (!protectedPawnIDs.Add(p.thingIDNumber))
+        {
             protectedPawnIDs.Remove(p.thingIDNumber);
+        }
         dirty = true;
     }
 
@@ -82,9 +90,18 @@ public class ASM_MapComp : MapComponent
         globalSettings.ExposeData();
         if (Scribe.mode == LoadSaveMode.PostLoadInit)
         {
-            if (kindSettings == null) kindSettings = new Dictionary<ThingDef, KindSettings>();
-            if (protectedPawnIDs == null) protectedPawnIDs = new HashSet<int>();
-            if (pregnantModes == null) pregnantModes = new Dictionary<ThingDef, PregnantMode>();
+            if (kindSettings == null)
+            {
+                kindSettings = new Dictionary<ThingDef, KindSettings>();
+            }
+            if (protectedPawnIDs == null)
+            {
+                protectedPawnIDs = new HashSet<int>();
+            }
+            if (pregnantModes == null)
+            {
+                pregnantModes = new Dictionary<ThingDef, PregnantMode>();
+            }
         }
     }
 

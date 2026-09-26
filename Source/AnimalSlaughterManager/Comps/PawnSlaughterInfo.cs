@@ -14,13 +14,26 @@ public static class PawnSlaughterInfo
     // exposes no public accessor for an in-progress egg — so it is read via reflection.
     public static bool IsPregnantOrCarryingEgg(Pawn? p)
     {
-        if (p == null) return false;
+        if (p == null)
+        {
+            return false;
+        }
         var hs = p.health?.hediffSet;
-        if (hs != null && hs.HasHediff(HediffDefOf.Pregnant)) return true;
+        if (hs != null && hs.HasHediff(HediffDefOf.Pregnant))
+        {
+            return true;
+        }
         var egg = p.TryGetComp<CompEggLayer>();
         if (egg != null && EggProgressField != null)
         {
-            try { if ((float)EggProgressField.GetValue(egg) > 0f) return true; } catch { }
+            try
+            {
+                if ((float)EggProgressField.GetValue(egg) > 0f)
+                {
+                    return true;
+                }
+            }
+            catch { }
         }
         return false;
     }
@@ -31,11 +44,18 @@ public static class PawnSlaughterInfo
     public static float PregnancyProgress(Pawn p)
     {
         var preg = p.health?.hediffSet?.GetFirstHediffOfDef(HediffDefOf.Pregnant);
-        if (preg != null) return preg.Severity;
+        if (preg != null)
+        {
+            return preg.Severity;
+        }
         var egg = p.TryGetComp<CompEggLayer>();
         if (egg != null && EggProgressField != null)
         {
-            try { return (float)EggProgressField.GetValue(egg); } catch { }
+            try
+            {
+                return (float)EggProgressField.GetValue(egg);
+            }
+            catch { }
         }
         return 0f;
     }
