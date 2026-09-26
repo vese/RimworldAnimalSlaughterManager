@@ -34,14 +34,16 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
         // Row 4: table header
         top += UIConstants.GapY;
 
-        top += DrawHeader(top, left, listWidth);
+        top += DrawHeader(left, top, listWidth);
 
         // List
         left = x;
         top += UIConstants.GapY;
 
+        var rowHeight = UIConstants.MediumTextHeight;
+        var contentHeight = ruleSet.Count * (rowHeight + KindSlaughterSettingsTabListHelper.ListGapY);
         var outRect = new Rect(left, top, listWidth, listHeight);
-        var view = new Rect(left, top, listWidth - UIConstants.ScrollbarWidth, outRect.height/*TODO: need this? Mathf.Max(listState.contentHeight, outRect.height)*/);
+        var view = new Rect(left, top, listWidth - UIConstants.ScrollbarWidth, Mathf.Max(contentHeight, outRect.height));
 
         Widgets.BeginScrollView(outRect, ref listState.scroll, view);
 
@@ -52,7 +54,7 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
 
         for (int i = 0; i < ruleSet.Count; i++)
         {
-            var row = new Rect(view.x, top, view.width, UIConstants.MediumTextHeight);
+            var row = new Rect(view.x, top, view.width, rowHeight);
 
             if (i % 2 == 1)
             {
@@ -65,9 +67,6 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
 
             top += row.height + KindSlaughterSettingsTabListHelper.ListGapY;
         }
-
-        //TODO: need this?
-        //listState.contentHeight = Mathf.Max(cy - y, outRect.height);
 
         Widgets.EndScrollView();
 
