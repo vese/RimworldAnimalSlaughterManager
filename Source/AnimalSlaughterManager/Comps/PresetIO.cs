@@ -371,116 +371,15 @@ namespace ASM
 
         public static KindDto From(ThingDef def, KindSettings k)
         {
-            return new KindDto
-            {
-                animal = def.defName,
-                malePref = k.preferenceSettings.malePref.ToString(),
-                femalePref = k.preferenceSettings.femalePref.ToString(),
-                maleYoungPref = k.preferenceSettings.maleYoungPref.ToString(),
-                femaleYoungPref = k.preferenceSettings.femaleYoungPref.ToString(),
-                KeepTraits = k.traitsSettings.protectRuleSet.rules.Select(TraitDto.From).ToList(),
-                CullTraits = k.traitsSettings.cullTraits.Select(TraitDto.From).ToList(),
-                SpareTraits = k.traitsSettings.spareTraits.Select(TraitDto.From).ToList(),
-                ForceCullTraits = k.traitsSettings.forceCullRuleSet.rules.Select(TraitDto.From).ToList(),
-                PrioRulesAdultMale = k.prioritySettings.Get(true, true).Select(PriorityRuleDto.From).ToList(),
-                PrioRulesYoungMale = k.prioritySettings.Get(true, false).Select(PriorityRuleDto.From).ToList(),
-                PrioRulesAdultFemale = k.prioritySettings.Get(false, true).Select(PriorityRuleDto.From).ToList(),
-                PrioRulesYoungFemale = k.prioritySettings.Get(false, false).Select(PriorityRuleDto.From).ToList()
-            };
+            var dto = new KindDto { animal = def.defName };
+            k.Save(dto);
+            return dto;
         }
 
         public void ApplyTo(KindSettings ks)
         {
             ks.Reset();
-            Enum.TryParse(malePref, out ks.preferenceSettings.malePref);
-            Enum.TryParse(femalePref, out ks.preferenceSettings.femalePref);
-            Enum.TryParse(maleYoungPref, out ks.preferenceSettings.maleYoungPref);
-            Enum.TryParse(femaleYoungPref, out ks.preferenceSettings.femaleYoungPref);
-            if (KeepTraits != null)
-            {
-                foreach (var t in KeepTraits.Select(t => t.ToTarget()))
-                {
-                    if (t != null)
-                    {
-                        ks.traitsSettings.protectRuleSet.rules.Add(t);
-                    }
-                }
-            }
-
-            if (CullTraits != null)
-            {
-                foreach (var c in CullTraits.Select(t => t.ToCull()))
-                {
-                    if (c != null)
-                    {
-                        ks.traitsSettings.cullTraits.Add(c);
-                    }
-                }
-            }
-
-            if (SpareTraits != null)
-            {
-                foreach (var c in SpareTraits.Select(t => t.ToCull()))
-                {
-                    if (c != null)
-                    {
-                        ks.traitsSettings.spareTraits.Add(c);
-                    }
-                }
-            }
-
-            if (ForceCullTraits != null)
-            {
-                foreach (var c in ForceCullTraits.Select(t => t.ToCull()))
-                {
-                    if (c != null)
-                    {
-                        ks.traitsSettings.forceCullRuleSet.rules.Add(c);
-                    }
-                }
-            }
-
-            ApplyPriorityRules(PrioRulesAdultMale, PrioAdultMale, ks.prioritySettings.Get(true, true));
-            ApplyPriorityRules(PrioRulesYoungMale, PrioYoungMale, ks.prioritySettings.Get(true, false));
-            ApplyPriorityRules(PrioRulesAdultFemale, PrioAdultFemale, ks.prioritySettings.Get(false, true));
-            ApplyPriorityRules(PrioRulesYoungFemale, PrioYoungFemale, ks.prioritySettings.Get(false, false));
-        }
-
-        // PrioRules* — current format; the legacy ConditionDto lists cover presets saved before
-        // the priority-rule refactor.
-        private void ApplyPriorityRules(List<PriorityRuleDto> rules, List<ConditionDto> legacy, List<BasePriorityRule> target)
-        {
-            target.Clear();
-
-            if (rules != null)
-            {
-                foreach (var r in rules)
-                {
-                    var rule = r.ToRule();
-
-                    if (rule != null)
-                    {
-                        target.Add(rule);
-                    }
-                }
-
-                return;
-            }
-
-            if (legacy != null)
-            {
-#pragma warning disable CS0618
-                foreach (var c in legacy)
-                {
-                    var rule = KindPrioritySettingsLegacy.Convert(c.ToCondition());
-
-                    if (rule != null)
-                    {
-                        target.Add(rule);
-                    }
-                }
-#pragma warning restore CS0618
-            }
+            ks.Load(this);
         }
     }
 
