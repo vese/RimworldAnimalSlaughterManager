@@ -114,7 +114,7 @@ public class KindPrioritySettings
 
     public List<BasePriorityRule> Get(bool male, bool adult) => ruleSets[(male, adult)].rules;
 
-    public bool HasRules => ruleSets.Values.All(x => x.HasRules);
+    public bool HasRules => ruleSets.Values.Any(x => x.HasRules);
 
     public void Reset()
     {
