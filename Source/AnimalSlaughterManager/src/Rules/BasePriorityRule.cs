@@ -16,5 +16,12 @@ public abstract class BasePriorityRule : IExposable
     public abstract bool Matches(Pawn? p);
     public abstract void ExposeData();
     public abstract bool IsInvalid(BasePriorityRule baseRule);
-    public virtual void ChangeVariant() { }
+
+    public void ChangeVariant()
+    {
+        ChangeVariantInternal();
+        SettingsChanges.Raise();
+    }
+
+    protected virtual void ChangeVariantInternal() { }
 }

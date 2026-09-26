@@ -28,7 +28,7 @@ public class TraitPriorityRule : BasePriorityRule
         // TODO: for TraitInheritability.Both and other any
         trait?.defName == rule.trait?.defName && inheritability == rule.inheritability;
 
-    public override void ChangeVariant() => has = !has;
+    protected override void ChangeVariantInternal() => has = !has;
 
     private static string DefName(Def? d) => d == null ? Constants.MissingLabel : d.LabelCap.ToString();
 

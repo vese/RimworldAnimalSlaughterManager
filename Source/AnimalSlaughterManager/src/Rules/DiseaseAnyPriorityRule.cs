@@ -20,7 +20,7 @@ public class DiseaseAnyPriorityRule : BasePriorityRule
 
     public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is DiseaseAnyPriorityRule;
 
-    public override void ChangeVariant() => has = !has;
+    protected override void ChangeVariantInternal() => has = !has;
 
     private static bool IsSick(Pawn? p)
     {

@@ -76,13 +76,13 @@ public class TraitRulesListSection(IEditableTraitsRuleSet<TraitRule> rules) : Ba
         Text.Anchor = TextAnchor.UpperLeft;
 
         // TODO: button width
-        left += AgeDropdown.Draw(left, top, UIConstants.ButtonMinWidth, rule.ageScope, val => { rule.ageScope = val; SettingsChanges.Raise(); });
+        left += AgeDropdown.Draw(left, top, UIConstants.ButtonMinWidth, rule.ageScope, val => rule.SetAgeScope(val));
         left += UIConstants.GapX;
         // TODO: button width
-        left += GenderDropdown.Draw(left, top, UIConstants.ButtonMinWidth, rule.genderScope, val => { rule.genderScope = val; SettingsChanges.Raise(); });
+        left += GenderDropdown.Draw(left, top, UIConstants.ButtonMinWidth, rule.genderScope, val => rule.SetGenderScope(val));
         left += UIConstants.GapX;
         // TODO: button width
-        left += TraitInheritabilityDropdown.Draw(left, top, UIConstants.ButtonMinWidth, rule.inheritMode, value => { rule.inheritMode = value; SettingsChanges.Raise(); });
+        left += TraitInheritabilityDropdown.Draw(left, top, UIConstants.ButtonMinWidth, rule.inheritMode, value => rule.SetInheritability(value));
         left += UIConstants.GapX;
 
         top = row.y + (row.height - UIConstants.IconSize) / 2f;

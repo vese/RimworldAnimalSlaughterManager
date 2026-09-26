@@ -360,7 +360,6 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         if (Widgets.ButtonInvisible(labelButtonRect))
         {
             condition.ChangeVariant();
-            SettingsChanges.Raise();
         }
 
         var wrap = Text.WordWrap;
@@ -611,15 +610,11 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
     {
         settings.preferenceSettings.Reset(comp.globalSettings.preferenceSettings);
         settings.prioritySettings.Reset();
-
-        SettingsChanges.Raise();
     }
 
     private static void ResetAllSettings(ASM_MapComp comp, ThingDef animalDef, KindSettings settings)
     {
         settings.Reset(comp.globalSettings);
-
-        SettingsChanges.Raise();
     }
 
 }

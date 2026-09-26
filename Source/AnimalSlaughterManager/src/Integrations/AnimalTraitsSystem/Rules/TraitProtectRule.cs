@@ -34,6 +34,30 @@ public class TraitProtectRule : ITraitRule, IExposable
         trait = newTrait;
     }
 
+    public void SetKeepCount(int value)
+    {
+        keepCount = value;
+        SettingsChanges.Raise();
+    }
+
+    public void SetAgeScope(AgeScope value)
+    {
+        ageScope = value;
+        SettingsChanges.Raise();
+    }
+
+    public void SetGenderScope(GenderScope value)
+    {
+        genderScope = value;
+        SettingsChanges.Raise();
+    }
+
+    public void SetInheritability(TraitInheritability value)
+    {
+        inheritMode = value;
+        SettingsChanges.Raise();
+    }
+
     public string Label => trait is null ? Constants.MissingLabel : trait.LabelCap;
 
     public virtual void ExposeData()
