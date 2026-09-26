@@ -17,7 +17,9 @@ namespace ASM
     {
         private readonly ASM_MapComp comp;
         private readonly CondBucket bucket;
-        private readonly List<BasePriorityRule> targetList;
+        private readonly KindPrioritySettings prioritySettings;
+        private readonly bool male;
+        private readonly bool adult;
 
         private Vector2 scroll;
         private float listHeight = 9999f;
@@ -31,18 +33,20 @@ namespace ASM
 
         public override Vector2 InitialSize => new Vector2(820f, 600f);
 
-        public Dialog_ConditionPresetBrowser(ASM_MapComp comp, bool male, bool adult, List<BasePriorityRule> targetList)
+        public Dialog_ConditionPresetBrowser(ASM_MapComp comp, bool male, bool adult, KindPrioritySettings prioritySettings)
         {
             this.comp = comp;
             bucket = male ? (adult ? CondBucket.AdultMale : CondBucket.YoungMale) : (adult ? CondBucket.AdultFemale : CondBucket.YoungFemale);
-            this.targetList = targetList;
+            this.prioritySettings = prioritySettings;
+            this.male = male;
+            this.adult = adult;
             doCloseX = true;
             draggable = true;
             resizeable = true;
             optionalTitle = ASMKeys.CondPresetTitle.Translate(BucketLabel(bucket));
         }
 
-        private bool HasData => targetList != null && targetList.Count > 0;
+        private bool HasData => prioritySettings.Get(male, adult).Count > 0;
 
         private static string BucketLabel(CondBucket b)
         {
@@ -254,20 +258,20 @@ namespace ASM
         {
             string name = (nameBuffer ?? "").Trim();
             if (name.NullOrEmpty()) return;
-            PresetIO.ExportConditions(name, bucket, targetList);
+            PresetIO.ExportConditions(name, bucket, prioritySettings.Get(male, adult));
             Messages.Message(ASMKeys.PresetSaved.Translate(name), MessageTypeDefOf.TaskCompletion, false);
             nameBuffer = "";
         }
 
         private void OverwriteByName(string name)
         {
-            PresetIO.ExportConditions(name, bucket, targetList);
+            PresetIO.ExportConditions(name, bucket, prioritySettings.Get(male, adult));
             Messages.Message(ASMKeys.PresetOverwritten.Translate(name), MessageTypeDefOf.TaskCompletion, false);
         }
 
         private void OverwriteEntry(PresetEntry e)
         {
-            PresetIO.ExportConditions(e.name, bucket, targetList);
+            PresetIO.ExportConditions(e.name, bucket, prioritySettings.Get(male, adult));
             Messages.Message(ASMKeys.PresetOverwritten.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
         }
 
@@ -278,9 +282,7 @@ namespace ASM
                 var loaded = PresetIO.ApplyConditions(e);
                 if (loaded != null)
                 {
-                    targetList.Clear();
-                    targetList.AddRange(loaded);
-                    comp.MarkDirty();
+                    prioritySettings.ReplaceAll(male, adult, loaded);
                     Messages.Message(ASMKeys.PresetLoaded.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
                 }
             }
@@ -299,19 +301,7 @@ namespace ASM
                             : bucket == CondBucket.YoungMale ? kd.PrioRulesYoungMale
                             : bucket == CondBucket.AdultFemale ? kd.PrioRulesAdultFemale : kd.PrioRulesYoungFemale;
                         if (source == null || source.Count == 0) { Messages.Message(ASMKeys.PresetNoSlice.Translate(""), MessageTypeDefOf.RejectInput, false); return; }
-                        targetList.Clear();
-
-                        foreach (var rd in source)
-                        {
-                            var rule = rd.ToRule();
-
-                            if (rule != null)
-                            {
-                                targetList.Add(rule);
-                            }
-                        }
-
-                        comp.MarkDirty();
+                        prioritySettings.ReplaceAll(male, adult, source.Select(rd => rd.ToRule()).Where(r => r != null).ToList());
                         Messages.Message(ASMKeys.PresetLoaded.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
                     }
                 }

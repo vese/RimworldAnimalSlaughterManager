@@ -77,7 +77,7 @@ public class TraitGeneralPriorityRule : BasePriorityRule
         // TODO: for Both
         type == rule.type && inheritability == rule.inheritability;
 
-    public override void ChangeVariant()
+    protected override void ChangeVariantInternal()
     {
         has = !has;
 

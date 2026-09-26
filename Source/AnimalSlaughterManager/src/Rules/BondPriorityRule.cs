@@ -20,5 +20,5 @@ public class BondPriorityRule : BasePriorityRule
 
     public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is BondPriorityRule;
 
-    public override void ChangeVariant() => has = !has;
+    protected override void ChangeVariantInternal() => has = !has;
 }

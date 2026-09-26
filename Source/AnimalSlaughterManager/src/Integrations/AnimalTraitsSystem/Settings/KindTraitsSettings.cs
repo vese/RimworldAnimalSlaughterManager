@@ -38,7 +38,11 @@ public abstract class KindTraitsRuleSet<T> : IEditableTraitsRuleSet<T> where T :
 
     public abstract bool Load(KindDto dto);
 
-    public void Clear() => rules.Clear();
+    public void Clear()
+    {
+        rules.Clear();
+        SettingsChanges.Raise();
+    }
 
     public void Swap(int from, int to)
     {
@@ -59,21 +63,36 @@ public abstract class KindTraitsRuleSet<T> : IEditableTraitsRuleSet<T> where T :
         {
             rules.Insert(to, item);
         }
+
+        SettingsChanges.Raise();
     }
 
     public T Get(int i) => rules[i];
 
-    public void Add(List<HediffDef> traits) => rules.AddRange(traits.Select(t => (T)Activator.CreateInstance(typeof(T), t)));
+    public void Add(List<HediffDef> traits)
+    {
+        rules.AddRange(traits.Select(t => (T)Activator.CreateInstance(typeof(T), t)));
+        SettingsChanges.Raise();
+    }
 
-    public void CopyAt(int i) => rules.Insert(i + 1, (T)rules[i].Copy());
+    public void CopyAt(int i)
+    {
+        rules.Insert(i + 1, (T)rules[i].Copy());
+        SettingsChanges.Raise();
+    }
 
-    public void RemoveAt(int i) => rules.RemoveAt(i);
+    public void RemoveAt(int i)
+    {
+        rules.RemoveAt(i);
+        SettingsChanges.Raise();
+    }
 
     public void ReplaceAt(int i, List<HediffDef> traits)
     {
         if (traits.Count == 1)
         {
             rules[i].SetTrait(traits.First());
+            SettingsChanges.Raise();
 
             return;
         }
@@ -88,6 +107,7 @@ public abstract class KindTraitsRuleSet<T> : IEditableTraitsRuleSet<T> where T :
 
         rules.RemoveAt(i);
         rules.InsertRange(i, newRules);
+        SettingsChanges.Raise();
     }
 
     public void ExposeData(string label)

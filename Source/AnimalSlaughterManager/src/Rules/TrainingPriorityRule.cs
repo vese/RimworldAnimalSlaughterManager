@@ -24,7 +24,7 @@ public class TrainingPriorityRule : BasePriorityRule
 
     public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is TrainingPriorityRule rule && trainable?.defName == rule.trainable?.defName;
 
-    public override void ChangeVariant() => has = !has;
+    protected override void ChangeVariantInternal() => has = !has;
 
     private static string DefName(Def? d) => d == null ? Constants.MissingLabel : d.LabelCap.ToString();
 }

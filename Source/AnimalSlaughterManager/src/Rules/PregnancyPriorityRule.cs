@@ -20,5 +20,5 @@ public class PregnancyPriorityRule : BasePriorityRule
 
     public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is PregnancyPriorityRule;
 
-    public override void ChangeVariant() => has = !has;
+    protected override void ChangeVariantInternal() => has = !has;
 }

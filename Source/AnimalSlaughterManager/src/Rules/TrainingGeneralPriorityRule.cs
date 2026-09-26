@@ -37,7 +37,7 @@ public class TrainingGeneralPriorityRule : BasePriorityRule
     // TODO: for PartialOrFull and Partial, Full
     public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is TrainingGeneralPriorityRule rule && type == rule.type;
 
-    public override void ChangeVariant() => type = type switch
+    protected override void ChangeVariantInternal() => type = type switch
     {
         TrainingGeneralType.None => TrainingGeneralType.Partial,
         TrainingGeneralType.Partial => TrainingGeneralType.PartialOrFull,

@@ -49,7 +49,7 @@ public class TraitProtectRulesListSection(IEditableTraitsRuleSet<TraitProtectRul
         return labelHeight;
     }
 
-    protected override float DrawRow(Rect row, int index, ASM_MapComp comp)
+    protected override float DrawRow(Rect row, int index)
     {
         var rule = RuleSet.Get(index);
 
@@ -75,7 +75,7 @@ public class TraitProtectRulesListSection(IEditableTraitsRuleSet<TraitProtectRul
         top = row.y + (row.height - UIConstants.ButtonHeight) / 2f;
 
         left += TraitRuleListButton.Draw(new Rect(left, top, traitButtonWidth, UIConstants.ButtonHeight), rule.trait, rule.Label,
-            () => Find.WindowStack.Add(new Dialog_TraitPicker(picked => ReplaceTraits(index, picked, comp))));
+            () => Find.WindowStack.Add(new Dialog_TraitPicker(picked => ReplaceTraits(index, picked))));
 
         Text.Anchor = TextAnchor.MiddleCenter;
 
@@ -83,8 +83,7 @@ public class TraitProtectRulesListSection(IEditableTraitsRuleSet<TraitProtectRul
 
         if (int.TryParse(keepCountValue, out int n) && n >= 0 && n != rule.keepCount)
         {
-            rule.keepCount = n;
-            comp.MarkDirty();
+            rule.SetKeepCount(n);
         }
 
         Text.Anchor = TextAnchor.UpperLeft;
@@ -92,13 +91,13 @@ public class TraitProtectRulesListSection(IEditableTraitsRuleSet<TraitProtectRul
         left += UIConstants.ButtonMinWidth + UIConstants.GapX;
 
         // TODO: button width
-        left += AgeDropdown.Draw(left, top, UIConstants.ButtonMinWidth, rule.ageScope, val => { rule.ageScope = val; comp.MarkDirty(); });
+        left += AgeDropdown.Draw(left, top, UIConstants.ButtonMinWidth, rule.ageScope, val => rule.SetAgeScope(val));
         left += UIConstants.GapX;
         // TODO: button width
-        left += GenderDropdown.Draw(left, top, UIConstants.ButtonMinWidth, rule.genderScope, val => { rule.genderScope = val; comp.MarkDirty(); });
+        left += GenderDropdown.Draw(left, top, UIConstants.ButtonMinWidth, rule.genderScope, val => rule.SetGenderScope(val));
         left += UIConstants.GapX;
         // TODO: button width
-        left += TraitInheritabilityDropdown.Draw(left, top, UIConstants.ButtonMinWidth, rule.inheritMode, value => { rule.inheritMode = value; comp.MarkDirty(); });
+        left += TraitInheritabilityDropdown.Draw(left, top, UIConstants.ButtonMinWidth, rule.inheritMode, value => rule.SetInheritability(value));
         left += UIConstants.GapX;
 
         top = row.y + (row.height - UIConstants.IconSize) / 2f;
@@ -115,7 +114,6 @@ public class TraitProtectRulesListSection(IEditableTraitsRuleSet<TraitProtectRul
         if (KindSlaughterSettingsTabListHelper.RemoveButton(removeButtonRect, ASMKeys.RemoveTrait))
         {
             RuleSet.RemoveAt(index);
-            comp.MarkDirty();
         }
 
         Text.Anchor = anchor;
