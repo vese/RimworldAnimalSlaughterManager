@@ -1,98 +1,11 @@
 using RimWorld;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
 
 namespace ASM;
-
-public class ListSectionState
-{
-    public Vector2 scroll;
-    public int group;
-}
-
-public static class UIConstants
-{
-    public const float IconSize = 22f;
-    public const float GapX = 6f;
-    public const float GapY = 8f;
-    [Obsolete]
-    public const float ButtonHeight = 26f;
-    public const float ButtonMinWidth = 120f;
-    public const float ButtonPaddingY = 4f;
-    public const float ButtonPaddingX = 16f;
-    public const float ScrollbarWidth = 16f;
-    public const float TextPaddingY = 2f;
-    public const float ListMinHeight = 200f;
-}
-
-public static class KindSlaughterSettingsTabListHelper
-{
-    public const float ListGapY = 2f;
-    public const float ListRowPaddingX = 4f;
-    private static readonly Color ListDividerColor = new(1f, 1f, 1f, 0.5f);
-
-    public static void ReorderList(IList list, int from, int to)
-    {
-        if (from < 0 || from >= list.Count || to < 0 || to > list.Count || from == to)
-        {
-            return;
-        }
-
-        var item = list[from];
-
-        list.RemoveAt(from);
-
-        if (from < to)
-        {
-            list.Insert(to - 1, item);
-        }
-        else
-        {
-            list.Insert(to, item);
-        }
-    }
-
-    public static float DrawGrip(float x, float y, float height)
-    {
-        var anchor = Text.Anchor;
-        var color = GUI.color;
-        Text.Anchor = TextAnchor.MiddleCenter;
-        GUI.color = ListDividerColor;
-
-        Widgets.Label(new Rect(x, y, UIConstants.IconSize, height), "≡");
-
-        Text.Anchor = anchor;
-        GUI.color = color;
-
-        return UIConstants.IconSize;
-    }
-
-    // Red X remove icon, like the clear buttons in the manager table.
-    public static bool RemoveButton(Rect buttonRect, string tooltipKey)
-    {
-        TooltipHandler.TipRegion(buttonRect, tooltipKey.Translate());
-
-        GUI.color = Color.red;
-
-        var click = Widgets.ButtonImage(buttonRect, TexButton.CloseXSmall);
-
-        return click;
-    }
-    public static bool CopyButton(Rect buttonRect, string tooltipKey)
-    {
-        TooltipHandler.TipRegion(buttonRect, tooltipKey.Translate());
-
-        GUI.color = Color.white;
-
-        var click = Widgets.ButtonImage(buttonRect, TexButton.Copy);
-
-        return click;
-    }
-}
 
 public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef animalDef, KindSettings settings) : BaseKindSlaughterSettingsTab
 {
