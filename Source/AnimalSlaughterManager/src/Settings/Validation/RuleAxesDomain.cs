@@ -9,6 +9,10 @@ namespace ASM;
 /// </summary>
 public class HealthAxis : IRuleAxis
 {
+    public static readonly HealthAxis Instance = new();
+
+    private HealthAxis() { }
+
     public IEnumerable<object> EnumerateStates(IReadOnlyList<BasePriorityRule> rules)
     {
         var diseases = rules.OfType<DiseasePriorityRule>()
@@ -60,6 +64,10 @@ public class HealthAxis : IRuleAxis
 /// </summary>
 public class TrainingAxis : IRuleAxis
 {
+    public static readonly TrainingAxis Instance = new();
+
+    private TrainingAxis() { }
+
     public enum Status
     {
         None,
@@ -110,6 +118,10 @@ public class TrainingAxis : IRuleAxis
 /// </summary>
 public class TraitAxis : IRuleAxis
 {
+    public static readonly TraitAxis Instance = new();
+
+    private TraitAxis() { }
+
     public IEnumerable<object> EnumerateStates(IReadOnlyList<BasePriorityRule> rules)
     {
         var traits = rules.OfType<TraitPriorityRule>()

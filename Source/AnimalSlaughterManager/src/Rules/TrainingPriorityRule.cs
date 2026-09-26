@@ -22,6 +22,8 @@ public class TrainingPriorityRule : BasePriorityRule
         Scribe_Defs.Look(ref trainable, "trainable");
     }
 
+    public override IRuleAxis? Axis => TrainingAxis.Instance;
+
     public override bool Covers(BasePriorityRule other) =>
         (other is TrainingPriorityRule rule && has == rule.has && trainable?.defName == rule.trainable?.defName) ||
         // Untrained in a skill ⊆ no training at all.

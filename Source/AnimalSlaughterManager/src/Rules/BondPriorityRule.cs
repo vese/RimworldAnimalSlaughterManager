@@ -18,6 +18,8 @@ public class BondPriorityRule : BasePriorityRule
         Scribe_Values.Look(ref has, "has", true);
     }
 
+    public override IRuleAxis? Axis => BondAxis.Instance;
+
     public override bool Covers(BasePriorityRule other) => other is BondPriorityRule rule && has == rule.has;
 
     protected override void ChangeVariantInternal() => has = !has;

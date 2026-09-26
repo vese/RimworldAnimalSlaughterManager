@@ -22,6 +22,8 @@ public class DiseasePriorityRule : BasePriorityRule
         Scribe_Defs.Look(ref disease, "disease");
     }
 
+    public override IRuleAxis? Axis => HealthAxis.Instance;
+
     public override bool Covers(BasePriorityRule other) =>
         (other is DiseasePriorityRule rule && has == rule.has && disease?.defName == rule.disease?.defName) ||
         // Healthy ⊆ not having a specific disease.

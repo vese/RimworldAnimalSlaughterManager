@@ -35,6 +35,8 @@ public class TrainingGeneralPriorityRule : BasePriorityRule
     }
 
     // TODO: for PartialOrFull and Partial, Full
+    public override IRuleAxis? Axis => TrainingAxis.Instance;
+
     public override bool Covers(BasePriorityRule other) =>
         (other is TrainingGeneralPriorityRule rule && type == rule.type) ||
         // Fully trained ⊆ any training.

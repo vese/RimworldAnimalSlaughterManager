@@ -24,6 +24,8 @@ public class TraitPriorityRule : BasePriorityRule
         Scribe_Values.Look(ref inheritability, "inheritability", TraitInheritability.Both);
     }
 
+    public override IRuleAxis? Axis => TraitAxis.Instance;
+
     public override bool Covers(BasePriorityRule other) =>
         other is TraitPriorityRule rule &&
         trait?.defName == rule.trait?.defName &&

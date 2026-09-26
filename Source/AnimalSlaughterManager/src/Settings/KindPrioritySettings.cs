@@ -115,12 +115,28 @@ public class PriorityRuleSet
             }
         }
 
-        // The axes the list actually uses; a rule without a registered axis is always reachable.
-        var axes = rules
-            .Select(RuleAxes.For)
-            .Where(a => a != null)
-            .Distinct()
-            .Select(a => a!.EnumerateStates(rules).ToArray())
+        // Per-validation axis map: each rule declares its own axis; states are accumulated from
+        // the rules assigned to that axis. A rule with a null axis is always reachable.
+        var axesByInstance = new Dictionary<IRuleAxis, List<BasePriorityRule>>();
+
+        foreach (var rule in rules)
+        {
+            if (rule.Axis == null)
+            {
+                continue;
+            }
+
+            if (!axesByInstance.TryGetValue(rule.Axis, out var assigned))
+            {
+                assigned = [];
+                axesByInstance[rule.Axis] = assigned;
+            }
+
+            assigned.Add(rule);
+        }
+
+        var axes = axesByInstance
+            .Select(kv => kv.Key.EnumerateStates(kv.Value).ToArray())
             .ToArray();
         var reachable = new bool[rules.Count];
         var state = new object?[axes.Length];
@@ -173,9 +189,7 @@ public class PriorityRuleSet
 
     private static bool AxisMatches(BasePriorityRule rule, object? state)
     {
-        var axis = RuleAxes.For(rule);
-
-        return axis == null || axis.Matches(rule, state!);
+        return rule.Axis == null || rule.Axis.Matches(rule, state!);
     }
 
     private string JoinUpper(int index) => string.Join(", ", Enumerable.Range(1, index).Select(n => n.ToString()));
