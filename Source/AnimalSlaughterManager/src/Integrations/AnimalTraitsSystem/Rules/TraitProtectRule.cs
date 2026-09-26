@@ -20,7 +20,14 @@ public class TraitProtectRule : ITraitRule, IExposable
     public TraitProtectRule() { }
     public TraitProtectRule(HediffDef t) { trait = t; }
 
-    public ITraitRule Copy() => trait is null ? new TraitProtectRule() : new TraitProtectRule(trait);
+    public ITraitRule Copy() => new TraitProtectRule
+    {
+        trait = trait,
+        keepCount = keepCount,
+        ageScope = ageScope,
+        genderScope = genderScope,
+        inheritMode = inheritMode,
+    };
 
     public void SetTrait(HediffDef newTrait)
     {
