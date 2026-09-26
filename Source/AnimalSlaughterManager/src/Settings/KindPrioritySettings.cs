@@ -4,10 +4,6 @@ using Verse;
 
 namespace ASM;
 
-//TODO: метод валидации списков
-//TODO: контроллер с событиями изменения, по которому ревалидировать
-//TODO: для каждого списка отдельный класс с добавлением/удалением/изменением и ревалидацией
-
 public class PriorityRuleSet
 {
     public List<BasePriorityRule> rules = [];
@@ -17,6 +13,59 @@ public class PriorityRuleSet
     public void Reset()
     {
         rules.Clear();
+    }
+
+    public void Add(BasePriorityRule rule)
+    {
+        rules.Add(rule);
+        SettingsChanges.Raise();
+    }
+
+    public void RemoveAt(int index)
+    {
+        rules.RemoveAt(index);
+        SettingsChanges.Raise();
+    }
+
+    public void CopyAt(int index)
+    {
+        rules.Insert(index + 1, rules[index].Clone());
+        SettingsChanges.Raise();
+    }
+
+    public void Move(int from, int to)
+    {
+        if (from < 0 || to < 0 || from == to || from >= rules.Count || to > rules.Count)
+        {
+            return;
+        }
+
+        var rule = rules[from];
+        rules.RemoveAt(from);
+
+        if (from < to)
+        {
+            rules.Insert(to - 1, rule);
+        }
+        else
+        {
+            rules.Insert(to, rule);
+        }
+
+        SettingsChanges.Raise();
+    }
+
+    public void ReplaceAll(List<BasePriorityRule> replacement)
+    {
+        rules.Clear();
+        rules.AddRange(replacement);
+        SettingsChanges.Raise();
+    }
+
+    public void Clear()
+    {
+        rules.Clear();
+        SettingsChanges.Raise();
     }
 
     public void PostLoadInit()
@@ -116,62 +165,17 @@ public class KindPrioritySettings : IPresettable
 
     public bool HasRules => ruleSets.Values.Any(x => x.HasRules);
 
-    public void Add(bool male, bool adult, BasePriorityRule rule)
-    {
-        Get(male, adult).Add(rule);
-        SettingsChanges.Raise();
-    }
+    public void Add(bool male, bool adult, BasePriorityRule rule) => Get(male, adult).Add(rule);
 
-    public void RemoveAt(bool male, bool adult, int index)
-    {
-        Get(male, adult).RemoveAt(index);
-        SettingsChanges.Raise();
-    }
+    public void RemoveAt(bool male, bool adult, int index) => Get(male, adult).RemoveAt(index);
 
-    public void CopyAt(bool male, bool adult, int index)
-    {
-        var rules = Get(male, adult);
-        rules.Insert(index + 1, rules[index].Clone());
-        SettingsChanges.Raise();
-    }
+    public void CopyAt(bool male, bool adult, int index) => ruleSets[(male, adult)].CopyAt(index);
 
-    public void Move(bool male, bool adult, int from, int to)
-    {
-        if (from < 0 || to < 0 || from == to || from >= Get(male, adult).Count || to > Get(male, adult).Count)
-        {
-            return;
-        }
+    public void Move(bool male, bool adult, int from, int to) => ruleSets[(male, adult)].Move(from, to);
 
-        var rules = Get(male, adult);
-        var rule = rules[from];
-        rules.RemoveAt(from);
+    public void ReplaceAll(bool male, bool adult, List<BasePriorityRule> replacement) => ruleSets[(male, adult)].ReplaceAll(replacement);
 
-        if (from < to)
-        {
-            rules.Insert(to - 1, rule);
-        }
-        else
-        {
-            rules.Insert(to, rule);
-        }
-
-        SettingsChanges.Raise();
-    }
-
-    public void ReplaceAll(bool male, bool adult, List<BasePriorityRule> replacement)
-    {
-        var rules = Get(male, adult);
-        rules.Clear();
-        rules.AddRange(replacement);
-        SettingsChanges.Raise();
-    }
-
-    public void Clear(bool male, bool adult)
-    {
-        Get(male, adult).Clear();
-        SettingsChanges.Raise();
-    }
-
+    public void Clear(bool male, bool adult) => Get(male, adult).Clear();
     public void Reset()
     {
         foreach (var ruleSet in ruleSets.Values)
