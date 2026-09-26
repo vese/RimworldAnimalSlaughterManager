@@ -22,7 +22,21 @@ public class DiseasePriorityRule : BasePriorityRule
         Scribe_Defs.Look(ref disease, "disease");
     }
 
-    public override IRuleAxis? Axis => HealthAxis.Instance;
+    public override void Accumulate(RuleValidationContext context, int index)
+    {
+        var set = context.GetSet<HealthTraitSet>();
+        set.AddRule(index, this);
+
+        var self = (BasePriorityRule)this;
+
+        if (self is DiseasePriorityRule { disease: not null } d)
+        {
+            set.Diseases.Add(d.disease.defName);
+        }
+
+        context.GetValidator<ReachabilityValidator>();
+        context.GetValidator<DuplicateValidator>();
+    }
 
     public override bool Covers(BasePriorityRule other) =>
         (other is DiseasePriorityRule rule && has == rule.has && disease?.defName == rule.disease?.defName) ||

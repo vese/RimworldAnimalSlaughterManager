@@ -18,7 +18,12 @@ public class PregnancyPriorityRule : BasePriorityRule
         Scribe_Values.Look(ref has, "has", true);
     }
 
-    public override IRuleAxis? Axis => PregnancyAxis.Instance;
+    public override void Accumulate(RuleValidationContext context, int index)
+    {
+        context.GetSet<PregnancyTraitSet>().AddRule(index, this);
+        context.GetValidator<ReachabilityValidator>();
+        context.GetValidator<DuplicateValidator>();
+    }
 
     public override bool Covers(BasePriorityRule other) => other is PregnancyPriorityRule rule && has == rule.has;
 

@@ -15,10 +15,12 @@ public abstract class BasePriorityRule : IExposable
     public abstract BasePriorityRule Clone();
     public abstract void ExposeData();
 
-    /// <summary>The animal axis this rule matches on; null for a rule that takes no part in
-    /// reachability validation. The rule itself declares its axis — the validator collects the
-    /// axes it meets into a per-validation map, no global registry.</summary>
-    public abstract IRuleAxis? Axis { get; }
+    /// <summary>
+    /// Registers this rule for validation: creates-or-updates the trait set of its axis (adding
+    /// itself with its list index and any concrete data — def names, flags) and registers the
+    /// validators to run after the pass. The default implementation does nothing.
+    /// </summary>
+    public virtual void Accumulate(RuleValidationContext context, int index) { }
 
     public abstract bool Matches(Pawn? p);
 

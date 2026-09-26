@@ -35,7 +35,21 @@ public class TrainingGeneralPriorityRule : BasePriorityRule
     }
 
     // TODO: for PartialOrFull and Partial, Full
-    public override IRuleAxis? Axis => TrainingAxis.Instance;
+    public override void Accumulate(RuleValidationContext context, int index)
+    {
+        var set = context.GetSet<TrainingTraitSet>();
+        set.AddRule(index, this);
+
+        var self = (BasePriorityRule)this;
+
+        if (self is TrainingPriorityRule { trainable: not null } t)
+        {
+            set.Skills.Add(t.trainable.defName);
+        }
+
+        context.GetValidator<ReachabilityValidator>();
+        context.GetValidator<DuplicateValidator>();
+    }
 
     public override bool Covers(BasePriorityRule other) =>
         (other is TrainingGeneralPriorityRule rule && type == rule.type) ||

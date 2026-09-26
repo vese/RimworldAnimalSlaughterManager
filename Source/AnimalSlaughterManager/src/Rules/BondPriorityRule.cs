@@ -18,7 +18,12 @@ public class BondPriorityRule : BasePriorityRule
         Scribe_Values.Look(ref has, "has", true);
     }
 
-    public override IRuleAxis? Axis => BondAxis.Instance;
+    public override void Accumulate(RuleValidationContext context, int index)
+    {
+        context.GetSet<BondTraitSet>().AddRule(index, this);
+        context.GetValidator<ReachabilityValidator>();
+        context.GetValidator<DuplicateValidator>();
+    }
 
     public override bool Covers(BasePriorityRule other) => other is BondPriorityRule rule && has == rule.has;
 
