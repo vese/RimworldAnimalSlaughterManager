@@ -366,17 +366,48 @@ namespace ASM
             Enum.TryParse(maleYoungPref, out ks.preferenceSettings.maleYoungPref);
             Enum.TryParse(femaleYoungPref, out ks.preferenceSettings.femaleYoungPref);
             if (KeepTraits != null)
+            {
                 foreach (var t in KeepTraits.Select(t => t.ToTarget()))
-                    if (t != null) ks.traitsSettings.protectRuleSet.rules.Add(t);
+                {
+                    if (t != null)
+                    {
+                        ks.traitsSettings.protectRuleSet.rules.Add(t);
+                    }
+                }
+            }
+
             if (CullTraits != null)
+            {
                 foreach (var c in CullTraits.Select(t => t.ToCull()))
-                    if (c != null) ks.traitsSettings.cullTraits.Add(c);
+                {
+                    if (c != null)
+                    {
+                        ks.traitsSettings.cullTraits.Add(c);
+                    }
+                }
+            }
+
             if (SpareTraits != null)
+            {
                 foreach (var c in SpareTraits.Select(t => t.ToCull()))
-                    if (c != null) ks.traitsSettings.spareTraits.Add(c);
+                {
+                    if (c != null)
+                    {
+                        ks.traitsSettings.spareTraits.Add(c);
+                    }
+                }
+            }
+
             if (ForceCullTraits != null)
+            {
                 foreach (var c in ForceCullTraits.Select(t => t.ToCull()))
-                    if (c != null) ks.traitsSettings.forceCullRuleSet.rules.Add(c);
+                {
+                    if (c != null)
+                    {
+                        ks.traitsSettings.forceCullRuleSet.rules.Add(c);
+                    }
+                }
+            }
             //if (PrioAdultMale != null) foreach (var c in PrioAdultMale) ks.prioritySettings.prioAdultMale.Add(c.ToCondition());
             //if (PrioYoungMale != null) foreach (var c in PrioYoungMale) ks.prioritySettings.prioYoungMale.Add(c.ToCondition());
             //if (PrioAdultFemale != null) foreach (var c in PrioAdultFemale) ks.prioritySettings.prioAdultFemale.Add(c.ToCondition());
