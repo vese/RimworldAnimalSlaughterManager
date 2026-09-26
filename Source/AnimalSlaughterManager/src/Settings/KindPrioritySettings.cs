@@ -116,6 +116,62 @@ public class KindPrioritySettings : IPresettable
 
     public bool HasRules => ruleSets.Values.Any(x => x.HasRules);
 
+    public void Add(bool male, bool adult, BasePriorityRule rule)
+    {
+        Get(male, adult).Add(rule);
+        SettingsChanges.Raise();
+    }
+
+    public void RemoveAt(bool male, bool adult, int index)
+    {
+        Get(male, adult).RemoveAt(index);
+        SettingsChanges.Raise();
+    }
+
+    public void CopyAt(bool male, bool adult, int index)
+    {
+        var rules = Get(male, adult);
+        rules.Insert(index + 1, rules[index].Clone());
+        SettingsChanges.Raise();
+    }
+
+    public void Move(bool male, bool adult, int from, int to)
+    {
+        if (from < 0 || to < 0 || from == to || from >= Get(male, adult).Count || to > Get(male, adult).Count)
+        {
+            return;
+        }
+
+        var rules = Get(male, adult);
+        var rule = rules[from];
+        rules.RemoveAt(from);
+
+        if (from < to)
+        {
+            rules.Insert(to - 1, rule);
+        }
+        else
+        {
+            rules.Insert(to, rule);
+        }
+
+        SettingsChanges.Raise();
+    }
+
+    public void ReplaceAll(bool male, bool adult, List<BasePriorityRule> replacement)
+    {
+        var rules = Get(male, adult);
+        rules.Clear();
+        rules.AddRange(replacement);
+        SettingsChanges.Raise();
+    }
+
+    public void Clear(bool male, bool adult)
+    {
+        Get(male, adult).Clear();
+        SettingsChanges.Raise();
+    }
+
     public void Reset()
     {
         foreach (var ruleSet in ruleSets.Values)

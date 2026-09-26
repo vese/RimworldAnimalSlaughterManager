@@ -35,27 +35,6 @@ public static class KindSlaughterSettingsTabListHelper
     public const float ListRowPaddingX = 4f;
     private static readonly Color ListDividerColor = new(1f, 1f, 1f, 0.5f);
 
-    public static void ReorderList(IList list, int from, int to)
-    {
-        if (from < 0 || from >= list.Count || to < 0 || to > list.Count || from == to)
-        {
-            return;
-        }
-
-        var item = list[from];
-
-        list.RemoveAt(from);
-
-        if (from < to)
-        {
-            list.Insert(to - 1, item);
-        }
-        else
-        {
-            list.Insert(to, item);
-        }
-    }
-
     public static float DrawGrip(float x, float y, float height)
     {
         var anchor = Text.Anchor;
@@ -174,7 +153,6 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         }
     }
 
-    // TODO: actions in list through settings object
     private void DrawConditionSection(float x, float y, float listWidth, float listHeight, TaggedString title,
         List<BasePriorityRule> list, ref ListSectionState listState, bool male, bool adult, List<List<string>> validation)
     {
@@ -182,7 +160,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         var top = y;
 
         // Row 1: title (left) + copy + paste icons right after the title.
-        top += DrawConditionSectionHeader(x, y, title, list);
+        top += DrawConditionSectionHeader(x, y, title, list, male, adult);
 
         // Row 2: add, clear, presets (left-aligned).
         top += UIConstants.GapY;
@@ -195,13 +173,13 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         DrawConditionList(left, top, listWidth, listHeight, list, ref listState, male, adult, validation);
     }
 
-    private float DrawConditionSectionHeader(float x, float y, TaggedString title, List<BasePriorityRule> rules)
+    private float DrawConditionSectionHeader(float x, float y, TaggedString title, List<BasePriorityRule> rules, bool male, bool adult)
     {
         var color = GUI.color;
         GUI.color = Color.white;
 
         (var titleWidth, var height) = DrawConditionSectionHeaderTitle(x, y, title);
-        DrawConditionSectionHeaderButtons(x + titleWidth, y, height, rules);
+        DrawConditionSectionHeaderButtons(x + titleWidth, y, height, rules, male, adult);
 
         GUI.color = color;
 
@@ -226,7 +204,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         return (rectWidth, rectHeight);
     }
 
-    private void DrawConditionSectionHeaderButtons(float x, float y, float height, List<BasePriorityRule> list)
+    private void DrawConditionSectionHeaderButtons(float x, float y, float height, List<BasePriorityRule> list, bool male, bool adult)
     {
         var font = Text.Font;
         var anchor = Text.Anchor;
@@ -249,14 +227,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
             if (Widgets.ButtonImage(pasteButtonRect, TexButton.Paste, tooltip: ASMKeys.PasteConditions.Translate()))
             {
-                list.Clear();
-
-                foreach (var c in clipboard!)
-                {
-                    list.Add(c.Clone());
-                }
-
-                comp.MarkDirty();
+                settings.prioritySettings.ReplaceAll(male, adult, clipboard!.Select(c => c.Clone()).ToList());
             }
         }
 
@@ -283,7 +254,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
         if (Widgets.ButtonText(addBtn, addButtonText))
         {
-            OpenAddConditionMenu(list, male, adult, comp, animalDef);
+            OpenAddConditionMenu(male, adult, animalDef);
         }
 
         var presetButtonText = ASMKeys.CondPresets.Translate();
@@ -293,7 +264,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
         if (Widgets.ButtonText(presetBtn, presetButtonText))
         {
-            Find.WindowStack.Add(new Dialog_ConditionPresetBrowser(comp, male, adult, list));
+            Find.WindowStack.Add(new Dialog_ConditionPresetBrowser(comp, male, adult, settings.prioritySettings));
         }
 
         var clearButtonText = ASMKeys.ClearList.Translate();
@@ -304,9 +275,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
         if (Widgets.ButtonText(clearBtn, clearButtonText))
         {
-            // TODO: changes in list in settings class, use ReadonlyList
-            list.Clear();
-            comp.MarkDirty();
+            settings.prioritySettings.Clear(male, adult);
         }
 
         GUI.enabled = true;
@@ -331,8 +300,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
         if (Event.current.type == EventType.Repaint)
         {
-            // TODO: changes in list in settings class, use ReadonlyList
-            listState.group = ReorderableWidget.NewGroup((a, b) => KindSlaughterSettingsTabListHelper.ReorderList(list, a, b), ReorderableDirection.Vertical, outRect);
+            listState.group = ReorderableWidget.NewGroup((a, b) => settings.prioritySettings.Move(male, adult, a, b), ReorderableDirection.Vertical, outRect);
         }
 
         for (int i = 0; i < list.Count; i++)
@@ -346,7 +314,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
             ReorderableWidget.Reorderable(listState.group, new Rect(row.x, row.y, UIConstants.IconSize, row.height));
 
-            DrawConditionRow(row, list, i, validation, comp);
+            DrawConditionRow(row, list, i, validation, male, adult);
 
             top += row.height + KindSlaughterSettingsTabListHelper.ListGapY;
         }
@@ -354,7 +322,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         Widgets.EndScrollView();
     }
 
-    private void DrawConditionRow(Rect row, List<BasePriorityRule> list, int index, List<List<string>> validation, ASM_MapComp comp)
+    private void DrawConditionRow(Rect row, List<BasePriorityRule> list, int index, List<List<string>> validation, bool male, bool adult)
     {
         var rowValidation = validation[index];
 
@@ -392,7 +360,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         if (Widgets.ButtonInvisible(labelButtonRect))
         {
             condition.ChangeVariant();
-            comp.MarkDirty();
+            SettingsChanges.Raise();
         }
 
         var wrap = Text.WordWrap;
@@ -473,9 +441,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
         if (KindSlaughterSettingsTabListHelper.RemoveButton(removeButtonRect, ASMKeys.RemoveTrait))
         {
-            // TODO: changes in list in settings class, use ReadonlyList
-            list.RemoveAt(index);
-            comp.MarkDirty();
+            settings.prioritySettings.RemoveAt(male, adult, index);
         }
     }
 
@@ -510,7 +476,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
     //    return conflicts.Count > 0 ? string.Join(", ", conflicts.ToArray()) : null;
     //}
 
-    private void OpenAddConditionMenu(List<BasePriorityRule> list, bool male, bool adult, ASM_MapComp comp, ThingDef animalDef)
+    private void OpenAddConditionMenu(bool male, bool adult, ThingDef animalDef)
     {
         var options = new List<FloatMenuOption>();
 
@@ -518,35 +484,35 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         {
             // TODO: 1 option
             options.Add(new FloatMenuOption(ASMKeys.CondPregnantHas.Translate(),
-                () => { list.Add(new PregnancyPriorityRule() { has = true }); comp.MarkDirty(); }));
+                () => settings.prioritySettings.Add(male, adult, new PregnancyPriorityRule() { has = true })));
             options.Add(new FloatMenuOption(ASMKeys.CondPregnantMissing.Translate(),
-                () => { list.Add(new PregnancyPriorityRule() { has = false }); comp.MarkDirty(); }));
+                () => settings.prioritySettings.Add(male, adult, new PregnancyPriorityRule() { has = false })));
         }
 
         // TODO: 1 option
         options.Add(new FloatMenuOption(ASMKeys.CondBondHas.Translate(),
-            () => { list.Add(new BondPriorityRule() { has = true }); comp.MarkDirty(); }));
+            () => settings.prioritySettings.Add(male, adult, new BondPriorityRule() { has = true })));
         options.Add(new FloatMenuOption(ASMKeys.CondBondMissing.Translate(),
-            () => { list.Add(new BondPriorityRule() { has = false }); comp.MarkDirty(); }));
+            () => settings.prioritySettings.Add(male, adult, new BondPriorityRule() { has = false })));
 
         // TODO: cache
         var diseaseList = DefDatabase<HediffDef>.AllDefs.Where(d => d.makesSickThought).OrderBy(d => d.LabelCap.ToString()).ToList();
         options.Add(new FloatMenuOption(ASMKeys.CondAddDisease.Translate(),
-            () => OpenDiseaseSubmenu(list, diseaseList, comp)));
+            () => OpenDiseaseSubmenu(male, adult, diseaseList)));
         // TODO: 1 option
         options.Add(new FloatMenuOption(ASMKeys.CondDiseaseAnyHas.Translate(),
-            () => { list.Add(new DiseaseAnyPriorityRule() { has = true }); comp.MarkDirty(); }));
+            () => settings.prioritySettings.Add(male, adult, new DiseaseAnyPriorityRule() { has = true })));
         options.Add(new FloatMenuOption(ASMKeys.CondDiseaseAnyMissing.Translate(),
-            () => { list.Add(new DiseaseAnyPriorityRule() { has = false }); comp.MarkDirty(); }));
+            () => settings.prioritySettings.Add(male, adult, new DiseaseAnyPriorityRule() { has = false })));
 
         options.Add(new FloatMenuOption(ASMKeys.CondAddTraining.Translate(),
-            () => OpenTrainingSubmenu(list, animalDef, comp)));
+            () => OpenTrainingSubmenu(male, adult, animalDef)));
         options.Add(new FloatMenuOption(ASMKeys.CondTrainingNone.Translate(),
-            () => { list.Add(new TrainingGeneralPriorityRule()); comp.MarkDirty(); }));
+            () => settings.prioritySettings.Add(male, adult, new TrainingGeneralPriorityRule())));
         options.Add(new FloatMenuOption(ASMKeys.CondTrainingPartial.Translate(),
-            () => { list.Add(new TrainingGeneralPriorityRule()); comp.MarkDirty(); }));
+            () => settings.prioritySettings.Add(male, adult, new TrainingGeneralPriorityRule())));
         options.Add(new FloatMenuOption(ASMKeys.CondTrainingFull.Translate(),
-            () => { list.Add(new TrainingGeneralPriorityRule()); comp.MarkDirty(); }));
+            () => settings.prioritySettings.Add(male, adult, new TrainingGeneralPriorityRule())));
 
         // Trait options only when ATS trait content is actually loaded.
         if (AnimalTraitsAccess.HasAvailableTraits)
@@ -557,26 +523,24 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
                     // TODO: 1 option for 1 trait def
                     foreach ((HediffDef def, bool has) in picked)
                     {
-                        list.Add(new TraitPriorityRule() { has = has, trait = def });
+                        settings.prioritySettings.Add(male, adult, new TraitPriorityRule() { has = has, trait = def });
                     }
-
-                    comp.MarkDirty();
                 }))));
             // TODO: 1 option with TraitType.Both
             options.Add(new FloatMenuOption(ASMKeys.CondPositiveHas.Translate(),
-                () => { list.Add(new TraitGeneralPriorityRule() { has = true, type = TraitType.Positive }); comp.MarkDirty(); }));
+                () => settings.prioritySettings.Add(male, adult, new TraitGeneralPriorityRule() { has = true, type = TraitType.Positive })));
             options.Add(new FloatMenuOption(ASMKeys.CondPositiveMissing.Translate(),
-                () => { list.Add(new TraitGeneralPriorityRule() { has = false, type = TraitType.Positive }); comp.MarkDirty(); }));
+                () => settings.prioritySettings.Add(male, adult, new TraitGeneralPriorityRule() { has = false, type = TraitType.Positive })));
             options.Add(new FloatMenuOption(ASMKeys.CondNegativeHas.Translate(),
-                () => { list.Add(new TraitGeneralPriorityRule() { has = true, type = TraitType.Negative }); comp.MarkDirty(); }));
+                () => settings.prioritySettings.Add(male, adult, new TraitGeneralPriorityRule() { has = true, type = TraitType.Negative })));
             options.Add(new FloatMenuOption(ASMKeys.CondNegativeMissing.Translate(),
-                () => { list.Add(new TraitGeneralPriorityRule() { has = false, type = TraitType.Negative }); comp.MarkDirty(); }));
+                () => settings.prioritySettings.Add(male, adult, new TraitGeneralPriorityRule() { has = false, type = TraitType.Negative })));
         }
 
         Find.WindowStack.Add(new FloatMenu(options));
     }
 
-    private void OpenDiseaseSubmenu(List<BasePriorityRule> list, List<HediffDef> defs, ASM_MapComp comp)
+    private void OpenDiseaseSubmenu(bool male, bool adult, List<HediffDef> defs)
     {
         // TODO: cache
         var dupLabels = defs
@@ -597,18 +561,18 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
             }
 
             options.Add(new FloatMenuOption(ASMKeys.CondHasSub.Translate(label),
-                () => { list.Add(new DiseasePriorityRule() { has = true, disease = def }); comp.MarkDirty(); }));
+                () => settings.prioritySettings.Add(male, adult, new DiseasePriorityRule() { has = true, disease = def })));
 
             // TODO: 1 option
             options.Add(new FloatMenuOption(ASMKeys.CondMissingSub.Translate(label),
-                () => { list.Add(new DiseasePriorityRule() { has = false, disease = def }); comp.MarkDirty(); }));
+                () => settings.prioritySettings.Add(male, adult, new DiseasePriorityRule() { has = false, disease = def })));
         }
 
         Find.WindowStack.Add(new FloatMenu(options));
     }
 
     // Training submenu: available trainables for this kind first (white), unavailable below (gray).
-    private void OpenTrainingSubmenu(List<BasePriorityRule> list, ThingDef animalDef, ASM_MapComp comp)
+    private void OpenTrainingSubmenu(bool male, bool adult, ThingDef animalDef)
     {
         var trainability = animalDef.race?.trainability;
 
@@ -627,9 +591,9 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
             void Add(string key, bool has) =>
                 options.Add(avail ?
                     new FloatMenuOption(key.Translate(def.LabelCap),
-                    () => { list.Add(new TrainingPriorityRule() { has = has, trainable = def }); comp.MarkDirty(); }, icon, col) :
+                    () => settings.prioritySettings.Add(male, adult, new TrainingPriorityRule() { has = has, trainable = def }), icon, col) :
                     new GrayFloatMenuOption(key.Translate(def.LabelCap),
-                    () => { list.Add(new TrainingPriorityRule() { has = has, trainable = def }); comp.MarkDirty(); }, icon, col, col));
+                    () => settings.prioritySettings.Add(male, adult, new TrainingPriorityRule() { has = has, trainable = def }), icon, col, col));
 
             Add(ASMKeys.CondTrainingLearnedSub, true);
             // TODO: 1 option
@@ -648,14 +612,14 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         settings.preferenceSettings.Reset(comp.globalSettings.preferenceSettings);
         settings.prioritySettings.Reset();
 
-        comp.MarkDirty();
+        SettingsChanges.Raise();
     }
 
     private static void ResetAllSettings(ASM_MapComp comp, ThingDef animalDef, KindSettings settings)
     {
         settings.Reset(comp.globalSettings);
 
-        comp.MarkDirty();
+        SettingsChanges.Raise();
     }
 
 }

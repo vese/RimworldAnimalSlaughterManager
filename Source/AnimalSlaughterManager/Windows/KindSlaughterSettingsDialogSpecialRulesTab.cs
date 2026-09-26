@@ -34,14 +34,14 @@ public class KindSlaughterSettingsDialogSpecialRulesTab(KindTraitsSettings trait
     {
         settings.traitsSettings.Reset();
 
-        comp.MarkDirty();
+        SettingsChanges.Raise();
     }
 
     private static void ResetAllSettings(ASM_MapComp comp, ThingDef animalDef, KindSettings settings)
     {
         settings.Reset(comp.globalSettings);
 
-        comp.MarkDirty();
+        SettingsChanges.Raise();
     }
 
     protected override void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings settings, ASM_MapComp comp, ThingDef animalDef)

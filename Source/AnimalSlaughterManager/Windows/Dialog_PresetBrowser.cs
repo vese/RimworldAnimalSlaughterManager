@@ -442,11 +442,11 @@ namespace ASM
                     break;
                 case PresetScope.Kind:
                     ok = PresetIO.ApplyKindSettings(e, kind, Settings);
-                    comp.MarkDirty();
+                    SettingsChanges.Raise();
                     break;
                 default:
                     ok = applyList!(e);
-                    comp.MarkDirty();
+                    SettingsChanges.Raise();
                     break;
             }
             if (ok)

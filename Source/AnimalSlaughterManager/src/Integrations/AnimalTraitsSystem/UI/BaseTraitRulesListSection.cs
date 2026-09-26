@@ -109,7 +109,6 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
         if (Widgets.ButtonText(clearBtn, clearButtonText))
         {
             ruleSet.Clear();
-            comp.MarkDirty();
         }
 
         GUI.enabled = true;
@@ -167,7 +166,7 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
 
             ReorderableWidget.Reorderable(listState.group, new Rect(row.x, row.y, UIConstants.IconSize, row.height));
 
-            DrawRow(row, i, comp);
+            DrawRow(row, i);
 
             top += row.height + KindSlaughterSettingsTabListHelper.ListGapY;
         }
@@ -175,9 +174,9 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
         Widgets.EndScrollView();
     }
 
-    protected abstract float DrawRow(Rect row, int index, ASM_MapComp comp);
+    protected abstract float DrawRow(Rect row, int index);
 
-    protected void ReplaceTraits(int i, List<HediffDef> picked, ASM_MapComp comp)
+    protected void ReplaceTraits(int i, List<HediffDef> picked)
     {
         if (picked is null || picked.Count == 0)
         {
@@ -185,6 +184,5 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
         }
 
         RuleSet.ReplaceAt(i, picked);
-        comp.MarkDirty();
     }
 }
