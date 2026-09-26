@@ -347,10 +347,10 @@ namespace ASM
                 femalePref = k.preferenceSettings.femalePref.ToString(),
                 maleYoungPref = k.preferenceSettings.maleYoungPref.ToString(),
                 femaleYoungPref = k.preferenceSettings.femaleYoungPref.ToString(),
-                //KeepTraits = k.traitsSettings.keepTraits.Select(TraitDto.From).ToList(),
+                KeepTraits = k.traitsSettings.protectRuleSet.rules.Select(TraitDto.From).ToList(),
                 CullTraits = k.traitsSettings.cullTraits.Select(TraitDto.From).ToList(),
                 SpareTraits = k.traitsSettings.spareTraits.Select(TraitDto.From).ToList(),
-                //ForceCullTraits = k.traitsSettings.forceCullTraits.Select(TraitDto.From).ToList(),
+                ForceCullTraits = k.traitsSettings.forceCullRuleSet.rules.Select(TraitDto.From).ToList(),
                 //PrioAdultMale = k.prioritySettings.prioAdultMale.Select(ConditionDto.From).ToList(),
                 //PrioYoungMale = k.prioritySettings.prioYoungMale.Select(ConditionDto.From).ToList(),
                 //PrioAdultFemale = k.prioritySettings.prioAdultFemale.Select(ConditionDto.From).ToList(),
@@ -365,18 +365,49 @@ namespace ASM
             Enum.TryParse(femalePref, out ks.preferenceSettings.femalePref);
             Enum.TryParse(maleYoungPref, out ks.preferenceSettings.maleYoungPref);
             Enum.TryParse(femaleYoungPref, out ks.preferenceSettings.femaleYoungPref);
-            //if (KeepTraits != null)
-            //    foreach (var t in KeepTraits.Select(t => t.ToTarget()))
-            //        if (t != null) ks.traitsSettings.keepTraits.Add(t);
+            if (KeepTraits != null)
+            {
+                foreach (var t in KeepTraits.Select(t => t.ToTarget()))
+                {
+                    if (t != null)
+                    {
+                        ks.traitsSettings.protectRuleSet.rules.Add(t);
+                    }
+                }
+            }
+
             if (CullTraits != null)
+            {
                 foreach (var c in CullTraits.Select(t => t.ToCull()))
-                    if (c != null) ks.traitsSettings.cullTraits.Add(c);
+                {
+                    if (c != null)
+                    {
+                        ks.traitsSettings.cullTraits.Add(c);
+                    }
+                }
+            }
+
             if (SpareTraits != null)
+            {
                 foreach (var c in SpareTraits.Select(t => t.ToCull()))
-                    if (c != null) ks.traitsSettings.spareTraits.Add(c);
-            //if (ForceCullTraits != null)
-            //    foreach (var c in ForceCullTraits.Select(t => t.ToCull()))
-            //        if (c != null) ks.traitsSettings.forceCullTraits.Add(c);
+                {
+                    if (c != null)
+                    {
+                        ks.traitsSettings.spareTraits.Add(c);
+                    }
+                }
+            }
+
+            if (ForceCullTraits != null)
+            {
+                foreach (var c in ForceCullTraits.Select(t => t.ToCull()))
+                {
+                    if (c != null)
+                    {
+                        ks.traitsSettings.forceCullRuleSet.rules.Add(c);
+                    }
+                }
+            }
             //if (PrioAdultMale != null) foreach (var c in PrioAdultMale) ks.prioritySettings.prioAdultMale.Add(c.ToCondition());
             //if (PrioYoungMale != null) foreach (var c in PrioYoungMale) ks.prioritySettings.prioYoungMale.Add(c.ToCondition());
             //if (PrioAdultFemale != null) foreach (var c in PrioAdultFemale) ks.prioritySettings.prioAdultFemale.Add(c.ToCondition());
