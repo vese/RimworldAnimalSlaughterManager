@@ -176,6 +176,7 @@ public class KindPrioritySettings : IPresettable
     public void ReplaceAll(bool male, bool adult, List<BasePriorityRule> replacement) => ruleSets[(male, adult)].ReplaceAll(replacement);
 
     public void Clear(bool male, bool adult) => Get(male, adult).Clear();
+
     public void Reset()
     {
         foreach (var ruleSet in ruleSets.Values)
