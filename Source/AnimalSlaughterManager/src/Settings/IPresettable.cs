@@ -11,3 +11,17 @@ public interface IPresettable
 
     void Load(KindDto dto);
 }
+
+/// <summary>
+/// A rule set that knows its own List-preset slot: the presets subfolder, and how to
+/// save/read its rules from the matching <see cref="KindDto"/> field.
+/// </summary>
+public interface IPresettableRuleSet
+{
+    string PresetsFolder { get; }
+
+    void Save(KindDto dto);
+
+    /// <summary>True when the DTO carries this rule set's slice.</summary>
+    bool Load(KindDto dto);
+}
