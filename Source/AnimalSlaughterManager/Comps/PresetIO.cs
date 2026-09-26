@@ -353,13 +353,21 @@ namespace ASM
         [XmlArray("ForceCullTraits")] [XmlArrayItem("Trait")]
         public List<TraitDto> ForceCullTraits = new List<TraitDto>();
         [XmlArray("PrioAdultMale")] [XmlArrayItem("Cond")]
-        public List<ConditionDto> PrioAdultMale = new List<ConditionDto>();
+        public List<ConditionDto> PrioAdultMale;
         [XmlArray("PrioYoungMale")] [XmlArrayItem("Cond")]
-        public List<ConditionDto> PrioYoungMale = new List<ConditionDto>();
+        public List<ConditionDto> PrioYoungMale;
         [XmlArray("PrioAdultFemale")] [XmlArrayItem("Cond")]
-        public List<ConditionDto> PrioAdultFemale = new List<ConditionDto>();
+        public List<ConditionDto> PrioAdultFemale;
         [XmlArray("PrioYoungFemale")] [XmlArrayItem("Cond")]
-        public List<ConditionDto> PrioYoungFemale = new List<ConditionDto>();
+        public List<ConditionDto> PrioYoungFemale;
+        [XmlArray("PrioRulesAdultMale")] [XmlArrayItem("Rule")]
+        public List<PriorityRuleDto> PrioRulesAdultMale = new List<PriorityRuleDto>();
+        [XmlArray("PrioRulesYoungMale")] [XmlArrayItem("Rule")]
+        public List<PriorityRuleDto> PrioRulesYoungMale = new List<PriorityRuleDto>();
+        [XmlArray("PrioRulesAdultFemale")] [XmlArrayItem("Rule")]
+        public List<PriorityRuleDto> PrioRulesAdultFemale = new List<PriorityRuleDto>();
+        [XmlArray("PrioRulesYoungFemale")] [XmlArrayItem("Rule")]
+        public List<PriorityRuleDto> PrioRulesYoungFemale = new List<PriorityRuleDto>();
 
         public static KindDto From(ThingDef def, KindSettings k)
         {
@@ -374,10 +382,10 @@ namespace ASM
                 CullTraits = k.traitsSettings.cullTraits.Select(TraitDto.From).ToList(),
                 SpareTraits = k.traitsSettings.spareTraits.Select(TraitDto.From).ToList(),
                 ForceCullTraits = k.traitsSettings.forceCullRuleSet.rules.Select(TraitDto.From).ToList(),
-                //PrioAdultMale = k.prioritySettings.prioAdultMale.Select(ConditionDto.From).ToList(),
-                //PrioYoungMale = k.prioritySettings.prioYoungMale.Select(ConditionDto.From).ToList(),
-                //PrioAdultFemale = k.prioritySettings.prioAdultFemale.Select(ConditionDto.From).ToList(),
-                //PrioYoungFemale = k.prioritySettings.prioYoungFemale.Select(ConditionDto.From).ToList()
+                PrioRulesAdultMale = k.prioritySettings.Get(true, true).Select(PriorityRuleDto.From).ToList(),
+                PrioRulesYoungMale = k.prioritySettings.Get(true, false).Select(PriorityRuleDto.From).ToList(),
+                PrioRulesAdultFemale = k.prioritySettings.Get(false, true).Select(PriorityRuleDto.From).ToList(),
+                PrioRulesYoungFemale = k.prioritySettings.Get(false, false).Select(PriorityRuleDto.From).ToList()
             };
         }
 
@@ -431,10 +439,48 @@ namespace ASM
                     }
                 }
             }
-            //if (PrioAdultMale != null) foreach (var c in PrioAdultMale) ks.prioritySettings.prioAdultMale.Add(c.ToCondition());
-            //if (PrioYoungMale != null) foreach (var c in PrioYoungMale) ks.prioritySettings.prioYoungMale.Add(c.ToCondition());
-            //if (PrioAdultFemale != null) foreach (var c in PrioAdultFemale) ks.prioritySettings.prioAdultFemale.Add(c.ToCondition());
-            //if (PrioYoungFemale != null) foreach (var c in PrioYoungFemale) ks.prioritySettings.prioYoungFemale.Add(c.ToCondition());
+
+            ApplyPriorityRules(PrioRulesAdultMale, PrioAdultMale, ks.prioritySettings.Get(true, true));
+            ApplyPriorityRules(PrioRulesYoungMale, PrioYoungMale, ks.prioritySettings.Get(true, false));
+            ApplyPriorityRules(PrioRulesAdultFemale, PrioAdultFemale, ks.prioritySettings.Get(false, true));
+            ApplyPriorityRules(PrioRulesYoungFemale, PrioYoungFemale, ks.prioritySettings.Get(false, false));
+        }
+
+        // PrioRules* — current format; the legacy ConditionDto lists cover presets saved before
+        // the priority-rule refactor.
+        private void ApplyPriorityRules(List<PriorityRuleDto> rules, List<ConditionDto> legacy, List<BasePriorityRule> target)
+        {
+            target.Clear();
+
+            if (rules != null)
+            {
+                foreach (var r in rules)
+                {
+                    var rule = r.ToRule();
+
+                    if (rule != null)
+                    {
+                        target.Add(rule);
+                    }
+                }
+
+                return;
+            }
+
+            if (legacy != null)
+            {
+#pragma warning disable CS0618
+                foreach (var c in legacy)
+                {
+                    var rule = KindPrioritySettingsLegacy.Convert(c.ToCondition());
+
+                    if (rule != null)
+                    {
+                        target.Add(rule);
+                    }
+                }
+#pragma warning restore CS0618
+            }
         }
     }
 

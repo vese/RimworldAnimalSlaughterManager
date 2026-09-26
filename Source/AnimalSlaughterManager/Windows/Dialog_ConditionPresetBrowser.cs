@@ -295,12 +295,22 @@ namespace ASM
                         var dto = (SlaughterPresetDto)ser.Deserialize(r);
                         KindDto kd = dto.Kinds.FirstOrDefault();
                         if (kd == null) { Messages.Message(ASMKeys.PresetNoSlice.Translate(""), MessageTypeDefOf.RejectInput, false); return; }
-                        List<ConditionDto> source = bucket == CondBucket.AdultMale ? kd.PrioAdultMale
-                            : bucket == CondBucket.YoungMale ? kd.PrioYoungMale
-                            : bucket == CondBucket.AdultFemale ? kd.PrioAdultFemale : kd.PrioYoungFemale;
+                        List<PriorityRuleDto> source = bucket == CondBucket.AdultMale ? kd.PrioRulesAdultMale
+                            : bucket == CondBucket.YoungMale ? kd.PrioRulesYoungMale
+                            : bucket == CondBucket.AdultFemale ? kd.PrioRulesAdultFemale : kd.PrioRulesYoungFemale;
                         if (source == null || source.Count == 0) { Messages.Message(ASMKeys.PresetNoSlice.Translate(""), MessageTypeDefOf.RejectInput, false); return; }
                         targetList.Clear();
-                        //foreach (var cd in source) targetList.Add(cd.ToCondition());
+
+                        foreach (var rd in source)
+                        {
+                            var rule = rd.ToRule();
+
+                            if (rule != null)
+                            {
+                                targetList.Add(rule);
+                            }
+                        }
+
                         comp.MarkDirty();
                         Messages.Message(ASMKeys.PresetLoaded.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
                     }
