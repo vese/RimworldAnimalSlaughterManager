@@ -13,6 +13,10 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
 
     protected abstract string HelpKey { get; }
 
+    protected abstract TraitListKind ListKind { get; }
+
+    protected abstract string PresetsTitleKey { get; }
+
     public float Draw(float x, float y, float listWidth, float listHeight, ref ListSectionState listState, ASM_MapComp comp, ThingDef animalDef)
     {
         // Row 1: title.
@@ -93,7 +97,9 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
 
         if (Widgets.ButtonText(presetBtn, presetButtonText))
         {
-            Find.WindowStack.Add(new Dialog_PresetBrowser/*<T>*/(comp, PresetScope.List, animalDef/*, ruleSet*/));
+            Find.WindowStack.Add(new Dialog_PresetBrowser(comp, PresetScope.List, animalDef, PresetsTitleKey.Translate(animalDef.LabelCap),
+                name => PresetIO.ExportList(name, ListKind, animalDef, RuleSet.Rules),
+                e => PresetIO.ApplyList(e, ListKind, animalDef, RuleSet.Rules)));
         }
 
         var clearButtonText = ASMKeys.ClearList.Translate();

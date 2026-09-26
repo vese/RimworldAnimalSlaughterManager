@@ -32,8 +32,9 @@ namespace ASM
         private readonly ASM_MapComp comp;
         private readonly PresetScope scope;
         private readonly ThingDef kind;
-        //private readonly TraitListKind? listKind;
-        //private readonly IEditableTraitsRuleSet<T>? ruleSet;
+        private readonly string? listTitle;
+        private readonly Action<string>? exportList;
+        private readonly Func<PresetEntry, bool>? applyList;
 
         private Vector2 scroll;
         private float listHeight = 9999f;
@@ -64,13 +65,20 @@ namespace ASM
 
         public override Vector2 InitialSize => new Vector2(820f, 600f);
 
-        public Dialog_PresetBrowser(ASM_MapComp comp, PresetScope scope, ThingDef kind/*, TraitListKind? listKind*//*, IEditableTraitsRuleSet<T>? ruleSet*/)
+        public Dialog_PresetBrowser(ASM_MapComp comp, PresetScope scope, ThingDef kind)
+            : this(comp, scope, kind, null, null, null)
+        {
+        }
+
+        public Dialog_PresetBrowser(ASM_MapComp comp, PresetScope scope, ThingDef kind,
+            string? listTitle, Action<string>? exportList, Func<PresetEntry, bool>? applyList)
         {
             this.comp = comp;
             this.scope = scope;
             this.kind = kind;
-            //this.listKind = listKind;
-            //this.ruleSet = ruleSet;
+            this.listTitle = listTitle;
+            this.exportList = exportList;
+            this.applyList = applyList;
             doCloseX = true;
             draggable = true;
             resizeable = true;
@@ -79,26 +87,18 @@ namespace ASM
 
         private string PresetTitle()
         {
+            if (scope == PresetScope.List && listTitle != null)
+            {
+                return listTitle;
+            }
+
             string kindLabel = kind != null ? kind.LabelCap.ToString() : "";
             switch (scope)
             {
                 case PresetScope.Kind:
                     return ASMKeys.PresetTitleKind.Translate(kindLabel);
-                //case PresetScope.List:
-                //    return ListTitle(listKind, kindLabel);
                 default:
                     return ASMKeys.PresetTitleAll.Translate();
-            }
-        }
-
-        private string ListTitle(TraitListKind? lk, string kindLabel)
-        {
-            switch (lk)
-            {
-                case TraitListKind.Keep: return ASMKeys.PresetTitleKeep.Translate(kindLabel);
-                case TraitListKind.ForceCull: return ASMKeys.PresetTitleForceCull.Translate(kindLabel);
-                case TraitListKind.Cull: return ASMKeys.PresetTitleCull.Translate(kindLabel);
-                default: return ASMKeys.PresetTitleSpare.Translate(kindLabel);
             }
         }
 
@@ -406,7 +406,7 @@ namespace ASM
             {
                 case PresetScope.All: PresetIO.ExportAll(name, comp); break;
                 case PresetScope.Kind: PresetIO.ExportKind(name, kind, Settings); break;
-                //default: PresetIO.ExportList(name, listKind.Value, kind, rules); break;
+                default: exportList!(name); break;
             }
             Messages.Message(ASMKeys.PresetOverwritten.Translate(name), MessageTypeDefOf.TaskCompletion, false);
         }
@@ -417,7 +417,7 @@ namespace ASM
             {
                 case PresetScope.All: PresetIO.ExportAll(e.name, comp); break;
                 case PresetScope.Kind: PresetIO.ExportKind(e.name, kind, Settings); break;
-                //default: PresetIO.ExportList(e.name, listKind.Value, kind, rules); break;
+                default: exportList!(e.name); break;
             }
             Messages.Message(ASMKeys.PresetOverwritten.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
         }
@@ -430,7 +430,7 @@ namespace ASM
             {
                 case PresetScope.All: PresetIO.ExportAll(name, comp); break;
                 case PresetScope.Kind: PresetIO.ExportKind(name, kind, Settings); break;
-                //default: PresetIO.ExportList(name, listKind.Value, kind, rules); break;
+                default: exportList!(name); break;
             }
             Messages.Message(ASMKeys.PresetSaved.Translate(name), MessageTypeDefOf.TaskCompletion, false);
             nameBuffer = "";
@@ -449,7 +449,7 @@ namespace ASM
                     comp.MarkDirty();
                     break;
                 default:
-                    //ok = PresetIO.ApplyList(e, listKind.Value, kind, rules);
+                    ok = applyList!(e);
                     comp.MarkDirty();
                     break;
             }

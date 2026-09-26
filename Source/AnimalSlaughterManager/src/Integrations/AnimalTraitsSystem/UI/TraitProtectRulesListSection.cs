@@ -7,6 +7,8 @@ public class TraitProtectRulesListSection(IEditableTraitsRuleSet<TraitProtectRul
 {
     protected override string TitleKey { get; } = ASMKeys.KeepTraits;
     protected override string HelpKey { get; } = ASMKeys.KeepTraitsHelp;
+    protected override TraitListKind ListKind { get; } = TraitListKind.Keep;
+    protected override string PresetsTitleKey { get; } = ASMKeys.PresetTitleKeep;
 
     protected override float DrawHeader(float x, float y, float width)
     {
