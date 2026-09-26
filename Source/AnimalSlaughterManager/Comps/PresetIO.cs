@@ -33,18 +33,18 @@ namespace ASM
     {
         private static string RootFolder => Path.Combine(Application.persistentDataPath, "AnimalSlaughterManagerPresets");
 
-        private static string ScopeFolder(PresetScope scope, TraitListKind listKind = TraitListKind.Keep)
+        private static string ScopeFolder(PresetScope scope)
         {
             switch (scope)
             {
                 case PresetScope.All: return Path.Combine(RootFolder, "All");
                 case PresetScope.Kind: return Path.Combine(RootFolder, "Kind");
-                default: return Path.Combine(RootFolder, "List", listKind.ToString());
+                default: return Path.Combine(RootFolder, "List");
             }
         }
 
-        /// <summary>Presets of one scope (+list), newest-first by file write time.</summary>
-        public static List<PresetEntry> ListPresets(PresetScope scope, TraitListKind listKind = TraitListKind.Keep)
+        /// <summary>Presets of one scope (List covers every rule-set subfolder), newest-first by file write time.</summary>
+        public static List<PresetEntry> ListPresets(PresetScope scope)
         {
             var result = new List<PresetEntry>();
             void AddFolder(string dir)
@@ -57,12 +57,21 @@ namespace ASM
                         name = Path.GetFileNameWithoutExtension(p),
                         path = p,
                         date = File.GetLastWriteTime(p),
-                        scope = scope,
-                        listKind = (scope == PresetScope.List) ? listKind : (TraitListKind?)null
+                        scope = scope
                     });
                 }
             }
-            AddFolder(ScopeFolder(scope, listKind));
+
+            if (scope == PresetScope.List)
+            {
+                AddFolder(Path.Combine(ScopeFolder(scope), "Keep"));
+                AddFolder(Path.Combine(ScopeFolder(scope), "ForceCull"));
+            }
+            else
+            {
+                AddFolder(ScopeFolder(scope));
+            }
+
             // Legacy: presets saved by older versions live in the root folder and are all-animals.
             if (scope == PresetScope.All)
                 AddFolder(RootFolder);
@@ -85,10 +94,17 @@ namespace ASM
             Serialize(name, ScopeFolder(PresetScope.Kind), dto);
         }
 
-        public static void ExportList(string name, TraitListKind listKind, ThingDef animalDef, IList list)
+        public static void ExportList(string name, ThingDef animalDef, IPresettableRuleSet ruleSet)
         {
-            Directory.CreateDirectory(ScopeFolder(PresetScope.List, listKind));
-            Serialize(name, ScopeFolder(PresetScope.List, listKind), ListDto(animalDef, listKind, list));
+            var folder = Path.Combine(ScopeFolder(PresetScope.List), ruleSet.PresetsFolder);
+            Directory.CreateDirectory(folder);
+
+            var full = new KindDto { animal = animalDef.defName };
+            ruleSet.Save(full);
+
+            var dto = new SlaughterPresetDto();
+            dto.Kinds.Add(full);
+            Serialize(name, folder, dto);
         }
 
         // ---- Condition list presets ----------------------------------------------------------
@@ -182,17 +198,14 @@ namespace ASM
             return true;
         }
 
-        /// <summary>Apply a preset's <paramref name="listKind"/> list into <paramref name="targetList"/>
-        /// (cleared first). Works for List-scope (its list), Kind-scope (that kind's list), and
-        /// All-scope (the slice for <paramref name="targetDef"/>'s list). Returns false if nothing applied.</summary>
-        public static bool ApplyList(PresetEntry entry, TraitListKind listKind, ThingDef targetDef, IList targetList)
+        /// <summary>Apply a preset's rules into <paramref name="ruleSet"/>. Works for List-scope
+        /// presets (their rule list), and Kind/All presets (the slice for <paramref name="targetDef"/>).
+        /// Returns false when the preset has no slice for this kind.</summary>
+        public static bool ApplyList(PresetEntry entry, ThingDef targetDef, IPresettableRuleSet ruleSet)
         {
             var kd = RelevantKindDto(entry, targetDef);
             if (kd == null) return false;
-            targetList.Clear();
-            foreach (var o in BuildList(kd, listKind))
-                targetList.Add(o);
-            return true;
+            return ruleSet.Load(kd);
         }
 
         public static void Delete(PresetEntry entry)
@@ -236,42 +249,6 @@ namespace ASM
                 ser.Serialize(w, dto);
         }
 
-        private static SlaughterPresetDto ListDto(ThingDef animalDef, TraitListKind listKind, IList list)
-        {
-            // A List-scope preset is a single-kind DTO carrying only one populated list.
-            var full = KindDto.From(animalDef, new KindSettings());
-            switch (listKind)
-            {
-                case TraitListKind.Keep: full.KeepTraits = TraitList(list, true); break;
-                case TraitListKind.ForceCull: full.ForceCullTraits = TraitList(list, false); break;
-            }
-            var dto = new SlaughterPresetDto();
-            dto.Kinds.Add(full);
-            return dto;
-        }
-
-        private static List<TraitDto> TraitList(IList list, bool isKeep)
-        {
-            var result = new List<TraitDto>();
-            foreach (var item in list)
-            {
-                if (isKeep && item is TraitProtectRule tt)
-                    result.Add(TraitDto.From(tt));
-                else if (!isKeep && item is TraitRule ct)
-                    result.Add(TraitDto.From(ct));
-            }
-            return result;
-        }
-
-        private static IList BuildList(KindDto kd, TraitListKind listKind)
-        {
-            switch (listKind)
-            {
-                case TraitListKind.Keep: return kd.KeepTraits.Select(t => t.ToTarget()).Where(t => t != null).ToList();
-                default: return kd.ForceCullTraits.Select(t => t.ToCull()).Where(c => c != null).ToList();
-            }
-        }
-
         private static string Sanitize(string name)
         {
             foreach (char c in Path.GetInvalidFileNameChars())
@@ -284,8 +261,6 @@ namespace ASM
     public enum PresetScope { All, Kind, List }
 
     /// <summary>Which of the four trait lists a List-scope preset holds.</summary>
-    public enum TraitListKind { Keep, ForceCull }
-
     /// <summary>Which of the four condition buckets a List-scope condition preset holds.</summary>
     public enum CondBucket { AdultMale, YoungMale, AdultFemale, YoungFemale }
 
@@ -295,7 +270,6 @@ namespace ASM
         public string path;
         public DateTime date;
         public PresetScope scope;
-        public TraitListKind? listKind;
         public CondBucket? condBucket;
 
         /// <summary>Rank for delete-gating: a context may only delete presets at or below its own rank.</summary>

@@ -6,7 +6,7 @@ using Verse;
 
 namespace ASM;
 
-public interface IEditableTraitsRuleSet<T> where T : ITraitRule
+public interface IEditableTraitsRuleSet<T> : IPresettableRuleSet where T : ITraitRule
 {
     int Count { get; }
     bool HasRules { get; }
@@ -20,7 +20,7 @@ public interface IEditableTraitsRuleSet<T> where T : ITraitRule
     void ReplaceAt(int i, List<HediffDef> items);
 }
 
-public class KindTraitsRuleSet<T>(Func<IEditableTraitsRuleSet<T>, ITraitRulesListSection<T>> editorFactory) : IEditableTraitsRuleSet<T> where T : ITraitRule
+public abstract class KindTraitsRuleSet<T> : IEditableTraitsRuleSet<T> where T : ITraitRule
 {
     public List<T> rules = [];
 
@@ -30,7 +30,13 @@ public class KindTraitsRuleSet<T>(Func<IEditableTraitsRuleSet<T>, ITraitRulesLis
 
     public System.Collections.IList Rules => rules;
 
-    public ITraitRulesListSection<T> GetEditor() => editorFactory(this);
+    public abstract ITraitRulesListSection<T> GetEditor();
+
+    public abstract string PresetsFolder { get; }
+
+    public abstract void Save(KindDto dto);
+
+    public abstract bool Load(KindDto dto);
 
     public void Clear() => rules.Clear();
 
@@ -99,10 +105,10 @@ public class KindTraitsRuleSet<T>(Func<IEditableTraitsRuleSet<T>, ITraitRulesLis
 public class KindTraitsSettings : IPresettable
 {
     // Breeding: protect these animals from slaughter.
-    public KindTraitsRuleSet<TraitProtectRule> protectRuleSet = new((ruleSet) => new TraitProtectRulesListSection(ruleSet));
+    public ProtectRuleSet protectRuleSet = new();
     // Force slaughter: cull these animals regardless of count/limits and other settings
     // (protection still wins at intersections).
-    public KindTraitsRuleSet<TraitRule> forceCullRuleSet = new((ruleSet) => new TraitRulesListSection(ruleSet));
+    public ForceCullRuleSet forceCullRuleSet = new();
     /// <summary>True when this kind deviates from vanilla behaviour and must be recomputed.</summary>
     public bool Customized =>
         protectRuleSet.HasRules ||
@@ -184,5 +190,65 @@ public class KindTraitsSettings : IPresettable
                 }
             }
         }
+    }
+}
+
+public class ProtectRuleSet() : KindTraitsRuleSet<TraitProtectRule>
+{
+    public override ITraitRulesListSection<TraitProtectRule> GetEditor() => new TraitProtectRulesListSection(this);
+
+    public override string PresetsFolder => "Keep";
+
+    public override void Save(KindDto dto) =>
+        dto.KeepTraits = rules.Select(TraitDto.From).ToList();
+
+    public override bool Load(KindDto dto)
+    {
+        if (dto.KeepTraits == null)
+        {
+            return false;
+        }
+
+        rules.Clear();
+
+        foreach (var t in dto.KeepTraits.Select(t => t.ToTarget()))
+        {
+            if (t != null)
+            {
+                rules.Add(t);
+            }
+        }
+
+        return true;
+    }
+}
+
+public class ForceCullRuleSet() : KindTraitsRuleSet<TraitRule>
+{
+    public override ITraitRulesListSection<TraitRule> GetEditor() => new TraitRulesListSection(this);
+
+    public override string PresetsFolder => "ForceCull";
+
+    public override void Save(KindDto dto) =>
+        dto.ForceCullTraits = rules.Select(TraitDto.From).ToList();
+
+    public override bool Load(KindDto dto)
+    {
+        if (dto.ForceCullTraits == null)
+        {
+            return false;
+        }
+
+        rules.Clear();
+
+        foreach (var c in dto.ForceCullTraits.Select(t => t.ToCull()))
+        {
+            if (c != null)
+            {
+                rules.Add(c);
+            }
+        }
+
+        return true;
     }
 }
