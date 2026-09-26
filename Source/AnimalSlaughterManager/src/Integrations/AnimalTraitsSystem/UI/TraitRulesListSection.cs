@@ -5,8 +5,8 @@ namespace ASM;
 
 public class TraitRulesListSection(IEditableTraitsRuleSet<TraitRule> rules) : BaseTraitRulesListSection<TraitRule>(rules)
 {
-    protected override string TitleKey { get; } = ASMKeys.KeepTraits;
-    protected override string HelpKey { get; } = ASMKeys.KeepTraitsHelp;
+    protected override string TitleKey { get; } = ASMKeys.ForceCullTraits;
+    protected override string HelpKey { get; } = ASMKeys.ForceCullTraitsHelp;
 
     protected override float DrawHeader(float x, float y, float width)
     {
@@ -19,27 +19,30 @@ public class TraitRulesListSection(IEditableTraitsRuleSet<TraitRule> rules) : Ba
         Text.Font = GameFont.Small;
         GUI.color = Color.white;
 
-        var left = x;
-        //TODO: width
-        var traitButtonWidth = width -
-            UIConstants.IconSize -
-            UIConstants.ButtonMinWidth - UIConstants.GapX -
-            UIConstants.ButtonMinWidth - UIConstants.GapX -
-            UIConstants.ButtonMinWidth - UIConstants.GapX -
-            UIConstants.IconSize - UIConstants.GapX -
-            UIConstants.IconSize;
+        var labelHeight = Text.LineHeight;
+        var gripOffset = UIConstants.IconSize;
+        var rightSideWidth = UIConstants.ButtonMinWidth + UIConstants.GapX + // age
+            UIConstants.ButtonMinWidth + UIConstants.GapX + // gender
+            UIConstants.ButtonMinWidth + UIConstants.GapX + // inheritability
+            UIConstants.IconSize + UIConstants.GapX + // copy
+            UIConstants.IconSize; // remove
+        var traitColumnWidth = width - gripOffset - rightSideWidth;
+        var left = x + gripOffset;
 
-        Widgets.Label(new Rect(left, y, traitButtonWidth, Text.SmallFontHeight), ASMKeys.Trait.Translate());
-        Widgets.Label(new Rect(left, y, UIConstants.ButtonMinWidth, Text.SmallFontHeight), ASMKeys.AgeScope.Translate());
-        Widgets.Label(new Rect(left, y, UIConstants.ButtonMinWidth, Text.SmallFontHeight), ASMKeys.GenderScope.Translate());
-        Widgets.Label(new Rect(left, y, UIConstants.ButtonMinWidth, Text.SmallFontHeight), ASMKeys.InheritMode.Translate());
+        Widgets.Label(new Rect(left, y, traitColumnWidth, labelHeight), ASMKeys.Trait.Translate());
+        left += traitColumnWidth;
+        Widgets.Label(new Rect(left, y, UIConstants.ButtonMinWidth, labelHeight), ASMKeys.AgeScope.Translate());
+        left += UIConstants.ButtonMinWidth + UIConstants.GapX;
+        Widgets.Label(new Rect(left, y, UIConstants.ButtonMinWidth, labelHeight), ASMKeys.GenderScope.Translate());
+        left += UIConstants.ButtonMinWidth + UIConstants.GapX;
+        Widgets.Label(new Rect(left, y, UIConstants.ButtonMinWidth, labelHeight), ASMKeys.InheritMode.Translate());
 
         Text.WordWrap = wrap;
         Text.Anchor = anchor;
         Text.Font = font;
         GUI.color = color;
 
-        return Text.SmallFontHeight;
+        return labelHeight;
     }
 
     protected override float DrawRow(Rect row, int index, ASM_MapComp comp)
@@ -52,16 +55,17 @@ public class TraitRulesListSection(IEditableTraitsRuleSet<TraitRule> rules) : Ba
             return 0;
         }
 
+        var anchor = Text.Anchor;
         var left = row.x;
         var top = row.y;
 
         left += KindSlaughterSettingsTabListHelper.DrawGrip(left, top, row.height);
 
-        var right = row.xMax -= UIConstants.ButtonMinWidth + UIConstants.GapX +
+        var right = row.xMax - (UIConstants.ButtonMinWidth + UIConstants.GapX +
             UIConstants.ButtonMinWidth + UIConstants.GapX +
             UIConstants.ButtonMinWidth + UIConstants.GapX +
             UIConstants.IconSize + UIConstants.GapX +
-            UIConstants.IconSize;
+            UIConstants.IconSize);
         var traitButtonWidth = right - left;
         top = row.y + (row.height - UIConstants.ButtonHeight) / 2f;
 
@@ -96,6 +100,8 @@ public class TraitRulesListSection(IEditableTraitsRuleSet<TraitRule> rules) : Ba
             RuleSet.RemoveAt(index);
             comp.MarkDirty();
         }
+
+        Text.Anchor = anchor;
 
         return row.height;
     }

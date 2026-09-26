@@ -26,10 +26,7 @@ public static class UIConstants
     public const float ButtonPaddingY = 4f;
     public const float ButtonPaddingX = 16f;
     public const float ScrollbarWidth = 16f;
-    public const float TextPaddingBottom = 2f;
-    public static float SmallTextHeight => Text.LineHeightOf(GameFont.Small);
-    [Obsolete]
-    public static float MediumTextHeight => Text.LineHeightOf(GameFont.Medium);
+    public const float TextPaddingY = 2f;
     public const float ListMinHeight = 200f;
 }
 
@@ -196,37 +193,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         // List
         top += UIConstants.GapY;
 
-        var outRect = new Rect(left, top, listWidth, listHeight);
-        var view = new Rect(left, top, listWidth - UIConstants.ScrollbarWidth, outRect.height/*TODO: need this? Mathf.Max(listState.contentHeight, outRect.height)*/);
-
-        Widgets.BeginScrollView(outRect, ref listState.scroll, view);
-
-        if (Event.current.type == EventType.Repaint)
-        {
-            // TODO: changes in list in settings class, use ReadonlyList
-            listState.group = ReorderableWidget.NewGroup((a, b) => KindSlaughterSettingsTabListHelper.ReorderList(list, a, b), ReorderableDirection.Vertical, outRect);
-        }
-
-        for (int i = 0; i < list.Count; i++)
-        {
-            var row = new Rect(view.x, top, view.width, UIConstants.MediumTextHeight);
-
-            if (i % 2 == 1)
-            {
-                Widgets.DrawAltRect(row);
-            }
-
-            ReorderableWidget.Reorderable(listState.group, new Rect(row.x, row.y, UIConstants.IconSize, row.height));
-
-            DrawConditionRow(row, list, i, validation, comp);
-
-            top += row.height + KindSlaughterSettingsTabListHelper.ListGapY;
-        }
-
-        //TODO: need this?
-        //listState.contentHeight = Mathf.Max(cy - y, outRect.height);
-
-        Widgets.EndScrollView();
+        DrawConditionList(left, top, listWidth, listHeight, list, ref listState, male, adult, validation);
     }
 
     private float DrawConditionSectionHeader(float x, float y, TaggedString title, List<BasePriorityRule> rules)
@@ -250,7 +217,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         Text.Anchor = TextAnchor.UpperLeft;
 
         var rectWidth = Text.CalcSize(title).x + UIConstants.GapX;
-        var rectHeight = Text.LineHeight + UIConstants.TextPaddingBottom;
+        var rectHeight = Text.LineHeight + UIConstants.TextPaddingY;
 
         Widgets.Label(new Rect(x, y, rectWidth, rectHeight), title);
 
@@ -352,6 +319,42 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         return height;
     }
 
+    private void DrawConditionList(float x, float y, float listWidth, float listHeight,
+        List<BasePriorityRule> list, ref ListSectionState listState, bool male, bool adult, List<List<string>> validation)
+    {
+        var top = y;
+        var rowHeight = Text.LineHeight + UIConstants.TextPaddingY;
+        var contentHeight = list.Count * (rowHeight + KindSlaughterSettingsTabListHelper.ListGapY);
+        var outRect = new Rect(x, top, listWidth, listHeight);
+        var view = new Rect(x, top, listWidth - UIConstants.ScrollbarWidth, Mathf.Max(contentHeight, outRect.height));
+
+        Widgets.BeginScrollView(outRect, ref listState.scroll, view);
+
+        if (Event.current.type == EventType.Repaint)
+        {
+            // TODO: changes in list in settings class, use ReadonlyList
+            listState.group = ReorderableWidget.NewGroup((a, b) => KindSlaughterSettingsTabListHelper.ReorderList(list, a, b), ReorderableDirection.Vertical, outRect);
+        }
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            var row = new Rect(view.x, top, view.width, rowHeight);
+
+            if (i % 2 == 1)
+            {
+                Widgets.DrawAltRect(row);
+            }
+
+            ReorderableWidget.Reorderable(listState.group, new Rect(row.x, row.y, UIConstants.IconSize, row.height));
+
+            DrawConditionRow(row, list, i, validation, comp);
+
+            top += row.height + KindSlaughterSettingsTabListHelper.ListGapY;
+        }
+
+        Widgets.EndScrollView();
+    }
+
     private void DrawConditionRow(Rect row, List<BasePriorityRule> list, int index, List<List<string>> validation, ASM_MapComp comp)
     {
         var rowValidation = validation[index];
@@ -382,7 +385,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         Text.Anchor = TextAnchor.MiddleLeft;
         GUI.color = Color.white;
 
-        top = row.y + (UIConstants.MediumTextHeight - UIConstants.ButtonHeight) / 2;
+        top = row.y + (row.height - UIConstants.ButtonHeight) / 2f;
         var labelButtonRect = new Rect(left, top, labelWidth, UIConstants.ButtonHeight);
 
         Widgets.DrawHighlightIfMouseover(labelButtonRect);

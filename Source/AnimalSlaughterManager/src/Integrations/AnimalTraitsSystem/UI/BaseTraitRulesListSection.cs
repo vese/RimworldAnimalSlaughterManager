@@ -34,42 +34,13 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
         // Row 4: table header
         top += UIConstants.GapY;
 
-        top += DrawHeader(top, left, listWidth);
+        top += DrawHeader(left, top, listWidth);
 
         // List
         left = x;
         top += UIConstants.GapY;
 
-        var outRect = new Rect(left, top, listWidth, listHeight);
-        var view = new Rect(left, top, listWidth - UIConstants.ScrollbarWidth, outRect.height/*TODO: need this? Mathf.Max(listState.contentHeight, outRect.height)*/);
-
-        Widgets.BeginScrollView(outRect, ref listState.scroll, view);
-
-        if (Event.current.type == EventType.Repaint)
-        {
-            listState.group = ReorderableWidget.NewGroup(ruleSet.Swap, ReorderableDirection.Vertical, outRect);
-        }
-
-        for (int i = 0; i < ruleSet.Count; i++)
-        {
-            var row = new Rect(view.x, top, view.width, UIConstants.MediumTextHeight);
-
-            if (i % 2 == 1)
-            {
-                Widgets.DrawAltRect(row);
-            }
-
-            ReorderableWidget.Reorderable(listState.group, new Rect(row.x, row.y, UIConstants.IconSize, row.height));
-
-            DrawRow(row, i, comp);
-
-            top += row.height + KindSlaughterSettingsTabListHelper.ListGapY;
-        }
-
-        //TODO: need this?
-        //listState.contentHeight = Mathf.Max(cy - y, outRect.height);
-
-        Widgets.EndScrollView();
+        DrawList(left, top, listWidth, listHeight, ref listState, comp);
 
         return listHeight;
     }
@@ -83,7 +54,7 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
         Text.Font = GameFont.Medium;
         Text.Anchor = TextAnchor.UpperLeft;
 
-        var height = Text.LineHeight + UIConstants.TextPaddingBottom;
+        var height = Text.LineHeight + UIConstants.TextPaddingY;
         Widgets.Label(new Rect(x, y, width, height), TitleKey.Translate());
 
         GUI.color = color;
@@ -165,6 +136,40 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
     }
 
     protected abstract float DrawHeader(float x, float y, float width);
+
+    private void DrawList(float x, float y, float listWidth, float listHeight, ref ListSectionState listState, ASM_MapComp comp)
+    {
+        var top = y;
+        var rowHeight = Text.LineHeight + UIConstants.TextPaddingY;
+        var contentHeight = ruleSet.Count * (rowHeight + KindSlaughterSettingsTabListHelper.ListGapY);
+        var outRect = new Rect(x, top, listWidth, listHeight);
+        var view = new Rect(x, top, listWidth - UIConstants.ScrollbarWidth, Mathf.Max(contentHeight, outRect.height));
+
+        Widgets.BeginScrollView(outRect, ref listState.scroll, view);
+
+        if (Event.current.type == EventType.Repaint)
+        {
+            listState.group = ReorderableWidget.NewGroup(ruleSet.Swap, ReorderableDirection.Vertical, outRect);
+        }
+
+        for (int i = 0; i < ruleSet.Count; i++)
+        {
+            var row = new Rect(view.x, top, view.width, rowHeight);
+
+            if (i % 2 == 1)
+            {
+                Widgets.DrawAltRect(row);
+            }
+
+            ReorderableWidget.Reorderable(listState.group, new Rect(row.x, row.y, UIConstants.IconSize, row.height));
+
+            DrawRow(row, i, comp);
+
+            top += row.height + KindSlaughterSettingsTabListHelper.ListGapY;
+        }
+
+        Widgets.EndScrollView();
+    }
 
     protected abstract float DrawRow(Rect row, int index, ASM_MapComp comp);
 
