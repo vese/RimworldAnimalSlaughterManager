@@ -87,13 +87,13 @@ public class KindPrioritySettingsLegacy
         CondType.HasPositiveTrait => new TraitGeneralPriorityRule
         {
             has = slaughterCondition.has,
-            type = slaughterCondition.has ? TraitType.Positive : TraitType.Negative,
+            type = TraitType.Positive,
             inheritability = TraitInheritability.Both
         },
         CondType.HasNegativeTrait => new TraitGeneralPriorityRule
         {
             has = slaughterCondition.has,
-            type = slaughterCondition.has ? TraitType.Negative : TraitType.Positive,
+            type = TraitType.Negative,
             inheritability = TraitInheritability.Both
         },
         _ => null,
