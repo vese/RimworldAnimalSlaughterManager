@@ -103,23 +103,10 @@ public class KindTraitsSettings : IPresettable
     // Force slaughter: cull these animals regardless of count/limits and other settings
     // (protection still wins at intersections).
     public KindTraitsRuleSet<TraitRule> forceCullRuleSet = new((ruleSet) => new TraitRulesListSection(ruleSet));
-    // TODO: obsolete?
-    [Obsolete]
-    // Slaughter priority: cull these animals first.
-    public List<TraitRule> cullTraits = [];
-    // TODO: obsolete?
-    [Obsolete]
-    // Slaughter priority: cull these animals LAST (less priority for slaughter).
-    public List<TraitRule> spareTraits = [];
-
     /// <summary>True when this kind deviates from vanilla behaviour and must be recomputed.</summary>
     public bool Customized =>
         protectRuleSet.HasRules ||
-        forceCullRuleSet.HasRules ||
-        cullTraits != null && cullTraits.Count > 0 ||
-        spareTraits != null && spareTraits.Count > 0;
-
-    ///// <summary>Priority customization: sex×age (older/younger) prefs, condition lists, or cull/spare trait lists.</summary>
+        forceCullRuleSet.HasRules;    ///// <summary>Priority customization: sex×age (older/younger) prefs, condition lists, or cull/spare trait lists.</summary>
     //public bool HasPrioritySettings =>
     //    cullTraits != null && cullTraits.Count > 0 ||
     //    spareTraits != null && spareTraits.Count > 0;
@@ -134,8 +121,6 @@ public class KindTraitsSettings : IPresettable
     {
         protectRuleSet.Clear();
         forceCullRuleSet.Clear();
-        cullTraits.Clear();
-        spareTraits.Clear();
     }
 
     public void ExposeData()
@@ -171,10 +156,6 @@ public class KindTraitsSettings : IPresettable
     {
         dto.KeepTraits = protectRuleSet.rules.Select(TraitDto.From).ToList();
         dto.ForceCullTraits = forceCullRuleSet.rules.Select(TraitDto.From).ToList();
-#pragma warning disable CS0618
-        dto.CullTraits = cullTraits.Select(TraitDto.From).ToList();
-        dto.SpareTraits = spareTraits.Select(TraitDto.From).ToList();
-#pragma warning restore CS0618
     }
 
     public void Load(KindDto dto)
@@ -203,32 +184,5 @@ public class KindTraitsSettings : IPresettable
                 }
             }
         }
-
-#pragma warning disable CS0618
-        cullTraits.Clear();
-        spareTraits.Clear();
-
-        if (dto.CullTraits != null)
-        {
-            foreach (var c in dto.CullTraits.Select(t => t.ToCull()))
-            {
-                if (c != null)
-                {
-                    cullTraits.Add(c);
-                }
-            }
-        }
-
-        if (dto.SpareTraits != null)
-        {
-            foreach (var c in dto.SpareTraits.Select(t => t.ToCull()))
-            {
-                if (c != null)
-                {
-                    spareTraits.Add(c);
-                }
-            }
-        }
-#pragma warning restore CS0618
     }
 }

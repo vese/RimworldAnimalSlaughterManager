@@ -243,8 +243,6 @@ namespace ASM
             switch (listKind)
             {
                 case TraitListKind.Keep: full.KeepTraits = TraitList(list, true); break;
-                case TraitListKind.Cull: full.CullTraits = TraitList(list, false); break;
-                case TraitListKind.Spare: full.SpareTraits = TraitList(list, false); break;
                 case TraitListKind.ForceCull: full.ForceCullTraits = TraitList(list, false); break;
             }
             var dto = new SlaughterPresetDto();
@@ -270,8 +268,6 @@ namespace ASM
             switch (listKind)
             {
                 case TraitListKind.Keep: return kd.KeepTraits.Select(t => t.ToTarget()).Where(t => t != null).ToList();
-                case TraitListKind.Cull: return kd.CullTraits.Select(t => t.ToCull()).Where(c => c != null).ToList();
-                case TraitListKind.Spare: return kd.SpareTraits.Select(t => t.ToCull()).Where(c => c != null).ToList();
                 default: return kd.ForceCullTraits.Select(t => t.ToCull()).Where(c => c != null).ToList();
             }
         }
@@ -288,7 +284,7 @@ namespace ASM
     public enum PresetScope { All, Kind, List }
 
     /// <summary>Which of the four trait lists a List-scope preset holds.</summary>
-    public enum TraitListKind { Keep, Cull, Spare, ForceCull }
+    public enum TraitListKind { Keep, ForceCull }
 
     /// <summary>Which of the four condition buckets a List-scope condition preset holds.</summary>
     public enum CondBucket { AdultMale, YoungMale, AdultFemale, YoungFemale }
@@ -346,10 +342,6 @@ namespace ASM
         public string femaleYoungPref;
         [XmlArray("KeepTraits")] [XmlArrayItem("Trait")]
         public List<TraitDto> KeepTraits = new List<TraitDto>();
-        [XmlArray("CullTraits")] [XmlArrayItem("Trait")]
-        public List<TraitDto> CullTraits = new List<TraitDto>();
-        [XmlArray("SpareTraits")] [XmlArrayItem("Trait")]
-        public List<TraitDto> SpareTraits = new List<TraitDto>();
         [XmlArray("ForceCullTraits")] [XmlArrayItem("Trait")]
         public List<TraitDto> ForceCullTraits = new List<TraitDto>();
         [XmlArray("PrioAdultMale")] [XmlArrayItem("Cond")]
