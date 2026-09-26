@@ -254,20 +254,20 @@ namespace ASM
         {
             string name = (nameBuffer ?? "").Trim();
             if (name.NullOrEmpty()) return;
-            //PresetIO.ExportConditions(name, bucket, targetList);
+            PresetIO.ExportConditions(name, bucket, targetList);
             Messages.Message(ASMKeys.PresetSaved.Translate(name), MessageTypeDefOf.TaskCompletion, false);
             nameBuffer = "";
         }
 
         private void OverwriteByName(string name)
         {
-            //PresetIO.ExportConditions(name, bucket, targetList);
+            PresetIO.ExportConditions(name, bucket, targetList);
             Messages.Message(ASMKeys.PresetOverwritten.Translate(name), MessageTypeDefOf.TaskCompletion, false);
         }
 
         private void OverwriteEntry(PresetEntry e)
         {
-            //PresetIO.ExportConditions(e.name, bucket, targetList);
+            PresetIO.ExportConditions(e.name, bucket, targetList);
             Messages.Message(ASMKeys.PresetOverwritten.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
         }
 
@@ -279,7 +279,7 @@ namespace ASM
                 if (loaded != null)
                 {
                     targetList.Clear();
-                    //targetList.AddRange(loaded);
+                    targetList.AddRange(loaded);
                     comp.MarkDirty();
                     Messages.Message(ASMKeys.PresetLoaded.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
                 }
