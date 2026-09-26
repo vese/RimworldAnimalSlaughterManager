@@ -85,36 +85,45 @@ public class PriorityRuleSet
         }
     }
 
+    /// <summary>
+    /// Per-rule problem messages (null when the rule is fine). Rules are matched top-to-down and
+    /// the first match wins: a rule covered by an earlier one can never fire (unreachable), and
+    /// two rules covering each other are duplicates.
+    /// </summary>
     public List<List<string>> Validate()
     {
-        if (!HasRules)
-        {
-            return [];
-        }
+        var errors = new List<List<string>?>(rules.Count);
 
-        var errors = new List<List<string>>(rules.Count);
+        for (int i = 0; i < rules.Count; i++)
+        {
+            errors.Add(null);
+        }
 
         for (int i = 0; i < rules.Count - 1; i++)
         {
-            var first = rules[i];
-
             for (int j = i + 1; j < rules.Count; j++)
             {
-                var second = rules[j];
+                bool upperCoversLower = rules[i].Covers(rules[j]);
+                bool lowerCoversUpper = rules[j].Covers(rules[i]);
 
-                if (first.IsInvalid(second))
+                if (upperCoversLower && lowerCoversUpper)
                 {
                     errors[i] ??= [];
                     errors[j] ??= [];
-                    // TODO: errors messages
-                    errors[i]?.Add("Invalid");
-                    errors[j]?.Add("Invalid");
+                    errors[i]!.Add(ASMKeys.ValidationDuplicate.Translate(j + 1));
+                    errors[j]!.Add(ASMKeys.ValidationDuplicate.Translate(i + 1));
+                }
+                else if (upperCoversLower)
+                {
+                    errors[j] ??= [];
+                    errors[j]!.Add(ASMKeys.ValidationUnreachable.Translate(i + 1));
                 }
             }
         }
 
-        return errors;
+        return errors!;
     }
+
 }
 
 public class KindPrioritySettings : IPresettable

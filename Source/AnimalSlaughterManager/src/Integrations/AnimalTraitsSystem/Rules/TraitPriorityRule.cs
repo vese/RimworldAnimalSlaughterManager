@@ -24,9 +24,12 @@ public class TraitPriorityRule : BasePriorityRule
         Scribe_Values.Look(ref inheritability, "inheritability", TraitInheritability.Both);
     }
 
-    public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is TraitPriorityRule rule &&
-        // TODO: for TraitInheritability.Both and other any
-        trait?.defName == rule.trait?.defName && inheritability == rule.inheritability;
+    public override bool Covers(BasePriorityRule other) =>
+        other is TraitPriorityRule rule &&
+        trait?.defName == rule.trait?.defName &&
+        has == rule.has &&
+        // "Any inheritability" matches every animal the narrower filter matches.
+        (inheritability == TraitInheritability.Both || inheritability == rule.inheritability);
 
     protected override void ChangeVariantInternal() => has = !has;
 

@@ -22,7 +22,10 @@ public class TrainingPriorityRule : BasePriorityRule
         Scribe_Defs.Look(ref trainable, "trainable");
     }
 
-    public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is TrainingPriorityRule rule && trainable?.defName == rule.trainable?.defName;
+    public override bool Covers(BasePriorityRule other) =>
+        (other is TrainingPriorityRule rule && has == rule.has && trainable?.defName == rule.trainable?.defName) ||
+        // Untrained in a skill ⊆ no training at all.
+        (other is TrainingGeneralPriorityRule g && !has && g.type == TrainingGeneralType.None);
 
     protected override void ChangeVariantInternal() => has = !has;
 

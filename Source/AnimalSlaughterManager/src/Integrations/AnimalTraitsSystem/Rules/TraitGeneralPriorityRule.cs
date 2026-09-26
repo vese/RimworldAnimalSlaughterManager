@@ -73,9 +73,33 @@ public class TraitGeneralPriorityRule : BasePriorityRule
         Scribe_Values.Look(ref inheritability, "inheritability", TraitInheritability.Both);
     }
 
-    public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is TraitGeneralPriorityRule rule &&
-        // TODO: for Both
-        type == rule.type && inheritability == rule.inheritability;
+    public override bool Covers(BasePriorityRule other)
+    {
+        if (other is TraitGeneralPriorityRule general)
+        {
+            if (inheritability != general.inheritability)
+            {
+                return false;
+            }
+
+            // Same target is a duplicate; "any trait" covers "positive/negative only" for "has".
+            if (type == general.type || (has && type == TraitType.Both && general.type != TraitType.Both))
+            {
+                return true;
+            }
+
+            // "Without positive/negative" covers "without any trait".
+            return !has && type != TraitType.Both && general.type == TraitType.Both;
+        }
+
+        // A specific positive/negative trait ⊆ the matching "has" general rule.
+        return other is TraitPriorityRule trait &&
+               trait.has == has &&
+               inheritability == TraitInheritability.Both &&
+               type != TraitType.Both &&
+               trait.trait != null &&
+               trait.trait.isBad == (type == TraitType.Negative);
+    }
 
     protected override void ChangeVariantInternal()
     {

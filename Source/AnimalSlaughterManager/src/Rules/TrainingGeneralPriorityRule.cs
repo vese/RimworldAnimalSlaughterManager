@@ -35,7 +35,12 @@ public class TrainingGeneralPriorityRule : BasePriorityRule
     }
 
     // TODO: for PartialOrFull and Partial, Full
-    public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is TrainingGeneralPriorityRule rule && type == rule.type;
+    public override bool Covers(BasePriorityRule other) =>
+        (other is TrainingGeneralPriorityRule rule && type == rule.type) ||
+        // Fully trained ⊆ any training.
+        (other is TrainingGeneralPriorityRule g && type == TrainingGeneralType.PartialOrFull && g.type == TrainingGeneralType.Full) ||
+        // Fully trained ⇒ every skill learned.
+        (other is TrainingPriorityRule t && t.has);
 
     protected override void ChangeVariantInternal() => type = type switch
     {

@@ -15,7 +15,13 @@ public abstract class BasePriorityRule : IExposable
     public abstract BasePriorityRule Clone();
     public abstract bool Matches(Pawn? p);
     public abstract void ExposeData();
-    public abstract bool IsInvalid(BasePriorityRule baseRule);
+
+    /// <summary>
+    /// True when every animal matching <paramref name="other"/> also matches this rule
+    /// (this rule's set ⊇ other's set). Rules are evaluated top-to-down and the first match
+    /// wins, so a rule covered by an earlier one can never fire.
+    /// </summary>
+    public virtual bool Covers(BasePriorityRule other) => false;
 
     public void ChangeVariant()
     {

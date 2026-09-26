@@ -262,11 +262,10 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
         if (rowValidation is not null && rowValidation.Count > 0)
         {
-            // TODO: need this?
-            //private static readonly Color ForceCullTint = new Color(0.5f, 0.15f, 0.15f, 0.5f);
-            //GUI.color = ForceCullTint;
-            //GUI.DrawTexture(row, Texture2D.whiteTexture);
-            //GUI.color = Color.white;
+            GUI.color = new Color(0.5f, 0.15f, 0.15f, 0.3f);
+            GUI.DrawTexture(row, BaseContent.WhiteTex);
+            GUI.color = Color.white;
+            TooltipHandler.TipRegion(row, string.Join("\n", rowValidation));
         }
 
         var left = row.x;

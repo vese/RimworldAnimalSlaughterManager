@@ -18,7 +18,10 @@ public class DiseaseAnyPriorityRule : BasePriorityRule
         Scribe_Values.Look(ref has, "has", true);
     }
 
-    public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is DiseaseAnyPriorityRule;
+    public override bool Covers(BasePriorityRule other) =>
+        (other is DiseaseAnyPriorityRule rule && has == rule.has) ||
+        // Sick with a specific disease ⊆ sick.
+        (other is DiseasePriorityRule d && has && d.has);
 
     protected override void ChangeVariantInternal() => has = !has;
 

@@ -133,6 +133,10 @@ namespace ASM
         /// <summary>CondPresets</summary>
         public const string CondPresets = "ASM.CondPresets";
 
+        /// <summary>ValidationDuplicate</summary>
+        public const string ValidationDuplicate = "ASM.ValidationDuplicate";
+        /// <summary>ValidationUnreachable</summary>
+        public const string ValidationUnreachable = "ASM.ValidationUnreachable";
         /// <summary>CondProblemTip</summary>
         public const string CondProblemTip = "ASM.CondProblemTip";
 

@@ -18,7 +18,7 @@ public class PregnancyPriorityRule : BasePriorityRule
         Scribe_Values.Look(ref has, "has", true);
     }
 
-    public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is PregnancyPriorityRule;
+    public override bool Covers(BasePriorityRule other) => other is PregnancyPriorityRule rule && has == rule.has;
 
     protected override void ChangeVariantInternal() => has = !has;
 }
