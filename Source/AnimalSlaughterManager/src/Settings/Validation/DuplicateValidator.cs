@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 namespace ASM;
 
-/// <summary>Duplicates: mutually covering pairs among rules of the same type (identical
-/// targets), reported pairwise with the partner index.</summary>
+/// <summary>Duplicates: identical rules of the same type (see <see cref="BasePriorityRule.IsDuplicate"/>),
+/// reported pairwise with the partner index.</summary>
 public sealed class DuplicateValidator : IRuleSetValidator
 {
     public void Validate(RuleValidationContext context, IReadOnlyList<BasePriorityRule> rules, List<List<string>?> errors)
@@ -18,7 +18,7 @@ public sealed class DuplicateValidator : IRuleSetValidator
                     var (firstIndex, first) = list[i];
                     var (secondIndex, second) = list[j];
 
-                    if (first.Covers(second) && second.Covers(first))
+                    if (first.IsDuplicate(second))
                     {
                         errors[firstIndex] ??= [];
                         errors[secondIndex] ??= [];

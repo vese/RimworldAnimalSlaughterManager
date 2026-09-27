@@ -25,12 +25,9 @@ public abstract class BasePriorityRule : IExposable
 
     public abstract bool Matches(Pawn? p);
 
-    /// <summary>
-    /// True when every animal matching <paramref name="other"/> also matches this rule
-    /// (this rule's set ⊇ other's set). Rules are evaluated top-to-down and the first match
-    /// wins, so a rule covered by an earlier one can never fire.
-    /// </summary>
-    public virtual bool Covers(BasePriorityRule other) => false;
+    /// <summary>True when the other rule is an identical duplicate (same type, same target and
+    /// parameters). Used by DuplicateValidator; coverage is ICoversRule<TOther>.</summary>
+    public virtual bool IsDuplicate(BasePriorityRule other) => false;
 
     public void ChangeVariant()
     {

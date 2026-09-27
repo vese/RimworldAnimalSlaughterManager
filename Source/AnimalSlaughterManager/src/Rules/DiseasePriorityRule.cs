@@ -5,7 +5,7 @@ using Verse;
 
 namespace ASM;
 
-public class DiseasePriorityRule : BasePriorityRule
+public class DiseasePriorityRule : BasePriorityRule, ICoversRule<DiseaseAnyPriorityRule>
 {
     public bool has = true;
     public HediffDef? disease;
@@ -32,12 +32,12 @@ public class DiseasePriorityRule : BasePriorityRule
         }
     }
 
-    public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new SameTypeCoverageValidator(), new CrossTypeCoverageValidator()];
+    public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new CoverageValidator<DiseasePriorityRule, DiseaseAnyPriorityRule>(), new StateCoverageValidator()];
 
-    public override bool Covers(BasePriorityRule other) =>
-        (other is DiseasePriorityRule rule && has == rule.has && disease?.defName == rule.disease?.defName) ||
-        // Healthy ⊆ not having a specific disease.
-        (other is DiseaseAnyPriorityRule any && !has && !any.has);
+    public override bool IsDuplicate(BasePriorityRule other) => other is DiseasePriorityRule rule && has == rule.has && disease?.defName == rule.disease?.defName;
+
+        /// Healthy ⊆ not having a specific disease.
+        public bool Covers(DiseaseAnyPriorityRule other) => !has && !other.has;
 
     protected override void ChangeVariantInternal() => has = !has;
 

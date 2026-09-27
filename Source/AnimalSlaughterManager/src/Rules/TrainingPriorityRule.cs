@@ -5,7 +5,7 @@ using Verse;
 
 namespace ASM;
 
-public class TrainingPriorityRule : BasePriorityRule
+public class TrainingPriorityRule : BasePriorityRule, ICoversRule<TrainingGeneralPriorityRule>
 {
     public bool has = true;
     public TrainableDef? trainable;
@@ -32,12 +32,12 @@ public class TrainingPriorityRule : BasePriorityRule
         }
     }
 
-    public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new SameTypeCoverageValidator(), new CrossTypeCoverageValidator()];
+    public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new CoverageValidator<TrainingPriorityRule, TrainingGeneralPriorityRule>(), new StateCoverageValidator()];
 
-    public override bool Covers(BasePriorityRule other) =>
-        (other is TrainingPriorityRule rule && has == rule.has && trainable?.defName == rule.trainable?.defName) ||
-        // Untrained in a skill ⊆ no training at all.
-        (other is TrainingGeneralPriorityRule g && !has && g.type == TrainingGeneralType.None);
+    public override bool IsDuplicate(BasePriorityRule other) => other is TrainingPriorityRule rule && has == rule.has && trainable?.defName == rule.trainable?.defName;
+
+        /// Untrained in a skill ⊆ no training at all.
+        public bool Covers(TrainingGeneralPriorityRule other) => !has && other.type == TrainingGeneralType.None;
 
     protected override void ChangeVariantInternal() => has = !has;
 

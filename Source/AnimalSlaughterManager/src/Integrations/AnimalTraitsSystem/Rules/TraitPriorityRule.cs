@@ -5,7 +5,7 @@ using Verse;
 
 namespace ASM;
 
-public class TraitPriorityRule : BasePriorityRule
+public class TraitPriorityRule : BasePriorityRule, ICoversRule<TraitPriorityRule>
 {
     public bool has = true;
     public HediffDef? trait;
@@ -34,14 +34,19 @@ public class TraitPriorityRule : BasePriorityRule
         }
     }
 
-    public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new SameTypeCoverageValidator(), new CrossTypeCoverageValidator()];
+    public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new CoverageValidator<TraitPriorityRule, TraitPriorityRule>(), new StateCoverageValidator()];
 
-    public override bool Covers(BasePriorityRule other) =>
+    public override bool IsDuplicate(BasePriorityRule other) =>
         other is TraitPriorityRule rule &&
         trait?.defName == rule.trait?.defName &&
         has == rule.has &&
-        // "Any inheritability" matches every animal the narrower filter matches.
-        (inheritability == TraitInheritability.Both || inheritability == rule.inheritability);
+        inheritability == rule.inheritability;
+
+        /// "Any inheritability" matches every animal the narrower filter matches.
+        public bool Covers(TraitPriorityRule other) =>
+            trait?.defName == other.trait?.defName &&
+            has == other.has &&
+            (inheritability == TraitInheritability.Both || inheritability == other.inheritability);
 
     protected override void ChangeVariantInternal() => has = !has;
 

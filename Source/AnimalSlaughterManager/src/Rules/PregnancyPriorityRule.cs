@@ -28,9 +28,9 @@ public class PregnancyPriorityRule : BasePriorityRule
         }
     }
 
-    public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new SameTypeCoverageValidator(), new CrossTypeCoverageValidator()];
+    public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new StateCoverageValidator()];
 
-    public override bool Covers(BasePriorityRule other) => other is PregnancyPriorityRule rule && has == rule.has;
+    public override bool IsDuplicate(BasePriorityRule other) => other is PregnancyPriorityRule rule && has == rule.has;
 
     protected override void ChangeVariantInternal() => has = !has;
 }
