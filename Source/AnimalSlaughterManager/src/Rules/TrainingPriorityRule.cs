@@ -32,7 +32,7 @@ public class TrainingPriorityRule : BasePriorityRule, ICoversRule<TrainingGenera
         }
     }
 
-    public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new CoverageValidator<TrainingPriorityRule, TrainingGeneralPriorityRule>(), new StateCoverageValidator()];
+    public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new CoverageValidator<TrainingPriorityRule, TrainingGeneralPriorityRule>(), new SetClosureValidator()];
 
     public override bool IsDuplicate(BasePriorityRule other) => other is TrainingPriorityRule rule && has == rule.has && trainable?.defName == rule.trainable?.defName;
 

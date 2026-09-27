@@ -34,7 +34,7 @@ public class TraitPriorityRule : BasePriorityRule, ICoversRule<TraitPriorityRule
         }
     }
 
-    public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new CoverageValidator<TraitPriorityRule, TraitPriorityRule>(), new StateCoverageValidator()];
+    public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new CoverageValidator<TraitPriorityRule, TraitPriorityRule>(), new SetClosureValidator()];
 
     public override bool IsDuplicate(BasePriorityRule other) =>
         other is TraitPriorityRule rule &&

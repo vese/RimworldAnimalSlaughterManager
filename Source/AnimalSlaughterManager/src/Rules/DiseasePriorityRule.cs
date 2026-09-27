@@ -32,7 +32,7 @@ public class DiseasePriorityRule : BasePriorityRule, ICoversRule<DiseaseAnyPrior
         }
     }
 
-    public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new CoverageValidator<DiseasePriorityRule, DiseaseAnyPriorityRule>(), new StateCoverageValidator()];
+    public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new CoverageValidator<DiseasePriorityRule, DiseaseAnyPriorityRule>(), new SetClosureValidator()];
 
     public override bool IsDuplicate(BasePriorityRule other) => other is DiseasePriorityRule rule && has == rule.has && disease?.defName == rule.disease?.defName;
 
