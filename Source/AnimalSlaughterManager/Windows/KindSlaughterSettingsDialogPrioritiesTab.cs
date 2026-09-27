@@ -293,7 +293,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
         if (Widgets.ButtonInvisible(labelButtonRect))
         {
-            condition.ChangeVariant();
+            settings.prioritySettings.ChangeVariant(male, adult, index);
         }
 
         var wrap = Text.WordWrap;
