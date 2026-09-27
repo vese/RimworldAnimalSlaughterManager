@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -18,7 +19,7 @@ public sealed class HealthTraitSet : TraitSet<HealthTraitSet>
         }
     }
 
-    public override void ValidateClosure(List<List<string>?> errors)
+    public override void ValidateClosure(Action<int, string> addError)
     {
         var has = new Dictionary<string, int>();     // defName → index of the rule that closed «sick with it»
         var notHas = new Dictionary<string, int>(); // … «not sick with it»
@@ -51,19 +52,19 @@ public sealed class HealthTraitSet : TraitSet<HealthTraitSet>
                     {
                         if (has.TryGetValue(def, out var flagCloser))
                         {
-                            MarkRedundant(errors, index, [flagCloser]);
+                            MarkRedundant(addError, index, [flagCloser]);
                             continue;
                         }
 
                         if (anyClaimer is int anyIndex)
                         {
-                            MarkRedundant(errors, index, [anyIndex]);
+                            MarkRedundant(addError, index, [anyIndex]);
                             continue;
                         }
 
                         if (SpaceCovered())
                         {
-                            MarkRedundant(errors, index, AllClaimers());
+                            MarkRedundant(addError, index, AllClaimers());
                             continue;
                         }
 
@@ -73,20 +74,20 @@ public sealed class HealthTraitSet : TraitSet<HealthTraitSet>
                     {
                         if (notHas.TryGetValue(def, out var flagCloser))
                         {
-                            MarkRedundant(errors, index, [flagCloser]);
+                            MarkRedundant(addError, index, [flagCloser]);
                             continue;
                         }
 
                         if (diseases.Count == 1 && healthyClaimer is int healthyIndex)
                         {
                             // The only mentioned disease: «healthy» closes the same single state.
-                            MarkRedundant(errors, index, [healthyIndex]);
+                            MarkRedundant(addError, index, [healthyIndex]);
                             continue;
                         }
 
                         if (SpaceCovered())
                         {
-                            MarkRedundant(errors, index, AllClaimers());
+                            MarkRedundant(addError, index, AllClaimers());
                             continue;
                         }
 
@@ -95,7 +96,7 @@ public sealed class HealthTraitSet : TraitSet<HealthTraitSet>
 
                     if (SpaceCovered())
                     {
-                        MarkExhausts(errors, index);
+                        MarkExhausts(addError, index);
                     }
 
                     break;
@@ -107,13 +108,13 @@ public sealed class HealthTraitSet : TraitSet<HealthTraitSet>
                     {
                         if (anyClaimer is int claimer)
                         {
-                            MarkRedundant(errors, index, [claimer]);
+                            MarkRedundant(addError, index, [claimer]);
                             continue;
                         }
 
                         if (SickCovered())
                         {
-                            MarkRedundant(errors, index, AllClaimers());
+                            MarkRedundant(addError, index, AllClaimers());
                             continue;
                         }
 
@@ -123,13 +124,13 @@ public sealed class HealthTraitSet : TraitSet<HealthTraitSet>
                     {
                         if (healthyClaimer is int claimer)
                         {
-                            MarkRedundant(errors, index, [claimer]);
+                            MarkRedundant(addError, index, [claimer]);
                             continue;
                         }
 
                         if (HealthyCovered())
                         {
-                            MarkRedundant(errors, index, notHas.Values);
+                            MarkRedundant(addError, index, notHas.Values);
                             continue;
                         }
 
@@ -138,7 +139,7 @@ public sealed class HealthTraitSet : TraitSet<HealthTraitSet>
 
                     if (SpaceCovered())
                     {
-                        MarkExhausts(errors, index);
+                        MarkExhausts(addError, index);
                     }
 
                     break;

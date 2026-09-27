@@ -100,6 +100,12 @@ public class PriorityRuleSet
             errors.Add(null);
         }
 
+        void AddError(int index, string message)
+        {
+            errors[index] ??= [];
+            errors[index]!.Add(message);
+        }
+
         var context = new RuleValidationContext();
 
         for (int i = 0; i < rules.Count; i++)
@@ -109,7 +115,7 @@ public class PriorityRuleSet
 
         foreach (var validator in context.Validators)
         {
-            validator.Validate(context, errors);
+            validator.Validate(context, AddError);
         }
 
         return errors!;

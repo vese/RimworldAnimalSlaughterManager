@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace ASM;
@@ -7,7 +8,7 @@ public sealed class PregnancyTraitSet : TraitSet<PregnancyTraitSet>
 {
     protected override void AcceptData(BasePriorityRule rule) { }
 
-    public override void ValidateClosure(List<List<string>?> errors)
+    public override void ValidateClosure(Action<int, string> addError)
     {
         var closed = new Dictionary<bool, int>();
 
@@ -17,7 +18,7 @@ public sealed class PregnancyTraitSet : TraitSet<PregnancyTraitSet>
 
             if (closed.TryGetValue(has, out var closer))
             {
-                MarkRedundant(errors, index, [closer]);
+                MarkRedundant(addError, index, [closer]);
                 continue;
             }
 
@@ -25,7 +26,7 @@ public sealed class PregnancyTraitSet : TraitSet<PregnancyTraitSet>
 
             if (closed.Count == 2)
             {
-                MarkExhausts(errors, index);
+                MarkExhausts(addError, index);
             }
         }
     }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -27,7 +28,7 @@ public sealed class TrainingTraitSet : TraitSet<TrainingTraitSet>
         }
     }
 
-    public override void ValidateClosure(List<List<string>?> errors)
+    public override void ValidateClosure(Action<int, string> addError)
     {
         var has = new Dictionary<string, int>();        // defName → index of the rule that closed «learned»
         var notHas = new Dictionary<string, int>();    // … «not learned»
@@ -51,19 +52,19 @@ public sealed class TrainingTraitSet : TraitSet<TrainingTraitSet>
 
                     if (flags.TryGetValue(def, out var flagCloser))
                     {
-                        MarkRedundant(errors, index, [flagCloser]);
+                        MarkRedundant(addError, index, [flagCloser]);
                         continue;
                     }
 
                     if (AllStatuses.All(s => statuses.ContainsKey(s)))
                     {
-                        MarkRedundant(errors, index, statuses.Values);
+                        MarkRedundant(addError, index, statuses.Values);
                         continue;
                     }
 
                     if (SkillsCovered())
                     {
-                        MarkRedundant(errors, index, SkillClaimers());
+                        MarkRedundant(addError, index, SkillClaimers());
                         continue;
                     }
 
@@ -71,7 +72,7 @@ public sealed class TrainingTraitSet : TraitSet<TrainingTraitSet>
 
                     if (SpaceCovered())
                     {
-                        MarkExhausts(errors, index);
+                        MarkExhausts(addError, index);
                     }
 
                     break;
@@ -83,13 +84,13 @@ public sealed class TrainingTraitSet : TraitSet<TrainingTraitSet>
 
                     if (matched.All(s => statuses.ContainsKey(s)))
                     {
-                        MarkRedundant(errors, index, matched.Select(s => statuses[s]));
+                        MarkRedundant(addError, index, matched.Select(s => statuses[s]));
                         continue;
                     }
 
                     if (SkillsCovered())
                     {
-                        MarkRedundant(errors, index, SkillClaimers());
+                        MarkRedundant(addError, index, SkillClaimers());
                         continue;
                     }
 
@@ -100,7 +101,7 @@ public sealed class TrainingTraitSet : TraitSet<TrainingTraitSet>
 
                     if (SpaceCovered())
                     {
-                        MarkExhausts(errors, index);
+                        MarkExhausts(addError, index);
                     }
 
                     break;

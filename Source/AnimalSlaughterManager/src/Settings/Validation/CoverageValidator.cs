@@ -1,5 +1,5 @@
 using Verse;
-using System.Collections.Generic;
+using System;
 
 namespace ASM;
 
@@ -10,7 +10,7 @@ public sealed class CoverageValidator<TRule, TOther> : IRuleSetValidator
     where TRule : BasePriorityRule, ICoversRule<TOther>
     where TOther : BasePriorityRule
 {
-    public void Validate(RuleValidationContext context, List<List<string>?> errors)
+    public void Validate(RuleValidationContext context, Action<int, string> addError)
     {
         if (!context.RulesByType.TryGetValue(typeof(TRule), out var covering) ||
             !context.RulesByType.TryGetValue(typeof(TOther), out var covered))
@@ -24,8 +24,7 @@ public sealed class CoverageValidator<TRule, TOther> : IRuleSetValidator
             {
                 if (upperIndex < lowerIndex && ((ICoversRule<TOther>)upper).Covers((TOther)lower))
                 {
-                    errors[lowerIndex] ??= [];
-                    errors[lowerIndex]!.Add(ASMKeys.ValidationRedundant.Translate(upperIndex + 1));
+                    addError(lowerIndex, ASMKeys.ValidationRedundant.Translate(upperIndex + 1));
                 }
             }
         }

@@ -1,5 +1,5 @@
 using Verse;
-using System.Collections.Generic;
+using System;
 
 namespace ASM;
 
@@ -7,7 +7,7 @@ namespace ASM;
 /// reported pairwise with the partner index.</summary>
 public sealed class DuplicateValidator : IRuleSetValidator
 {
-    public void Validate(RuleValidationContext context, List<List<string>?> errors)
+    public void Validate(RuleValidationContext context, Action<int, string> addError)
     {
         foreach (var list in context.RulesByType.Values)
         {
@@ -20,10 +20,8 @@ public sealed class DuplicateValidator : IRuleSetValidator
 
                     if (first.IsDuplicate(second))
                     {
-                        errors[firstIndex] ??= [];
-                        errors[secondIndex] ??= [];
-                        errors[firstIndex]!.Add(ASMKeys.ValidationDuplicate.Translate(secondIndex + 1));
-                        errors[secondIndex]!.Add(ASMKeys.ValidationDuplicate.Translate(firstIndex + 1));
+                        addError(firstIndex, ASMKeys.ValidationDuplicate.Translate(secondIndex + 1));
+                        addError(secondIndex, ASMKeys.ValidationDuplicate.Translate(firstIndex + 1));
                     }
                 }
             }

@@ -1,10 +1,10 @@
-using System.Collections.Generic;
+using System;
 
 namespace ASM;
 
 /// <summary>Validates over the accumulated context: marks duplicated or covered rules, or any
-/// other incompatibility, writing per-index problem messages into the errors list.</summary>
+/// other incompatibility, reporting a problem message for a rule list index.</summary>
 public interface IRuleSetValidator
 {
-    void Validate(RuleValidationContext context, List<List<string>?> errors);
+    void Validate(RuleValidationContext context, Action<int, string> addError);
 }

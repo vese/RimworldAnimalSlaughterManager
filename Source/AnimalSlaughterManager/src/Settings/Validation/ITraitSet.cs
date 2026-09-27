@@ -19,5 +19,5 @@ public interface ITraitSet
     /// <summary>Closure check over the accumulated rules in list order: rules close axis
     /// states (per-def flags and aggregate axes); a rule whose states are all closed is
     /// redundant, a rule that closes the last open state exhausts the set.</summary>
-    void ValidateClosure(List<List<string>?> errors);
+    void ValidateClosure(Action<int, string> addError);
 }

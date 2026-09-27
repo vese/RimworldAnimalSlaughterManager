@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System;
 
 namespace ASM;
 
@@ -11,11 +11,11 @@ namespace ASM;
 /// </summary>
 public sealed class SetClosureValidator : IRuleSetValidator
 {
-    public void Validate(RuleValidationContext context, List<List<string>?> errors)
+    public void Validate(RuleValidationContext context, Action<int, string> addError)
     {
         foreach (var set in context.Sets)
         {
-            set.ValidateClosure(errors);
+            set.ValidateClosure(addError);
         }
     }
 }
