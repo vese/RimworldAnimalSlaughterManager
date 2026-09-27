@@ -44,7 +44,7 @@ public class TrainingGeneralPriorityRule : BasePriorityRule
         }
     }
 
-    public override IEnumerable<IRuleSetValidator> Validators => [new RedundantRuleValidator(), new DuplicateValidator()];
+    public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new SameTypeCoverageValidator(), new CrossTypeCoverageValidator()];
 
     public override bool Covers(BasePriorityRule other) =>
         (other is TrainingGeneralPriorityRule rule && type == rule.type) ||

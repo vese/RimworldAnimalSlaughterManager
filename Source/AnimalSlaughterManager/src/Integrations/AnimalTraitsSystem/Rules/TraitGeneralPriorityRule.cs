@@ -60,11 +60,11 @@ public class TraitGeneralPriorityRule : BasePriorityRule
     {
         get
         {
-            yield return typeof(TraitTraitSet);
+            yield return typeof(AnimalTraitSet);
         }
     }
 
-    public override IEnumerable<IRuleSetValidator> Validators => [new RedundantRuleValidator(), new DuplicateValidator()];
+    public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new SameTypeCoverageValidator(), new CrossTypeCoverageValidator()];
 
     public override bool Covers(BasePriorityRule other)
     {

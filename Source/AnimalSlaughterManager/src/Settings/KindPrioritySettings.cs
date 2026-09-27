@@ -116,7 +116,7 @@ public class PriorityRuleSet
 
         foreach (var validator in context.Validators)
         {
-            validator.Validate(context, rules.Count, errors);
+            validator.Validate(context, rules, errors);
         }
 
         return errors!;

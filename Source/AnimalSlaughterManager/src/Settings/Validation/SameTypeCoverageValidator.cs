@@ -1,11 +1,12 @@
 using Verse;
+using System;
 using System.Collections.Generic;
 
 namespace ASM;
 
-/// <summary>Duplicates: mutually covering pairs among rules of the same type (identical
-/// targets), reported pairwise with the partner index.</summary>
-public sealed class DuplicateValidator : IRuleSetValidator
+/// <summary>Coverage among rules of the same type, in list order: when an earlier rule covers a
+/// later one, the later rule never fires (first match wins) and is redundant.</summary>
+public sealed class SameTypeCoverageValidator : IRuleSetValidator
 {
     public void Validate(RuleValidationContext context, IReadOnlyList<BasePriorityRule> rules, List<List<string>?> errors)
     {
@@ -18,12 +19,10 @@ public sealed class DuplicateValidator : IRuleSetValidator
                     var (firstIndex, first) = list[i];
                     var (secondIndex, second) = list[j];
 
-                    if (first.Covers(second) && second.Covers(first))
+                    if (first.Covers(second) && !second.Covers(first))
                     {
-                        errors[firstIndex] ??= [];
                         errors[secondIndex] ??= [];
-                        errors[firstIndex]!.Add(ASMKeys.ValidationDuplicate.Translate(secondIndex + 1));
-                        errors[secondIndex]!.Add(ASMKeys.ValidationDuplicate.Translate(firstIndex + 1));
+                        errors[secondIndex]!.Add(ASMKeys.ValidationRedundant.Translate(firstIndex + 1));
                     }
                 }
             }

@@ -6,7 +6,7 @@ namespace ASM;
 
 /// <summary>Trait axis: presence of accumulated traits + polarity; foreignTrait covers animals
 /// carrying a trait none of the rules references.</summary>
-public sealed class TraitTraitSet : TraitSet<TraitTraitSet>
+public sealed class AnimalTraitSet : TraitSet<AnimalTraitSet>
 {
     public readonly HashSet<HediffDef> Traits = new();
 
