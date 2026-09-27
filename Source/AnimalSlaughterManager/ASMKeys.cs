@@ -135,8 +135,8 @@ namespace ASM
 
         /// <summary>ValidationDuplicate</summary>
         public const string ValidationDuplicate = "ASM.ValidationDuplicate";
-        /// <summary>ValidationUnreachable</summary>
-        public const string ValidationUnreachable = "ASM.ValidationUnreachable";
+        /// <summary>ValidationMeaningless</summary>
+        public const string ValidationMeaningless = "ASM.ValidationMeaningless";
         /// <summary>CondProblemTip</summary>
         public const string CondProblemTip = "ASM.CondProblemTip";
 

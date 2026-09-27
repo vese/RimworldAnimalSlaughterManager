@@ -1,3 +1,4 @@
+using System;
 using RimWorld;
 using Verse;
 
@@ -18,21 +19,7 @@ public class DiseaseAnyPriorityRule : BasePriorityRule
         Scribe_Values.Look(ref has, "has", true);
     }
 
-    public override void Accumulate(RuleValidationContext context, int index)
-    {
-        var set = context.GetSet<HealthTraitSet>();
-        set.AddRule(index, this);
-
-        var self = (BasePriorityRule)this;
-
-        if (self is DiseasePriorityRule { disease: not null } d)
-        {
-            set.Diseases.Add(d.disease.defName);
-        }
-
-        context.GetValidator<ReachabilityValidator>();
-        context.GetValidator<DuplicateValidator>();
-    }
+    public override Type? TraitSetType => typeof(HealthTraitSet);
 
     public override bool Covers(BasePriorityRule other) =>
         (other is DiseaseAnyPriorityRule rule && has == rule.has) ||

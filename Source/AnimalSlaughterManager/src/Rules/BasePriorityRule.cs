@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Verse;
 
@@ -15,12 +16,9 @@ public abstract class BasePriorityRule : IExposable
     public abstract BasePriorityRule Clone();
     public abstract void ExposeData();
 
-    /// <summary>
-    /// Registers this rule for validation: creates-or-updates the trait set of its axis (adding
-    /// itself with its list index and any concrete data — def names, flags) and registers the
-    /// validators to run after the pass. The default implementation does nothing.
-    /// </summary>
-    public virtual void Accumulate(RuleValidationContext context, int index) { }
+    /// <summary>The trait set type this rule belongs to; null for a rule that takes no part in
+    /// validation. The context asks the rule for it and does the rest itself.</summary>
+    public virtual Type? TraitSetType => null;
 
     public abstract bool Matches(Pawn? p);
 

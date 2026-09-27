@@ -1,3 +1,4 @@
+using System;
 using RimWorld;
 using Verse;
 
@@ -18,12 +19,7 @@ public class BondPriorityRule : BasePriorityRule
         Scribe_Values.Look(ref has, "has", true);
     }
 
-    public override void Accumulate(RuleValidationContext context, int index)
-    {
-        context.GetSet<BondTraitSet>().AddRule(index, this);
-        context.GetValidator<ReachabilityValidator>();
-        context.GetValidator<DuplicateValidator>();
-    }
+    public override Type? TraitSetType => typeof(BondTraitSet);
 
     public override bool Covers(BasePriorityRule other) => other is BondPriorityRule rule && has == rule.has;
 

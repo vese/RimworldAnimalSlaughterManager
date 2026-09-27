@@ -90,7 +90,7 @@
   <ASM.CondMissingTip>Нет черты</ASM.CondMissingTip>
   <ASM.ValidationProblems>{0}: проблемы в списках условий — {1}</ASM.ValidationProblems>
   <ASM.ValidationDuplicate>Дубликат правила {0}</ASM.ValidationDuplicate>
-  <ASM.ValidationUnreachable>Недостижимо: перекрыто правилом {0} выше</ASM.ValidationUnreachable>
+  <ASM.ValidationMeaningless>Бессмысленное правило: подходящие ему животные уже разобраны правилами выше ({0})</ASM.ValidationMeaningless>
   <ASM.CondProblemTip>Конфликт или дубликат: {0}</ASM.CondProblemTip>
   <ASM.CondConflictTip>{0} конфликтует с: {1}</ASM.CondConflictTip>
   <ASM.PriorityHelp>Условия в списке задают очерёдность забоя сверху вниз: животные, подходящие по условия вверху, забиваются последними, внизу — первыми. Оставшиеся сортируются по возрасту из настроек выше.</ASM.PriorityHelp>

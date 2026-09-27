@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace ASM;
 
@@ -15,4 +16,5 @@ public static class UIConstants
     public const float ScrollbarWidth = 16f;
     public const float TextPaddingY = 2f;
     public const float ListMinHeight = 200f;
+    public static readonly Color ValidationProblemTint = new(0.5f, 0.15f, 0.15f, 0.3f);
 }

@@ -111,7 +111,7 @@ public class PriorityRuleSet
 
         for (int i = 0; i < rules.Count; i++)
         {
-            rules[i].Accumulate(context, i);
+            context.Add(rules[i], i);
         }
 
         foreach (var validator in context.Validators)

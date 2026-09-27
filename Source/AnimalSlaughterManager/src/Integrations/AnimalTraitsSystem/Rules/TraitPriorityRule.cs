@@ -1,3 +1,4 @@
+using System;
 using RimWorld;
 using Verse;
 
@@ -24,21 +25,7 @@ public class TraitPriorityRule : BasePriorityRule
         Scribe_Values.Look(ref inheritability, "inheritability", TraitInheritability.Both);
     }
 
-    public override void Accumulate(RuleValidationContext context, int index)
-    {
-        var set = context.GetSet<TraitTraitSet>();
-        set.AddRule(index, this);
-
-        var self = (BasePriorityRule)this;
-
-        if (self is TraitPriorityRule { trait: not null } t)
-        {
-            set.Traits.Add(t.trait);
-        }
-
-        context.GetValidator<ReachabilityValidator>();
-        context.GetValidator<DuplicateValidator>();
-    }
+    public override Type? TraitSetType => typeof(TraitTraitSet);
 
     public override bool Covers(BasePriorityRule other) =>
         other is TraitPriorityRule rule &&
