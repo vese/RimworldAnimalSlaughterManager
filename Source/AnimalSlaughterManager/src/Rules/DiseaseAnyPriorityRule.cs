@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using RimWorld;
 using Verse;
 
@@ -19,7 +20,15 @@ public class DiseaseAnyPriorityRule : BasePriorityRule
         Scribe_Values.Look(ref has, "has", true);
     }
 
-    public override Type? TraitSetType => typeof(HealthTraitSet);
+    public override IEnumerable<Type> TraitSetTypes
+    {
+        get
+        {
+            yield return typeof(HealthTraitSet);
+        }
+    }
+
+    public override IEnumerable<IRuleSetValidator> Validators => [new RedundantRuleValidator(), new DuplicateValidator()];
 
     public override bool Covers(BasePriorityRule other) =>
         (other is DiseaseAnyPriorityRule rule && has == rule.has) ||

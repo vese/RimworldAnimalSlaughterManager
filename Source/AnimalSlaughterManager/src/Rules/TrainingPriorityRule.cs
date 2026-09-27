@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using RimWorld;
 using Verse;
 
@@ -23,7 +24,15 @@ public class TrainingPriorityRule : BasePriorityRule
         Scribe_Defs.Look(ref trainable, "trainable");
     }
 
-    public override Type? TraitSetType => typeof(TrainingTraitSet);
+    public override IEnumerable<Type> TraitSetTypes
+    {
+        get
+        {
+            yield return typeof(TrainingTraitSet);
+        }
+    }
+
+    public override IEnumerable<IRuleSetValidator> Validators => [new RedundantRuleValidator(), new DuplicateValidator()];
 
     public override bool Covers(BasePriorityRule other) =>
         (other is TrainingPriorityRule rule && has == rule.has && trainable?.defName == rule.trainable?.defName) ||

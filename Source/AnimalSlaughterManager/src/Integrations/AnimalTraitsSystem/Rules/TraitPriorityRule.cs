@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using RimWorld;
 using Verse;
 
@@ -25,7 +26,15 @@ public class TraitPriorityRule : BasePriorityRule
         Scribe_Values.Look(ref inheritability, "inheritability", TraitInheritability.Both);
     }
 
-    public override Type? TraitSetType => typeof(TraitTraitSet);
+    public override IEnumerable<Type> TraitSetTypes
+    {
+        get
+        {
+            yield return typeof(TraitTraitSet);
+        }
+    }
+
+    public override IEnumerable<IRuleSetValidator> Validators => [new RedundantRuleValidator(), new DuplicateValidator()];
 
     public override bool Covers(BasePriorityRule other) =>
         other is TraitPriorityRule rule &&

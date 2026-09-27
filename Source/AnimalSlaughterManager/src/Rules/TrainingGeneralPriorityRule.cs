@@ -1,4 +1,5 @@
 using RimWorld;
+using System.Collections.Generic;
 using System;
 using System.Security.Policy;
 using Verse;
@@ -35,7 +36,15 @@ public class TrainingGeneralPriorityRule : BasePriorityRule
     }
 
     // TODO: for PartialOrFull and Partial, Full
-    public override Type? TraitSetType => typeof(TrainingTraitSet);
+    public override IEnumerable<Type> TraitSetTypes
+    {
+        get
+        {
+            yield return typeof(TrainingTraitSet);
+        }
+    }
+
+    public override IEnumerable<IRuleSetValidator> Validators => [new RedundantRuleValidator(), new DuplicateValidator()];
 
     public override bool Covers(BasePriorityRule other) =>
         (other is TrainingGeneralPriorityRule rule && type == rule.type) ||

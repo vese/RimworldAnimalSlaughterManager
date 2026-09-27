@@ -48,7 +48,7 @@ public sealed class TrainingTraitSet : TraitSet<TrainingTraitSet>
                 TrainingGeneralType.Full => status == Status.Full,
                 _ => true,
             },
-            TrainingPriorityRule specific => skills.Contains(specific.trainable?.defName ?? "") == specific.has,
+            TrainingPriorityRule specific => skills.Contains(specific.trainable?.defName ?? string.Empty) == specific.has,
             _ => true,
         };
     }

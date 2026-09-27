@@ -25,7 +25,7 @@ public sealed class HealthTraitSet : TraitSet<HealthTraitSet>
         return rule switch
         {
             DiseaseAnyPriorityRule any => (diseases.Count > 0) == any.has,
-            DiseasePriorityRule specific => diseases.Contains(specific.disease?.defName ?? "") == specific.has,
+            DiseasePriorityRule specific => diseases.Contains(specific.disease?.defName ?? string.Empty) == specific.has,
             _ => true,
         };
     }

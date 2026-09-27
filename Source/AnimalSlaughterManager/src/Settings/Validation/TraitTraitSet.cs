@@ -46,7 +46,7 @@ public sealed class TraitTraitSet : TraitSet<TraitTraitSet>
                 TraitType.Negative => negative == general.has,
                 _ => true,
             },
-            TraitPriorityRule specific => present.Contains(specific.trait?.defName ?? "") == specific.has,
+            TraitPriorityRule specific => present.Contains(specific.trait?.defName ?? string.Empty) == specific.has,
             _ => true,
         };
     }

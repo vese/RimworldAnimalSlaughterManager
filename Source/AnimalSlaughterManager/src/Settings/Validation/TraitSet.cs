@@ -11,12 +11,6 @@ public abstract class TraitSet<TSelf> : ITraitSet where TSelf : TraitSet<TSelf>,
 
     public IReadOnlyDictionary<Type, List<(int index, BasePriorityRule rule)>> Rules => rules;
 
-    public IEnumerable<IRuleSetValidator> Validators { get; } =
-    [
-        new RedundantRuleValidator(),
-        new DuplicateValidator(),
-    ];
-
     public void Accept(BasePriorityRule rule, int index)
     {
         if (!rules.TryGetValue(rule.GetType(), out var list))

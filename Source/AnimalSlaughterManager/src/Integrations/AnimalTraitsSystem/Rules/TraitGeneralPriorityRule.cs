@@ -1,4 +1,5 @@
 using RimWorld;
+using System.Collections.Generic;
 using System;
 using Verse;
 using Verse.Sound;
@@ -55,7 +56,15 @@ public class TraitGeneralPriorityRule : BasePriorityRule
         Scribe_Values.Look(ref inheritability, "inheritability", TraitInheritability.Both);
     }
 
-    public override Type? TraitSetType => typeof(TraitTraitSet);
+    public override IEnumerable<Type> TraitSetTypes
+    {
+        get
+        {
+            yield return typeof(TraitTraitSet);
+        }
+    }
+
+    public override IEnumerable<IRuleSetValidator> Validators => [new RedundantRuleValidator(), new DuplicateValidator()];
 
     public override bool Covers(BasePriorityRule other)
     {

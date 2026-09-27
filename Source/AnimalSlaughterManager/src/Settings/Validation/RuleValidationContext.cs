@@ -17,26 +17,24 @@ public sealed class RuleValidationContext
 
     public IEnumerable<IRuleSetValidator> Validators => validators.Values;
 
-    /// <summary>Stores the rule: creates-or-reuses its set, lets the set accept the rule, and
-    /// registers the set's validators.</summary>
+    /// <summary>Stores the rule: creates-or-reuses each of its trait sets, lets every set take
+    /// the rule's data, and registers the rule's validators.</summary>
     public void Add(BasePriorityRule rule, int index)
     {
-        if (rule.TraitSetType == null)
+        foreach (var setType in rule.TraitSetTypes)
         {
-            return;
-        }
-
-        if (!sets.TryGetValue(rule.TraitSetType, out var set))
-        {
-            set = (ITraitSet)Activator.CreateInstance(rule.TraitSetType)!;
-            sets[rule.TraitSetType] = set;
-
-            foreach (var validator in set.Validators)
+            if (!sets.TryGetValue(setType, out var set))
             {
-                validators.TryAdd(validator.GetType(), validator);
+                set = (ITraitSet)Activator.CreateInstance(setType)!;
+                sets[setType] = set;
             }
+
+            set.Accept(rule, index);
         }
 
-        set.Accept(rule, index);
+        foreach (var validator in rule.Validators)
+        {
+            validators.TryAdd(validator.GetType(), validator);
+        }
     }
 }

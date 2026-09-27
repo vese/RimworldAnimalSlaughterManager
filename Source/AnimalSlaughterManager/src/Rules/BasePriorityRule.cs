@@ -16,9 +16,12 @@ public abstract class BasePriorityRule : IExposable
     public abstract BasePriorityRule Clone();
     public abstract void ExposeData();
 
-    /// <summary>The trait set type this rule belongs to; null for a rule that takes no part in
-    /// validation. The context asks the rule for it and does the rest itself.</summary>
-    public virtual Type? TraitSetType => null;
+    /// <summary>The trait set types this rule belongs to; empty for a rule that takes no part in
+    /// validation. The context asks the rule for them and does the rest itself.</summary>
+    public virtual IEnumerable<Type> TraitSetTypes { get { yield break; } }
+
+    /// <summary>The validators this rule needs; they may read several trait sets.</summary>
+    public virtual IEnumerable<IRuleSetValidator> Validators => [];
 
     public abstract bool Matches(Pawn? p);
 
