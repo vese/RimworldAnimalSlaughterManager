@@ -85,36 +85,42 @@ public class PriorityRuleSet
         }
     }
 
+    /// <summary>
+    /// Per-rule problem messages (null when the rule is fine). The pass asks each rule to
+    /// accumulate into trait sets (creating-or-updating its set, registering validators); then
+    /// every registered validator runs once over the accumulated data. Rules are matched
+    /// top-to-down, the first match wins — see SetClosureValidator and DuplicateValidator.
+    /// </summary>
     public List<List<string>> Validate()
     {
-        if (!HasRules)
+        var errors = new List<List<string>?>(rules.Count);
+
+        for (int i = 0; i < rules.Count; i++)
         {
-            return [];
+            errors.Add(null);
         }
 
-        var errors = new List<List<string>>(rules.Count);
-
-        for (int i = 0; i < rules.Count - 1; i++)
+        void AddError(int index, string message)
         {
-            var first = rules[i];
-
-            for (int j = i + 1; j < rules.Count; j++)
-            {
-                var second = rules[j];
-
-                if (first.IsInvalid(second))
-                {
-                    errors[i] ??= [];
-                    errors[j] ??= [];
-                    // TODO: errors messages
-                    errors[i]?.Add("Invalid");
-                    errors[j]?.Add("Invalid");
-                }
-            }
+            errors[index] ??= [];
+            errors[index]!.Add(message);
         }
 
-        return errors;
+        var context = new RuleValidationContext();
+
+        for (int i = 0; i < rules.Count; i++)
+        {
+            context.Add(rules[i], i);
+        }
+
+        foreach (var validator in context.Validators)
+        {
+            validator.Validate(context, AddError);
+        }
+
+        return errors!;
     }
+
 }
 
 public class KindPrioritySettings : IPresettable
@@ -159,11 +165,13 @@ public class KindPrioritySettings : IPresettable
         return messages.Count > 0 ? string.Join(", ", messages) : null;
     }
 
-    public List<List<string>> Validate(bool male, bool adult) => ruleSets[(male, adult)].Validate();
+
 
     public List<BasePriorityRule> Get(bool male, bool adult) => ruleSets[(male, adult)].rules;
 
     public bool HasRules => ruleSets.Values.Any(x => x.HasRules);
+
+    public List<List<string>> Validate(bool male, bool adult) => ruleSets[(male, adult)].Validate();
 
     public void Add(bool male, bool adult, BasePriorityRule rule) => Get(male, adult).Add(rule);
 
@@ -176,6 +184,7 @@ public class KindPrioritySettings : IPresettable
     public void ReplaceAll(bool male, bool adult, List<BasePriorityRule> replacement) => ruleSets[(male, adult)].ReplaceAll(replacement);
 
     public void Clear(bool male, bool adult) => Get(male, adult).Clear();
+
     public void Reset()
     {
         foreach (var ruleSet in ruleSets.Values)

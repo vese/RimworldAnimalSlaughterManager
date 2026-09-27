@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using RimWorld;
 using Verse;
 
@@ -18,7 +20,13 @@ public class PregnancyPriorityRule : BasePriorityRule
         Scribe_Values.Look(ref has, "has", true);
     }
 
-    public override bool IsInvalid(BasePriorityRule baseRule) => baseRule is PregnancyPriorityRule;
+    private static readonly Type[] traitSetTypes = [typeof(PregnancyTraitSet)];
+
+    public override IEnumerable<Type> TraitSetTypes => traitSetTypes;
+
+    public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new SetClosureValidator()];
+
+    public override bool IsDuplicate(BasePriorityRule other) => other is PregnancyPriorityRule rule && has == rule.has;
 
     protected override void ChangeVariantInternal() => has = !has;
 }
