@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace ASM;
 
@@ -10,21 +9,30 @@ public sealed class BondTraitSet : TraitSet<BondTraitSet>
 
     public override void ValidateClosure(Action<int, string> addError)
     {
-        var closed = new Dictionary<bool, int>();
+        int? closedBonded = null;
+        int? closedNotBonded = null;
 
         foreach (var (index, rule) in OrderedRules())
         {
             var has = ((BondPriorityRule)rule).has;
+            var alreadyClosed = has ? closedBonded : closedNotBonded;
 
-            if (closed.TryGetValue(has, out var closer))
+            if (alreadyClosed is int closer)
             {
                 MarkRedundant(addError, index, [closer]);
                 continue;
             }
 
-            closed[has] = index;
+            if (has)
+            {
+                closedBonded = index;
+            }
+            else
+            {
+                closedNotBonded = index;
+            }
 
-            if (closed.Count == 2)
+            if (closedBonded.HasValue && closedNotBonded.HasValue)
             {
                 MarkExhausts(addError, index);
             }

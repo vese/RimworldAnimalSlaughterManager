@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace ASM;
 
@@ -10,21 +9,30 @@ public sealed class PregnancyTraitSet : TraitSet<PregnancyTraitSet>
 
     public override void ValidateClosure(Action<int, string> addError)
     {
-        var closed = new Dictionary<bool, int>();
+        int? closedPregnant = null;
+        int? closedNotPregnant = null;
 
         foreach (var (index, rule) in OrderedRules())
         {
             var has = ((PregnancyPriorityRule)rule).has;
+            var alreadyClosed = has ? closedPregnant : closedNotPregnant;
 
-            if (closed.TryGetValue(has, out var closer))
+            if (alreadyClosed is int closer)
             {
                 MarkRedundant(addError, index, [closer]);
                 continue;
             }
 
-            closed[has] = index;
+            if (has)
+            {
+                closedPregnant = index;
+            }
+            else
+            {
+                closedNotPregnant = index;
+            }
 
-            if (closed.Count == 2)
+            if (closedPregnant.HasValue && closedNotPregnant.HasValue)
             {
                 MarkExhausts(addError, index);
             }
