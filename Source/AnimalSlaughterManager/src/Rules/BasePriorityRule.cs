@@ -18,7 +18,7 @@ public abstract class BasePriorityRule : IExposable
 
     /// <summary>The trait set types this rule belongs to; empty for a rule that takes no part in
     /// validation. The context asks the rule for them and does the rest itself.</summary>
-    public virtual IEnumerable<Type> TraitSetTypes { get { yield break; } }
+    public virtual IEnumerable<Type> TraitSetTypes => Type.EmptyTypes;
 
     /// <summary>The validators this rule needs; they may read several trait sets.</summary>
     public virtual IEnumerable<IRuleSetValidator> Validators => [];

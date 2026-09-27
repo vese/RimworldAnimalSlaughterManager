@@ -23,15 +23,19 @@ public sealed class TrainingTraitSet : TraitSet<TrainingTraitSet>
         }
     }
 
-    public override IEnumerable<object> EnumerateStates()
+    public override IReadOnlyList<object> EnumerateStates()
     {
+        var states = new List<object>();
+
         foreach (var status in new[] { Status.None, Status.Partial, Status.Full })
         {
             foreach (var subset in HealthTraitSet.Subsets(Skills.ToList()))
             {
-                yield return (status, subset);
+                states.Add((status, subset));
             }
         }
+
+        return states;
     }
 
     public override bool Matches(BasePriorityRule rule, object state)

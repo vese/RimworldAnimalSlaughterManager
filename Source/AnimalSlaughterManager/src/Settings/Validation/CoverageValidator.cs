@@ -10,7 +10,7 @@ public sealed class CoverageValidator<TRule, TOther> : IRuleSetValidator
     where TRule : BasePriorityRule, ICoversRule<TOther>
     where TOther : BasePriorityRule
 {
-    public void Validate(RuleValidationContext context, IReadOnlyList<BasePriorityRule> rules, List<List<string>?> errors)
+    public void Validate(RuleValidationContext context, List<List<string>?> errors)
     {
         if (!context.RulesByType.TryGetValue(typeof(TRule), out var covering) ||
             !context.RulesByType.TryGetValue(typeof(TOther), out var covered))

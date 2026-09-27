@@ -35,14 +35,9 @@ public class TrainingGeneralPriorityRule : BasePriorityRule, ICoversRule<Trainin
         Scribe_Values.Look(ref type, "type", TrainingGeneralType.PartialOrFull);
     }
 
-    // TODO: for PartialOrFull and Partial, Full
-    public override IEnumerable<Type> TraitSetTypes
-    {
-        get
-        {
-            yield return typeof(TrainingTraitSet);
-        }
-    }
+    private static readonly Type[] traitSetTypes = [typeof(TrainingTraitSet)];
+
+    public override IEnumerable<Type> TraitSetTypes => traitSetTypes;
 
     public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new CoverageValidator<TrainingGeneralPriorityRule, TrainingGeneralPriorityRule>(), new CoverageValidator<TrainingGeneralPriorityRule, TrainingPriorityRule>(), new SetClosureValidator()];
 

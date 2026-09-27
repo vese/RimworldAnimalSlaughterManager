@@ -7,7 +7,7 @@ namespace ASM;
 /// reported pairwise with the partner index.</summary>
 public sealed class DuplicateValidator : IRuleSetValidator
 {
-    public void Validate(RuleValidationContext context, IReadOnlyList<BasePriorityRule> rules, List<List<string>?> errors)
+    public void Validate(RuleValidationContext context, List<List<string>?> errors)
     {
         foreach (var list in context.RulesByType.Values)
         {

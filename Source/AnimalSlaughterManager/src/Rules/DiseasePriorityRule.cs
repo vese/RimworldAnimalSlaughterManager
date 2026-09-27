@@ -24,13 +24,9 @@ public class DiseasePriorityRule : BasePriorityRule, ICoversRule<DiseaseAnyPrior
         Scribe_Defs.Look(ref disease, "disease");
     }
 
-    public override IEnumerable<Type> TraitSetTypes
-    {
-        get
-        {
-            yield return typeof(HealthTraitSet);
-        }
-    }
+    private static readonly Type[] traitSetTypes = [typeof(HealthTraitSet)];
+
+    public override IEnumerable<Type> TraitSetTypes => traitSetTypes;
 
     public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new CoverageValidator<DiseasePriorityRule, DiseaseAnyPriorityRule>(), new SetClosureValidator()];
 

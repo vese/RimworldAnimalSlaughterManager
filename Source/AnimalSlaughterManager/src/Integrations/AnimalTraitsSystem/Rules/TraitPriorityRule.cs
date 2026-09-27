@@ -26,13 +26,9 @@ public class TraitPriorityRule : BasePriorityRule, ICoversRule<TraitPriorityRule
         Scribe_Values.Look(ref inheritability, "inheritability", TraitInheritability.Both);
     }
 
-    public override IEnumerable<Type> TraitSetTypes
-    {
-        get
-        {
-            yield return typeof(AnimalTraitSet);
-        }
-    }
+    private static readonly Type[] traitSetTypes = [typeof(AnimalTraitSet)];
+
+    public override IEnumerable<Type> TraitSetTypes => traitSetTypes;
 
     public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new CoverageValidator<TraitPriorityRule, TraitPriorityRule>(), new SetClosureValidator()];
 

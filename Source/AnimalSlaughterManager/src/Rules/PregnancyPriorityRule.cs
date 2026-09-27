@@ -20,13 +20,9 @@ public class PregnancyPriorityRule : BasePriorityRule
         Scribe_Values.Look(ref has, "has", true);
     }
 
-    public override IEnumerable<Type> TraitSetTypes
-    {
-        get
-        {
-            yield return typeof(PregnancyTraitSet);
-        }
-    }
+    private static readonly Type[] traitSetTypes = [typeof(PregnancyTraitSet)];
+
+    public override IEnumerable<Type> TraitSetTypes => traitSetTypes;
 
     public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new SetClosureValidator()];
 

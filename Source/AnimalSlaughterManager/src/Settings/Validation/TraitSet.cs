@@ -26,7 +26,7 @@ public abstract class TraitSet<TSelf> : ITraitSet where TSelf : TraitSet<TSelf>,
     /// <summary>Take the concrete data (def names, flags) from the rule of this set.</summary>
     protected abstract void AcceptData(BasePriorityRule rule);
 
-    public abstract IEnumerable<object> EnumerateStates();
+    public abstract IReadOnlyList<object> EnumerateStates();
 
     public abstract bool Matches(BasePriorityRule rule, object state);
 }

@@ -17,7 +17,7 @@ public interface ITraitSet
     void Accept(BasePriorityRule rule, int index);
 
     /// <summary>Animal states this set distinguishes by its accumulated data.</summary>
-    IEnumerable<object> EnumerateStates();
+    IReadOnlyList<object> EnumerateStates();
 
     /// <summary>Whether the rule matches the state; foreign-set rules match everything.</summary>
     bool Matches(BasePriorityRule rule, object state);

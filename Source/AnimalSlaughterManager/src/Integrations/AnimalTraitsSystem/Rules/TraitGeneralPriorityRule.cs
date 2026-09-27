@@ -56,13 +56,9 @@ public class TraitGeneralPriorityRule : BasePriorityRule, ICoversRule<TraitGener
         Scribe_Values.Look(ref inheritability, "inheritability", TraitInheritability.Both);
     }
 
-    public override IEnumerable<Type> TraitSetTypes
-    {
-        get
-        {
-            yield return typeof(AnimalTraitSet);
-        }
-    }
+    private static readonly Type[] traitSetTypes = [typeof(AnimalTraitSet)];
+
+    public override IEnumerable<Type> TraitSetTypes => traitSetTypes;
 
     public override bool IsDuplicate(BasePriorityRule other) =>
         other is TraitGeneralPriorityRule rule && type == rule.type && inheritability == rule.inheritability;

@@ -24,13 +24,9 @@ public class TrainingPriorityRule : BasePriorityRule, ICoversRule<TrainingGenera
         Scribe_Defs.Look(ref trainable, "trainable");
     }
 
-    public override IEnumerable<Type> TraitSetTypes
-    {
-        get
-        {
-            yield return typeof(TrainingTraitSet);
-        }
-    }
+    private static readonly Type[] traitSetTypes = [typeof(TrainingTraitSet)];
+
+    public override IEnumerable<Type> TraitSetTypes => traitSetTypes;
 
     public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new CoverageValidator<TrainingPriorityRule, TrainingGeneralPriorityRule>(), new SetClosureValidator()];
 

@@ -18,8 +18,9 @@ public sealed class AnimalTraitSet : TraitSet<AnimalTraitSet>
         }
     }
 
-    public override IEnumerable<object> EnumerateStates()
+    public override IReadOnlyList<object> EnumerateStates()
     {
+        var states = new List<object>();
         var traits = Traits.ToList();
 
         foreach (var subset in HealthTraitSet.Subsets(traits.Select(t => t.defName).ToList()))
@@ -27,10 +28,12 @@ public sealed class AnimalTraitSet : TraitSet<AnimalTraitSet>
             bool positive = traits.Any(t => subset.Contains(t.defName) && !t.isBad);
             bool negative = traits.Any(t => subset.Contains(t.defName) && t.isBad);
 
-            yield return (subset, positive, negative, false);
-            yield return (subset, true, false, true);
-            yield return (subset, false, true, true);
+            states.Add((subset, positive, negative, false));
+            states.Add((subset, true, false, true));
+            states.Add((subset, false, true, true));
         }
+
+        return states;
     }
 
     public override bool Matches(BasePriorityRule rule, object state)

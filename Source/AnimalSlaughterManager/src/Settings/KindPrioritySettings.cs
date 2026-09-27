@@ -86,17 +86,10 @@ public class PriorityRuleSet
     }
 
     /// <summary>
-    /// Per-rule problem messages (null when the rule is fine). Rules are matched top-to-down and
-    /// the first match wins, so a rule is unreachable when the rules above it together match every
-    /// animal it could match — detected exactly by enumerating the states of every rule axis the
-    /// list uses. Duplicates (identical targets) are additionally reported pairwise for a clearer
-    /// message.
-    /// </summary>
-    /// <summary>
     /// Per-rule problem messages (null when the rule is fine). The pass asks each rule to
     /// accumulate into trait sets (creating-or-updating its set, registering validators); then
     /// every registered validator runs once over the accumulated data. Rules are matched
-    /// top-to-down, the first match wins — see ReachabilityValidator and DuplicateValidator.
+    /// top-to-down, the first match wins — see SetClosureValidator and DuplicateValidator.
     /// </summary>
     public List<List<string>> Validate()
     {
@@ -116,7 +109,7 @@ public class PriorityRuleSet
 
         foreach (var validator in context.Validators)
         {
-            validator.Validate(context, rules, errors);
+            validator.Validate(context, errors);
         }
 
         return errors!;

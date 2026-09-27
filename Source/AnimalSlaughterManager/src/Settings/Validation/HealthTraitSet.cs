@@ -16,7 +16,7 @@ public sealed class HealthTraitSet : TraitSet<HealthTraitSet>
         }
     }
 
-    public override IEnumerable<object> EnumerateStates() => Subsets(Diseases.ToList());
+    public override IReadOnlyList<object> EnumerateStates() => Subsets(Diseases.ToList());
 
     public override bool Matches(BasePriorityRule rule, object state)
     {
@@ -30,8 +30,10 @@ public sealed class HealthTraitSet : TraitSet<HealthTraitSet>
         };
     }
 
-    internal static IEnumerable<HashSet<string>> Subsets(List<string> items)
+    internal static List<HashSet<string>> Subsets(List<string> items)
     {
+        var subsets = new List<HashSet<string>>();
+
         for (long mask = 0; mask < 1L << items.Count; mask++)
         {
             var set = new HashSet<string>();
@@ -44,7 +46,9 @@ public sealed class HealthTraitSet : TraitSet<HealthTraitSet>
                 }
             }
 
-            yield return set;
+            subsets.Add(set);
         }
+
+        return subsets;
     }
 }

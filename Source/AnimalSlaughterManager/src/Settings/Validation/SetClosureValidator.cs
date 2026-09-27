@@ -14,13 +14,13 @@ namespace ASM;
 /// </summary>
 public sealed class SetClosureValidator : IRuleSetValidator
 {
-    public void Validate(RuleValidationContext context, IReadOnlyList<BasePriorityRule> rules, List<List<string>?> errors)
+    public void Validate(RuleValidationContext context, List<List<string>?> errors)
     {
         foreach (var set in context.Sets)
         {
-            var states = set.EnumerateStates().ToArray();
+            var states = set.EnumerateStates();
             // Closing rule index per state; -1 = open.
-            var closedBy = new int[states.Length];
+            var closedBy = new int[states.Count];
             for (int i = 0; i < closedBy.Length; i++)
             {
                 closedBy[i] = -1;
@@ -35,7 +35,7 @@ public sealed class SetClosureValidator : IRuleSetValidator
             {
                 var open = new List<int>();
 
-                for (int s = 0; s < states.Length; s++)
+                for (int s = 0; s < states.Count; s++)
                 {
                     if (closedBy[s] < 0 && set.Matches(rule, states[s]))
                     {
@@ -68,25 +68,12 @@ public sealed class SetClosureValidator : IRuleSetValidator
 
                 // The rule closed the last open state: the set (and with it the whole animal
                 // space — every animal matches some rule of this set) is exhausted here.
-                if (closedBy.All(c => c >= 0) && index < rules.Count - 1)
+                if (closedBy.All(c => c >= 0))
                 {
                     errors[index] ??= [];
                     errors[index]!.Add(ASMKeys.ValidationExhausts.Translate());
                 }
             }
         }
-    }
-
-    private static int IndexOf(IReadOnlyList<BasePriorityRule> rules, BasePriorityRule rule)
-    {
-        for (int i = 0; i < rules.Count; i++)
-        {
-            if (ReferenceEquals(rules[i], rule))
-            {
-                return i;
-            }
-        }
-
-        return -1;
     }
 }
