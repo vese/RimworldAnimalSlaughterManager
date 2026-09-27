@@ -13,7 +13,7 @@ public abstract class TraitSet<TSelf> : ITraitSet where TSelf : TraitSet<TSelf>,
 
     public IEnumerable<IRuleSetValidator> Validators { get; } =
     [
-        new MeaninglessRuleValidator(),
+        new RedundantRuleValidator(),
         new DuplicateValidator(),
     ];
 

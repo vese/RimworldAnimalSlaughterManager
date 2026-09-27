@@ -6,10 +6,10 @@ namespace ASM;
 
 /// <summary>
 /// The cartesian product of the states of every accumulated set describes every animal the list
-/// can distinguish. A rule that no combination first-matches is meaningless: by the time it is
+/// can distinguish. A rule that no combination first-matches is redundant: by the time it is
 /// reached, every animal it could pick by its trait has already been taken by the rules above.
 /// </summary>
-public sealed class MeaninglessRuleValidator : IRuleSetValidator
+public sealed class RedundantRuleValidator : IRuleSetValidator
 {
     public void Validate(RuleValidationContext context, int ruleCount, List<List<string>?> errors)
     {
@@ -25,7 +25,7 @@ public sealed class MeaninglessRuleValidator : IRuleSetValidator
             if (!meaningful[i])
             {
                 errors[i] ??= [];
-                errors[i]!.Add(ASMKeys.ValidationMeaningless.Translate(JoinUpper(i)));
+                errors[i]!.Add(ASMKeys.ValidationRedundant.Translate(JoinUpper(i)));
             }
         }
     }
