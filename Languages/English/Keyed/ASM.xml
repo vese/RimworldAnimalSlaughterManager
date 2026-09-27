@@ -90,7 +90,8 @@
   <ASM.CondMissingTip>Missing this trait</ASM.CondMissingTip>
   <ASM.ValidationProblems>{0}: condition list issues — {1}</ASM.ValidationProblems>
   <ASM.ValidationDuplicate>Duplicate of rule {0}</ASM.ValidationDuplicate>
-  <ASM.ValidationUnreachable>Unreachable: covered by rule {0} above</ASM.ValidationUnreachable>
+  <ASM.ValidationRedundant>Redundant rule: every animal it could pick is already taken by rules {0}</ASM.ValidationRedundant>
+  <ASM.ValidationExhausts>This rule closes the last open combination — every rule below it can never fire</ASM.ValidationExhausts>
   <ASM.CondProblemTip>Conflict or duplicate: {0}</ASM.CondProblemTip>
   <ASM.CondConflictTip>{0} conflicts with: {1}</ASM.CondConflictTip>
   <ASM.PriorityHelp>Conditions in the list set the slaughter order top-to-bottom: animals matching conditions higher up are slaughtered last, lower down — first. Remaining animals are sorted by age from the settings above.</ASM.PriorityHelp>

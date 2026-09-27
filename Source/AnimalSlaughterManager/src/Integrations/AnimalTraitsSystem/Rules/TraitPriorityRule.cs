@@ -1,9 +1,11 @@
+using System;
+using System.Collections.Generic;
 using RimWorld;
 using Verse;
 
 namespace ASM;
 
-public class TraitPriorityRule : BasePriorityRule
+public class TraitPriorityRule : BasePriorityRule, ICoversRule<TraitPriorityRule>
 {
     public bool has = true;
     public HediffDef? trait;
@@ -24,12 +26,23 @@ public class TraitPriorityRule : BasePriorityRule
         Scribe_Values.Look(ref inheritability, "inheritability", TraitInheritability.Both);
     }
 
-    public override bool Covers(BasePriorityRule other) =>
+    private static readonly Type[] traitSetTypes = [typeof(AnimalTraitSet)];
+
+    public override IEnumerable<Type> TraitSetTypes => traitSetTypes;
+
+    public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new CoverageValidator<TraitPriorityRule, TraitPriorityRule>(), new SetClosureValidator()];
+
+    public override bool IsDuplicate(BasePriorityRule other) =>
         other is TraitPriorityRule rule &&
         trait?.defName == rule.trait?.defName &&
         has == rule.has &&
-        // "Any inheritability" matches every animal the narrower filter matches.
-        (inheritability == TraitInheritability.Both || inheritability == rule.inheritability);
+        inheritability == rule.inheritability;
+
+        /// "Any inheritability" matches every animal the narrower filter matches.
+        public bool Covers(TraitPriorityRule other) =>
+            trait?.defName == other.trait?.defName &&
+            has == other.has &&
+            (inheritability == TraitInheritability.Both || inheritability == other.inheritability);
 
     protected override void ChangeVariantInternal() => has = !has;
 

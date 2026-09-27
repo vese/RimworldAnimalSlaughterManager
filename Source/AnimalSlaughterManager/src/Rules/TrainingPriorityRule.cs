@@ -1,9 +1,11 @@
+using System;
+using System.Collections.Generic;
 using RimWorld;
 using Verse;
 
 namespace ASM;
 
-public class TrainingPriorityRule : BasePriorityRule
+public class TrainingPriorityRule : BasePriorityRule, ICoversRule<TrainingGeneralPriorityRule>
 {
     public bool has = true;
     public TrainableDef? trainable;
@@ -22,10 +24,16 @@ public class TrainingPriorityRule : BasePriorityRule
         Scribe_Defs.Look(ref trainable, "trainable");
     }
 
-    public override bool Covers(BasePriorityRule other) =>
-        (other is TrainingPriorityRule rule && has == rule.has && trainable?.defName == rule.trainable?.defName) ||
-        // Untrained in a skill ⊆ no training at all.
-        (other is TrainingGeneralPriorityRule g && !has && g.type == TrainingGeneralType.None);
+    private static readonly Type[] traitSetTypes = [typeof(TrainingTraitSet)];
+
+    public override IEnumerable<Type> TraitSetTypes => traitSetTypes;
+
+    public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new CoverageValidator<TrainingPriorityRule, TrainingGeneralPriorityRule>(), new SetClosureValidator()];
+
+    public override bool IsDuplicate(BasePriorityRule other) => other is TrainingPriorityRule rule && has == rule.has && trainable?.defName == rule.trainable?.defName;
+
+        /// Untrained in a skill ⊆ no training at all.
+        public bool Covers(TrainingGeneralPriorityRule other) => !has && other.type == TrainingGeneralType.None;
 
     protected override void ChangeVariantInternal() => has = !has;
 

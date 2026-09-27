@@ -262,9 +262,10 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
         if (rowValidation is not null && rowValidation.Count > 0)
         {
-            GUI.color = new Color(0.5f, 0.15f, 0.15f, 0.3f);
+            var prevColor = GUI.color;
+            GUI.color = UIConstants.ValidationProblemTint;
             GUI.DrawTexture(row, BaseContent.WhiteTex);
-            GUI.color = Color.white;
+            GUI.color = prevColor;
             TooltipHandler.TipRegion(row, string.Join("\n", rowValidation));
         }
 

@@ -1,11 +1,12 @@
 using RimWorld;
+using System.Collections.Generic;
 using System;
 using Verse;
 using Verse.Sound;
 
 namespace ASM;
 
-public class TraitGeneralPriorityRule : BasePriorityRule
+public class TraitGeneralPriorityRule : BasePriorityRule, ICoversRule<TraitGeneralPriorityRule>, ICoversRule<TraitPriorityRule>
 {
     public bool has = true;
     public TraitType type = TraitType.Both;
@@ -55,33 +56,37 @@ public class TraitGeneralPriorityRule : BasePriorityRule
         Scribe_Values.Look(ref inheritability, "inheritability", TraitInheritability.Both);
     }
 
-    public override bool Covers(BasePriorityRule other)
+    private static readonly Type[] traitSetTypes = [typeof(AnimalTraitSet)];
+
+    public override IEnumerable<Type> TraitSetTypes => traitSetTypes;
+
+    public override bool IsDuplicate(BasePriorityRule other) =>
+        other is TraitGeneralPriorityRule rule && type == rule.type && inheritability == rule.inheritability;
+
+    public bool Covers(TraitGeneralPriorityRule other)
     {
-        if (other is TraitGeneralPriorityRule general)
+        if (inheritability != other.inheritability)
         {
-            if (inheritability != general.inheritability)
-            {
-                return false;
-            }
-
-            // Same target is a duplicate; "any trait" covers "positive/negative only" for "has".
-            if (type == general.type || (has && type == TraitType.Both && general.type != TraitType.Both))
-            {
-                return true;
-            }
-
-            // "Without positive/negative" covers "without any trait".
-            return !has && type != TraitType.Both && general.type == TraitType.Both;
+            return false;
         }
 
-        // A specific positive/negative trait ⊆ the matching "has" general rule.
-        return other is TraitPriorityRule trait &&
-               trait.has == has &&
-               inheritability == TraitInheritability.Both &&
-               type != TraitType.Both &&
-               trait.trait != null &&
-               trait.trait.isBad == (type == TraitType.Negative);
+        // "Any trait" covers "positive/negative only" for "has".
+        if (type == other.type || (has && type == TraitType.Both && other.type != TraitType.Both))
+        {
+            return true;
+        }
+
+        // "Without positive/negative" covers "without any trait".
+        return !has && type != TraitType.Both && other.type == TraitType.Both;
     }
+
+    // A specific positive/negative trait ⊆ the matching "has" general rule.
+    public bool Covers(TraitPriorityRule other) =>
+        other.has == has &&
+        inheritability == TraitInheritability.Both &&
+        type != TraitType.Both &&
+        other.trait != null &&
+        other.trait.isBad == (type == TraitType.Negative);
 
     protected override void ChangeVariantInternal()
     {

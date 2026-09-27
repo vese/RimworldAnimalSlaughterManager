@@ -1,9 +1,11 @@
+using System;
+using System.Collections.Generic;
 using RimWorld;
 using Verse;
 
 namespace ASM;
 
-public class DiseasePriorityRule : BasePriorityRule
+public class DiseasePriorityRule : BasePriorityRule, ICoversRule<DiseaseAnyPriorityRule>
 {
     public bool has = true;
     public HediffDef? disease;
@@ -22,10 +24,16 @@ public class DiseasePriorityRule : BasePriorityRule
         Scribe_Defs.Look(ref disease, "disease");
     }
 
-    public override bool Covers(BasePriorityRule other) =>
-        (other is DiseasePriorityRule rule && has == rule.has && disease?.defName == rule.disease?.defName) ||
-        // Healthy ⊆ not having a specific disease.
-        (other is DiseaseAnyPriorityRule any && !has && !any.has);
+    private static readonly Type[] traitSetTypes = [typeof(HealthTraitSet)];
+
+    public override IEnumerable<Type> TraitSetTypes => traitSetTypes;
+
+    public override IEnumerable<IRuleSetValidator> Validators => [new DuplicateValidator(), new CoverageValidator<DiseasePriorityRule, DiseaseAnyPriorityRule>(), new SetClosureValidator()];
+
+    public override bool IsDuplicate(BasePriorityRule other) => other is DiseasePriorityRule rule && has == rule.has && disease?.defName == rule.disease?.defName;
+
+        /// Healthy ⊆ not having a specific disease.
+        public bool Covers(DiseaseAnyPriorityRule other) => !has && !other.has;
 
     protected override void ChangeVariantInternal() => has = !has;
 

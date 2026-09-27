@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Verse;
 
@@ -15,14 +16,18 @@ public abstract class BasePriorityRule : IExposable
     public abstract BasePriorityRule Clone();
     public abstract void ExposeData();
 
+    /// <summary>The trait set types this rule belongs to; empty for a rule that takes no part in
+    /// validation. The context asks the rule for them and does the rest itself.</summary>
+    public virtual IEnumerable<Type> TraitSetTypes => Type.EmptyTypes;
+
+    /// <summary>The validators this rule needs; they may read several trait sets.</summary>
+    public virtual IEnumerable<IRuleSetValidator> Validators => [];
+
     public abstract bool Matches(Pawn? p);
 
-    /// <summary>
-    /// True when every animal matching <paramref name="other"/> also matches this rule
-    /// (this rule's set ⊇ other's set). Rules are evaluated top-to-down and the first match
-    /// wins, so a rule covered by an earlier one can never fire.
-    /// </summary>
-    public virtual bool Covers(BasePriorityRule other) => false;
+    /// <summary>True when the other rule is an identical duplicate (same type, same target and
+    /// parameters). Used by DuplicateValidator; coverage is ICoversRule<TOther>.</summary>
+    public virtual bool IsDuplicate(BasePriorityRule other) => false;
 
     public void ChangeVariant()
     {

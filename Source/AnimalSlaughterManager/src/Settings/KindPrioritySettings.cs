@@ -86,11 +86,10 @@ public class PriorityRuleSet
     }
 
     /// <summary>
-    /// Per-rule problem messages (null when the rule is fine). Rules are matched top-to-down and
-    /// the first match wins, so a rule is unreachable when the rules above it together match every
-    /// animal it could match — detected exactly by enumerating the states of every rule axis the
-    /// list uses. Duplicates (identical targets) are additionally reported pairwise for a clearer
-    /// message.
+    /// Per-rule problem messages (null when the rule is fine). The pass asks each rule to
+    /// accumulate into trait sets (creating-or-updating its set, registering validators); then
+    /// every registered validator runs once over the accumulated data. Rules are matched
+    /// top-to-down, the first match wins — see SetClosureValidator and DuplicateValidator.
     /// </summary>
     public List<List<string>> Validate()
     {
@@ -101,84 +100,26 @@ public class PriorityRuleSet
             errors.Add(null);
         }
 
-        for (int i = 0; i < rules.Count - 1; i++)
+        void AddError(int index, string message)
         {
-            for (int j = i + 1; j < rules.Count; j++)
-            {
-                if (rules[i].Covers(rules[j]) && rules[j].Covers(rules[i]))
-                {
-                    errors[i] ??= [];
-                    errors[j] ??= [];
-                    errors[i]!.Add(ASMKeys.ValidationDuplicate.Translate(j + 1));
-                    errors[j]!.Add(ASMKeys.ValidationDuplicate.Translate(i + 1));
-                }
-            }
+            errors[index] ??= [];
+            errors[index]!.Add(message);
         }
 
-        // The axes the list actually uses; a rule without a registered axis is always reachable.
-        var axes = rules
-            .Select(RuleAxes.For)
-            .Where(a => a != null)
-            .Distinct()
-            .Select(a => a!.EnumerateStates(rules).ToArray())
-            .ToArray();
-        var reachable = new bool[rules.Count];
-        var state = new object?[axes.Length];
-        VisitProfiles(axes, state, 0, reachable);
+        var context = new RuleValidationContext();
 
         for (int i = 0; i < rules.Count; i++)
         {
-            if (!reachable[i])
-            {
-                errors[i] ??= [];
-                errors[i]!.Add(ASMKeys.ValidationUnreachable.Translate(JoinUpper(i)));
-            }
+            context.Add(rules[i], i);
+        }
+
+        foreach (var validator in context.Validators)
+        {
+            validator.Validate(context, AddError);
         }
 
         return errors!;
     }
-
-    // Cartesian product of all axis states; the first matching rule wins, so it (and only it) is
-    // reached by the animal this state combination describes.
-    private void VisitProfiles(object?[][] axes, object?[] state, int depth, bool[] reachable)
-    {
-        if (depth == axes.Length)
-        {
-            for (int i = 0; i < rules.Count; i++)
-            {
-                var matched = true;
-
-                for (int a = 0; matched && a < axes.Length; a++)
-                {
-                    // Every axis answers for its own rules; foreign-axis rules match everything.
-                    matched = AxisMatches(rules[i], state[a!]);
-                }
-
-                if (matched)
-                {
-                    reachable[i] = true;
-                    break;
-                }
-            }
-
-            return;
-        }
-
-        foreach (var value in axes[depth])
-        {
-            state[depth] = value;
-            VisitProfiles(axes, state, depth + 1, reachable);
-        }
-    }
-
-    private static bool AxisMatches(BasePriorityRule rule, object? state)
-    {
-        var axis = RuleAxes.For(rule);
-
-        return axis == null || axis.Matches(rule, state!);
-    }
-
-    private string JoinUpper(int index) => string.Join(", ", Enumerable.Range(1, index).Select(n => n.ToString()));
 
 }
 
@@ -224,11 +165,13 @@ public class KindPrioritySettings : IPresettable
         return messages.Count > 0 ? string.Join(", ", messages) : null;
     }
 
-    public List<List<string>> Validate(bool male, bool adult) => ruleSets[(male, adult)].Validate();
+
 
     public List<BasePriorityRule> Get(bool male, bool adult) => ruleSets[(male, adult)].rules;
 
     public bool HasRules => ruleSets.Values.Any(x => x.HasRules);
+
+    public List<List<string>> Validate(bool male, bool adult) => ruleSets[(male, adult)].Validate();
 
     public void Add(bool male, bool adult, BasePriorityRule rule) => Get(male, adult).Add(rule);
 
