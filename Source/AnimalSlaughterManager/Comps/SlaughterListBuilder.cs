@@ -227,7 +227,7 @@ public static class SlaughterListBuilder
             }
             else if (pawn.gender == Gender.Female)
             {
-                bool isPregnant = PawnSlaughterInfo.IsPregnantOrCarryingEgg(pawn);
+                bool isPregnant = PregnancyUtility.IsPregnantOrCarryingEgg(pawn);
 
                 if (repro && !isPregnant) { females.Add(pawn); all.Add(pawn); }
                 else if (repro && isPregnant)
@@ -253,7 +253,7 @@ public static class SlaughterListBuilder
 
         if (pregMode == PregnantMode.Always)
         {
-            pregnant.SortByDescending(PawnSlaughterInfo.PregnancyProgress);
+            pregnant.SortByDescending(PregnancyUtility.PregnancyProgress);
             females.AddRange(pregnant);
             all.AddRange(pregnant);
         }
@@ -262,15 +262,15 @@ public static class SlaughterListBuilder
         // already fill part of the limit, so fewer others are kept. In Defer mode a pregnant
         // female that gets popped is deferred (kept alive, removed from the counts) rather than
         // slaughtered, so she does not take a kept slot.
-        if (config.maxFemales != -1) while (females.Count > Math.Max(0, config.maxFemales - resF)) { var p = females.PopFront(); all.Remove(p); if (!(pregMode == PregnantMode.Defer && PawnSlaughterInfo.IsPregnantOrCarryingEgg(p))) slaughter.Add(p); }
-        if (config.maxFemalesYoung != -1) while (femalesYoung.Count > Math.Max(0, config.maxFemalesYoung - resFY)) { var p = femalesYoung.PopFront(); all.Remove(p); if (!(pregMode == PregnantMode.Defer && PawnSlaughterInfo.IsPregnantOrCarryingEgg(p))) slaughter.Add(p); }
-        if (config.maxMales != -1) while (males.Count > Math.Max(0, config.maxMales - resM)) { var p = males.PopFront(); all.Remove(p); if (!(pregMode == PregnantMode.Defer && PawnSlaughterInfo.IsPregnantOrCarryingEgg(p))) slaughter.Add(p); }
-        if (config.maxMalesYoung != -1) while (malesYoung.Count > Math.Max(0, config.maxMalesYoung - resMY)) { var p = malesYoung.PopFront(); all.Remove(p); if (!(pregMode == PregnantMode.Defer && PawnSlaughterInfo.IsPregnantOrCarryingEgg(p))) slaughter.Add(p); }
+        if (config.maxFemales != -1) while (females.Count > Math.Max(0, config.maxFemales - resF)) { var p = females.PopFront(); all.Remove(p); if (!(pregMode == PregnantMode.Defer && PregnancyUtility.IsPregnantOrCarryingEgg(p))) slaughter.Add(p); }
+        if (config.maxFemalesYoung != -1) while (femalesYoung.Count > Math.Max(0, config.maxFemalesYoung - resFY)) { var p = femalesYoung.PopFront(); all.Remove(p); if (!(pregMode == PregnantMode.Defer && PregnancyUtility.IsPregnantOrCarryingEgg(p))) slaughter.Add(p); }
+        if (config.maxMales != -1) while (males.Count > Math.Max(0, config.maxMales - resM)) { var p = males.PopFront(); all.Remove(p); if (!(pregMode == PregnantMode.Defer && PregnancyUtility.IsPregnantOrCarryingEgg(p))) slaughter.Add(p); }
+        if (config.maxMalesYoung != -1) while (malesYoung.Count > Math.Max(0, config.maxMalesYoung - resMY)) { var p = malesYoung.PopFront(); all.Remove(p); if (!(pregMode == PregnantMode.Defer && PregnancyUtility.IsPregnantOrCarryingEgg(p))) slaughter.Add(p); }
 
         SortBucket(all, SlaughterPreference.OldestFirst, vitals, null);
 
         if (config.maxTotal != -1)
-            while (all.Count > Math.Max(0, config.maxTotal - reservedTotal)) { var p = all.PopFront(); if (!(pregMode == PregnantMode.Defer && PawnSlaughterInfo.IsPregnantOrCarryingEgg(p))) slaughter.Add(p); }
+            while (all.Count > Math.Max(0, config.maxTotal - reservedTotal)) { var p = all.PopFront(); if (!(pregMode == PregnantMode.Defer && PregnancyUtility.IsPregnantOrCarryingEgg(p))) slaughter.Add(p); }
     }
 
     /// <summary>Animals of this kind that match a breeding ("keep") trait target and are protected from slaughter.</summary>
@@ -411,7 +411,7 @@ public static class SlaughterListBuilder
         {
             return v;
         }
-        v.pregnant = PawnSlaughterInfo.IsPregnantOrCarryingEgg(p);
+        v.pregnant = PregnancyUtility.IsPregnantOrCarryingEgg(p);
         int pos = 0, neg = 0;
         for (int i = 0; i < traitDefs.Count; i++)
         {

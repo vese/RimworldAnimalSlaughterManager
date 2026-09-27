@@ -375,7 +375,7 @@ namespace ASM
             foreach (var pa in map.mapPawns.SpawnedColonyAnimals)
             {
                 if (pa.def != def) continue;
-                bool isPregnant = pa.gender == Gender.Female && PawnSlaughterInfo.IsPregnantOrCarryingEgg(pa);
+                bool isPregnant = pa.gender == Gender.Female && PregnancyUtility.IsPregnantOrCarryingEgg(pa);
                 bool isBonded = pa.relations.GetDirectRelationsCount(PawnRelationDefOf.Bond) > 0;
                 if ((countPregnant || !isPregnant) && (countBonded || !isBonded))
                 {

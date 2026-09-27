@@ -13,7 +13,7 @@ public class PregnancyPriorityRule : BasePriorityRule
 
     public override BasePriorityRule Clone() => new PregnancyPriorityRule() { has = has };
 
-    public override bool Matches(Pawn? p) => PawnSlaughterInfo.IsPregnantOrCarryingEgg(p) == has;
+    public override bool Matches(Pawn? p) => PregnancyUtility.IsPregnantOrCarryingEgg(p) == has;
 
     public override void ExposeData()
     {

@@ -4,8 +4,8 @@ using Verse;
 
 namespace ASM;
 
-/// <summary>Pawn properties the slaughter engine asks about: pregnancy incl. egg-layers.</summary>
-public static class PawnSlaughterInfo
+/// <summary>Pregnancy helpers for the slaughter engine: the Pregnant hediff of mammals plus developing eggs of egg-layers.</summary>
+public static class PregnancyUtility
 {
     private static readonly FieldInfo EggProgressField = typeof(CompEggLayer).GetField("eggProgress", BindingFlags.NonPublic | BindingFlags.Instance);
 
