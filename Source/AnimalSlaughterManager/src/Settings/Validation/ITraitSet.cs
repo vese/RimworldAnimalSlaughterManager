@@ -6,7 +6,7 @@ namespace ASM;
 /// <summary>
 /// An accumulated trait set (pregnancy, training skills, traits, …) of one animal axis. The
 /// validation context feeds rules into their sets; a set stores the rules with their list
-/// indices and the concrete data it took from them, then distinguishes animal states and matches rules.
+/// indices and the concrete data it took from them, then runs the closure check over its axes.
 /// </summary>
 public interface ITraitSet
 {
@@ -16,9 +16,8 @@ public interface ITraitSet
     /// <summary>Takes the rule with its index and accumulates the data it carries.</summary>
     void Accept(BasePriorityRule rule, int index);
 
-    /// <summary>Animal states this set distinguishes by its accumulated data.</summary>
-    IReadOnlyList<object> EnumerateStates();
-
-    /// <summary>Whether the rule matches the state; foreign-set rules match everything.</summary>
-    bool Matches(BasePriorityRule rule, object state);
+    /// <summary>Closure check over the accumulated rules in list order: rules close axis
+    /// states (per-def flags and aggregate axes); a rule whose states are all closed is
+    /// redundant, a rule that closes the last open state exhausts the set.</summary>
+    void ValidateClosure(List<List<string>?> errors);
 }

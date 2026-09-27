@@ -3,7 +3,9 @@ using System.Linq;
 
 namespace ASM;
 
-/// <summary>Training axis: none/partial/full × learned flags of the accumulated skills.</summary>
+/// <summary>Training axis: per-skill «learned / not learned» flags plus the shared training
+/// status axis (none/partial/full). Skill combinations are not enumerated — a specific-skill
+/// rule only depends on its own def.</summary>
 public sealed class TrainingTraitSet : TraitSet<TrainingTraitSet>
 {
     public enum Status
@@ -13,47 +15,114 @@ public sealed class TrainingTraitSet : TraitSet<TrainingTraitSet>
         Full,
     }
 
-    public readonly HashSet<string> Skills = new();
+    private static readonly Status[] AllStatuses = [Status.None, Status.Partial, Status.Full];
+
+    private readonly HashSet<string> skills = new();
 
     protected override void AcceptData(BasePriorityRule rule)
     {
         if (rule is TrainingPriorityRule { trainable: not null } t)
         {
-            Skills.Add(t.trainable.defName);
+            skills.Add(t.trainable.defName);
         }
     }
 
-    public override IReadOnlyList<object> EnumerateStates()
+    public override void ValidateClosure(List<List<string>?> errors)
     {
-        var states = new List<object>();
+        var has = new Dictionary<string, int>();        // defName → index of the rule that closed «learned»
+        var notHas = new Dictionary<string, int>();    // … «not learned»
+        var statuses = new Dictionary<Status, int>();  // status → index of the rule that closed it
 
-        foreach (var status in new[] { Status.None, Status.Partial, Status.Full })
+        bool SkillsCovered() => notHas.Count > 0
+            && (has.Keys.Any(notHas.ContainsKey) || skills.All(s => has.ContainsKey(s)));
+
+        bool SpaceCovered() => AllStatuses.All(s => statuses.ContainsKey(s)) || SkillsCovered();
+
+        IEnumerable<int> SkillClaimers() => has.Values.Concat(notHas.Values);
+
+        foreach (var (index, rule) in OrderedRules())
         {
-            foreach (var subset in HealthTraitSet.Subsets(Skills.ToList()))
+            switch (rule)
             {
-                states.Add((status, subset));
+                case TrainingPriorityRule { trainable: not null } specific:
+                {
+                    var def = specific.trainable.defName;
+                    var flags = specific.has ? has : notHas;
+
+                    if (flags.TryGetValue(def, out var flagCloser))
+                    {
+                        MarkRedundant(errors, index, [flagCloser]);
+                        continue;
+                    }
+
+                    if (AllStatuses.All(s => statuses.ContainsKey(s)))
+                    {
+                        MarkRedundant(errors, index, statuses.Values);
+                        continue;
+                    }
+
+                    if (SkillsCovered())
+                    {
+                        MarkRedundant(errors, index, SkillClaimers());
+                        continue;
+                    }
+
+                    flags[def] = index;
+
+                    if (SpaceCovered())
+                    {
+                        MarkExhausts(errors, index);
+                    }
+
+                    break;
+                }
+
+                case TrainingGeneralPriorityRule general:
+                {
+                    var matched = StatusesOf(general.type).ToList();
+
+                    if (matched.All(s => statuses.ContainsKey(s)))
+                    {
+                        MarkRedundant(errors, index, matched.Select(s => statuses[s]));
+                        continue;
+                    }
+
+                    if (SkillsCovered())
+                    {
+                        MarkRedundant(errors, index, SkillClaimers());
+                        continue;
+                    }
+
+                    foreach (var status in matched)
+                    {
+                        statuses.TryAdd(status, index);
+                    }
+
+                    if (SpaceCovered())
+                    {
+                        MarkExhausts(errors, index);
+                    }
+
+                    break;
+                }
             }
         }
-
-        return states;
     }
 
-    public override bool Matches(BasePriorityRule rule, object state)
+    private static IEnumerable<Status> StatusesOf(TrainingGeneralType type)
     {
-        var (status, skills) = ((Status, HashSet<string>))state;
-
-        return rule switch
+        switch (type)
         {
-            TrainingGeneralPriorityRule general => general.type switch
-            {
-                TrainingGeneralType.None => status == Status.None,
-                TrainingGeneralType.Partial => status == Status.Partial,
-                TrainingGeneralType.PartialOrFull => status != Status.None,
-                TrainingGeneralType.Full => status == Status.Full,
-                _ => true,
-            },
-            TrainingPriorityRule specific => skills.Contains(specific.trainable?.defName ?? string.Empty) == specific.has,
-            _ => true,
-        };
+            case TrainingGeneralType.None:
+                return [Status.None];
+            case TrainingGeneralType.Partial:
+                return [Status.Partial];
+            case TrainingGeneralType.PartialOrFull:
+                return [Status.Partial, Status.Full];
+            case TrainingGeneralType.Full:
+                return [Status.Full];
+            default:
+                return [];
+        }
     }
 }
