@@ -8,23 +8,34 @@ public class PriorityRuleSet
 {
     public List<BasePriorityRule> rules = [];
 
+    private List<List<string>>? validationCache;
+
     public bool HasRules => rules != null && rules.Count > 0;
 
     public void Reset()
     {
         rules.Clear();
+        validationCache = null;
     }
 
     public void Add(BasePriorityRule rule)
     {
         rules.Add(rule);
+        validationCache = null;
         SettingsChanges.Raise();
     }
 
     public void RemoveAt(int index)
     {
         rules.RemoveAt(index);
+        validationCache = null;
         SettingsChanges.Raise();
+    }
+
+    public void ChangeVariant(int index)
+    {
+        rules[index].ChangeVariant();
+        validationCache = null;
     }
 
     public void CopyAt(int index)
@@ -52,6 +63,7 @@ public class PriorityRuleSet
             rules.Insert(to, rule);
         }
 
+        validationCache = null;
         SettingsChanges.Raise();
     }
 
@@ -59,12 +71,14 @@ public class PriorityRuleSet
     {
         rules.Clear();
         rules.AddRange(replacement);
+        validationCache = null;
         SettingsChanges.Raise();
     }
 
     public void Clear()
     {
         rules.Clear();
+        validationCache = null;
         SettingsChanges.Raise();
     }
 
@@ -83,6 +97,8 @@ public class PriorityRuleSet
             // base game resolving the save, outside this mod's control.)
             rules.RemoveAll(c => c is null || c.HasNullDef);
         }
+
+        validationCache = null;
     }
 
     /// <summary>
@@ -90,8 +106,11 @@ public class PriorityRuleSet
     /// accumulate into trait sets (creating-or-updating its set, registering validators); then
     /// every registered validator runs once over the accumulated data. Rules are matched
     /// top-to-down, the first match wins — see SetClosureValidator and DuplicateValidator.
+    /// Cached — recomputed only after a change made through this set's methods.
     /// </summary>
-    public List<List<string>> Validate()
+    public List<List<string>> Validate() => validationCache ??= ComputeValidation();
+
+    private List<List<string>> ComputeValidation()
     {
         var errors = new List<List<string>?>(rules.Count);
 
@@ -173,17 +192,19 @@ public class KindPrioritySettings : IPresettable
 
     public List<List<string>> Validate(bool male, bool adult) => ruleSets[(male, adult)].Validate();
 
-    public void Add(bool male, bool adult, BasePriorityRule rule) => Get(male, adult).Add(rule);
+    public void Add(bool male, bool adult, BasePriorityRule rule) => ruleSets[(male, adult)].Add(rule);
 
-    public void RemoveAt(bool male, bool adult, int index) => Get(male, adult).RemoveAt(index);
+    public void RemoveAt(bool male, bool adult, int index) => ruleSets[(male, adult)].RemoveAt(index);
 
     public void CopyAt(bool male, bool adult, int index) => ruleSets[(male, adult)].CopyAt(index);
+
+    public void ChangeVariant(bool male, bool adult, int index) => ruleSets[(male, adult)].ChangeVariant(index);
 
     public void Move(bool male, bool adult, int from, int to) => ruleSets[(male, adult)].Move(from, to);
 
     public void ReplaceAll(bool male, bool adult, List<BasePriorityRule> replacement) => ruleSets[(male, adult)].ReplaceAll(replacement);
 
-    public void Clear(bool male, bool adult) => Get(male, adult).Clear();
+    public void Clear(bool male, bool adult) => ruleSets[(male, adult)].Clear();
 
     public void Reset()
     {
@@ -203,17 +224,17 @@ public class KindPrioritySettings : IPresettable
 
     public void Load(KindDto dto)
     {
-        LoadRuleSet(dto.PrioRulesAdultMale, dto.PrioAdultMale, Get(true, true));
-        LoadRuleSet(dto.PrioRulesYoungMale, dto.PrioYoungMale, Get(true, false));
-        LoadRuleSet(dto.PrioRulesAdultFemale, dto.PrioAdultFemale, Get(false, true));
-        LoadRuleSet(dto.PrioRulesYoungFemale, dto.PrioYoungFemale, Get(false, false));
+        LoadRuleSet(dto.PrioRulesAdultMale, dto.PrioAdultMale, ruleSets[(true, true)]);
+        LoadRuleSet(dto.PrioRulesYoungMale, dto.PrioYoungMale, ruleSets[(true, false)]);
+        LoadRuleSet(dto.PrioRulesAdultFemale, dto.PrioAdultFemale, ruleSets[(false, true)]);
+        LoadRuleSet(dto.PrioRulesYoungFemale, dto.PrioYoungFemale, ruleSets[(false, false)]);
     }
 
     // PrioRules* — current format; the legacy ConditionDto lists cover presets saved before
     // the priority-rule refactor.
-    private static void LoadRuleSet(List<PriorityRuleDto> rules, List<ConditionDto> legacy, List<BasePriorityRule> target)
+    private static void LoadRuleSet(List<PriorityRuleDto> rules, List<ConditionDto> legacy, PriorityRuleSet target)
     {
-        target.Clear();
+        var loaded = new List<BasePriorityRule>();
 
         if (rules != null)
         {
@@ -223,14 +244,11 @@ public class KindPrioritySettings : IPresettable
 
                 if (rule != null)
                 {
-                    target.Add(rule);
+                    loaded.Add(rule);
                 }
             }
-
-            return;
         }
-
-        if (legacy != null)
+        else if (legacy != null)
         {
 #pragma warning disable CS0618
             foreach (var c in legacy)
@@ -239,11 +257,13 @@ public class KindPrioritySettings : IPresettable
 
                 if (rule != null)
                 {
-                    target.Add(rule);
+                    loaded.Add(rule);
                 }
             }
 #pragma warning restore CS0618
         }
+
+        target.ReplaceAll(loaded);
     }
 
     public void ExposeData()
