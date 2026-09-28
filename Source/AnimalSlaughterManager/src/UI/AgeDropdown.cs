@@ -10,9 +10,9 @@ public static class AgeDropdown
     public static float Draw(float x, float y, float width, AgeScope currentValue, Action<AgeScope> setValue)
     {
         var anchor = Text.Anchor;
-        var height = UIConstants.ButtonHeight;
         Text.Anchor = TextAnchor.UpperLeft;
 
+        var height = UIConstants.ButtonHeight;
         if (Widgets.ButtonText(new Rect(x, y, width, height), currentValue.Translate()))
         {
             var options = new List<FloatMenuOption>();
