@@ -28,7 +28,7 @@ public sealed class AnimalTraitSet : TraitSet<AnimalTraitSet>
         }
     }
 
-    public override void ValidateClosure(Action<int, string> addError)
+    public override void ValidateClosure(Action<int, string> addProblem)
     {
         var has = new Dictionary<string, int>();     // defName → index of the rule that closed «carries it»
         var notHas = new Dictionary<string, int>(); // … «doesn't carry it»
@@ -168,7 +168,7 @@ public sealed class AnimalTraitSet : TraitSet<AnimalTraitSet>
 
                     if (AxisClaimer() is int claimer)
                     {
-                        MarkRedundant(addError, index, [claimer]);
+                        MarkRedundant(addProblem, index, [claimer]);
                         continue;
                     }
 
@@ -185,7 +185,7 @@ public sealed class AnimalTraitSet : TraitSet<AnimalTraitSet>
 
                     if (!AnyUncovered(null, null, inMatch))
                     {
-                        MarkRedundant(addError, index, AllClaimers());
+                        MarkRedundant(addProblem, index, AllClaimers());
                         continue;
                     }
 
@@ -201,7 +201,7 @@ public sealed class AnimalTraitSet : TraitSet<AnimalTraitSet>
 
                     if (!AnyUncovered(null, null, null))
                     {
-                        MarkExhausts(addError, index);
+                        MarkExhausts(addProblem, index);
                     }
 
                     break;
@@ -214,13 +214,13 @@ public sealed class AnimalTraitSet : TraitSet<AnimalTraitSet>
 
                     if (flags.TryGetValue(def, out var flagCloser))
                     {
-                        MarkRedundant(addError, index, [flagCloser]);
+                        MarkRedundant(addProblem, index, [flagCloser]);
                         continue;
                     }
 
                     if (!AnyUncovered(specific.has ? def : null, specific.has ? null : def, null))
                     {
-                        MarkRedundant(addError, index, AllClaimers());
+                        MarkRedundant(addProblem, index, AllClaimers());
                         continue;
                     }
 
@@ -228,7 +228,7 @@ public sealed class AnimalTraitSet : TraitSet<AnimalTraitSet>
 
                     if (!AnyUncovered(null, null, null))
                     {
-                        MarkExhausts(addError, index);
+                        MarkExhausts(addProblem, index);
                     }
 
                     break;

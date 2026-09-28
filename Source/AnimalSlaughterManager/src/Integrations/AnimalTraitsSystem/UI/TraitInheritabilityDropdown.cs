@@ -12,7 +12,8 @@ public static class TraitInheritabilityDropdown
         var anchor = Text.Anchor;
         Text.Anchor = TextAnchor.UpperLeft;
 
-        if (Widgets.ButtonText(new Rect(x, y, width, UIConstants.ButtonHeight), currentValue.Translate()))
+        var height = UIConstants.ButtonHeight;
+        if (Widgets.ButtonText(new Rect(x, y, width, height), currentValue.Translate()))
         {
             var options = new List<FloatMenuOption>();
 
@@ -26,6 +27,6 @@ public static class TraitInheritabilityDropdown
 
         Text.Anchor = anchor;
 
-        return UIConstants.ButtonHeight;
+        return height;
     }
 }

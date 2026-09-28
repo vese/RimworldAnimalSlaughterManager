@@ -9,33 +9,62 @@ public class PriorityRuleSet
     public List<BasePriorityRule> rules = [];
 
     private List<List<string>>? validationCache;
+    private int problemCountCache = -1;
 
     public bool HasRules => rules != null && rules.Count > 0;
+
+    private void InvalidateValidationCache()
+    {
+        validationCache = null;
+        problemCountCache = -1;
+    }
+
+    /// <summary>Number of rules with validation problems in this bucket. Cached with the validation itself.</summary>
+    public int ProblemCount
+    {
+        get
+        {
+            if (problemCountCache < 0)
+            {
+                problemCountCache = 0;
+
+                foreach (var problems in Validate())
+                {
+                    if (problems is not null && problems.Count > 0)
+                    {
+                        problemCountCache++;
+                    }
+                }
+            }
+
+            return problemCountCache;
+        }
+    }
 
     public void Reset()
     {
         rules.Clear();
-        validationCache = null;
+        InvalidateValidationCache();
     }
 
     public void Add(BasePriorityRule rule)
     {
         rules.Add(rule);
-        validationCache = null;
+        InvalidateValidationCache();
         SettingsChanges.Raise();
     }
 
     public void RemoveAt(int index)
     {
         rules.RemoveAt(index);
-        validationCache = null;
+        InvalidateValidationCache();
         SettingsChanges.Raise();
     }
 
     public void ChangeVariant(int index)
     {
         rules[index].ChangeVariant();
-        validationCache = null;
+        InvalidateValidationCache();
     }
 
     public void CopyAt(int index)
@@ -63,7 +92,7 @@ public class PriorityRuleSet
             rules.Insert(to, rule);
         }
 
-        validationCache = null;
+        InvalidateValidationCache();
         SettingsChanges.Raise();
     }
 
@@ -71,14 +100,14 @@ public class PriorityRuleSet
     {
         rules.Clear();
         rules.AddRange(replacement);
-        validationCache = null;
+        InvalidateValidationCache();
         SettingsChanges.Raise();
     }
 
     public void Clear()
     {
         rules.Clear();
-        validationCache = null;
+        InvalidateValidationCache();
         SettingsChanges.Raise();
     }
 
@@ -98,7 +127,7 @@ public class PriorityRuleSet
             rules.RemoveAll(c => c is null || c.HasNullDef);
         }
 
-        validationCache = null;
+        InvalidateValidationCache();
     }
 
     /// <summary>
@@ -112,17 +141,17 @@ public class PriorityRuleSet
 
     private List<List<string>> ComputeValidation()
     {
-        var errors = new List<List<string>?>(rules.Count);
+        var problems = new List<List<string>?>(rules.Count);
 
         for (int i = 0; i < rules.Count; i++)
         {
-            errors.Add(null);
+            problems.Add(null);
         }
 
-        void AddError(int index, string message)
+        void AddProblem(int index, string message)
         {
-            errors[index] ??= [];
-            errors[index]!.Add(message);
+            problems[index] ??= [];
+            problems[index]!.Add(message);
         }
 
         var context = new RuleValidationContext();
@@ -134,10 +163,10 @@ public class PriorityRuleSet
 
         foreach (var validator in context.Validators)
         {
-            validator.Validate(context, AddError);
+            validator.Validate(context, AddProblem);
         }
 
-        return errors!;
+        return problems!;
     }
 
 }
@@ -174,17 +203,18 @@ public class KindPrioritySettings : IPresettable
         (false, false)
     ];
 
-    public string? GetErrorsCountsMessage()
+    /// <summary>Number of rules with validation problems, across all buckets.</summary>
+    public int CountProblems() => ruleSets.Values.Sum(set => set.ProblemCount);
+
+    public string? GetProblemsCountsMessage()
     {
         var messages = ruleSets.Keys
-            .Select(key => (Key: key, ErrorsCount: ruleSets[key].Validate().Count(x => x is not null)))
-            .Where(x => x.ErrorsCount > 0)
-            .Select(x => $"{ruleSetsNames[x.Key].Translate()} ({x.ErrorsCount})")
+            .Select(key => (Key: key, ProblemsCount: ruleSets[key].ProblemCount))
+            .Where(x => x.ProblemsCount > 0)
+            .Select(x => $"{ruleSetsNames[x.Key].Translate()} ({x.ProblemsCount})")
             .ToList();
         return messages.Count > 0 ? string.Join(", ", messages) : null;
     }
-
-
 
     public List<BasePriorityRule> Get(bool male, bool adult) => ruleSets[(male, adult)].rules;
 

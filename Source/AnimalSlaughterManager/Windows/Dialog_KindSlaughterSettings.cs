@@ -61,10 +61,11 @@ public class Dialog_KindSlaughterSettings : Window
     {
         base.PreClose();
 
-        var msg = ASMKeys.ValidationProblems.Translate(animalDef.LabelCap, settings.prioritySettings.GetErrorsCountsMessage());
+        var problems = settings.prioritySettings.GetProblemsCountsMessage();
 
-        if (msg != null)
+        if (problems != null)
         {
+            var msg = ASMKeys.ValidationProblems.Translate(animalDef.LabelCap, problems);
             Messages.Message(msg, MessageTypeDefOf.NegativeEvent, false);
             Find.WindowStack.Add(new Dialog_MessageBox(msg));
         }

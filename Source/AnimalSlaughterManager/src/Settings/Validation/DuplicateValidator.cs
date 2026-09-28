@@ -7,7 +7,7 @@ namespace ASM;
 /// reported pairwise with the partner index.</summary>
 public sealed class DuplicateValidator : IRuleSetValidator
 {
-    public void Validate(RuleValidationContext context, Action<int, string> addError)
+    public void Validate(RuleValidationContext context, Action<int, string> addProblem)
     {
         foreach (var list in context.RulesByType.Values)
         {
@@ -20,8 +20,8 @@ public sealed class DuplicateValidator : IRuleSetValidator
 
                     if (first.IsDuplicate(second))
                     {
-                        addError(firstIndex, ASMKeys.ValidationDuplicate.Translate(secondIndex + 1));
-                        addError(secondIndex, ASMKeys.ValidationDuplicate.Translate(firstIndex + 1));
+                        addProblem(firstIndex, ASMKeys.ValidationDuplicate.Translate(secondIndex + 1));
+                        addProblem(secondIndex, ASMKeys.ValidationDuplicate.Translate(firstIndex + 1));
                     }
                 }
             }
