@@ -11,7 +11,6 @@ public abstract class BasePriorityRule : IExposable
     /// to resolve on load (def-providing mod disabled). Such entries are no-ops and get pruned.
     /// </summary>
     public virtual bool HasNullDef { get; } = false;
-    public virtual bool HasExtraParameters { get; } = false;
     public abstract string Label { get; }
     public abstract BasePriorityRule Clone();
     public abstract void ExposeData();

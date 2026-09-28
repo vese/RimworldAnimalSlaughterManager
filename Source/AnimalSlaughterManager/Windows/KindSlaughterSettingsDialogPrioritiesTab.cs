@@ -278,11 +278,6 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         var labelWidth = row.width - UIConstants.IconSize - UIConstants.IconSize - UIConstants.IconSize;
         var condition = list[index];
 
-        if (condition.HasExtraParameters)
-        {
-            labelWidth -= UIConstants.ButtonMinWidth;// TODO: size (min of max from names length or half of available width)
-        }
-
         Text.Anchor = TextAnchor.MiddleLeft;
         GUI.color = Color.white;
 
@@ -313,38 +308,6 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
         TooltipHandler.TipRegion(labelButtonRect, ASMKeys.CondToggleTip.Translate());
 
-        // TODO:
-        // Trait-only: inherit dropdown + copy button.
-        //if (condition.HasExtraParameters)
-        //{
-        //    float ex = labelRect.xMax + gap;
-        //    Rect inheritBtn = new Rect(ex, row.y + 3f, 100f, 24f);
-        //    InheritDropdown(inheritBtn, cond);
-        //    Rect copyRowBtn = new Rect(inheritBtn.xMax + gap, row.y + (row.height - CopyIconS) / 2f, CopyIconS, CopyIconS);
-        //    TooltipHandler.TipRegion(copyRowBtn, ASMKeys.Copy.Translate());
-        //    if (Widgets.ButtonImage(copyRowBtn, TexButton.Copy))
-        //        list.Insert(index + 1, cond.Clone());
-        //}
-
-        //private void InheritDropdown(Rect rect, SlaughterCondition cond)
-        //{
-        //    string label = cond.inheritMode == TraitInheritability.Inheritable ? ASMKeys.InhInheritable.Translate()
-        //                 : cond.inheritMode == TraitInheritability.NonInheritable ? ASMKeys.InhNonInheritable.Translate()
-        //                 : ASMKeys.InhBoth.Translate();
-        //    if (Widgets.ButtonText(rect, label))
-        //    {
-        //        var opts = new List<FloatMenuOption>();
-        //        foreach (TraitInheritability s in (TraitInheritability[])Enum.GetValues(typeof(TraitInheritability)))
-        //        { var c = s; opts.Add(new FloatMenuOption(InhLabel(s), () => { cond.inheritMode = c; comp.MarkDirty(); })); }
-        //        Find.WindowStack.Add(new FloatMenu(opts));
-        //    }
-        //}
-
-        //private static string InhLabel(TraitInheritability s)
-        //{
-        //    switch (s) { case TraitInheritability.Inheritable: return ASMKeys.InhInheritable.Translate(); case TraitInheritability.NonInheritable: return ASMKeys.InhNonInheritable.Translate(); default: return ASMKeys.InhBoth.Translate(); }
-        //}
-
         // Warning icon for problematic conditions.
         if (rowValidation is not null && rowValidation.Count > 0)
         {
@@ -360,11 +323,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
             GUI.color = Color.white;
 
-            // TODO:
-            //var conflicts = FindConflicts(list, index);
-            var tipText = //conflicts != null ?
-                          //ASMKeys.CondConflictTip.Translate(cond.Label, conflicts) :
-                ASMKeys.CondProblemTip.Translate(condition.Label);
+            var tipText = ASMKeys.CondProblemTip.Translate(condition.Label);
 
             TooltipHandler.TipRegion(warnRect, tipText);
         }
@@ -378,37 +337,6 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
             settings.prioritySettings.RemoveAt(male, adult, index);
         }
     }
-
-    //// Returns a comma-separated list of conflicting condition labels, or null if none found.
-    //public static string FindConflicts(List<SlaughterCondition> list, int index)
-    //{
-    //    var c = list[index];
-    //    var conflicts = new List<string>();
-    //    bool isTrainingState = c.type == CondType.TrainingNone || c.type == CondType.TrainingPartial || c.type == CondType.TrainingFull;
-    //
-    //    if (!isTrainingState)
-    //    {
-    //        string key = ConditionKey(c);
-    //        for (int i = 0; i < list.Count; i++)
-    //        {
-    //            if (i == index) continue;
-    //            if (ConditionKey(list[i]) == key)
-    //                conflicts.Add(list[i].Label);
-    //        }
-    //    }
-    //    else
-    //    {
-    //        for (int i = 0; i < list.Count; i++)
-    //        {
-    //            if (i == index) continue;
-    //            var ot = list[i].type;
-    //            if (ot == CondType.TrainingNone || ot == CondType.TrainingPartial || ot == CondType.TrainingFull)
-    //                if (!conflicts.Contains(list[i].Label))
-    //                    conflicts.Add(list[i].Label);
-    //        }
-    //    }
-    //    return conflicts.Count > 0 ? string.Join(", ", conflicts.ToArray()) : null;
-    //}
 
     private void OpenAddConditionMenu(bool male, bool adult, ThingDef animalDef)
     {
