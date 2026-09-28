@@ -43,7 +43,7 @@ public class Alert_ConditionProblems : Alert
                 continue;
             }
 
-            var issues = CountProblems(kv.Value);
+            var issues = kv.Value.prioritySettings.CountProblems();
 
             if (issues > 0)
             {
@@ -83,16 +83,11 @@ public class Alert_ConditionProblems : Alert
                 continue;
             }
 
-            if (CountProblems(kv.Value) > 0)
+            if (kv.Value.prioritySettings.CountProblems() > 0)
             {
                 Find.WindowStack.Add(new Dialog_KindSlaughterSettings(comp, kv.Key));
                 return;
             }
         }
     }
-
-    // TODO: do method in KindPrioritySettings
-    private static int CountProblems(KindSettings ks) => ks.prioritySettings.ruleSets.Keys
-        .Select(key => ks.prioritySettings.Validate(key.Male, key.Adult))
-        .Sum(x => x.Count(errors => errors is not null && errors.Count > 0));
 }

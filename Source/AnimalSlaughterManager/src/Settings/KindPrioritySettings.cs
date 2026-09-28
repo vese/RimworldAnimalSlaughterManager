@@ -174,6 +174,10 @@ public class KindPrioritySettings : IPresettable
         (false, false)
     ];
 
+    /// <summary>Number of rules with validation problems, across all buckets.</summary>
+    public int CountProblems() => ruleSets.Values
+        .Sum(set => set.Validate().Count(errors => errors is not null && errors.Count > 0));
+
     public string? GetErrorsCountsMessage()
     {
         var messages = ruleSets.Keys
@@ -183,8 +187,6 @@ public class KindPrioritySettings : IPresettable
             .ToList();
         return messages.Count > 0 ? string.Join(", ", messages) : null;
     }
-
-
 
     public List<BasePriorityRule> Get(bool male, bool adult) => ruleSets[(male, adult)].rules;
 

@@ -6,7 +6,6 @@ using Verse;
 namespace ASM;
 
 /// <summary>
-/// <summary>
 /// Per-map settings and state for Animal Slaughter Manager: per-kind settings, individual
 /// protection, pregnant modes, global settings. The recomputed slaughter list itself is built
 /// by <see cref="SlaughterListBuilder"/> and cached here, replacing the vanilla
