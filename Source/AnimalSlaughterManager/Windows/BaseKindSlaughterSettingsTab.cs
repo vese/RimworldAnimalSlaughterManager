@@ -13,7 +13,7 @@ public abstract class BaseKindSlaughterSettingsTab : IKindSlaughterSettingsDialo
     protected const float HeaderIconSize = 28f;
     protected const float HeaderMarginRight = 12f; // margin from the window close-X in the top-right corner
     protected const float LabelMarginLeft = HeaderIconSize + UIConstants.GapX;
-    protected static readonly float ButtonMarginTop = (HeaderHeight - UIConstants.ButtonHeight) / 2; //centered vertically
+    protected static float ButtonMarginTop => (HeaderHeight - Text.LineHeight - UIConstants.ButtonPaddingY) / 2; //centered vertically
     public const float TabBarHeight = 32f;
     protected const float DividerGap = 2f;
     protected static readonly Color DividerColor = new(1f, 1f, 1f, 0.25f);
@@ -72,7 +72,7 @@ public abstract class BaseKindSlaughterSettingsTab : IKindSlaughterSettingsDialo
         {
             var buttonText = button.Text.Translate();
             var buttonWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(buttonText).x + UIConstants.ButtonPaddingX);
-            var buttonRect = new Rect(right - buttonWidth, y + ButtonMarginTop, buttonWidth, UIConstants.ButtonHeight);
+            var buttonRect = new Rect(right - buttonWidth, y + ButtonMarginTop, buttonWidth, (Text.LineHeight + UIConstants.ButtonPaddingY));
             buttons.Add((buttonText, buttonRect, button.Action));
             right -= buttonWidth + UIConstants.GapX;
         }

@@ -72,14 +72,14 @@ public class TraitProtectRulesListSection(IEditableTraitsRuleSet<TraitProtectRul
             UIConstants.IconSize + UIConstants.GapX +
             UIConstants.IconSize);
         var traitButtonWidth = right - left;
-        top = row.y + (row.height - UIConstants.ButtonHeight) / 2f;
+        top = row.y + (row.height - (Text.LineHeight + UIConstants.ButtonPaddingY)) / 2f;
 
-        left += TraitRuleListButton.Draw(new Rect(left, top, traitButtonWidth, UIConstants.ButtonHeight), rule.trait, rule.Label,
+        left += TraitRuleListButton.Draw(new Rect(left, top, traitButtonWidth, (Text.LineHeight + UIConstants.ButtonPaddingY)), rule.trait, rule.Label,
             () => Find.WindowStack.Add(new Dialog_TraitPicker(picked => ReplaceTraits(index, picked))));
 
         Text.Anchor = TextAnchor.MiddleCenter;
 
-        var keepCountValue = Widgets.TextField(new Rect(left, top, UIConstants.ButtonMinWidth, UIConstants.ButtonHeight), rule.keepCount.ToString());
+        var keepCountValue = Widgets.TextField(new Rect(left, top, UIConstants.ButtonMinWidth, (Text.LineHeight + UIConstants.ButtonPaddingY)), rule.keepCount.ToString());
 
         if (int.TryParse(keepCountValue, out int n) && n >= 0 && n != rule.keepCount)
         {

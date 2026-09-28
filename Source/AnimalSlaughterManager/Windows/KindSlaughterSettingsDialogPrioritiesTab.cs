@@ -286,8 +286,8 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         Text.Anchor = TextAnchor.MiddleLeft;
         GUI.color = Color.white;
 
-        top = row.y + (row.height - UIConstants.ButtonHeight) / 2f;
-        var labelButtonRect = new Rect(left, top, labelWidth, UIConstants.ButtonHeight);
+        top = row.y + (row.height - (Text.LineHeight + UIConstants.ButtonPaddingY)) / 2f;
+        var labelButtonRect = new Rect(left, top, labelWidth, (Text.LineHeight + UIConstants.ButtonPaddingY));
 
         Widgets.DrawHighlightIfMouseover(labelButtonRect);
 
