@@ -6,5 +6,5 @@ namespace ASM;
 /// other incompatibility, reporting a problem message for a rule list index.</summary>
 public interface IRuleSetValidator
 {
-    void Validate(RuleValidationContext context, Action<int, string> addError);
+    void Validate(RuleValidationContext context, Action<int, string> addProblem);
 }

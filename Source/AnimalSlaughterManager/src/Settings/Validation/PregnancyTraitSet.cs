@@ -7,7 +7,7 @@ public sealed class PregnancyTraitSet : TraitSet<PregnancyTraitSet>
 {
     protected override void AcceptData(BasePriorityRule rule) { }
 
-    public override void ValidateClosure(Action<int, string> addError)
+    public override void ValidateClosure(Action<int, string> addProblem)
     {
         int? closedPregnant = null;
         int? closedNotPregnant = null;
@@ -19,7 +19,7 @@ public sealed class PregnancyTraitSet : TraitSet<PregnancyTraitSet>
 
             if (alreadyClosed is int closer)
             {
-                MarkRedundant(addError, index, [closer]);
+                MarkRedundant(addProblem, index, [closer]);
                 continue;
             }
 
@@ -34,7 +34,7 @@ public sealed class PregnancyTraitSet : TraitSet<PregnancyTraitSet>
 
             if (closedPregnant.HasValue && closedNotPregnant.HasValue)
             {
-                MarkExhausts(addError, index);
+                MarkExhausts(addProblem, index);
             }
         }
     }

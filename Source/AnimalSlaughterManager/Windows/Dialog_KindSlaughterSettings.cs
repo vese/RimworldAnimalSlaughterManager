@@ -61,7 +61,7 @@ public class Dialog_KindSlaughterSettings : Window
     {
         base.PreClose();
 
-        var problems = settings.prioritySettings.GetErrorsCountsMessage();
+        var problems = settings.prioritySettings.GetProblemsCountsMessage();
 
         if (problems != null)
         {

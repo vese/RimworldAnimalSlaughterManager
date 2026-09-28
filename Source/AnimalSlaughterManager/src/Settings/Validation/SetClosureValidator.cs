@@ -11,11 +11,11 @@ namespace ASM;
 /// </summary>
 public sealed class SetClosureValidator : IRuleSetValidator
 {
-    public void Validate(RuleValidationContext context, Action<int, string> addError)
+    public void Validate(RuleValidationContext context, Action<int, string> addProblem)
     {
         foreach (var set in context.Sets)
         {
-            set.ValidateClosure(addError);
+            set.ValidateClosure(addProblem);
         }
     }
 }

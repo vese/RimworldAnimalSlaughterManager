@@ -28,7 +28,7 @@ public abstract class TraitSet<TSelf> : ITraitSet where TSelf : TraitSet<TSelf>,
     /// <summary>Take the concrete data (def names, polarity) from the rules of this set.</summary>
     protected abstract void AcceptData(BasePriorityRule rule);
 
-    public abstract void ValidateClosure(Action<int, string> addError);
+    public abstract void ValidateClosure(Action<int, string> addProblem);
 
     /// <summary>The set's rules in list order.</summary>
     protected IEnumerable<(int index, BasePriorityRule rule)> OrderedRules() =>
@@ -36,14 +36,14 @@ public abstract class TraitSet<TSelf> : ITraitSet where TSelf : TraitSet<TSelf>,
 
     /// <summary>Marks the rule redundant, listing the 1-based numbers of the rules that
     /// closed its states.</summary>
-    protected static void MarkRedundant(Action<int, string> addError, int index, IEnumerable<int> closers)
+    protected static void MarkRedundant(Action<int, string> addProblem, int index, IEnumerable<int> closers)
     {
         var numbers = closers.Distinct().OrderBy(n => n).Select(n => n + 1);
-        addError(index, ASMKeys.ValidationRedundant.Translate(string.Join(", ", numbers)));
+        addProblem(index, ASMKeys.ValidationRedundant.Translate(string.Join(", ", numbers)));
     }
 
-    protected static void MarkExhausts(Action<int, string> addError, int index)
+    protected static void MarkExhausts(Action<int, string> addProblem, int index)
     {
-        addError(index, ASMKeys.ValidationExhausts.Translate());
+        addProblem(index, ASMKeys.ValidationExhausts.Translate());
     }
 }

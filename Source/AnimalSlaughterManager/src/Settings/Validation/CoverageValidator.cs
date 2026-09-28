@@ -10,7 +10,7 @@ public sealed class CoverageValidator<TRule, TOther> : IRuleSetValidator
     where TRule : BasePriorityRule, ICoversRule<TOther>
     where TOther : BasePriorityRule
 {
-    public void Validate(RuleValidationContext context, Action<int, string> addError)
+    public void Validate(RuleValidationContext context, Action<int, string> addProblem)
     {
         if (!context.RulesByType.TryGetValue(typeof(TRule), out var covering) ||
             !context.RulesByType.TryGetValue(typeof(TOther), out var covered))
@@ -24,7 +24,7 @@ public sealed class CoverageValidator<TRule, TOther> : IRuleSetValidator
             {
                 if (upperIndex < lowerIndex && ((ICoversRule<TOther>)upper).Covers((TOther)lower))
                 {
-                    addError(lowerIndex, ASMKeys.ValidationRedundant.Translate(upperIndex + 1));
+                    addProblem(lowerIndex, ASMKeys.ValidationRedundant.Translate(upperIndex + 1));
                 }
             }
         }
