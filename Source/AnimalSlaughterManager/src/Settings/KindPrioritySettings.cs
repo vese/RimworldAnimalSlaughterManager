@@ -67,12 +67,6 @@ public class PriorityRuleSet
         InvalidateValidationCache();
     }
 
-    public void CopyAt(int index)
-    {
-        rules.Insert(index + 1, rules[index].Clone());
-        SettingsChanges.Raise();
-    }
-
     public void Move(int from, int to)
     {
         if (from < 0 || to < 0 || from == to || from >= rules.Count || to > rules.Count)
@@ -225,8 +219,6 @@ public class KindPrioritySettings : IPresettable
     public void Add(bool male, bool adult, BasePriorityRule rule) => ruleSets[(male, adult)].Add(rule);
 
     public void RemoveAt(bool male, bool adult, int index) => ruleSets[(male, adult)].RemoveAt(index);
-
-    public void CopyAt(bool male, bool adult, int index) => ruleSets[(male, adult)].CopyAt(index);
 
     public void ChangeVariant(bool male, bool adult, int index) => ruleSets[(male, adult)].ChangeVariant(index);
 

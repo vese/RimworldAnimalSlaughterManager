@@ -42,7 +42,7 @@ public class Dialog_TraitPicker : Window
     }
 
     private readonly Action<List<HediffDef>> onPicked;
-    private readonly Action<List<(HediffDef, bool)>> onPickedFlag;
+    private readonly Action<List<(HediffDef, bool)>>? onPickedFlag;
     private readonly bool twoButtonMode;
     private readonly Dictionary<HediffDef, bool> selFlags = new Dictionary<HediffDef, bool>();
     private readonly List<Row> rows;
