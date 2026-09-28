@@ -74,7 +74,7 @@ public class PreferenceSettingsPanel(PreferenceSettings settings, Action<bool, b
         Text.Font = GameFont.Small;
         Text.Anchor = TextAnchor.MiddleLeft;
 
-        var height = Text.LineHeight + UIConstants.ButtonPaddingY;
+        var height = UIConstants.ButtonHeight;
         var left = x;
 
         Widgets.Label(new Rect(left, y, labelWidth, height), label);

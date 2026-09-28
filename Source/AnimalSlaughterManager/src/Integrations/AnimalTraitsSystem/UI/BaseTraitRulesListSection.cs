@@ -76,7 +76,7 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
         Text.Anchor = TextAnchor.MiddleLeft;
 
         var left = x;
-        var height = Text.LineHeight + UIConstants.ButtonPaddingY;
+        var height = UIConstants.ButtonHeight;
 
         var addButtonText = ASMKeys.AddTrait.Translate();
         var addButtonWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(addButtonText).x + UIConstants.ButtonPaddingX);
