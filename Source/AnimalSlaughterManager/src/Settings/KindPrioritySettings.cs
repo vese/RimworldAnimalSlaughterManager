@@ -67,6 +67,16 @@ public class PriorityRuleSet
         InvalidateValidationCache();
     }
 
+    public void SetInheritability(int index, TraitInheritability value)
+    {
+        if (rules[index] is TraitPriorityRule trait)
+        {
+            trait.inheritability = value;
+            InvalidateValidationCache();
+            SettingsChanges.Raise();
+        }
+    }
+
     public void CopyAt(int index)
     {
         rules.Insert(index + 1, rules[index].Clone());
@@ -231,6 +241,8 @@ public class KindPrioritySettings : IPresettable
     public void CopyAt(bool male, bool adult, int index) => ruleSets[(male, adult)].CopyAt(index);
 
     public void ChangeVariant(bool male, bool adult, int index) => ruleSets[(male, adult)].ChangeVariant(index);
+
+    public void SetInheritability(bool male, bool adult, int index, TraitInheritability value) => ruleSets[(male, adult)].SetInheritability(index, value);
 
     public void Move(bool male, bool adult, int from, int to) => ruleSets[(male, adult)].Move(from, to);
 

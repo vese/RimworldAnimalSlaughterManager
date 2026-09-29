@@ -275,8 +275,16 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         left += KindSlaughterSettingsTabListHelper.DrawGrip(left, top, row.height);
         left += UIConstants.GapX;
 
-        var labelWidth = row.width - UIConstants.IconSize - UIConstants.IconSize - UIConstants.IconSize;
         var condition = list[index];
+
+        // Trait rows carry extra controls after the label: the inheritability dropdown and
+        // the row-copy button.
+        var hasExtras = condition is TraitPriorityRule { trait: not null };
+        var extrasWidth = hasExtras
+            ? UIConstants.GapX + UIConstants.ButtonMinWidth + UIConstants.GapX + UIConstants.IconSize
+            : 0f;
+
+        var labelWidth = row.width - UIConstants.IconSize - UIConstants.IconSize - UIConstants.IconSize - extrasWidth;
 
         Text.Anchor = TextAnchor.MiddleLeft;
         GUI.color = Color.white;
@@ -307,6 +315,26 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         Text.Anchor = TextAnchor.UpperLeft;
 
         TooltipHandler.TipRegion(labelButtonRect, ASMKeys.CondToggleTip.Translate());
+
+        if (hasExtras)
+        {
+            var traitRule = (TraitPriorityRule)condition;
+            var extrasLeft = labelButtonRect.xMax + UIConstants.GapX;
+            TraitInheritabilityDropdown.Draw(extrasLeft, top, UIConstants.ButtonMinWidth, traitRule.inheritability,
+                value => settings.prioritySettings.SetInheritability(male, adult, index, value));
+
+            var copyRect = new Rect(
+                extrasLeft + UIConstants.ButtonMinWidth + UIConstants.GapX,
+                row.y + (row.height - UIConstants.IconSize) / 2f,
+                UIConstants.IconSize,
+                UIConstants.IconSize);
+            TooltipHandler.TipRegion(copyRect, ASMKeys.Copy.Translate());
+
+            if (Widgets.ButtonImage(copyRect, TexButton.Copy))
+            {
+                settings.prioritySettings.CopyAt(male, adult, index);
+            }
+        }
 
         // Warning icon for problematic conditions.
         if (rowValidation is not null && rowValidation.Count > 0)
