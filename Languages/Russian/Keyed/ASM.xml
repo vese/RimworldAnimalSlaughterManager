@@ -156,5 +156,6 @@
   <ASM.TipKindToList>Пресет вида. Применяется только список «{0}».</ASM.TipKindToList>
   <ASM.ConfirmDeleteList>Удалить пресет списка «{0}»?</ASM.ConfirmDeleteList>
   <ASM.ConfirmDeleteKind>Удалить пресет вида «{0}»?</ASM.ConfirmDeleteKind>
-  <ASM.PresetNoSlice>В этом пресете нет настроек для вида {0}.</ASM.PresetNoSlice>
+  <ASM.PresetNoSlice>В этом пресете нет списка правил для «{0}».</ASM.PresetNoSlice>
+  <ASM.PresetApplyFailed>Не удалось применить пресет {0}.</ASM.PresetApplyFailed>
 </LanguageData>

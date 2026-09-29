@@ -316,6 +316,9 @@ namespace ASM
         /// <summary>PresetListMark</summary>
         public const string PresetListMark = "ASM.PresetListMark";
 
+        /// <summary>PresetApplyFailed</summary>
+        public const string PresetApplyFailed = "ASM.PresetApplyFailed";
+
         /// <summary>PresetLoaded</summary>
         public const string PresetLoaded = "ASM.PresetLoaded";
 
