@@ -67,6 +67,13 @@ public class PriorityRuleSet
         InvalidateValidationCache();
     }
 
+    public void CopyAt(int index)
+    {
+        rules.Insert(index + 1, rules[index].Clone());
+        InvalidateValidationCache();
+        SettingsChanges.Raise();
+    }
+
     public void Move(int from, int to)
     {
         if (from < 0 || to < 0 || from == to || from >= rules.Count || to > rules.Count)
@@ -169,7 +176,9 @@ public class KindPrioritySettings : IPresettable
 {
     private const int currentDataVersion = 1;
 
-    private int dataVersion = 0;
+    // New instances start at the current version so they serialize in the current format;
+    // loading an old save overwrites this with the saved version and migrates in PostLoadInit.
+    private int dataVersion = currentDataVersion;
     private KindPrioritySettingsLegacy? settingsLegacy;
 
     // Per-bucket ordered slaughter-priority condition lists (top = keep, bottom = cull).
@@ -221,6 +230,8 @@ public class KindPrioritySettings : IPresettable
     public void RemoveAt(bool male, bool adult, int index) => ruleSets[(male, adult)].RemoveAt(index);
 
     public void ChangeVariant(bool male, bool adult, int index) => ruleSets[(male, adult)].ChangeVariant(index);
+
+    public void CopyAt(bool male, bool adult, int index) => ruleSets[(male, adult)].CopyAt(index);
 
     public void Move(bool male, bool adult, int from, int to) => ruleSets[(male, adult)].Move(from, to);
 
