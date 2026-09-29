@@ -175,7 +175,9 @@ public class KindPrioritySettings : IPresettable
 {
     private const int currentDataVersion = 1;
 
-    private int dataVersion = 0;
+    // New instances start at the current version so they serialize in the current format;
+    // loading an old save overwrites this with the saved version and migrates in PostLoadInit.
+    private int dataVersion = currentDataVersion;
     private KindPrioritySettingsLegacy? settingsLegacy;
 
     // Per-bucket ordered slaughter-priority condition lists (top = keep, bottom = cull).
