@@ -24,16 +24,16 @@ public class Dialog_TraitPicker : Window
     private class Col
     {
         public ColKind kind;
-        public StatDef stat;
-        public PawnCapacityDef cap;
+        public StatDef stat = null!;
+        public PawnCapacityDef cap = null!;
         public float width;
-        public string header;
-        public string key;
+        public string header = null!;
+        public string key = null!;
     }
 
     private class Row
     {
-        public HediffDef def;
+        public HediffDef def = null!;
         public bool isBad;
         public Dictionary<StatDef, float> statValues = new Dictionary<StatDef, float>();
         public Dictionary<StatDef, string> statStrings = new Dictionary<StatDef, string>();
