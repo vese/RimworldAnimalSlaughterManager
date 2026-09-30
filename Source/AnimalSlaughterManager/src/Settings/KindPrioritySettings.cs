@@ -215,6 +215,15 @@ public class KindPrioritySettings : IPresettable
         (false, false)
     ];
 
+    // XML save key of each bucket's rule list (the names predate the bucket tuples).
+    private static readonly Dictionary<(bool Male, bool Adult), string> bucketSaveKeys = new()
+    {
+        { (true, true), "priorityAdultMale" },
+        { (true, false), "priorityYoungMale" },
+        { (false, true), "priorityAdultFemale" },
+        { (false, false), "priorityYoungFemale" }
+    };
+
     /// <summary>Number of rules with validation problems, across all buckets.</summary>
     public int CountProblems() => ruleSets.Values.Sum(set => set.ProblemCount);
 
@@ -321,10 +330,12 @@ public class KindPrioritySettings : IPresettable
         }
         else if (dataVersion == 1)
         {
-            Scribe_Collections.Look(ref ruleSets[(true, true)].rules, "priorityAdultMale", LookMode.Deep);
-            Scribe_Collections.Look(ref ruleSets[(true, false)].rules, "priorityYoungMale", LookMode.Deep);
-            Scribe_Collections.Look(ref ruleSets[(false, true)].rules, "priorityAdultFemale", LookMode.Deep);
-            Scribe_Collections.Look(ref ruleSets[(false, false)].rules, "priorityYoungFemale", LookMode.Deep);
+            foreach (var key in keys)
+            {
+                var rules = ruleSets[key].rules;
+                Scribe_Collections.Look(ref rules, bucketSaveKeys[key], LookMode.Deep);
+                ruleSets[key].rules = rules;
+            }
         }
 
         if (Scribe.mode == LoadSaveMode.PostLoadInit)
