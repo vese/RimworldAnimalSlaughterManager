@@ -277,10 +277,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
         var condition = list[index];
 
-        // Trait rows carry extra controls after the label: the inheritability dropdown and
-        // the row-copy button.
-        var hasExtras = condition is TraitPriorityRule { trait: not null };
-        var extrasWidth = hasExtras
+        var extrasWidth = condition.HasExtraControls
             ? UIConstants.GapX + UIConstants.ButtonMinWidth + UIConstants.GapX + UIConstants.IconSize
             : 0f;
 
@@ -316,7 +313,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
         TooltipHandler.TipRegion(labelButtonRect, ASMKeys.CondToggleTip.Translate());
 
-        if (hasExtras)
+        if (condition.HasExtraControls)
         {
             var traitRule = (TraitPriorityRule)condition;
             var extrasLeft = labelButtonRect.xMax + UIConstants.GapX;
@@ -408,7 +405,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         if (AnimalTraitsAccess.HasAvailableTraits)
         {
             options.Add(new FloatMenuOption(ASMKeys.CondAddTrait.Translate(),
-                () => Find.WindowStack.Add(new Dialog_TraitPicker(picked =>
+                () => Find.WindowStack.Add(new Dialog_TraitFlagPicker(picked =>
                 {
                     // TODO: 1 option for 1 trait def
                     foreach ((HediffDef def, bool has) in picked)

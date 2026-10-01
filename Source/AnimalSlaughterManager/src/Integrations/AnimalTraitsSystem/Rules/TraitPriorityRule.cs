@@ -13,6 +13,8 @@ public class TraitPriorityRule : BasePriorityRule, ICoversRule<TraitPriorityRule
 
     public override bool HasNullDef => trait == null;
 
+    public override bool HasExtraControls => trait != null;
+
     public override string Label => (has ? ASMKeys.CondHas : ASMKeys.CondMissing).Translate(DefName(trait));
 
     public override BasePriorityRule Clone() => new TraitPriorityRule() { has = has, trait = trait, inheritability = inheritability };

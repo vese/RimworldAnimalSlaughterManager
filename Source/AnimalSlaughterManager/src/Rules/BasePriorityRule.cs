@@ -11,6 +11,11 @@ public abstract class BasePriorityRule : IExposable
     /// to resolve on load (def-providing mod disabled). Such entries are no-ops and get pruned.
     /// </summary>
     public virtual bool HasNullDef { get; } = false;
+
+    /// <summary>True when the rule's row in the priorities list carries extra controls
+    /// (the trait rule's inheritability dropdown and the row-copy button).</summary>
+    public virtual bool HasExtraControls => false;
+
     public abstract string Label { get; }
     public abstract BasePriorityRule Clone();
     public abstract void ExposeData();
