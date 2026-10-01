@@ -12,7 +12,8 @@ namespace ASM;
 /// </summary>
 public class Dialog_TraitFlagPicker : Dialog_TraitTable
 {
-    private const float ChecksW = 44f;
+    private const float ChecksW = 2f * UIConstants.IconSize;
+    private const float CheckSize = 18f;
 
     private readonly Action<List<(HediffDef def, bool has)>> onPicked;
     private readonly Dictionary<HediffDef, bool> selFlags = new Dictionary<HediffDef, bool>();
@@ -29,9 +30,9 @@ public class Dialog_TraitFlagPicker : Dialog_TraitTable
         Text.Anchor = TextAnchor.MiddleCenter;
         Text.Font = GameFont.Tiny;
         GUI.color = Color.green;
-        Widgets.Label(new Rect(r.x, r.y, 22f, 22f), "✓");
+        Widgets.Label(new Rect(r.x, r.y, UIConstants.IconSize, UIConstants.IconSize), "✓");
         GUI.color = Color.red;
-        Widgets.Label(new Rect(r.x + 22f, r.y, 22f, 22f), "✗");
+        Widgets.Label(new Rect(r.x + UIConstants.IconSize, r.y, UIConstants.IconSize, UIConstants.IconSize), "✗");
         GUI.color = Color.white;
         Text.Anchor = TextAnchor.UpperLeft;
         Text.Font = GameFont.Small;
@@ -48,8 +49,8 @@ public class Dialog_TraitFlagPicker : Dialog_TraitTable
     private void DrawChecks(Rect row, Row r)
     {
         // Two paint zones: left = has (green), right = missing (red). Drag across to paint.
-        Rect hasZone = new Rect(row.x, row.y, 22f, row.height);
-        Rect missZone = new Rect(row.x + 22f, row.y, 22f, row.height);
+        Rect hasZone = new Rect(row.x, row.y, UIConstants.IconSize, row.height);
+        Rect missZone = new Rect(row.x + UIConstants.IconSize, row.y, UIConstants.IconSize, row.height);
         bool isHas = selected.Contains(r.def) && selFlags.ContainsKey(r.def) && selFlags[r.def];
         bool isMissing = selected.Contains(r.def) && selFlags.ContainsKey(r.def) && !selFlags[r.def];
 
@@ -69,12 +70,12 @@ public class Dialog_TraitFlagPicker : Dialog_TraitTable
         }
 
         // Vanilla CheckboxDraw — no color tint, native rendering.
-        float cbY = row.y + (row.height - 18f) / 2f;
-        Rect hasRect = new Rect(row.x + 2f, cbY, 18f, 18f);
-        Rect missRect = new Rect(row.x + 22f, cbY, 18f, 18f);
+        float cbY = row.y + (row.height - CheckSize) / 2f;
+        Rect hasRect = new Rect(row.x + UIConstants.TextPaddingY, cbY, CheckSize, CheckSize);
+        Rect missRect = new Rect(row.x + UIConstants.IconSize, cbY, CheckSize, CheckSize);
         TooltipHandler.TipRegion(hasRect, ASMKeys.CondHasTip.Translate());
         TooltipHandler.TipRegion(missRect, ASMKeys.CondMissingTip.Translate());
-        Widgets.CheckboxDraw(hasRect.x, hasRect.y, isHas, !isHas, 18f);
-        Widgets.CheckboxDraw(missRect.x, missRect.y, isMissing, !isMissing, 18f);
+        Widgets.CheckboxDraw(hasRect.x, hasRect.y, isHas, !isHas, CheckSize);
+        Widgets.CheckboxDraw(missRect.x, missRect.y, isMissing, !isMissing, CheckSize);
     }
 }

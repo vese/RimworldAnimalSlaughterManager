@@ -10,6 +10,7 @@ namespace ASM;
 public class Dialog_TraitPicker : Dialog_TraitTable
 {
     private const float CheckW = 30f;
+    private const float CheckSize = 24f;
 
     private readonly Action<List<HediffDef>> onPicked;
 
@@ -51,8 +52,8 @@ public class Dialog_TraitPicker : Dialog_TraitTable
 
         // Draw-only checkbox: ALL input is handled by the paint logic above. Using Widgets.Checkbox
         // here would double-toggle a single click (its own click handler reverts the paint toggle).
-        Rect cb = new Rect(row.x + 4f, row.y + (row.height - 24f) / 2f, 24f, 24f);
-        Widgets.CheckboxDraw(cb.x, cb.y, value, false, 24f);
+        Rect cb = new Rect(row.x + UIConstants.GapX - UIConstants.TextPaddingY, row.y + (row.height - CheckSize) / 2f, CheckSize, CheckSize);
+        Widgets.CheckboxDraw(cb.x, cb.y, value, false, CheckSize);
     }
 
     private void SetSel(HediffDef d, bool on)

@@ -41,10 +41,15 @@ public abstract class Dialog_TraitTable : Window
 
     private const float TypeW = 70f;
     private const float ModW = 90f;
-    private const float HeaderTopH = 22f;
+    private const float HeaderTopH = UIConstants.IconSize;
     private const float HeaderSubH = 24f;
     private const float HeaderH = HeaderTopH + HeaderSubH;
     private const float RowH = 28f;
+    private const float TopPad = 12f;             // keeps the scrollbar clear of the window's close-X
+    private const float BottomBarHeight = 40f;    // the Add-selected bar under the table
+    private const float AddButtonWidth = 220f;
+    private const float ShowAllButtonWidth = 180f;
+    private const float SmallIconSize = 16f;      // TexButton.CloseXSmall
 
     // Cached UI tint colors (struct, but cached to avoid rebuilding each draw + dedup).
     private static readonly Color NegativeColor = new Color(1f, 0.5f, 0.5f);
@@ -142,22 +147,21 @@ public abstract class Dialog_TraitTable : Window
         Text.Font = GameFont.Small;
 
         // Search row: magnifier + field (left half) + clear ✕, one band below the close-X margin.
-        const float topPad = 12f; // keep the scrollbar clear of the window's close-X
-        const float searchH = 30f;
-        const float searchGap = 6f;
-        float searchY = inRect.y + topPad;
+        float searchH = UIConstants.ButtonHeight + 2f * UIConstants.TextPaddingY;
+        float searchY = inRect.y + TopPad;
         float mid = inRect.x + inRect.width * 0.5f;
-        const float icon = 22f, gap = 6f, clearGap = 10f;
+        float icon = UIConstants.IconSize;
+        float clearGap = UIConstants.GapY + UIConstants.TextPaddingY;
         GUI.DrawTexture(new Rect(inRect.x, searchY + (searchH - icon) / 2f, icon, icon), TexButton.Search);
-        float fx = inRect.x + icon + gap;
+        float fx = inRect.x + icon + UIConstants.GapX;
         float fieldEnd = mid - icon - clearGap;
-        searchBuffer = Widgets.TextField(new Rect(fx, searchY + 1f, fieldEnd - fx, 26f), searchBuffer);
+        searchBuffer = Widgets.TextField(new Rect(fx, searchY + 1f, fieldEnd - fx, UIConstants.ButtonHeight), searchBuffer);
         Rect clearBtn = new Rect(mid - icon, searchY + (searchH - icon) / 2f, icon, icon);
         TooltipHandler.TipRegion(clearBtn, ASMKeys.Clear.Translate());
         if (Widgets.ButtonImage(clearBtn, TexButton.CloseXSmall))
             searchBuffer = "";
 
-        float tableTop = searchY + searchH + searchGap;
+        float tableTop = searchY + searchH + UIConstants.GapX;
 
         var vis = VisibleColumns;
         float tableW = LeadingColumnWidth + vis.Sum(c => c.width);
@@ -165,7 +169,7 @@ public abstract class Dialog_TraitTable : Window
         string sf = (searchBuffer ?? "").Trim();
         var visibleRows = sf.NullOrEmpty() ? sorted : sorted.Where(r => r.def.LabelCap.ToString().IndexOf(sf, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
         float contentH = HeaderH + visibleRows.Count * RowH + 4f;
-        Rect outRect = new Rect(inRect.x, tableTop, inRect.width, inRect.yMax - 40f - tableTop);
+        Rect outRect = new Rect(inRect.x, tableTop, inRect.width, inRect.yMax - BottomBarHeight - tableTop);
         Rect view = new Rect(inRect.x, tableTop, Mathf.Max(tableW, outRect.width), Mathf.Max(contentH, outRect.height));
         Widgets.BeginScrollView(outRect, ref scroll, view);
 
@@ -186,15 +190,15 @@ public abstract class Dialog_TraitTable : Window
         if (Event.current.type == EventType.MouseUp) paintMode = false;
 
         // Bottom bar: add selected + show all columns.
-        float by = inRect.yMax - 32f;
+        float by = inRect.yMax - BottomBarHeight + UIConstants.GapY;
         bool any = selected.Count > 0;
-        var addBtn = new Rect(inRect.x, by, 220f, 30f);
+        var addBtn = new Rect(inRect.x, by, AddButtonWidth, UIConstants.ButtonHeight);
         if (Widgets.ButtonText(addBtn, ASMKeys.AddSelected.Translate(selected.Count), active: any) && any)
         {
             Confirm();
             Close();
         }
-        if (Widgets.ButtonText(new Rect(addBtn.xMax + 8f, by, 180f, 30f), ASMKeys.ShowAllColumns.Translate()))
+        if (Widgets.ButtonText(new Rect(addBtn.xMax + UIConstants.GapY, by, ShowAllButtonWidth, UIConstants.ButtonHeight), ASMKeys.ShowAllColumns.Translate()))
             hidden.Clear();
     }
 
@@ -211,8 +215,8 @@ public abstract class Dialog_TraitTable : Window
         GUI.DragWindow(new Rect(0, winH - m, winW, m));                           // bottom frame
         GUI.DragWindow(new Rect(0, 0, m, winH));                                  // left frame
         GUI.DragWindow(new Rect(winW - m, 0, m, winH));                           // right frame
-        GUI.DragWindow(new Rect(inRect.x, inRect.y, inRect.width, 12f));          // top pad (above table)
-        GUI.DragWindow(new Rect(inRect.x, inRect.yMax - 40f, inRect.width, 40f)); // bottom bar (below table)
+        GUI.DragWindow(new Rect(inRect.x, inRect.y, inRect.width, TopPad));          // top pad (above table)
+        GUI.DragWindow(new Rect(inRect.x, inRect.yMax - BottomBarHeight, inRect.width, BottomBarHeight)); // bottom bar (below table)
     }
 
     private void DrawHeader(Rect r, List<Col> vis)
@@ -259,7 +263,7 @@ public abstract class Dialog_TraitTable : Window
 
             // Sort button.
             bool isSort = colIdx == sortIndex;
-            Rect sortBtn = new Rect(sub.x, sub.y, 22f, HeaderSubH);
+            Rect sortBtn = new Rect(sub.x, sub.y, UIConstants.IconSize, HeaderSubH);
             TooltipHandler.TipRegion(sortBtn, ASMKeys.SortBy.Translate());
             if (Widgets.ButtonInvisible(sortBtn)) SetSort(colIdx);
             Text.Anchor = TextAnchor.MiddleCenter;
@@ -269,10 +273,10 @@ public abstract class Dialog_TraitTable : Window
             Text.Anchor = TextAnchor.UpperLeft;
 
             // Hide button (right). Name column is not hideable.
-            float hideW = isName ? 0f : 20f;
+            float hideW = isName ? 0f : SmallIconSize + UIConstants.ButtonPaddingY;
             if (!isName)
             {
-                Rect hideBtn = new Rect(sub.xMax - hideW, sub.y + (HeaderSubH - 16f) / 2f, 16f, 16f);
+                Rect hideBtn = new Rect(sub.xMax - hideW, sub.y + (HeaderSubH - SmallIconSize) / 2f, SmallIconSize, SmallIconSize);
                 TooltipHandler.TipRegion(hideBtn, ASMKeys.HideColumn.Translate());
                 GUI.color = Color.red;
                 if (Widgets.ButtonImage(hideBtn, TexButton.CloseXSmall))
@@ -288,7 +292,7 @@ public abstract class Dialog_TraitTable : Window
             {
                 // Drag handle (middle) — this is what reorders the column. The window never
                 // starts a drag from the table (see LateWindowOnGUI), so no ClaimDragHandle needed.
-                Rect drag = new Rect(sortBtn.xMax, sub.y, Mathf.Max(sub.xMax - hideW - sortBtn.xMax, 8f), HeaderSubH);
+                Rect drag = new Rect(sortBtn.xMax, sub.y, Mathf.Max(sub.xMax - hideW - sortBtn.xMax, UIConstants.GapY), HeaderSubH);
                 ReorderableWidget.Reorderable(colGroup, drag);
                 GUI.color = RowAltTint;
                 Text.Anchor = TextAnchor.MiddleCenter;
@@ -320,7 +324,7 @@ public abstract class Dialog_TraitTable : Window
         {
             if (Mouse.IsOver(tc.rect))
             {
-                float textW = Text.CalcSize(tc.col.header).x + 8f;
+                float textW = Text.CalcSize(tc.col.header).x + UIConstants.GapY;
                 if (textW > tc.rect.width)
                 {
                     Rect overRect = new Rect(tc.rect.x, tc.rect.y, textW, tc.rect.height);
