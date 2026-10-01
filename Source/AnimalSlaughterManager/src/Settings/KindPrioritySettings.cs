@@ -43,6 +43,7 @@ public class PriorityRuleSet
 
     public void Reset()
     {
+        UntrackAll();
         rules.Clear();
         InvalidateValidationCache();
     }
@@ -50,12 +51,14 @@ public class PriorityRuleSet
     public void Add(BasePriorityRule rule)
     {
         rules.Add(rule);
+        Track(rule);
         InvalidateValidationCache();
         SettingsChanges.Raise();
     }
 
     public void RemoveAt(int index)
     {
+        Untrack(rules[index]);
         rules.RemoveAt(index);
         InvalidateValidationCache();
         SettingsChanges.Raise();
@@ -67,20 +70,15 @@ public class PriorityRuleSet
         InvalidateValidationCache();
     }
 
-    /// <summary>The rule's extra dropdown, with changes wired to drop this set's validation
-    /// cache and raise SettingsChanges. The list tab only draws the result.</summary>
-    public IDropdownController? GetExtraDropdown(int index)
-    {
-        return rules[index].GetExtraDropdown(() =>
-        {
-            InvalidateValidationCache();
-            SettingsChanges.Raise();
-        });
-    }
+    /// <summary>The rule's extra dropdown. Changes are announced through the rule's
+    /// ContentChanged, which this set subscribes to — see <see cref="Track"/>.</summary>
+    public IDropdownController? GetExtraDropdown(int index) => rules[index].GetExtraDropdown();
 
     public void CopyAt(int index)
     {
-        rules.Insert(index + 1, rules[index].Clone());
+        var clone = rules[index].Clone();
+        rules.Insert(index + 1, clone);
+        Track(clone);
         InvalidateValidationCache();
         SettingsChanges.Raise();
     }
@@ -110,15 +108,46 @@ public class PriorityRuleSet
 
     public void ReplaceAll(List<BasePriorityRule> replacement)
     {
+        UntrackAll();
         rules.Clear();
         rules.AddRange(replacement);
+
+        foreach (var rule in replacement)
+        {
+            Track(rule);
+        }
+
         InvalidateValidationCache();
         SettingsChanges.Raise();
     }
 
     public void Clear()
     {
+        UntrackAll();
         rules.Clear();
+        InvalidateValidationCache();
+        SettingsChanges.Raise();
+    }
+
+    // A rule raises ContentChanged when it edits itself (its extra controls); the set owns the
+    // subscription, so the wiring does not depend on who calls GetExtraDropdown.
+    private void Track(BasePriorityRule rule) => rule.ContentChanged += OnRuleContentChanged;
+
+    private void Untrack(BasePriorityRule rule) => rule.ContentChanged -= OnRuleContentChanged;
+
+    private void UntrackAll()
+    {
+        foreach (var rule in rules)
+        {
+            if (rule != null)
+            {
+                Untrack(rule);
+            }
+        }
+    }
+
+    private void OnRuleContentChanged()
+    {
         InvalidateValidationCache();
         SettingsChanges.Raise();
     }
@@ -131,12 +160,19 @@ public class PriorityRuleSet
         }
         else
         {
+            UntrackAll();
+
             // A trait/disease/trainable def may resolve to null when the mod that defined it
             // (e.g. Animal Traits System) was disabled on this save. Drop those dead entries so
             // the settings don't fill up with no-op "?" rows. (This does not silence RimWorld's
             // own "Could not load reference" log for hediffs still on the pawns — that is the
             // base game resolving the save, outside this mod's control.)
             rules.RemoveAll(c => c is null || c.HasNullDef);
+
+            foreach (var rule in rules)
+            {
+                Track(rule);
+            }
         }
 
         InvalidateValidationCache();

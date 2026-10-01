@@ -12,11 +12,16 @@ public abstract class BasePriorityRule : IExposable
     /// </summary>
     public virtual bool HasNullDef { get; } = false;
 
-    /// <summary>The rule's extra row dropdown: values, the current one and the setter. Null
-    /// when the rule has none. Content changes must go through <paramref name="notifyChanged"/>
-    /// so the owning settings invalidate their caches and raise SettingsChanges. The rule only
+    /// <summary>Raised when the rule changes its own content (e.g. through its extra controls).
+    /// The owning rule set subscribes to invalidate its caches and raise SettingsChanges.</summary>
+    public event Action? ContentChanged;
+
+    protected void RaiseContentChanged() => ContentChanged?.Invoke();
+
+    /// <summary>The rule's extra row dropdown: values, the current one and the setter. Null when
+    /// the rule has none. Changes are announced via <see cref="ContentChanged"/>; the rule only
     /// supplies the data — rendering is the widget's business.</summary>
-    public virtual IDropdownController? GetExtraDropdown(Action notifyChanged) => null;
+    public virtual IDropdownController? GetExtraDropdown() => null;
 
     public abstract string Label { get; }
     public abstract BasePriorityRule Clone();

@@ -14,12 +14,12 @@ public class TraitPriorityRule : BasePriorityRule, ICoversRule<TraitPriorityRule
 
     public override bool HasNullDef => trait == null;
 
-    public override IDropdownController? GetExtraDropdown(Action notifyChanged) => trait == null ? null : new DropdownController<TraitInheritability>
+    public override IDropdownController? GetExtraDropdown() => trait == null ? null : new DropdownController<TraitInheritability>
     {
         Current = inheritability,
         Values = Enum.GetValues(typeof(TraitInheritability)).Cast<TraitInheritability>(),
         LabelOf = value => value.Translate(),
-        SetValue = value => { inheritability = value; notifyChanged(); }
+        SetValue = value => { inheritability = value; RaiseContentChanged(); }
     };
 
     public override string Label => (has ? ASMKeys.CondHas : ASMKeys.CondMissing).Translate(DefName(trait));
