@@ -12,6 +12,8 @@ namespace ASM;
 /// </summary>
 public class Dialog_TraitFlagPicker : Dialog_TraitTable
 {
+    private const float ChecksW = 44f;
+
     private readonly Action<List<(HediffDef def, bool has)>> onPicked;
     private readonly Dictionary<HediffDef, bool> selFlags = new Dictionary<HediffDef, bool>();
 
@@ -20,9 +22,9 @@ public class Dialog_TraitFlagPicker : Dialog_TraitTable
         this.onPicked = onPicked;
     }
 
-    protected override float CheckColumnWidth => 44f;
+    protected override float LeadingColumnWidth => ChecksW;
 
-    protected override void DrawCheckHeaderIcons(Rect r)
+    protected override void DrawLeadingHeaderIcons(Rect r)
     {
         Text.Anchor = TextAnchor.MiddleCenter;
         Text.Font = GameFont.Tiny;
@@ -35,7 +37,15 @@ public class Dialog_TraitFlagPicker : Dialog_TraitTable
         Text.Font = GameFont.Small;
     }
 
-    protected override void DrawRowChecks(Rect row, Row r)
+    protected override void DrawRow(Rect row, Row r, List<Col> vis)
+    {
+        DrawChecks(row, r);
+        base.DrawRow(new Rect(row.x + ChecksW, row.y, row.width - ChecksW, row.height), r, vis);
+    }
+
+    protected override void Confirm() => onPicked(selected.Select(d => (d, selFlags[d])).ToList());
+
+    private void DrawChecks(Rect row, Row r)
     {
         // Two paint zones: left = has (green), right = missing (red). Drag across to paint.
         Rect hasZone = new Rect(row.x, row.y, 22f, row.height);
@@ -67,6 +77,4 @@ public class Dialog_TraitFlagPicker : Dialog_TraitTable
         Widgets.CheckboxDraw(hasRect.x, hasRect.y, isHas, !isHas, 18f);
         Widgets.CheckboxDraw(missRect.x, missRect.y, isMissing, !isMissing, 18f);
     }
-
-    protected override void Confirm() => onPicked(selected.Select(d => (d, selFlags[d])).ToList());
 }
