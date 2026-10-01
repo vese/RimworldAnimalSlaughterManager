@@ -282,6 +282,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
             ? UIConstants.GapX + extraDropdown.Width + UIConstants.GapX + UIConstants.IconSize
             : 0f;
 
+
         var labelWidth = row.width - UIConstants.IconSize - UIConstants.IconSize - UIConstants.IconSize - extrasWidth;
 
         Text.Anchor = TextAnchor.MiddleLeft;
@@ -317,7 +318,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         if (extraDropdown != null)
         {
             var controlsLeft = labelButtonRect.xMax + UIConstants.GapX;
-            Dropdown.Draw(controlsLeft, top, extraDropdown);
+            extraDropdown.Draw(controlsLeft, top);
 
             var copyRect = new Rect(
                 controlsLeft + extraDropdown.Width + UIConstants.GapX,

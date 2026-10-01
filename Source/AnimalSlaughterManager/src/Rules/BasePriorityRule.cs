@@ -12,11 +12,11 @@ public abstract class BasePriorityRule : IExposable
     /// </summary>
     public virtual bool HasNullDef { get; } = false;
 
-    /// <summary>The rule's extra row dropdown: current value, options with their setters. Null
+    /// <summary>The rule's extra row dropdown: values, the current one and the setter. Null
     /// when the rule has none. Content changes must go through <paramref name="notifyChanged"/>
     /// so the owning settings invalidate their caches and raise SettingsChanges. The rule only
-    /// supplies the data — the list tab draws the dropdown.</summary>
-    public virtual DropdownControl? GetExtraDropdown(Action notifyChanged) => null;
+    /// supplies the data — rendering is the widget's business.</summary>
+    public virtual IDropdownController? GetExtraDropdown(Action notifyChanged) => null;
 
     public abstract string Label { get; }
     public abstract BasePriorityRule Clone();

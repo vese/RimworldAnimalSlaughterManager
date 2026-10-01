@@ -6,27 +6,23 @@ using Verse;
 
 namespace ASM;
 
-/// <summary>Data for drawing a dropdown: the width, the current value's label and the options
-/// (each carries its own setter). Rules and settings supply it; <see cref="Dropdown"/> draws it.</summary>
-public sealed class DropdownControl
-{
-    public float Width = UIConstants.ButtonMinWidth;
-    public TaggedString CurrentLabel;
-    public IEnumerable<FloatMenuOption> Options = [];
-}
-
-/// <summary>Generic dropdown button: shows the current label and opens a float menu of options.</summary>
+/// <summary>Generic dropdown widget: shows the controller's current label and opens a float
+/// menu of its values. Owns the rendering components (FloatMenu/FloatMenuOption).</summary>
 public static class Dropdown
 {
-    public static float Draw(float x, float y, DropdownControl control)
+    public static float Draw<T>(float x, float y, DropdownController<T> controller)
     {
         var anchor = Text.Anchor;
         Text.Anchor = TextAnchor.UpperLeft;
 
         var height = UIConstants.ButtonHeight;
-        if (Widgets.ButtonText(new Rect(x, y, control.Width, height), control.CurrentLabel))
+        if (Widgets.ButtonText(new Rect(x, y, controller.Width, height), controller.LabelOf(controller.Current)))
         {
-            Find.WindowStack.Add(new FloatMenu(control.Options.ToList()));
+            var options = controller.Values
+                .Select(value => new FloatMenuOption(controller.LabelOf(value), () => controller.SetValue(value)))
+                .ToList();
+
+            Find.WindowStack.Add(new FloatMenu(options));
         }
 
         Text.Anchor = anchor;
@@ -38,10 +34,13 @@ public static class Dropdown
     public static float DrawEnum<T>(float x, float y, float width, T current, Func<T, TaggedString> labelOf, Action<T> setValue)
         where T : struct, Enum
     {
-        var options = Enum.GetValues(typeof(T))
-            .Cast<T>()
-            .Select(value => new FloatMenuOption(labelOf(value), () => setValue(value)));
-
-        return Draw(x, y, new DropdownControl { Width = width, CurrentLabel = labelOf(current), Options = options });
+        return Draw(x, y, new DropdownController<T>
+        {
+            Width = width,
+            Current = current,
+            Values = Enum.GetValues(typeof(T)).Cast<T>(),
+            LabelOf = labelOf,
+            SetValue = setValue
+        });
     }
 }
