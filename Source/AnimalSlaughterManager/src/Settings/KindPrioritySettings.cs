@@ -8,78 +8,61 @@ public class PriorityRuleSet
 {
     public List<BasePriorityRule> rules = [];
 
+    // The validation cache is tagged with the SettingsChanges version it was computed at: any
+    // Raise() (ours or any other settings') moves the version and the next read recomputes —
+    // no per-owner subscriptions needed.
     private List<List<string>>? validationCache;
-    private int problemCountCache = -1;
+    private int validationVersion = -1;
 
     public bool HasRules => rules != null && rules.Count > 0;
 
-    private void InvalidateValidationCache()
-    {
-        validationCache = null;
-        problemCountCache = -1;
-    }
+    private bool CacheValid => validationCache != null && validationVersion == SettingsChanges.Version;
 
-    /// <summary>Number of rules with validation problems in this bucket. Cached with the validation itself.</summary>
+    /// <summary>Number of rules with validation problems in this bucket.</summary>
     public int ProblemCount
     {
         get
         {
-            if (problemCountCache < 0)
-            {
-                problemCountCache = 0;
+            var count = 0;
 
-                foreach (var problems in Validate())
+            foreach (var problems in Validate())
+            {
+                if (problems is not null && problems.Count > 0)
                 {
-                    if (problems is not null && problems.Count > 0)
-                    {
-                        problemCountCache++;
-                    }
+                    count++;
                 }
             }
 
-            return problemCountCache;
+            return count;
         }
     }
 
     public void Reset()
     {
-        UntrackAll();
         rules.Clear();
-        InvalidateValidationCache();
+        validationVersion = -1;
     }
 
     public void Add(BasePriorityRule rule)
     {
         rules.Add(rule);
-        Track(rule);
-        InvalidateValidationCache();
         SettingsChanges.Raise();
     }
 
     public void RemoveAt(int index)
     {
-        Untrack(rules[index]);
         rules.RemoveAt(index);
-        InvalidateValidationCache();
         SettingsChanges.Raise();
     }
 
     public void ChangeVariant(int index)
     {
         rules[index].ChangeVariant();
-        InvalidateValidationCache();
     }
-
-    /// <summary>The rule's extra dropdown. Changes are announced through the rule's
-    /// ContentChanged, which this set subscribes to — see <see cref="Track"/>.</summary>
-    public IDropdownController? GetExtraDropdown(int index) => rules[index].GetExtraDropdown();
 
     public void CopyAt(int index)
     {
-        var clone = rules[index].Clone();
-        rules.Insert(index + 1, clone);
-        Track(clone);
-        InvalidateValidationCache();
+        rules.Insert(index + 1, rules[index].Clone());
         SettingsChanges.Raise();
     }
 
@@ -102,53 +85,19 @@ public class PriorityRuleSet
             rules.Insert(to, rule);
         }
 
-        InvalidateValidationCache();
         SettingsChanges.Raise();
     }
 
     public void ReplaceAll(List<BasePriorityRule> replacement)
     {
-        UntrackAll();
         rules.Clear();
         rules.AddRange(replacement);
-
-        foreach (var rule in replacement)
-        {
-            Track(rule);
-        }
-
-        InvalidateValidationCache();
         SettingsChanges.Raise();
     }
 
     public void Clear()
     {
-        UntrackAll();
         rules.Clear();
-        InvalidateValidationCache();
-        SettingsChanges.Raise();
-    }
-
-    // A rule raises ContentChanged when it edits itself (its extra controls); the set owns the
-    // subscription, so the wiring does not depend on who calls GetExtraDropdown.
-    private void Track(BasePriorityRule rule) => rule.ContentChanged += OnRuleContentChanged;
-
-    private void Untrack(BasePriorityRule rule) => rule.ContentChanged -= OnRuleContentChanged;
-
-    private void UntrackAll()
-    {
-        foreach (var rule in rules)
-        {
-            if (rule != null)
-            {
-                Untrack(rule);
-            }
-        }
-    }
-
-    private void OnRuleContentChanged()
-    {
-        InvalidateValidationCache();
         SettingsChanges.Raise();
     }
 
@@ -160,22 +109,15 @@ public class PriorityRuleSet
         }
         else
         {
-            UntrackAll();
-
             // A trait/disease/trainable def may resolve to null when the mod that defined it
             // (e.g. Animal Traits System) was disabled on this save. Drop those dead entries so
             // the settings don't fill up with no-op "?" rows. (This does not silence RimWorld's
             // own "Could not load reference" log for hediffs still on the pawns — that is the
             // base game resolving the save, outside this mod's control.)
             rules.RemoveAll(c => c is null || c.HasNullDef);
-
-            foreach (var rule in rules)
-            {
-                Track(rule);
-            }
         }
 
-        InvalidateValidationCache();
+        validationVersion = -1;
     }
 
     /// <summary>
@@ -183,9 +125,19 @@ public class PriorityRuleSet
     /// accumulate into trait sets (creating-or-updating its set, registering validators); then
     /// every registered validator runs once over the accumulated data. Rules are matched
     /// top-to-down, the first match wins — see SetClosureValidator and DuplicateValidator.
-    /// Cached — recomputed only after a change made through this set's methods.
+    /// Cached against the SettingsChanges version — recomputed lazily after any settings change.
     /// </summary>
-    public List<List<string>> Validate() => validationCache ??= ComputeValidation();
+    public List<List<string>> Validate()
+    {
+        if (CacheValid)
+        {
+            return validationCache!;
+        }
+
+        validationCache = ComputeValidation();
+        validationVersion = SettingsChanges.Version;
+        return validationCache;
+    }
 
     private List<List<string>> ComputeValidation()
     {
@@ -279,8 +231,6 @@ public class KindPrioritySettings : IPresettable
     public void CopyAt(bool male, bool adult, int index) => ruleSets[(male, adult)].CopyAt(index);
 
     public void ChangeVariant(bool male, bool adult, int index) => ruleSets[(male, adult)].ChangeVariant(index);
-
-    public IDropdownController? GetExtraDropdown(bool male, bool adult, int index) => ruleSets[(male, adult)].GetExtraDropdown(index);
 
     public void Move(bool male, bool adult, int from, int to) => ruleSets[(male, adult)].Move(from, to);
 
