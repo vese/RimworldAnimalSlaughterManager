@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 using System.Collections.Generic;
 using Verse;
 
@@ -13,13 +12,11 @@ public abstract class BasePriorityRule : IExposable
     /// </summary>
     public virtual bool HasNullDef { get; } = false;
 
-    /// <summary>Width the rule's extra row controls need after the label (0 = none).</summary>
-    public virtual float ExtraControlsWidth => 0f;
-
-    /// <summary>Draws the rule's extra controls in the zone after the label. Content changes
-    /// must go through <paramref name="notifyChanged"/> so the owning settings invalidate
-    /// their caches and raise SettingsChanges.</summary>
-    public virtual void DrawExtraControls(Rect zone, Action notifyChanged) { }
+    /// <summary>The rule's extra row dropdown: current value, options with their setters. Null
+    /// when the rule has none. Content changes must go through <paramref name="notifyChanged"/>
+    /// so the owning settings invalidate their caches and raise SettingsChanges. The rule only
+    /// supplies the data — the list tab draws the dropdown.</summary>
+    public virtual DropdownControl? GetExtraDropdown(Action notifyChanged) => null;
 
     public abstract string Label { get; }
     public abstract BasePriorityRule Clone();

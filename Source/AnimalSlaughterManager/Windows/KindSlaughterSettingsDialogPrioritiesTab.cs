@@ -276,9 +276,10 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         left += UIConstants.GapX;
 
         var condition = list[index];
+        var extraDropdown = condition.GetExtraDropdown(() => settings.prioritySettings.NotifyRuleChanged(male, adult, index));
 
-        var extrasWidth = condition.ExtraControlsWidth > 0
-            ? UIConstants.GapX + condition.ExtraControlsWidth + UIConstants.GapX + UIConstants.IconSize
+        var extrasWidth = extraDropdown != null
+            ? UIConstants.GapX + extraDropdown.Width + UIConstants.GapX + UIConstants.IconSize
             : 0f;
 
         var labelWidth = row.width - UIConstants.IconSize - UIConstants.IconSize - UIConstants.IconSize - extrasWidth;
@@ -313,14 +314,13 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
         TooltipHandler.TipRegion(labelButtonRect, ASMKeys.CondToggleTip.Translate());
 
-        if (condition.ExtraControlsWidth > 0)
+        if (extraDropdown != null)
         {
             var controlsLeft = labelButtonRect.xMax + UIConstants.GapX;
-            condition.DrawExtraControls(new Rect(controlsLeft, top, condition.ExtraControlsWidth, buttonHeight),
-                () => settings.prioritySettings.NotifyRuleChanged(male, adult, index));
+            Dropdown.Draw(controlsLeft, top, extraDropdown);
 
             var copyRect = new Rect(
-                controlsLeft + condition.ExtraControlsWidth + UIConstants.GapX,
+                controlsLeft + extraDropdown.Width + UIConstants.GapX,
                 row.y + (row.height - UIConstants.IconSize) / 2f,
                 UIConstants.IconSize,
                 UIConstants.IconSize);

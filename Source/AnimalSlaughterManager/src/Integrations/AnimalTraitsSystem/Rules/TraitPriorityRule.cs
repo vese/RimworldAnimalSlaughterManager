@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
-using UnityEngine;
 using Verse;
 
 namespace ASM;
@@ -14,13 +14,13 @@ public class TraitPriorityRule : BasePriorityRule, ICoversRule<TraitPriorityRule
 
     public override bool HasNullDef => trait == null;
 
-    public override float ExtraControlsWidth => trait != null ? UIConstants.ButtonMinWidth : 0f;
-
-    public override void DrawExtraControls(Rect zone, Action notifyChanged)
+    public override DropdownControl? GetExtraDropdown(Action notifyChanged) => trait == null ? null : new DropdownControl
     {
-        TraitInheritabilityDropdown.Draw(zone.x, zone.y, zone.width, inheritability,
-            value => { inheritability = value; notifyChanged(); });
-    }
+        CurrentLabel = inheritability.Translate(),
+        Options = Enum.GetValues(typeof(TraitInheritability))
+            .Cast<TraitInheritability>()
+            .Select(value => new FloatMenuOption(value.Translate(), () => { inheritability = value; notifyChanged(); }))
+    };
 
     public override string Label => (has ? ASMKeys.CondHas : ASMKeys.CondMissing).Translate(DefName(trait));
 
