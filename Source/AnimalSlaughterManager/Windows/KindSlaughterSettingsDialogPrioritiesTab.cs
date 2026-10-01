@@ -278,12 +278,10 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         var condition = list[index];
         var extraDropdown = condition.GetExtraDropdown(() => settings.prioritySettings.NotifyRuleChanged(male, adult, index));
 
-        var extrasWidth = extraDropdown != null
-            ? UIConstants.GapX + extraDropdown.Width + UIConstants.GapX + UIConstants.IconSize
-            : 0f;
+        // Right-side icon group: copy, warning, remove; the extra dropdown sits after the label.
+        var extrasWidth = extraDropdown != null ? UIConstants.GapX + extraDropdown.Width : 0f;
 
-
-        var labelWidth = row.width - UIConstants.IconSize - UIConstants.IconSize - UIConstants.IconSize - extrasWidth;
+        var labelWidth = row.width - UIConstants.IconSize - UIConstants.IconSize - UIConstants.IconSize - UIConstants.IconSize - extrasWidth;
 
         Text.Anchor = TextAnchor.MiddleLeft;
         GUI.color = Color.white;
@@ -317,20 +315,20 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
         if (extraDropdown != null)
         {
-            var controlsLeft = labelButtonRect.xMax + UIConstants.GapX;
-            extraDropdown.Draw(controlsLeft, top);
+            extraDropdown.Draw(labelButtonRect.xMax + UIConstants.GapX, top);
+        }
 
-            var copyRect = new Rect(
-                controlsLeft + extraDropdown.Width + UIConstants.GapX,
-                row.y + (row.height - UIConstants.IconSize) / 2f,
-                UIConstants.IconSize,
-                UIConstants.IconSize);
-            TooltipHandler.TipRegion(copyRect, ASMKeys.Copy.Translate());
+        // Row-copy button — any rule can be duplicated.
+        var copyRect = new Rect(
+            row.xMax - UIConstants.GapX - UIConstants.IconSize - UIConstants.IconSize - UIConstants.IconSize - UIConstants.GapX,
+            row.y + (row.height - UIConstants.IconSize) / 2f,
+            UIConstants.IconSize,
+            UIConstants.IconSize);
+        TooltipHandler.TipRegion(copyRect, ASMKeys.Copy.Translate());
 
-            if (Widgets.ButtonImage(copyRect, TexButton.Copy))
-            {
-                settings.prioritySettings.CopyAt(male, adult, index);
-            }
+        if (Widgets.ButtonImage(copyRect, TexButton.Copy))
+        {
+            settings.prioritySettings.CopyAt(male, adult, index);
         }
 
         // Warning icon for problematic conditions.
