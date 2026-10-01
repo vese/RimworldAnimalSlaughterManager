@@ -452,7 +452,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         if (AnimalTraitsAccess.HasAvailableTraits)
         {
             options.Add(new FloatMenuOption(ASMKeys.CondAddTrait.Translate(),
-                () => Find.WindowStack.Add(new Dialog_TraitPicker(picked =>
+                () => Find.WindowStack.Add(new Dialog_TraitFlagPicker(picked =>
                 {
                     // TODO: 1 option for 1 trait def
                     foreach ((HediffDef def, bool has) in picked)

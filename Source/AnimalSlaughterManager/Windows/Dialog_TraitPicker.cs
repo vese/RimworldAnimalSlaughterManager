@@ -8,20 +8,16 @@ using Verse;
 namespace ASM;
 
 /// <summary>
-/// Animal Traits System trait picker: a sortable table (good/bad + one column per stat/
-/// capacity modifier). Multi-select traits to add several at once — click a row's checkbox
-/// and drag across rows to paint the same state on several traits (like the Pets tab).
-///
-/// A search field at the top (magnifier + half-width input + clear ✕) filters the table by
-/// trait name. The header is two rows: the column name on top, and below it a sort button, a
-/// drag handle (reorder the column) and a hide button. Columns can thus be reordered by
-/// dragging and shown/hidden by clicking ✕.
+/// The shared Animal Traits System trait table: sortable (good/bad + one column per stat/
+/// capacity modifier), searchable, with drag-paint row selection (like the Pets tab), and
+/// reorderable/hideable columns (drag the header handle, ✕ to hide).
+/// Subclasses define the check column and what "Add selected" does.
 /// </summary>
-public class Dialog_TraitPicker : Window
+public abstract class Dialog_TraitTable : Window
 {
-    private enum ColKind { Name, Type, Stat, Cap }
+    protected enum ColKind { Name, Type, Stat, Cap }
 
-    private class Col
+    protected class Col
     {
         public ColKind kind;
         public StatDef stat;
@@ -31,7 +27,7 @@ public class Dialog_TraitPicker : Window
         public string key;
     }
 
-    private class Row
+    protected class Row
     {
         public HediffDef def;
         public bool isBad;
@@ -41,26 +37,8 @@ public class Dialog_TraitPicker : Window
         public Dictionary<PawnCapacityDef, string> capStrings = new Dictionary<PawnCapacityDef, string>();
     }
 
-    private readonly Action<List<HediffDef>> onPicked;
-    private readonly Action<List<(HediffDef, bool)>>? onPickedFlag;
-    private readonly bool twoButtonMode;
-    private readonly Dictionary<HediffDef, bool> selFlags = new Dictionary<HediffDef, bool>();
-    private readonly List<Row> rows;
-    private readonly List<Col> columns = new List<Col>();
-    private readonly HashSet<string> hidden = new HashSet<string>();
-    private readonly HashSet<HediffDef> selected = new HashSet<HediffDef>();
-    private int sortIndex = 0;
-    private bool sortAsc = true;
-    private int colGroup = -1;
-    private Vector2 scroll;
-    private string searchBuffer = "";
+    protected const float NameW = 280f;
 
-    // Drag-paint selection state (shared across rows like the vanilla animal-tab checkboxes).
-    private bool paintMode;
-    private bool paintValue;
-
-    private const float CheckW = 30f;
-    private const float NameW = 280f;
     private const float TypeW = 70f;
     private const float ModW = 90f;
     private const float HeaderTopH = 22f;
@@ -75,11 +53,24 @@ public class Dialog_TraitPicker : Window
     private static readonly Color RowAltTint = new Color(1f, 1f, 1f, 0.45f);
     private static readonly Color DarkPanelBg = new Color(0.16f, 0.16f, 0.16f, 0.97f);
 
+    private readonly List<Row> rows;
+    private readonly List<Col> columns = new List<Col>();
+    private readonly HashSet<string> hidden = new HashSet<string>();
+    protected readonly HashSet<HediffDef> selected = new HashSet<HediffDef>();
+    private int sortIndex = 0;
+    private bool sortAsc = true;
+    private int colGroup = -1;
+    private Vector2 scroll;
+    private string searchBuffer = "";
+
+    // Drag-paint selection state (shared across rows like the vanilla animal-tab checkboxes).
+    protected bool paintMode;
+    protected bool paintValue;
+
     public override Vector2 InitialSize => new Vector2(1120f, 640f);
 
-    public Dialog_TraitPicker(Action<List<HediffDef>> onPicked)
+    protected Dialog_TraitTable()
     {
-        this.onPicked = onPicked;
         doCloseX = true;
         // Not draggable: a draggable window's GUI.DragWindow() grabs any unclaimed press, so
         // dragging a column would move the window instead. Non-draggable lets column reorder
@@ -100,12 +91,17 @@ public class Dialog_TraitPicker : Window
             columns.Add(new Col { kind = ColKind.Cap, cap = c, width = ModW, header = c.LabelCap, key = c.defName });
     }
 
-    // Two-button constructor for condition lists: each trait has a green ✓ (has) and red ✗ (missing).
-    public Dialog_TraitPicker(Action<List<(HediffDef, bool)>> onPickedFlag) : this((List<HediffDef> _) => { })
-    {
-        this.onPickedFlag = onPickedFlag;
-        twoButtonMode = true;
-    }
+    /// <summary>Width of the check column in front of the Name column.</summary>
+    protected abstract float CheckColumnWidth { get; }
+
+    /// <summary>Draw the check cell of a row and handle its click/drag-paint input.</summary>
+    protected abstract void DrawRowChecks(Rect row, Row r);
+
+    /// <summary>Called when "Add selected" is pressed with a non-empty selection.</summary>
+    protected abstract void Confirm();
+
+    /// <summary>Optional icons in the header's check-column area (e.g. the ✓/✗ pair).</summary>
+    protected virtual void DrawCheckHeaderIcons(Rect r) { }
 
     private static Row MakeRow(HediffDef def)
     {
@@ -167,8 +163,7 @@ public class Dialog_TraitPicker : Window
         float tableTop = searchY + searchH + searchGap;
 
         var vis = VisibleColumns;
-        float effectiveCheckW = twoButtonMode ? 44f : CheckW;
-        float tableW = effectiveCheckW + vis.Sum(c => c.width);
+        float tableW = CheckColumnWidth + vis.Sum(c => c.width);
         var sorted = SortedRows();
         string sf = (searchBuffer ?? "").Trim();
         var visibleRows = sf.NullOrEmpty() ? sorted : sorted.Where(r => r.def.LabelCap.ToString().IndexOf(sf, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
@@ -178,8 +173,7 @@ public class Dialog_TraitPicker : Window
         Widgets.BeginScrollView(outRect, ref scroll, view);
 
         DrawHeader(new Rect(view.x, view.y, view.width, HeaderH), vis);
-        if (twoButtonMode)
-            DrawTwoButtonHeaderIcons(new Rect(view.x, view.y, view.width, HeaderH));
+        DrawCheckHeaderIcons(new Rect(view.x, view.y, view.width, HeaderH));
 
         float cy = view.y + HeaderH;
         for (int i = 0; i < visibleRows.Count; i++)
@@ -200,10 +194,7 @@ public class Dialog_TraitPicker : Window
         var addBtn = new Rect(inRect.x, by, 220f, 30f);
         if (Widgets.ButtonText(addBtn, ASMKeys.AddSelected.Translate(selected.Count), active: any) && any)
         {
-            if (twoButtonMode)
-                onPickedFlag?.Invoke(selected.Select(d => (d, selFlags[d])).ToList());
-            else
-                onPicked?.Invoke(selected.ToList());
+            Confirm();
             Close();
         }
         if (Widgets.ButtonText(new Rect(addBtn.xMax + 8f, by, 180f, 30f), ASMKeys.ShowAllColumns.Translate()))
@@ -227,20 +218,6 @@ public class Dialog_TraitPicker : Window
         GUI.DragWindow(new Rect(inRect.x, inRect.yMax - 40f, inRect.width, 40f)); // bottom bar (below table)
     }
 
-    // In two-button mode, draw colored column indicators (green ✓, red ✗) in the checkbox area.
-    private void DrawTwoButtonHeaderIcons(Rect r)
-    {
-        Text.Anchor = TextAnchor.MiddleCenter;
-        Text.Font = GameFont.Tiny;
-        GUI.color = Color.green;
-        Widgets.Label(new Rect(r.x, r.y, 22f, HeaderTopH), "✓");
-        GUI.color = Color.red;
-        Widgets.Label(new Rect(r.x + 22f, r.y, 22f, HeaderTopH), "✗");
-        GUI.color = Color.white;
-        Text.Anchor = TextAnchor.UpperLeft;
-        Text.Font = GameFont.Small;
-    }
-
     private void DrawHeader(Rect r, List<Col> vis)
     {
         // Only non-Name columns are reorderable; the Name column stays pinned first.
@@ -254,7 +231,7 @@ public class Dialog_TraitPicker : Window
         // Top row: clickable column names (click = sort). Truncated; the hovered one is redrawn
         // full (overflowing onto the columns to the right) at the end so it sits on top.
         var topCells = new List<(Rect rect, Col col, int idx)>();
-        float x = r.x + (twoButtonMode ? 44f : CheckW);
+        float x = r.x + CheckColumnWidth;
         foreach (var col in vis)
         {
             int colIdx = columns.IndexOf(col);
@@ -275,7 +252,7 @@ public class Dialog_TraitPicker : Window
         }
 
         // Sub row: Name = sort button only; others = sort button + drag handle + hide button.
-        x = r.x + (twoButtonMode ? 44f : CheckW);
+        x = r.x + CheckColumnWidth;
         for (int i = 0; i < vis.Count; i++)
         {
             var col = vis[i];
@@ -328,7 +305,7 @@ public class Dialog_TraitPicker : Window
 
         // Gray gridlines between columns, between the name row and the control row, and under the header.
         GUI.color = Color.gray;
-        x = r.x + (twoButtonMode ? 44f : CheckW);
+        x = r.x + CheckColumnWidth;
         foreach (var col in vis)
         {
             Widgets.DrawLineVertical(x, r.y, r.height);
@@ -386,66 +363,9 @@ public class Dialog_TraitPicker : Window
 
     private void DrawRow(Rect row, Row r, List<Col> vis)
     {
-        if (twoButtonMode)
-        {
-            // Two paint zones: left = has (green), right = missing (red). Drag across to paint.
-            Rect hasZone = new Rect(row.x, row.y, 22f, row.height);
-            Rect missZone = new Rect(row.x + 22f, row.y, 22f, row.height);
-            bool isHas = selected.Contains(r.def) && selFlags.ContainsKey(r.def) && selFlags[r.def];
-            bool isMissing = selected.Contains(r.def) && selFlags.ContainsKey(r.def) && !selFlags[r.def];
+        DrawRowChecks(row, r);
 
-            if (Mouse.IsOver(hasZone) || Mouse.IsOver(missZone))
-            {
-                bool overHas = Mouse.IsOver(hasZone);
-                if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
-                {
-                    paintMode = true; paintValue = overHas;
-                    selected.Add(r.def); selFlags[r.def] = overHas; Event.current.Use();
-                }
-                else if (Event.current.type == EventType.MouseDrag && paintMode)
-                {
-                    if (overHas != paintValue) paintValue = overHas;
-                    selected.Add(r.def); selFlags[r.def] = overHas;
-                }
-            }
-
-            // Vanilla CheckboxDraw — no color tint, native rendering.
-            float cbY = row.y + (row.height - 18f) / 2f;
-            Rect hasRect = new Rect(row.x + 2f, cbY, 18f, 18f);
-            Rect missRect = new Rect(row.x + 22f, cbY, 18f, 18f);
-            TooltipHandler.TipRegion(hasRect, ASMKeys.CondHasTip.Translate());
-            TooltipHandler.TipRegion(missRect, ASMKeys.CondMissingTip.Translate());
-            Widgets.CheckboxDraw(hasRect.x, hasRect.y, isHas, !isHas, 18f);
-            Widgets.CheckboxDraw(missRect.x, missRect.y, isMissing, !isMissing, 18f);
-        }
-        else
-        {
-            // Paint selection: click + drag across the checkbox/name zone toggles rows together.
-            Rect paintZone = new Rect(row.x, row.y, CheckW + NameW, row.height);
-            bool value = selected.Contains(r.def);
-            if (Mouse.IsOver(paintZone))
-            {
-                if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
-                {
-                    paintMode = true;
-                    paintValue = !value;
-                    value = paintValue;
-                    SetSel(r.def, value);
-                    Event.current.Use();
-                }
-                else if (Event.current.type == EventType.MouseDrag && paintMode)
-                {
-                    if (value != paintValue) { value = paintValue; SetSel(r.def, value); }
-                }
-            }
-
-            // Draw-only checkbox: ALL input is handled by the paint logic above. Using Widgets.Checkbox
-            // here would double-toggle a single click (its own click handler reverts the paint toggle).
-            Rect cb = new Rect(row.x + 4f, row.y + (row.height - 24f) / 2f, 24f, 24f);
-            Widgets.CheckboxDraw(cb.x, cb.y, value, false, 24f);
-        }
-
-        float x = row.x + (twoButtonMode ? 44f : CheckW);
+        float x = row.x + CheckColumnWidth;
         foreach (var col in vis)
         {
             Rect cell = new Rect(x, row.y, col.width, row.height);
@@ -454,23 +374,9 @@ public class Dialog_TraitPicker : Window
         }
     }
 
-    private void SetSel(HediffDef d, bool on)
+    protected void SetSel(HediffDef d, bool on)
     {
         if (on) selected.Add(d); else selected.Remove(d);
-    }
-
-    private void ToggleSelFlag(HediffDef d, bool flag)
-    {
-        if (selected.Contains(d) && selFlags.ContainsKey(d) && selFlags[d] == flag)
-        {
-            selected.Remove(d);
-            selFlags.Remove(d);
-        }
-        else
-        {
-            selected.Add(d);
-            selFlags[d] = flag;
-        }
     }
 
     private static void DrawCell(Rect cell, Row r, Col col)
@@ -544,4 +450,48 @@ public class Dialog_TraitPicker : Window
         }
         return sortAsc ? ordered.ToList() : ordered.Reverse().ToList();
     }
+}
+
+/// <summary>Single-select trait picker: pick traits, "Add selected" hands their defs over.</summary>
+public class Dialog_TraitPicker : Dialog_TraitTable
+{
+    private const float CheckW = 30f;
+
+    private readonly Action<List<HediffDef>> onPicked;
+
+    public Dialog_TraitPicker(Action<List<HediffDef>> onPicked)
+    {
+        this.onPicked = onPicked;
+    }
+
+    protected override float CheckColumnWidth => CheckW;
+
+    protected override void DrawRowChecks(Rect row, Row r)
+    {
+        // Paint selection: click + drag across the checkbox/name zone toggles rows together.
+        Rect paintZone = new Rect(row.x, row.y, CheckW + NameW, row.height);
+        bool value = selected.Contains(r.def);
+        if (Mouse.IsOver(paintZone))
+        {
+            if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
+            {
+                paintMode = true;
+                paintValue = !value;
+                value = paintValue;
+                SetSel(r.def, value);
+                Event.current.Use();
+            }
+            else if (Event.current.type == EventType.MouseDrag && paintMode)
+            {
+                if (value != paintValue) { value = paintValue; SetSel(r.def, value); }
+            }
+        }
+
+        // Draw-only checkbox: ALL input is handled by the paint logic above. Using Widgets.Checkbox
+        // here would double-toggle a single click (its own click handler reverts the paint toggle).
+        Rect cb = new Rect(row.x + 4f, row.y + (row.height - 24f) / 2f, 24f, 24f);
+        Widgets.CheckboxDraw(cb.x, cb.y, value, false, 24f);
+    }
+
+    protected override void Confirm() => onPicked(selected.ToList());
 }
