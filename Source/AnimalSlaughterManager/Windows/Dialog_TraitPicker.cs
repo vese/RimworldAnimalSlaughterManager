@@ -42,7 +42,7 @@ public class Dialog_TraitPicker : Window
     }
 
     private readonly Action<List<HediffDef>> onPicked;
-    private readonly Action<List<(HediffDef, bool)>>? onPickedFlag;
+    private readonly Action<List<(HediffDef, bool)>> onPickedFlag = _ => { };
     private readonly bool twoButtonMode;
     private readonly Dictionary<HediffDef, bool> selFlags = new Dictionary<HediffDef, bool>();
     private readonly List<Row> rows;
@@ -201,7 +201,7 @@ public class Dialog_TraitPicker : Window
         if (Widgets.ButtonText(addBtn, ASMKeys.AddSelected.Translate(selected.Count), active: any) && any)
         {
             if (twoButtonMode)
-                onPickedFlag?.Invoke(selected.Select(d => (d, selFlags[d])).ToList());
+                onPickedFlag.Invoke(selected.Select(d => (d, selFlags[d])).ToList());
             else
                 onPicked?.Invoke(selected.ToList());
             Close();

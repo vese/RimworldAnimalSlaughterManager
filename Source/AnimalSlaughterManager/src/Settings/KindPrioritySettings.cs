@@ -229,9 +229,9 @@ public class KindPrioritySettings : IPresettable
 
     public void RemoveAt(bool male, bool adult, int index) => ruleSets[(male, adult)].RemoveAt(index);
 
-    public void ChangeVariant(bool male, bool adult, int index) => ruleSets[(male, adult)].ChangeVariant(index);
-
     public void CopyAt(bool male, bool adult, int index) => ruleSets[(male, adult)].CopyAt(index);
+
+    public void ChangeVariant(bool male, bool adult, int index) => ruleSets[(male, adult)].ChangeVariant(index);
 
     public void Move(bool male, bool adult, int from, int to) => ruleSets[(male, adult)].Move(from, to);
 
