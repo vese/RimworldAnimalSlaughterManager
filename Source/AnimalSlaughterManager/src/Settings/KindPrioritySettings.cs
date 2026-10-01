@@ -67,17 +67,15 @@ public class PriorityRuleSet
         InvalidateValidationCache();
     }
 
-    /// <summary>The rule changed its own content (via its extra controls): drop the validation
-    /// cache and let listeners recompute.</summary>
-    public void NotifyRuleChanged(int index)
+    /// <summary>The rule's extra dropdown, with changes wired to drop this set's validation
+    /// cache and raise SettingsChanges. The list tab only draws the result.</summary>
+    public IDropdownController? GetExtraDropdown(int index)
     {
-        if (index < 0 || index >= rules.Count)
+        return rules[index].GetExtraDropdown(() =>
         {
-            return;
-        }
-
-        InvalidateValidationCache();
-        SettingsChanges.Raise();
+            InvalidateValidationCache();
+            SettingsChanges.Raise();
+        });
     }
 
     public void CopyAt(int index)
@@ -246,7 +244,7 @@ public class KindPrioritySettings : IPresettable
 
     public void ChangeVariant(bool male, bool adult, int index) => ruleSets[(male, adult)].ChangeVariant(index);
 
-    public void NotifyRuleChanged(bool male, bool adult, int index) => ruleSets[(male, adult)].NotifyRuleChanged(index);
+    public IDropdownController? GetExtraDropdown(bool male, bool adult, int index) => ruleSets[(male, adult)].GetExtraDropdown(index);
 
     public void Move(bool male, bool adult, int from, int to) => ruleSets[(male, adult)].Move(from, to);
 

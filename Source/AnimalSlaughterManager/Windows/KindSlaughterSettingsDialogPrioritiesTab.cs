@@ -276,7 +276,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         left += UIConstants.GapX;
 
         var condition = list[index];
-        var extraDropdown = condition.GetExtraDropdown(() => settings.prioritySettings.NotifyRuleChanged(male, adult, index));
+        var extraDropdown = settings.prioritySettings.GetExtraDropdown(male, adult, index);
 
         // Right-side icon group: copy, warning, remove; the extra dropdown sits after the label.
         var extrasWidth = extraDropdown != null ? UIConstants.GapX + extraDropdown.Width : 0f;
