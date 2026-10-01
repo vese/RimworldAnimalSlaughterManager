@@ -70,6 +70,7 @@ public class PriorityRuleSet
     public void CopyAt(int index)
     {
         rules.Insert(index + 1, rules[index].Clone());
+        InvalidateValidationCache();
         SettingsChanges.Raise();
     }
 
