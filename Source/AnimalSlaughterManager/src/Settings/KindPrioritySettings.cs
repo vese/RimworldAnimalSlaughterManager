@@ -67,14 +67,17 @@ public class PriorityRuleSet
         InvalidateValidationCache();
     }
 
-    public void SetInheritability(int index, TraitInheritability value)
+    /// <summary>The rule changed its own content (via its extra controls): drop the validation
+    /// cache and let listeners recompute.</summary>
+    public void NotifyRuleChanged(int index)
     {
-        if (rules[index] is TraitPriorityRule trait)
+        if (index < 0 || index >= rules.Count)
         {
-            trait.inheritability = value;
-            InvalidateValidationCache();
-            SettingsChanges.Raise();
+            return;
         }
+
+        InvalidateValidationCache();
+        SettingsChanges.Raise();
     }
 
     public void CopyAt(int index)
@@ -243,7 +246,7 @@ public class KindPrioritySettings : IPresettable
 
     public void ChangeVariant(bool male, bool adult, int index) => ruleSets[(male, adult)].ChangeVariant(index);
 
-    public void SetInheritability(bool male, bool adult, int index, TraitInheritability value) => ruleSets[(male, adult)].SetInheritability(index, value);
+    public void NotifyRuleChanged(bool male, bool adult, int index) => ruleSets[(male, adult)].NotifyRuleChanged(index);
 
     public void Move(bool male, bool adult, int from, int to) => ruleSets[(male, adult)].Move(from, to);
 

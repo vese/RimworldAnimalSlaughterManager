@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using System.Collections.Generic;
 using Verse;
 
@@ -12,9 +13,13 @@ public abstract class BasePriorityRule : IExposable
     /// </summary>
     public virtual bool HasNullDef { get; } = false;
 
-    /// <summary>True when the rule's row in the priorities list carries extra controls
-    /// (the trait rule's inheritability dropdown and the row-copy button).</summary>
-    public virtual bool HasExtraControls => false;
+    /// <summary>Width the rule's extra row controls need after the label (0 = none).</summary>
+    public virtual float ExtraControlsWidth => 0f;
+
+    /// <summary>Draws the rule's extra controls in the zone after the label. Content changes
+    /// must go through <paramref name="notifyChanged"/> so the owning settings invalidate
+    /// their caches and raise SettingsChanges.</summary>
+    public virtual void DrawExtraControls(Rect zone, Action notifyChanged) { }
 
     public abstract string Label { get; }
     public abstract BasePriorityRule Clone();
