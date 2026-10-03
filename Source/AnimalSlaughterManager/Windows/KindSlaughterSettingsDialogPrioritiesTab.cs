@@ -276,15 +276,12 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         left += UIConstants.GapX;
 
         var condition = list[index];
+        var extraDropdown = condition.GetExtraDropdown();
 
-        // Trait rows carry extra controls after the label: the inheritability dropdown and
-        // the row-copy button.
-        var hasExtras = condition is TraitPriorityRule { trait: not null };
-        var extrasWidth = hasExtras
-            ? UIConstants.GapX + UIConstants.ButtonMinWidth + UIConstants.GapX + UIConstants.IconSize
-            : 0f;
+        // Right-side icon group: copy, warning, remove; the extra dropdown sits after the label.
+        var extrasWidth = extraDropdown != null ? UIConstants.GapX + extraDropdown.Width : 0f;
 
-        var labelWidth = row.width - UIConstants.IconSize - UIConstants.IconSize - UIConstants.IconSize - extrasWidth;
+        var labelWidth = row.width - UIConstants.IconSize - UIConstants.IconSize - UIConstants.IconSize - UIConstants.IconSize - extrasWidth;
 
         Text.Anchor = TextAnchor.MiddleLeft;
         GUI.color = Color.white;
@@ -316,24 +313,22 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
         TooltipHandler.TipRegion(labelButtonRect, ASMKeys.CondToggleTip.Translate());
 
-        if (hasExtras)
+        if (extraDropdown != null)
         {
-            var traitRule = (TraitPriorityRule)condition;
-            var extrasLeft = labelButtonRect.xMax + UIConstants.GapX;
-            TraitInheritabilityDropdown.Draw(extrasLeft, top, UIConstants.ButtonMinWidth, traitRule.inheritability,
-                value => settings.prioritySettings.SetInheritability(male, adult, index, value));
+            extraDropdown.Draw(labelButtonRect.xMax + UIConstants.GapX, top);
+        }
 
-            var copyRect = new Rect(
-                extrasLeft + UIConstants.ButtonMinWidth + UIConstants.GapX,
-                row.y + (row.height - UIConstants.IconSize) / 2f,
-                UIConstants.IconSize,
-                UIConstants.IconSize);
-            TooltipHandler.TipRegion(copyRect, ASMKeys.Copy.Translate());
+        // Row-copy button — any rule can be duplicated.
+        var copyRect = new Rect(
+            row.xMax - UIConstants.GapX - UIConstants.IconSize - UIConstants.IconSize - UIConstants.IconSize - UIConstants.GapX,
+            row.y + (row.height - UIConstants.IconSize) / 2f,
+            UIConstants.IconSize,
+            UIConstants.IconSize);
+        TooltipHandler.TipRegion(copyRect, ASMKeys.Copy.Translate());
 
-            if (Widgets.ButtonImage(copyRect, TexButton.Copy))
-            {
-                settings.prioritySettings.CopyAt(male, adult, index);
-            }
+        if (Widgets.ButtonImage(copyRect, TexButton.Copy))
+        {
+            settings.prioritySettings.CopyAt(male, adult, index);
         }
 
         // Warning icon for problematic conditions.
@@ -408,7 +403,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         if (AnimalTraitsAccess.HasAvailableTraits)
         {
             options.Add(new FloatMenuOption(ASMKeys.CondAddTrait.Translate(),
-                () => Find.WindowStack.Add(new Dialog_TraitPicker(picked =>
+                () => Find.WindowStack.Add(new Dialog_TraitFlagPicker(picked =>
                 {
                     // TODO: 1 option for 1 trait def
                     foreach ((HediffDef def, bool has) in picked)
