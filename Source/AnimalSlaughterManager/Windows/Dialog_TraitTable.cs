@@ -17,20 +17,20 @@ public abstract class Dialog_TraitTable : Window
 {
     protected enum ColKind { Name, Type, Stat, Cap }
 
-    protected class Col
+    protected class Col(ColKind kind, float width, string header, string key)
     {
-        public ColKind kind;
-        public StatDef stat;
-        public PawnCapacityDef cap;
-        public float width;
-        public string header;
-        public string key;
+        public ColKind kind = kind;
+        public StatDef? stat;
+        public PawnCapacityDef? cap;
+        public float width = width;
+        public string header = header;
+        public string key = key;
     }
 
-    protected class Row
+    protected class Row(HediffDef def)
     {
-        public HediffDef def;
-        public bool isBad;
+        public HediffDef def = def;
+        public bool isBad = def.isBad;
         public Dictionary<StatDef, float> statValues = new Dictionary<StatDef, float>();
         public Dictionary<StatDef, string> statStrings = new Dictionary<StatDef, string>();
         public Dictionary<PawnCapacityDef, float> capValues = new Dictionary<PawnCapacityDef, float>();
@@ -88,12 +88,12 @@ public abstract class Dialog_TraitTable : Window
         var statCols = rows.SelectMany(r => r.statValues.Keys).Distinct().OrderBy(s => s.label).ToList();
         var capCols = rows.SelectMany(r => r.capValues.Keys).Distinct().OrderBy(c => c.label).ToList();
 
-        columns.Add(new Col { kind = ColKind.Name, width = NameW, header = ASMKeys.Trait.Translate(), key = "name" });
-        columns.Add(new Col { kind = ColKind.Type, width = TypeW, header = ASMKeys.TypeCol.Translate(), key = "type" });
+        columns.Add(new Col(ColKind.Name, NameW, ASMKeys.Trait.Translate(), "name"));
+        columns.Add(new Col(ColKind.Type, TypeW, ASMKeys.TypeCol.Translate(), "type"));
         foreach (var s in statCols)
-            columns.Add(new Col { kind = ColKind.Stat, stat = s, width = ModW, header = s.LabelCap, key = s.defName });
+            columns.Add(new Col(ColKind.Stat, ModW, s.LabelCap, s.defName) { stat = s });
         foreach (var c in capCols)
-            columns.Add(new Col { kind = ColKind.Cap, cap = c, width = ModW, header = c.LabelCap, key = c.defName });
+            columns.Add(new Col(ColKind.Cap, ModW, c.LabelCap, c.defName) { cap = c });
     }
 
     /// <summary>Width of the leading column the subclass draws in front of the Name column.</summary>
@@ -107,7 +107,7 @@ public abstract class Dialog_TraitTable : Window
 
     private static Row MakeRow(HediffDef def)
     {
-        var r = new Row { def = def, isBad = def.isBad };
+        var r = new Row(def);
         // Aggregate modifiers across ALL stages (not just the first) so multi-stage traits — e.g.
         // from ATS Extended or other AnimalTrait_* mods — show every stat/capacity they affect.
         if (def.stages != null)
@@ -397,7 +397,7 @@ public abstract class Dialog_TraitTable : Window
                 break;
             case ColKind.Stat:
                 Text.Anchor = TextAnchor.MiddleCenter;
-                if (r.statStrings.TryGetValue(col.stat, out string sv))
+                if (col.stat != null && r.statStrings.TryGetValue(col.stat, out string sv))
                 {
                     GUI.color = r.statValues[col.stat] >= 0 ? PositiveColor : NegativeColor;
                     Widgets.Label(cell, sv);
@@ -406,7 +406,7 @@ public abstract class Dialog_TraitTable : Window
                 break;
             case ColKind.Cap:
                 Text.Anchor = TextAnchor.MiddleCenter;
-                if (r.capStrings.TryGetValue(col.cap, out string cv))
+                if (col.cap != null && r.capStrings.TryGetValue(col.cap, out string cv))
                 {
                     GUI.color = r.capValues[col.cap] >= 0 ? PositiveColor : NegativeColor;
                     Widgets.Label(cell, cv);
@@ -434,11 +434,11 @@ public abstract class Dialog_TraitTable : Window
             case ColKind.Type:
                 ordered = rows.OrderBy(r => r.isBad ? 1 : 0);
                 break;
-            case ColKind.Stat:
-                ordered = rows.OrderBy(r => r.statValues.TryGetValue(col.stat, out float v) ? v : 0f);
+            case ColKind.Stat when col.stat is StatDef stat:
+                ordered = rows.OrderBy(r => r.statValues.TryGetValue(stat, out float v) ? v : 0f);
                 break;
-            case ColKind.Cap:
-                ordered = rows.OrderBy(r => r.capValues.TryGetValue(col.cap, out float v) ? v : 0f);
+            case ColKind.Cap when col.cap is PawnCapacityDef cap:
+                ordered = rows.OrderBy(r => r.capValues.TryGetValue(cap, out float v) ? v : 0f);
                 break;
             default:
                 ordered = rows.OrderBy(r => r.def.LabelCap.ToString());
