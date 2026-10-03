@@ -156,5 +156,6 @@
   <ASM.TipKindToList>Kind preset. Only the '{0}' list is applied.</ASM.TipKindToList>
   <ASM.ConfirmDeleteList>Delete list preset '{0}'?</ASM.ConfirmDeleteList>
   <ASM.ConfirmDeleteKind>Delete kind preset '{0}'?</ASM.ConfirmDeleteKind>
-  <ASM.PresetNoSlice>This preset has no settings for {0}.</ASM.PresetNoSlice>
+  <ASM.PresetNoSlice>This preset has no rule list for {0}.</ASM.PresetNoSlice>
+  <ASM.PresetApplyFailed>Failed to apply preset {0}.</ASM.PresetApplyFailed>
 </LanguageData>

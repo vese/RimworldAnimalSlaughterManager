@@ -8,73 +8,56 @@ public class PriorityRuleSet
 {
     public List<BasePriorityRule> rules = [];
 
+    // The validation cache is tagged with the SettingsChanges version it was computed at: any
+    // Raise() (ours or any other settings') moves the version and the next read recomputes —
+    // no per-owner subscriptions needed.
     private List<List<string>>? validationCache;
-    private int problemCountCache = -1;
+    private int validationVersion = -1;
 
     public bool HasRules => rules != null && rules.Count > 0;
 
-    private void InvalidateValidationCache()
-    {
-        validationCache = null;
-        problemCountCache = -1;
-    }
+    private bool CacheValid => validationCache != null && validationVersion == SettingsChanges.Version;
 
-    /// <summary>Number of rules with validation problems in this bucket. Cached with the validation itself.</summary>
+    /// <summary>Number of rules with validation problems in this bucket.</summary>
     public int ProblemCount
     {
         get
         {
-            if (problemCountCache < 0)
-            {
-                problemCountCache = 0;
+            var count = 0;
 
-                foreach (var problems in Validate())
+            foreach (var problems in Validate())
+            {
+                if (problems is not null && problems.Count > 0)
                 {
-                    if (problems is not null && problems.Count > 0)
-                    {
-                        problemCountCache++;
-                    }
+                    count++;
                 }
             }
 
-            return problemCountCache;
+            return count;
         }
     }
 
     public void Reset()
     {
         rules.Clear();
-        InvalidateValidationCache();
+        validationVersion = -1;
     }
 
     public void Add(BasePriorityRule rule)
     {
         rules.Add(rule);
-        InvalidateValidationCache();
         SettingsChanges.Raise();
     }
 
     public void RemoveAt(int index)
     {
         rules.RemoveAt(index);
-        InvalidateValidationCache();
         SettingsChanges.Raise();
     }
 
     public void ChangeVariant(int index)
     {
         rules[index].ChangeVariant();
-        InvalidateValidationCache();
-    }
-
-    public void SetInheritability(int index, TraitInheritability value)
-    {
-        if (rules[index] is TraitPriorityRule trait)
-        {
-            trait.inheritability = value;
-            InvalidateValidationCache();
-            SettingsChanges.Raise();
-        }
     }
 
     public void CopyAt(int index)
@@ -102,7 +85,6 @@ public class PriorityRuleSet
             rules.Insert(to, rule);
         }
 
-        InvalidateValidationCache();
         SettingsChanges.Raise();
     }
 
@@ -110,14 +92,12 @@ public class PriorityRuleSet
     {
         rules.Clear();
         rules.AddRange(replacement);
-        InvalidateValidationCache();
         SettingsChanges.Raise();
     }
 
     public void Clear()
     {
         rules.Clear();
-        InvalidateValidationCache();
         SettingsChanges.Raise();
     }
 
@@ -137,7 +117,7 @@ public class PriorityRuleSet
             rules.RemoveAll(c => c is null || c.HasNullDef);
         }
 
-        InvalidateValidationCache();
+        validationVersion = -1;
     }
 
     /// <summary>
@@ -145,9 +125,19 @@ public class PriorityRuleSet
     /// accumulate into trait sets (creating-or-updating its set, registering validators); then
     /// every registered validator runs once over the accumulated data. Rules are matched
     /// top-to-down, the first match wins — see SetClosureValidator and DuplicateValidator.
-    /// Cached — recomputed only after a change made through this set's methods.
+    /// Cached against the SettingsChanges version — recomputed lazily after any settings change.
     /// </summary>
-    public List<List<string>> Validate() => validationCache ??= ComputeValidation();
+    public List<List<string>> Validate()
+    {
+        if (CacheValid)
+        {
+            return validationCache!;
+        }
+
+        validationCache = ComputeValidation();
+        validationVersion = SettingsChanges.Version;
+        return validationCache;
+    }
 
     private List<List<string>> ComputeValidation()
     {
@@ -250,8 +240,6 @@ public class KindPrioritySettings : IPresettable
     public void CopyAt(bool male, bool adult, int index) => ruleSets[(male, adult)].CopyAt(index);
 
     public void ChangeVariant(bool male, bool adult, int index) => ruleSets[(male, adult)].ChangeVariant(index);
-
-    public void SetInheritability(bool male, bool adult, int index, TraitInheritability value) => ruleSets[(male, adult)].SetInheritability(index, value);
 
     public void Move(bool male, bool adult, int from, int to) => ruleSets[(male, adult)].Move(from, to);
 

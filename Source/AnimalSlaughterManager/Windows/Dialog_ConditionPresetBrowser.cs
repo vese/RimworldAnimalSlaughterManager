@@ -296,17 +296,22 @@ namespace ASM
                     {
                         var dto = (SlaughterPresetDto)ser.Deserialize(r);
                         KindDto kd = dto.Kinds.FirstOrDefault();
-                        if (kd == null) { Messages.Message(ASMKeys.PresetNoSlice.Translate(""), MessageTypeDefOf.RejectInput, false); return; }
+                        if (kd == null) { Messages.Message(ASMKeys.PresetNoSlice.Translate(BucketLabel(bucket)), MessageTypeDefOf.RejectInput, false); return; }
                         List<PriorityRuleDto> source = bucket == CondBucket.AdultMale ? kd.PrioRulesAdultMale
                             : bucket == CondBucket.YoungMale ? kd.PrioRulesYoungMale
                             : bucket == CondBucket.AdultFemale ? kd.PrioRulesAdultFemale : kd.PrioRulesYoungFemale;
-                        if (source == null || source.Count == 0) { Messages.Message(ASMKeys.PresetNoSlice.Translate(""), MessageTypeDefOf.RejectInput, false); return; }
+                        if (source == null || source.Count == 0) { Messages.Message(ASMKeys.PresetNoSlice.Translate(BucketLabel(bucket)), MessageTypeDefOf.RejectInput, false); return; }
                         prioritySettings.ReplaceAll(male, adult, source.Select(rd => rd.ToRule()).Where(r => r != null).ToList());
                         Messages.Message(ASMKeys.PresetLoaded.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Log.Error($"[ASM] failed to apply preset '{e.name}' from {e.path}: {ex.Message}");
+                    Messages.Message(ASMKeys.PresetApplyFailed.Translate(e.name), MessageTypeDefOf.RejectInput, false);
+                }
             }
         }
+
     }
 }
