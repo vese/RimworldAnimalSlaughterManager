@@ -285,33 +285,20 @@ namespace ASM
                     prioritySettings.ReplaceAll(male, adult, loaded);
                     Messages.Message(ASMKeys.PresetLoaded.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
                 }
+                return;
             }
-            else
-            {
-                // Kind or All preset — extract the matching bucket.
-                try
-                {
-                    var ser = new XmlSerializer(typeof(SlaughterPresetDto));
-                    using (var r = new StreamReader(e.path))
-                    {
-                        var dto = (SlaughterPresetDto)ser.Deserialize(r);
-                        KindDto kd = dto.Kinds.FirstOrDefault();
-                        if (kd == null) { Messages.Message(ASMKeys.PresetNoSlice.Translate(BucketLabel(bucket)), MessageTypeDefOf.RejectInput, false); return; }
-                        List<PriorityRuleDto> source = bucket == CondBucket.AdultMale ? kd.PrioRulesAdultMale
-                            : bucket == CondBucket.YoungMale ? kd.PrioRulesYoungMale
-                            : bucket == CondBucket.AdultFemale ? kd.PrioRulesAdultFemale : kd.PrioRulesYoungFemale;
-                        if (source == null || source.Count == 0) { Messages.Message(ASMKeys.PresetNoSlice.Translate(BucketLabel(bucket)), MessageTypeDefOf.RejectInput, false); return; }
-                        prioritySettings.ReplaceAll(male, adult, source.Select(rd => rd.ToRule()).Where(r => r != null).ToList());
-                        Messages.Message(ASMKeys.PresetLoaded.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error($"[ASM] failed to apply preset '{e.name}' from {e.path}: {ex.Message}");
-                    Messages.Message(ASMKeys.PresetApplyFailed.Translate(e.name), MessageTypeDefOf.RejectInput, false);
-                }
-            }
-        }
 
+            // Kind or All preset — take the matching bucket slice.
+            var rules = PresetIO.ReadKindRules(e, bucket);
+
+            if (rules == null || rules.Count == 0)
+            {
+                Messages.Message(ASMKeys.PresetNoSlice.Translate(BucketLabel(bucket)), MessageTypeDefOf.RejectInput, false);
+                return;
+            }
+
+            prioritySettings.ReplaceAll(male, adult, rules);
+            Messages.Message(ASMKeys.PresetLoaded.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
+        }
     }
 }
