@@ -20,16 +20,16 @@ public abstract class Dialog_TraitTable : Window
     protected class Col
     {
         public ColKind kind;
-        public StatDef stat = null!;
-        public PawnCapacityDef cap = null!;
+        public StatDef? stat;
+        public PawnCapacityDef? cap;
         public float width;
-        public string header = null!;
-        public string key = null!;
+        public required string header;
+        public required string key;
     }
 
     protected class Row
     {
-        public HediffDef def = null!;
+        public required HediffDef def;
         public bool isBad;
         public Dictionary<StatDef, float> statValues = new Dictionary<StatDef, float>();
         public Dictionary<StatDef, string> statStrings = new Dictionary<StatDef, string>();
@@ -397,7 +397,7 @@ public abstract class Dialog_TraitTable : Window
                 break;
             case ColKind.Stat:
                 Text.Anchor = TextAnchor.MiddleCenter;
-                if (r.statStrings.TryGetValue(col.stat, out string sv))
+                if (col.stat != null && r.statStrings.TryGetValue(col.stat, out string sv))
                 {
                     GUI.color = r.statValues[col.stat] >= 0 ? PositiveColor : NegativeColor;
                     Widgets.Label(cell, sv);
@@ -406,7 +406,7 @@ public abstract class Dialog_TraitTable : Window
                 break;
             case ColKind.Cap:
                 Text.Anchor = TextAnchor.MiddleCenter;
-                if (r.capStrings.TryGetValue(col.cap, out string cv))
+                if (col.cap != null && r.capStrings.TryGetValue(col.cap, out string cv))
                 {
                     GUI.color = r.capValues[col.cap] >= 0 ? PositiveColor : NegativeColor;
                     Widgets.Label(cell, cv);
@@ -434,11 +434,11 @@ public abstract class Dialog_TraitTable : Window
             case ColKind.Type:
                 ordered = rows.OrderBy(r => r.isBad ? 1 : 0);
                 break;
-            case ColKind.Stat:
-                ordered = rows.OrderBy(r => r.statValues.TryGetValue(col.stat, out float v) ? v : 0f);
+            case ColKind.Stat when col.stat is StatDef stat:
+                ordered = rows.OrderBy(r => r.statValues.TryGetValue(stat, out float v) ? v : 0f);
                 break;
-            case ColKind.Cap:
-                ordered = rows.OrderBy(r => r.capValues.TryGetValue(col.cap, out float v) ? v : 0f);
+            case ColKind.Cap when col.cap is PawnCapacityDef cap:
+                ordered = rows.OrderBy(r => r.capValues.TryGetValue(cap, out float v) ? v : 0f);
                 break;
             default:
                 ordered = rows.OrderBy(r => r.def.LabelCap.ToString());
