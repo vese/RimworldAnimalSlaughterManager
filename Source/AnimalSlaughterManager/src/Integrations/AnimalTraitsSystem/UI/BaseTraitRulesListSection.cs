@@ -97,7 +97,8 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
         {
             Find.WindowStack.Add(new Dialog_PresetBrowser(comp, PresetScope.List, animalDef, PresetsTitleKey.Translate(animalDef.LabelCap),
                 name => PresetIO.ExportList(name, animalDef, RuleSet),
-                e => PresetIO.ApplyList(e, animalDef, RuleSet)));
+                e => PresetIO.ApplyList(e, animalDef, RuleSet),
+                () => RuleSet.HasRules));
         }
 
         var clearButtonText = ASMKeys.ClearList.Translate();
