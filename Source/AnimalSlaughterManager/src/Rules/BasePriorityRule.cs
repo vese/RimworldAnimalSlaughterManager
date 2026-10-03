@@ -11,7 +11,13 @@ public abstract class BasePriorityRule : IExposable
     /// to resolve on load (def-providing mod disabled). Such entries are no-ops and get pruned.
     /// </summary>
     public virtual bool HasNullDef { get; } = false;
-    public virtual bool HasExtraParameters { get; } = false;
+
+    /// <summary>The rule's extra row dropdown: values, the current one and the setter. Null when
+    /// the rule has none. A setter must raise SettingsChanges after editing the rule (the global
+    /// version invalidates every settings cache); the rule only supplies the data — rendering is
+    /// the widget's business.</summary>
+    public virtual IDropdownController? GetExtraDropdown() => null;
+
     public abstract string Label { get; }
     public abstract BasePriorityRule Clone();
     public abstract void ExposeData();
