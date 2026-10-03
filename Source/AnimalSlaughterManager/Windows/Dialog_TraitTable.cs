@@ -17,20 +17,20 @@ public abstract class Dialog_TraitTable : Window
 {
     protected enum ColKind { Name, Type, Stat, Cap }
 
-    protected class Col
+    protected class Col(ColKind kind, float width, string header, string key)
     {
-        public ColKind kind;
+        public ColKind kind = kind;
         public StatDef? stat;
         public PawnCapacityDef? cap;
-        public float width;
-        public required string header;
-        public required string key;
+        public float width = width;
+        public string header = header;
+        public string key = key;
     }
 
-    protected class Row
+    protected class Row(HediffDef def)
     {
-        public required HediffDef def;
-        public bool isBad;
+        public HediffDef def = def;
+        public bool isBad = def.isBad;
         public Dictionary<StatDef, float> statValues = new Dictionary<StatDef, float>();
         public Dictionary<StatDef, string> statStrings = new Dictionary<StatDef, string>();
         public Dictionary<PawnCapacityDef, float> capValues = new Dictionary<PawnCapacityDef, float>();
@@ -88,12 +88,12 @@ public abstract class Dialog_TraitTable : Window
         var statCols = rows.SelectMany(r => r.statValues.Keys).Distinct().OrderBy(s => s.label).ToList();
         var capCols = rows.SelectMany(r => r.capValues.Keys).Distinct().OrderBy(c => c.label).ToList();
 
-        columns.Add(new Col { kind = ColKind.Name, width = NameW, header = ASMKeys.Trait.Translate(), key = "name" });
-        columns.Add(new Col { kind = ColKind.Type, width = TypeW, header = ASMKeys.TypeCol.Translate(), key = "type" });
+        columns.Add(new Col(ColKind.Name, NameW, ASMKeys.Trait.Translate(), "name"));
+        columns.Add(new Col(ColKind.Type, TypeW, ASMKeys.TypeCol.Translate(), "type"));
         foreach (var s in statCols)
-            columns.Add(new Col { kind = ColKind.Stat, stat = s, width = ModW, header = s.LabelCap, key = s.defName });
+            columns.Add(new Col(ColKind.Stat, ModW, s.LabelCap, s.defName) { stat = s });
         foreach (var c in capCols)
-            columns.Add(new Col { kind = ColKind.Cap, cap = c, width = ModW, header = c.LabelCap, key = c.defName });
+            columns.Add(new Col(ColKind.Cap, ModW, c.LabelCap, c.defName) { cap = c });
     }
 
     /// <summary>Width of the leading column the subclass draws in front of the Name column.</summary>
@@ -107,7 +107,7 @@ public abstract class Dialog_TraitTable : Window
 
     private static Row MakeRow(HediffDef def)
     {
-        var r = new Row { def = def, isBad = def.isBad };
+        var r = new Row(def);
         // Aggregate modifiers across ALL stages (not just the first) so multi-stage traits — e.g.
         // from ATS Extended or other AnimalTrait_* mods — show every stat/capacity they affect.
         if (def.stages != null)
