@@ -104,15 +104,7 @@ public static class SlaughterListBuilder
 
         foreach (var pawn in comp.map.mapPawns.SpawnedColonyAnimals)
         {
-            if (slaughter.Contains(pawn))
-            {
-                continue;
-            }
-            if (!AutoSlaughterManager.CanAutoSlaughterNow(pawn))
-            {
-                continue;
-            }
-            if (comp.IsProtected(pawn) || reserved.Contains(pawn))
+            if (slaughter.Contains(pawn) || !EligibleForSlaughter(comp, pawn, reserved))
             {
                 continue;
             }
@@ -123,6 +115,13 @@ public static class SlaughterListBuilder
             }
         }
     }
+
+    // A pawn the custom pipeline may slaughter: passes vanilla's readiness check, is not
+    // individually protected and is not reserved by a keep-trait breeding target.
+    private static bool EligibleForSlaughter(ASM_MapComp comp, Pawn pawn, HashSet<Pawn> reserved) =>
+        AutoSlaughterManager.CanAutoSlaughterNow(pawn)
+        && !comp.IsProtected(pawn)
+        && !reserved.Contains(pawn);
 
     private static void AddForceCullTraits(ASM_MapComp comp, List<Pawn> slaughter, HashSet<Pawn> reserved)
     {
@@ -137,19 +136,7 @@ public static class SlaughterListBuilder
 
             foreach (var pawn in comp.map.mapPawns.SpawnedColonyAnimals)
             {
-                if (pawn.def != kv.Key)
-                {
-                    continue;
-                }
-                if (slaughter.Contains(pawn))
-                {
-                    continue;
-                }
-                if (!AutoSlaughterManager.CanAutoSlaughterNow(pawn))
-                {
-                    continue;
-                }
-                if (comp.IsProtected(pawn) || reserved.Contains(pawn))
+                if (pawn.def != kv.Key || slaughter.Contains(pawn) || !EligibleForSlaughter(comp, pawn, reserved))
                 {
                     continue;
                 }
@@ -196,19 +183,7 @@ public static class SlaughterListBuilder
 
         foreach (var pawn in comp.map.mapPawns.SpawnedColonyAnimals)
         {
-            if (pawn.def != config.animal)
-            {
-                continue;
-            }
-            if (!AutoSlaughterManager.CanAutoSlaughterNow(pawn))
-            {
-                continue;
-            }
-            if (comp.IsProtected(pawn))
-            {
-                continue;
-            }
-            if (reserved.Contains(pawn))
+            if (pawn.def != config.animal || !EligibleForSlaughter(comp, pawn, reserved))
             {
                 continue;
             }
