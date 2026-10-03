@@ -33,7 +33,6 @@
   <ASM.ManageDesc>Open the Animal Slaughter Manager settings (age/sex priority, breeding, cull traits, presets).</ASM.ManageDesc>
   <ASM.ConfigureKind>Configure</ASM.ConfigureKind>
 
-  <ASM.Presets>Presets</ASM.Presets>
   <ASM.SavePreset>Save</ASM.SavePreset>
   <ASM.LoadPreset>Load</ASM.LoadPreset>
   <ASM.DeletePreset>Delete</ASM.DeletePreset>
@@ -78,10 +77,6 @@
   <ASM.CopyConditions>Copy</ASM.CopyConditions>
   <ASM.PasteConditions>Paste</ASM.PasteConditions>
   <ASM.CondPresets>Presets...</ASM.CondPresets>
-  <ASM.CondPresetSave>Save...</ASM.CondPresetSave>
-  <ASM.CondImportKind>From kind</ASM.CondImportKind>
-  <ASM.CondImportAll>From all</ASM.CondImportAll>
-  <ASM.PresetNameTitle>Preset name</ASM.PresetNameTitle>
   <ASM.CondPresetTitle>Priority presets: {0}</ASM.CondPresetTitle>
   <ASM.CondPresetCrossBucket>Saved from bucket: {0}</ASM.CondPresetCrossBucket>
   <ASM.CondToggleTip>Click to toggle has/missing</ASM.CondToggleTip>
@@ -93,7 +88,6 @@
   <ASM.ValidationRedundant>Redundant rule: every animal it could pick is already taken by rules {0}</ASM.ValidationRedundant>
   <ASM.ValidationExhausts>This rule closes the last open combination — every rule below it can never fire</ASM.ValidationExhausts>
   <ASM.CondProblemTip>Conflict or duplicate: {0}</ASM.CondProblemTip>
-  <ASM.CondConflictTip>{0} conflicts with: {1}</ASM.CondConflictTip>
   <ASM.PriorityHelp>Conditions in the list set the slaughter order top-to-bottom: animals matching conditions higher up are slaughtered last, lower down — first. Remaining animals are sorted by age from the settings above.</ASM.PriorityHelp>
   <ASM.AlertConditionLabel>Slaughter priority conflicts</ASM.AlertConditionLabel>
   <ASM.SettingLogging>Verbose logging</ASM.SettingLogging>
@@ -134,18 +128,10 @@
   <ASM.KindPresets>Kind presets...</ASM.KindPresets>
   <ASM.TraitListPresets>Presets...</ASM.TraitListPresets>
 
-  <ASM.KindPresetsTitle>Kind presets: {0}</ASM.KindPresetsTitle>
   <ASM.PresetTitleAll>Slaughter settings presets</ASM.PresetTitleAll>
   <ASM.PresetTitleKind>Kind settings presets: {0}</ASM.PresetTitleKind>
   <ASM.PresetTitleKeep>Protection presets: {0}</ASM.PresetTitleKeep>
   <ASM.PresetTitleForceCull>Force slaughter presets: {0}</ASM.PresetTitleForceCull>
-  <ASM.PresetTitleCull>Cull presets: {0}</ASM.PresetTitleCull>
-  <ASM.PresetTitleSpare>Spare presets: {0}</ASM.PresetTitleSpare>
-  <ASM.ListPresetsTitle>List presets: {0} ({1})</ASM.ListPresetsTitle>
-  <ASM.ListNameKeep>Breeding</ASM.ListNameKeep>
-  <ASM.ListNameCull>Cull priority</ASM.ListNameCull>
-  <ASM.ListNameSpare>Spare</ASM.ListNameSpare>
-  <ASM.ListNameForceCull>Force cull</ASM.ListNameForceCull>
   <ASM.Clear>Clear</ASM.Clear>
   <ASM.NoPresetsFiltered>No matches</ASM.NoPresetsFiltered>
   <ASM.PresetAllMark>[All]</ASM.PresetAllMark>
@@ -157,5 +143,4 @@
   <ASM.ConfirmDeleteList>Delete list preset '{0}'?</ASM.ConfirmDeleteList>
   <ASM.ConfirmDeleteKind>Delete kind preset '{0}'?</ASM.ConfirmDeleteKind>
   <ASM.PresetNoSlice>This preset has no rule list for {0}.</ASM.PresetNoSlice>
-  <ASM.PresetApplyFailed>Failed to apply preset {0}.</ASM.PresetApplyFailed>
 </LanguageData>

@@ -70,9 +70,6 @@ namespace ASM
         /// <summary>CondBondMissing</summary>
         public const string CondBondMissing = "ASM.CondBondMissing";
 
-        /// <summary>CondConflictTip</summary>
-        public const string CondConflictTip = "ASM.CondConflictTip";
-
         /// <summary>CondDiseaseAnyHas</summary>
         public const string CondDiseaseAnyHas = "ASM.CondDiseaseAnyHas";
 
@@ -87,12 +84,6 @@ namespace ASM
 
         /// <summary>CondHasTip</summary>
         public const string CondHasTip = "ASM.CondHasTip";
-
-        /// <summary>CondImportAll</summary>
-        public const string CondImportAll = "ASM.CondImportAll";
-
-        /// <summary>CondImportKind</summary>
-        public const string CondImportKind = "ASM.CondImportKind";
 
         /// <summary>CondMissing</summary>
         public const string CondMissing = "ASM.CondMissing";
@@ -123,9 +114,6 @@ namespace ASM
 
         /// <summary>CondPresetCrossBucket</summary>
         public const string CondPresetCrossBucket = "ASM.CondPresetCrossBucket";
-
-        /// <summary>CondPresetSave</summary>
-        public const string CondPresetSave = "ASM.CondPresetSave";
 
         /// <summary>CondPresetTitle</summary>
         public const string CondPresetTitle = "ASM.CondPresetTitle";
@@ -253,24 +241,6 @@ namespace ASM
         /// <summary>KindPresets</summary>
         public const string KindPresets = "ASM.KindPresets";
 
-        /// <summary>KindPresetsTitle</summary>
-        public const string KindPresetsTitle = "ASM.KindPresetsTitle";
-
-        /// <summary>ListNameCull</summary>
-        public const string ListNameCull = "ASM.ListNameCull";
-
-        /// <summary>ListNameForceCull</summary>
-        public const string ListNameForceCull = "ASM.ListNameForceCull";
-
-        /// <summary>ListNameKeep</summary>
-        public const string ListNameKeep = "ASM.ListNameKeep";
-
-        /// <summary>ListNameSpare</summary>
-        public const string ListNameSpare = "ASM.ListNameSpare";
-
-        /// <summary>ListPresetsTitle</summary>
-        public const string ListPresetsTitle = "ASM.ListPresetsTitle";
-
         /// <summary>LoadPreset</summary>
         public const string LoadPreset = "ASM.LoadPreset";
 
@@ -316,14 +286,8 @@ namespace ASM
         /// <summary>PresetListMark</summary>
         public const string PresetListMark = "ASM.PresetListMark";
 
-        /// <summary>PresetApplyFailed</summary>
-        public const string PresetApplyFailed = "ASM.PresetApplyFailed";
-
         /// <summary>PresetLoaded</summary>
         public const string PresetLoaded = "ASM.PresetLoaded";
-
-        /// <summary>PresetNameTitle</summary>
-        public const string PresetNameTitle = "ASM.PresetNameTitle";
 
         /// <summary>PresetNoSlice</summary>
         public const string PresetNoSlice = "ASM.PresetNoSlice";
@@ -337,9 +301,6 @@ namespace ASM
         /// <summary>PresetTitleAll</summary>
         public const string PresetTitleAll = "ASM.PresetTitleAll";
 
-        /// <summary>PresetTitleCull</summary>
-        public const string PresetTitleCull = "ASM.PresetTitleCull";
-
         /// <summary>PresetTitleForceCull</summary>
         public const string PresetTitleForceCull = "ASM.PresetTitleForceCull";
 
@@ -348,12 +309,6 @@ namespace ASM
 
         /// <summary>PresetTitleKind</summary>
         public const string PresetTitleKind = "ASM.PresetTitleKind";
-
-        /// <summary>PresetTitleSpare</summary>
-        public const string PresetTitleSpare = "ASM.PresetTitleSpare";
-
-        /// <summary>Presets</summary>
-        public const string Presets = "ASM.Presets";
 
         /// <summary>PriorityHelp</summary>
         public const string PriorityHelp = "ASM.PriorityHelp";
