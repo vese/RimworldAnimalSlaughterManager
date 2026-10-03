@@ -9,6 +9,8 @@ Languages/                     — переводы
 Defs/                          — PawnColumnDef (колонка защиты)
 Textures/                      — иконки (щит, шестерёнка)
 Source/AnimalSlaughterManager/ — исходники (.csproj + src/)
+Docs/                          — Architecture.md (структура и правила зависимостей)
+Specs/                         — Gherkin-спеки поведения (SDD)
 ```
 
 ## Сборка
@@ -47,7 +49,7 @@ ATS (`packageId = luved.animaltraits`), Steam-Workshop ID 3652630316. Исход
 
 ## Animal Slaughter Manager (`namespace ASM`)
 
-Структура `Source/AnimalSlaughterManager/src/` (C#-исходники): `Data/` (модели/энумы), `Comps/` (`ASM_MapComp`, `AnimalTraitsAccess`, `PresetIO`), `Patches/` (Harmony), `Windows/` (диалоги), `Columns/` (колонки вкладки Питомцы), `Alerts/` (Alert для конфликтов).
+Весь код — в `Source/AnimalSlaughterManager/src/`, срезы по фичам (подробно — `Docs/Architecture.md`): `Core/` (ключи, константы, SettingsChanges, общие enums), `Slaughter/` (`ASM_MapComp`, `SlaughterListBuilder`, `PregnancyUtility`, `Patches/`), `Settings/` (модель настроек, `Rules/`, `Validation/`), `Presets/` (`PresetIO`, `Dtos/`), `UI/` (`Windows/`, `Controls/`, `Columns/`, `Alerts/`), `Integrations/AnimalTraitsSystem/` (вся интеграция с ATS: Access, правила, настройки, UI). Правила зависимостей: Core ни на кого; Settings/Presets/Slaughter не знают UI; интеграции не лезут во внутренние срезы.
 
 Ключевое:
 - **`ASM_MapComp.Recompute`** порядок: (1) vanilla per-config cull по лимитам с приоритетами по корзинам; (2) ATS force-cull; (3) forceCull-черты; (4) keep-trait защита (резервируется до забоя, входит в порог). Защита перевешивает forceCull.
