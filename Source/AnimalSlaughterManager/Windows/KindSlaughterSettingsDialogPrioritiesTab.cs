@@ -361,6 +361,11 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         }
     }
 
+    private void AddRuleOption(List<FloatMenuOption> options, TaggedString label, bool male, bool adult, Func<BasePriorityRule> factory)
+    {
+        options.Add(new FloatMenuOption(label, () => settings.prioritySettings.Add(male, adult, factory())));
+    }
+
     private void OpenAddConditionMenu(bool male, bool adult, ThingDef animalDef)
     {
         var options = new List<FloatMenuOption>();
@@ -368,36 +373,27 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         if (!male && adult)
         {
             // TODO: 1 option
-            options.Add(new FloatMenuOption(ASMKeys.CondPregnantHas.Translate(),
-                () => settings.prioritySettings.Add(male, adult, new PregnancyPriorityRule() { has = true })));
-            options.Add(new FloatMenuOption(ASMKeys.CondPregnantMissing.Translate(),
-                () => settings.prioritySettings.Add(male, adult, new PregnancyPriorityRule() { has = false })));
+            AddRuleOption(options, ASMKeys.CondPregnantHas.Translate(), male, adult, () => new PregnancyPriorityRule { has = true });
+            AddRuleOption(options, ASMKeys.CondPregnantMissing.Translate(), male, adult, () => new PregnancyPriorityRule { has = false });
         }
 
         // TODO: 1 option
-        options.Add(new FloatMenuOption(ASMKeys.CondBondHas.Translate(),
-            () => settings.prioritySettings.Add(male, adult, new BondPriorityRule() { has = true })));
-        options.Add(new FloatMenuOption(ASMKeys.CondBondMissing.Translate(),
-            () => settings.prioritySettings.Add(male, adult, new BondPriorityRule() { has = false })));
+        AddRuleOption(options, ASMKeys.CondBondHas.Translate(), male, adult, () => new BondPriorityRule { has = true });
+        AddRuleOption(options, ASMKeys.CondBondMissing.Translate(), male, adult, () => new BondPriorityRule { has = false });
 
         // TODO: cache
         var diseaseList = DefDatabase<HediffDef>.AllDefs.Where(d => d.makesSickThought).OrderBy(d => d.LabelCap.ToString()).ToList();
         options.Add(new FloatMenuOption(ASMKeys.CondAddDisease.Translate(),
             () => OpenDiseaseSubmenu(male, adult, diseaseList)));
         // TODO: 1 option
-        options.Add(new FloatMenuOption(ASMKeys.CondDiseaseAnyHas.Translate(),
-            () => settings.prioritySettings.Add(male, adult, new DiseaseAnyPriorityRule() { has = true })));
-        options.Add(new FloatMenuOption(ASMKeys.CondDiseaseAnyMissing.Translate(),
-            () => settings.prioritySettings.Add(male, adult, new DiseaseAnyPriorityRule() { has = false })));
+        AddRuleOption(options, ASMKeys.CondDiseaseAnyHas.Translate(), male, adult, () => new DiseaseAnyPriorityRule { has = true });
+        AddRuleOption(options, ASMKeys.CondDiseaseAnyMissing.Translate(), male, adult, () => new DiseaseAnyPriorityRule { has = false });
 
         options.Add(new FloatMenuOption(ASMKeys.CondAddTraining.Translate(),
             () => OpenTrainingSubmenu(male, adult, animalDef)));
-        options.Add(new FloatMenuOption(ASMKeys.CondTrainingNone.Translate(),
-            () => settings.prioritySettings.Add(male, adult, new TrainingGeneralPriorityRule())));
-        options.Add(new FloatMenuOption(ASMKeys.CondTrainingPartial.Translate(),
-            () => settings.prioritySettings.Add(male, adult, new TrainingGeneralPriorityRule())));
-        options.Add(new FloatMenuOption(ASMKeys.CondTrainingFull.Translate(),
-            () => settings.prioritySettings.Add(male, adult, new TrainingGeneralPriorityRule())));
+        AddRuleOption(options, ASMKeys.CondTrainingNone.Translate(), male, adult, () => new TrainingGeneralPriorityRule { type = TrainingGeneralType.None });
+        AddRuleOption(options, ASMKeys.CondTrainingPartial.Translate(), male, adult, () => new TrainingGeneralPriorityRule { type = TrainingGeneralType.Partial });
+        AddRuleOption(options, ASMKeys.CondTrainingFull.Translate(), male, adult, () => new TrainingGeneralPriorityRule { type = TrainingGeneralType.Full });
 
         // Trait options only when ATS trait content is actually loaded.
         if (AnimalTraitsAccess.HasAvailableTraits)
@@ -408,18 +404,14 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
                     // TODO: 1 option for 1 trait def
                     foreach ((HediffDef def, bool has) in picked)
                     {
-                        settings.prioritySettings.Add(male, adult, new TraitPriorityRule() { has = has, trait = def });
+                        settings.prioritySettings.Add(male, adult, new TraitPriorityRule { has = has, trait = def });
                     }
                 }))));
             // TODO: 1 option with TraitType.Both
-            options.Add(new FloatMenuOption(ASMKeys.CondPositiveHas.Translate(),
-                () => settings.prioritySettings.Add(male, adult, new TraitGeneralPriorityRule() { has = true, type = TraitType.Positive })));
-            options.Add(new FloatMenuOption(ASMKeys.CondPositiveMissing.Translate(),
-                () => settings.prioritySettings.Add(male, adult, new TraitGeneralPriorityRule() { has = false, type = TraitType.Positive })));
-            options.Add(new FloatMenuOption(ASMKeys.CondNegativeHas.Translate(),
-                () => settings.prioritySettings.Add(male, adult, new TraitGeneralPriorityRule() { has = true, type = TraitType.Negative })));
-            options.Add(new FloatMenuOption(ASMKeys.CondNegativeMissing.Translate(),
-                () => settings.prioritySettings.Add(male, adult, new TraitGeneralPriorityRule() { has = false, type = TraitType.Negative })));
+            AddRuleOption(options, ASMKeys.CondPositiveHas.Translate(), male, adult, () => new TraitGeneralPriorityRule { has = true, type = TraitType.Positive });
+            AddRuleOption(options, ASMKeys.CondPositiveMissing.Translate(), male, adult, () => new TraitGeneralPriorityRule { has = false, type = TraitType.Positive });
+            AddRuleOption(options, ASMKeys.CondNegativeHas.Translate(), male, adult, () => new TraitGeneralPriorityRule { has = true, type = TraitType.Negative });
+            AddRuleOption(options, ASMKeys.CondNegativeMissing.Translate(), male, adult, () => new TraitGeneralPriorityRule { has = false, type = TraitType.Negative });
         }
 
         Find.WindowStack.Add(new FloatMenu(options));
@@ -445,12 +437,10 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
                 label = $"{label} ({def.defName})";
             }
 
-            options.Add(new FloatMenuOption(ASMKeys.CondHasSub.Translate(label),
-                () => settings.prioritySettings.Add(male, adult, new DiseasePriorityRule() { has = true, disease = def })));
+            AddRuleOption(options, ASMKeys.CondHasSub.Translate(label), male, adult, () => new DiseasePriorityRule { has = true, disease = def });
 
             // TODO: 1 option
-            options.Add(new FloatMenuOption(ASMKeys.CondMissingSub.Translate(label),
-                () => settings.prioritySettings.Add(male, adult, new DiseasePriorityRule() { has = false, disease = def })));
+            AddRuleOption(options, ASMKeys.CondMissingSub.Translate(label), male, adult, () => new DiseasePriorityRule { has = false, disease = def });
         }
 
         Find.WindowStack.Add(new FloatMenu(options));
