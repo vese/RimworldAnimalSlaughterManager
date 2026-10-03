@@ -12,8 +12,6 @@ public class TraitGeneralPriorityRule : BasePriorityRule, ICoversRule<TraitGener
     public TraitType type = TraitType.Both;
     public TraitInheritability inheritability = TraitInheritability.Both;
 
-    public override bool HasExtraParameters { get; } = true;
-
     public override string Label => type switch
     {
         TraitType.Both => inheritability switch

@@ -275,13 +275,13 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         left += KindSlaughterSettingsTabListHelper.DrawGrip(left, top, row.height);
         left += UIConstants.GapX;
 
-        var labelWidth = row.width - UIConstants.IconSize - UIConstants.IconSize - UIConstants.IconSize;
         var condition = list[index];
+        var extraDropdown = condition.GetExtraDropdown();
 
-        if (condition.HasExtraParameters)
-        {
-            labelWidth -= UIConstants.ButtonMinWidth;// TODO: size (min of max from names length or half of available width)
-        }
+        // Right-side icon group: copy, warning, remove; the extra dropdown sits after the label.
+        var extrasWidth = extraDropdown != null ? UIConstants.GapX + extraDropdown.Width : 0f;
+
+        var labelWidth = row.width - UIConstants.IconSize - UIConstants.IconSize - UIConstants.IconSize - UIConstants.IconSize - extrasWidth;
 
         Text.Anchor = TextAnchor.MiddleLeft;
         GUI.color = Color.white;
@@ -313,37 +313,23 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
         TooltipHandler.TipRegion(labelButtonRect, ASMKeys.CondToggleTip.Translate());
 
-        // TODO:
-        // Trait-only: inherit dropdown + copy button.
-        //if (condition.HasExtraParameters)
-        //{
-        //    float ex = labelRect.xMax + gap;
-        //    Rect inheritBtn = new Rect(ex, row.y + 3f, 100f, 24f);
-        //    InheritDropdown(inheritBtn, cond);
-        //    Rect copyRowBtn = new Rect(inheritBtn.xMax + gap, row.y + (row.height - CopyIconS) / 2f, CopyIconS, CopyIconS);
-        //    TooltipHandler.TipRegion(copyRowBtn, ASMKeys.Copy.Translate());
-        //    if (Widgets.ButtonImage(copyRowBtn, TexButton.Copy))
-        //        list.Insert(index + 1, cond.Clone());
-        //}
+        if (extraDropdown != null)
+        {
+            extraDropdown.Draw(labelButtonRect.xMax + UIConstants.GapX, top);
+        }
 
-        //private void InheritDropdown(Rect rect, SlaughterCondition cond)
-        //{
-        //    string label = cond.inheritMode == TraitInheritability.Inheritable ? ASMKeys.InhInheritable.Translate()
-        //                 : cond.inheritMode == TraitInheritability.NonInheritable ? ASMKeys.InhNonInheritable.Translate()
-        //                 : ASMKeys.InhBoth.Translate();
-        //    if (Widgets.ButtonText(rect, label))
-        //    {
-        //        var opts = new List<FloatMenuOption>();
-        //        foreach (TraitInheritability s in (TraitInheritability[])Enum.GetValues(typeof(TraitInheritability)))
-        //        { var c = s; opts.Add(new FloatMenuOption(InhLabel(s), () => { cond.inheritMode = c; comp.MarkDirty(); })); }
-        //        Find.WindowStack.Add(new FloatMenu(opts));
-        //    }
-        //}
+        // Row-copy button — any rule can be duplicated.
+        var copyRect = new Rect(
+            row.xMax - UIConstants.GapX - UIConstants.IconSize - UIConstants.IconSize - UIConstants.IconSize - UIConstants.GapX,
+            row.y + (row.height - UIConstants.IconSize) / 2f,
+            UIConstants.IconSize,
+            UIConstants.IconSize);
+        TooltipHandler.TipRegion(copyRect, ASMKeys.Copy.Translate());
 
-        //private static string InhLabel(TraitInheritability s)
-        //{
-        //    switch (s) { case TraitInheritability.Inheritable: return ASMKeys.InhInheritable.Translate(); case TraitInheritability.NonInheritable: return ASMKeys.InhNonInheritable.Translate(); default: return ASMKeys.InhBoth.Translate(); }
-        //}
+        if (Widgets.ButtonImage(copyRect, TexButton.Copy))
+        {
+            settings.prioritySettings.CopyAt(male, adult, index);
+        }
 
         // Warning icon for problematic conditions.
         if (rowValidation is not null && rowValidation.Count > 0)
@@ -360,11 +346,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
             GUI.color = Color.white;
 
-            // TODO:
-            //var conflicts = FindConflicts(list, index);
-            var tipText = //conflicts != null ?
-                          //ASMKeys.CondConflictTip.Translate(cond.Label, conflicts) :
-                ASMKeys.CondProblemTip.Translate(condition.Label);
+            var tipText = ASMKeys.CondProblemTip.Translate(condition.Label);
 
             TooltipHandler.TipRegion(warnRect, tipText);
         }
@@ -378,37 +360,6 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
             settings.prioritySettings.RemoveAt(male, adult, index);
         }
     }
-
-    //// Returns a comma-separated list of conflicting condition labels, or null if none found.
-    //public static string FindConflicts(List<SlaughterCondition> list, int index)
-    //{
-    //    var c = list[index];
-    //    var conflicts = new List<string>();
-    //    bool isTrainingState = c.type == CondType.TrainingNone || c.type == CondType.TrainingPartial || c.type == CondType.TrainingFull;
-    //
-    //    if (!isTrainingState)
-    //    {
-    //        string key = ConditionKey(c);
-    //        for (int i = 0; i < list.Count; i++)
-    //        {
-    //            if (i == index) continue;
-    //            if (ConditionKey(list[i]) == key)
-    //                conflicts.Add(list[i].Label);
-    //        }
-    //    }
-    //    else
-    //    {
-    //        for (int i = 0; i < list.Count; i++)
-    //        {
-    //            if (i == index) continue;
-    //            var ot = list[i].type;
-    //            if (ot == CondType.TrainingNone || ot == CondType.TrainingPartial || ot == CondType.TrainingFull)
-    //                if (!conflicts.Contains(list[i].Label))
-    //                    conflicts.Add(list[i].Label);
-    //        }
-    //    }
-    //    return conflicts.Count > 0 ? string.Join(", ", conflicts.ToArray()) : null;
-    //}
 
     private void OpenAddConditionMenu(bool male, bool adult, ThingDef animalDef)
     {
@@ -452,7 +403,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         if (AnimalTraitsAccess.HasAvailableTraits)
         {
             options.Add(new FloatMenuOption(ASMKeys.CondAddTrait.Translate(),
-                () => Find.WindowStack.Add(new Dialog_TraitPicker(picked =>
+                () => Find.WindowStack.Add(new Dialog_TraitFlagPicker(picked =>
                 {
                     // TODO: 1 option for 1 trait def
                     foreach ((HediffDef def, bool has) in picked)
