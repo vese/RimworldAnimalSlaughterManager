@@ -8,9 +8,15 @@ public class PriorityRuleSet
 {
     public List<BasePriorityRule> rules = [];
 
-    private Cached<List<List<string>>> validation;
+    // The validation cache is tagged with the SettingsChanges version it was computed at: any
+    // Raise() (ours or any other settings') moves the version and the next read recomputes —
+    // no per-owner subscriptions needed.
+    private List<List<string>>? validationCache;
+    private int validationVersion = -1;
 
     public bool HasRules => rules != null && rules.Count > 0;
+
+    private bool CacheValid => validationCache != null && validationVersion == SettingsChanges.Version;
 
     /// <summary>Number of rules with validation problems in this bucket.</summary>
     public int ProblemCount
@@ -34,7 +40,7 @@ public class PriorityRuleSet
     public void Reset()
     {
         rules.Clear();
-        validation.Invalidate();
+        validationVersion = -1;
     }
 
     public void Add(BasePriorityRule rule)
@@ -111,7 +117,7 @@ public class PriorityRuleSet
             rules.RemoveAll(c => c is null || c.HasNullDef);
         }
 
-        validation.Invalidate();
+        validationVersion = -1;
     }
 
     /// <summary>
@@ -121,7 +127,17 @@ public class PriorityRuleSet
     /// top-to-down, the first match wins — see SetClosureValidator and DuplicateValidator.
     /// Cached against the SettingsChanges version — recomputed lazily after any settings change.
     /// </summary>
-    public List<List<string>> Validate() => validation.Get(ComputeValidation);
+    public List<List<string>> Validate()
+    {
+        if (CacheValid)
+        {
+            return validationCache!;
+        }
+
+        validationCache = ComputeValidation();
+        validationVersion = SettingsChanges.Version;
+        return validationCache;
+    }
 
     private List<List<string>> ComputeValidation()
     {
