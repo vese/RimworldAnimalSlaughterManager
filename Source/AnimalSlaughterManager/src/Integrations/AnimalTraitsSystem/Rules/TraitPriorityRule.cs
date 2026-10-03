@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using Verse;
 
@@ -12,6 +13,14 @@ public class TraitPriorityRule : BasePriorityRule, ICoversRule<TraitPriorityRule
     public TraitInheritability inheritability = TraitInheritability.Both;
 
     public override bool HasNullDef => trait == null;
+
+    public override IDropdownController? GetExtraDropdown() => trait == null ? null : new DropdownController<TraitInheritability>
+    {
+        Current = inheritability,
+        Values = Enum.GetValues(typeof(TraitInheritability)).Cast<TraitInheritability>(),
+        LabelOf = value => value.Translate(),
+        SetValue = value => { inheritability = value; SettingsChanges.Raise(); }
+    };
 
     public override string Label => (has ? ASMKeys.CondHas : ASMKeys.CondMissing).Translate(DefName(trait));
 
