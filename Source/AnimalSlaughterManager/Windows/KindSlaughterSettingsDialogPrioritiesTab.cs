@@ -479,7 +479,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
     private static void OpenKindPresetsWindow(ASM_MapComp comp, ThingDef animalDef, KindSettings _)
     {
-        Find.WindowStack.Add(new Dialog_PresetBrowser(comp, PresetScope.Kind, animalDef/*, null*/));
+        Find.WindowStack.Add(new Dialog_PresetBrowser(comp, PresetScope.Kind, animalDef));
     }
 
     private static void ResetTabSettings(ASM_MapComp comp, ThingDef animalDef, KindSettings settings)

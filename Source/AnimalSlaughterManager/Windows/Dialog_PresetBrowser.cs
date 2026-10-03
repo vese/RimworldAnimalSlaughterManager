@@ -27,7 +27,7 @@ namespace ASM
     /// no overwrite button or no scope mark. Presets are sorted newest-first and can be filtered by
     /// name and by scope type. The save row is disabled when there is nothing to save or no name typed.
     /// </summary>
-    public class Dialog_PresetBrowser/*<T>*/ : Window //where T : ITraitRule
+    public class Dialog_PresetBrowser : Window
     {
         private readonly ASM_MapComp comp;
         private readonly PresetScope scope;
@@ -35,6 +35,7 @@ namespace ASM
         private readonly string? listTitle;
         private readonly Action<string>? exportList;
         private readonly Func<PresetEntry, bool>? applyList;
+        private readonly Func<bool>? hasListData;
 
         private Vector2 scroll;
         private float listHeight = 9999f;
@@ -48,28 +49,17 @@ namespace ASM
 
         private int ContextRank => scope == PresetScope.All ? 3 : scope == PresetScope.Kind ? 2 : 1;
         private KindSettings Settings => comp.GetSettings(kind);
-        //private IList TargetList
-        //{
-        //    get
-        //    {
-        //        var s = Settings;
-        //        switch (listKind)
-        //        {
-        //            case TraitListKind.Keep: return s.keepTraits;
-        //            default: return s.forceCullTraits;
-        //        }
-        //    }
-        //}
 
         public override Vector2 InitialSize => new Vector2(820f, 600f);
 
         public Dialog_PresetBrowser(ASM_MapComp comp, PresetScope scope, ThingDef kind)
-            : this(comp, scope, kind, null, null, null)
+            : this(comp, scope, kind, null, null, null, null)
         {
         }
 
         public Dialog_PresetBrowser(ASM_MapComp comp, PresetScope scope, ThingDef kind,
-            string? listTitle, Action<string>? exportList, Func<PresetEntry, bool>? applyList)
+            string? listTitle, Action<string>? exportList, Func<PresetEntry, bool>? applyList,
+            Func<bool>? hasListData = null)
         {
             this.comp = comp;
             this.scope = scope;
@@ -77,6 +67,7 @@ namespace ASM
             this.listTitle = listTitle;
             this.exportList = exportList;
             this.applyList = applyList;
+            this.hasListData = hasListData;
             doCloseX = true;
             draggable = true;
             resizeable = true;
@@ -98,30 +89,6 @@ namespace ASM
                 default:
                     return ASMKeys.PresetTitleAll.Translate();
             }
-        }
-
-        private string Title()
-        {
-            string kindLabel = kind != null ? kind.LabelCap.ToString() : "";
-            switch (scope)
-            {
-                case PresetScope.Kind:
-                    return ASMKeys.KindPresetsTitle.Translate(kindLabel);
-                case PresetScope.List:
-                    return ASMKeys.ListPresetsTitle.Translate(ListName(), kindLabel);
-                default:
-                    return ASMKeys.Presets.Translate();
-            }
-        }
-
-        private string ListName()
-        {
-            return "";
-            //switch (listKind)
-            //{
-            //    case TraitListKind.Keep: return ASMKeys.ListNameKeep.Translate();
-            //    default: return ASMKeys.ListNameForceCull.Translate();
-            //}
         }
 
         public override void DoWindowContents(Rect inRect)
@@ -258,7 +225,6 @@ namespace ASM
         private List<PresetEntry> Gather()
         {
             var entries = new List<PresetEntry>();
-            //entries.AddRange(PresetIO.ListPresets(scope, listKind ?? TraitListKind.Keep));
             // Higher scopes are visible for cross-level application.
             if (scope == PresetScope.Kind) entries.AddRange(PresetIO.ListPresets(PresetScope.All));
             if (scope == PresetScope.List)
@@ -375,7 +341,7 @@ namespace ASM
                 return ASMKeys.TipAllToKind.Translate(kindLabel);
             if (scope == PresetScope.List)
             {
-                string ln = ListName();
+                string ln = listTitle ?? "";
                 if (e.scope == PresetScope.All) return ASMKeys.TipAllToList.Translate(ln, kindLabel);
                 if (e.scope == PresetScope.Kind) return ASMKeys.TipKindToList.Translate(ln, kindLabel);
             }
@@ -389,22 +355,8 @@ namespace ASM
             {
                 case PresetScope.All: return comp.kindSettings.Values.Any(k => k != null && k.Customized);
                 case PresetScope.Kind: return Settings.Customized;
-                //default: return rules?.Count > 0;
+                default: return hasListData?.Invoke() ?? false;
             }
-            return false;
-        }
-
-        // Overwrite an existing same-scope preset with the current settings. Serialize overwrites a
-        // same-name file, so this just reuses the normal export path under the preset's own name.
-        private void OverwritePresetByName(string name)
-        {
-            switch (scope)
-            {
-                case PresetScope.All: PresetIO.ExportAll(name, comp); break;
-                case PresetScope.Kind: PresetIO.ExportKind(name, kind, Settings); break;
-                default: exportList!(name); break;
-            }
-            Messages.Message(ASMKeys.PresetOverwritten.Translate(name), MessageTypeDefOf.TaskCompletion, false);
         }
 
         private void OverwriteEntry(PresetEntry e)
