@@ -33,7 +33,6 @@
   <ASM.ManageDesc>Открыть настройки Animal Slaughter Manager (приоритет по возрасту/полу, разведение, черты для забоя, пресеты).</ASM.ManageDesc>
   <ASM.ConfigureKind>Настроить</ASM.ConfigureKind>
 
-  <ASM.Presets>Пресеты</ASM.Presets>
   <ASM.SavePreset>Сохранить</ASM.SavePreset>
   <ASM.LoadPreset>Загрузить</ASM.LoadPreset>
   <ASM.DeletePreset>Удалить</ASM.DeletePreset>
@@ -78,10 +77,6 @@
   <ASM.CopyConditions>Копировать</ASM.CopyConditions>
   <ASM.PasteConditions>Вставить</ASM.PasteConditions>
   <ASM.CondPresets>Пресеты...</ASM.CondPresets>
-  <ASM.CondPresetSave>Сохранить...</ASM.CondPresetSave>
-  <ASM.CondImportKind>Из вида</ASM.CondImportKind>
-  <ASM.CondImportAll>Из всех</ASM.CondImportAll>
-  <ASM.PresetNameTitle>Название пресета</ASM.PresetNameTitle>
   <ASM.CondPresetTitle>Пресеты приоритетов: {0}</ASM.CondPresetTitle>
   <ASM.CondPresetCrossBucket>Сохранено из корзины: {0}</ASM.CondPresetCrossBucket>
   <ASM.CondToggleTip>Клик переключает есть/нет</ASM.CondToggleTip>
@@ -93,7 +88,6 @@
   <ASM.ValidationRedundant>Избыточное правило: подходящие животные уже отобраны правилами {0}</ASM.ValidationRedundant>
   <ASM.ValidationExhausts>Это правило закрывает последнюю комбинацию — все правила ниже никогда не сработают</ASM.ValidationExhausts>
   <ASM.CondProblemTip>Конфликт или дубликат: {0}</ASM.CondProblemTip>
-  <ASM.CondConflictTip>{0} конфликтует с: {1}</ASM.CondConflictTip>
   <ASM.PriorityHelp>Условия в списке задают очерёдность забоя сверху вниз: животные, подходящие по условия вверху, забиваются последними, внизу — первыми. Оставшиеся сортируются по возрасту из настроек выше.</ASM.PriorityHelp>
   <ASM.AlertConditionLabel>Конфликты в приоритетах забоя</ASM.AlertConditionLabel>
   <ASM.SettingLogging>Подробное логирование</ASM.SettingLogging>
@@ -134,18 +128,10 @@
   <ASM.KindPresets>Пресеты для вида...</ASM.KindPresets>
   <ASM.TraitListPresets>Пресеты...</ASM.TraitListPresets>
 
-  <ASM.KindPresetsTitle>Пресеты для вида: {0}</ASM.KindPresetsTitle>
   <ASM.PresetTitleAll>Пресеты настроек забоя</ASM.PresetTitleAll>
   <ASM.PresetTitleKind>Пресеты настроек вида: {0}</ASM.PresetTitleKind>
   <ASM.PresetTitleKeep>Пресеты защиты: {0}</ASM.PresetTitleKeep>
   <ASM.PresetTitleForceCull>Пресеты принудительного забоя: {0}</ASM.PresetTitleForceCull>
-  <ASM.PresetTitleCull>Пресеты приоритетного забоя: {0}</ASM.PresetTitleCull>
-  <ASM.PresetTitleSpare>Пресеты запаса: {0}</ASM.PresetTitleSpare>
-  <ASM.ListPresetsTitle>Пресеты списка: {0} ({1})</ASM.ListPresetsTitle>
-  <ASM.ListNameKeep>Разведение</ASM.ListNameKeep>
-  <ASM.ListNameCull>Приоритет забоя</ASM.ListNameCull>
-  <ASM.ListNameSpare>Запас</ASM.ListNameSpare>
-  <ASM.ListNameForceCull>Принуд. забой</ASM.ListNameForceCull>
   <ASM.Clear>Очистить</ASM.Clear>
   <ASM.NoPresetsFiltered>Ничего не найдено</ASM.NoPresetsFiltered>
   <ASM.PresetAllMark>[Все виды]</ASM.PresetAllMark>
@@ -157,5 +143,4 @@
   <ASM.ConfirmDeleteList>Удалить пресет списка «{0}»?</ASM.ConfirmDeleteList>
   <ASM.ConfirmDeleteKind>Удалить пресет вида «{0}»?</ASM.ConfirmDeleteKind>
   <ASM.PresetNoSlice>В этом пресете нет списка правил для «{0}».</ASM.PresetNoSlice>
-  <ASM.PresetApplyFailed>Не удалось применить пресет {0}.</ASM.PresetApplyFailed>
 </LanguageData>
