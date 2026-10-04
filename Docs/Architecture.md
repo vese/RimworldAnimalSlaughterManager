@@ -1,37 +1,62 @@
 # Архитектура мода
 
-Мод ориентирован на **Vertical Slice Architecture**: код сгруппирован по фичам-вертикалям
-(`Slaughter`, `Settings`, `Presets`), каждая из которых замкнута вокруг своей задачи; UI —
-отдельный внешний слой-потребитель. Интеграции со сторонними модами изолированы в
-`Integrations/` и во внутренние слои не заглядывают.
+Мод построен по **Vertical Slice Architecture**: код сгруппирован по фичам-вертикалям,
+и каждая фича владеет всем своим — моделью, логикой и своим UI (`<фича>/UI/`).
+Общий `src/UI/` — только переиспользуемые примитивы интерфейса, «всё вперемешку» там нет.
+Интеграции со сторонними модами изолированы в `Integrations/` и во внутренние срезы не заглядывают.
 
 ## Структура
 
 ```
 Source/AnimalSlaughterManager/
-  AnimalSlaughterManager.csproj   # SDK-style, net472, неявные включения *.cs
+  AnimalSlaughterManager.csproj     # SDK-style, net472, неявные включения *.cs
   src/
-    ASMMod.cs, ASMSettings.cs     # точка входа мода и его настройки (логирование)
-    Core/                         # сквозное ядро: ключи перевода, константы, SettingsChanges,
-                                  # общие enums, GlobalSuppressions
-    Slaughter/                    # фича: бизнес-логика забоя
-      ASM_MapComp, SlaughterListBuilder, PregnancyUtility
-      Patches/                    # Harmony-патчи ванильного авторезня/колонок/гизмо
-    Settings/                     # фича: модель настроек (данные + поведение, без UI и файлов)
-      Kind*/Global*/Preference*   # иерархия настроек вида и глобальных
-      Rules/                      # правила приоритетов забоя (BasePriorityRule и наследники)
-      Validation/                 # осевая валидация списков правил (сеты, валидаторы)
-    Presets/                      # фича: работа с файлами пресетов
-      PresetIO                    # экспорт/импорт/листинг (XML в persistentDataPath)
-      Dtos/                       # XML-формы (по классу на файл)
-    UI/                           # внешний слой: весь интерфейс
-      Windows/                    # диалоги и вкладки настроек
-      Controls/                   # переиспользуемые контролы (Dropdown и др.)
-      Columns/, Alerts/           # колонки вкладки «Питомцы», алерты
-      UIConstants
+    ASMMod.cs, ASMSettings.cs       # точка входа мода и его настройки (логирование)
+    Core/                           # сквозное ядро — ни на кого не ссылается
+    UI/                             # ОБЩИЙ UI: переиспользуемые примитивы
+      UIConstants.cs                #   размеры/отступы/цвета интерфейса
+      Controls/                     #   Dropdown + DropdownController, GrayFloatMenuOption
+      TraitPicker/                  #   таблица черт: базовая Dialog_TraitTable + Picker (одиночный
+                                    #   выбор) + FlagPicker (пары ✓/✗) — юзают и Settings, и ATS
+    Slaughter/                      # ФИЧА: движок забоя
+      ASM_MapComp                   #   состояние карты: настройки видов, защита, беременные режимы
+      SlaughterListBuilder          #   построение списка забоя поверх ванильного авторезня
+      PregnancyUtility              #   «беременность» incl. яйцекладущие (hediff + eggProgress)
+      Patches/                      #   Harmony: авторез (AnimalsToSlaughter), кэш Notify_*,
+                                    #   колонки вкладки Питомцы, гизмо переключения защиты
+      UI/
+        Dialog_SlaughterManager     #   главное окно управления забоем (лимиты по видам)
+        Columns/                    #   колонки вкладки Питомцы (индивидуальная защита)
+    Settings/                       # ФИЧА: модель настроек (данные + поведение, без UI и файлов)
+      Global*, Kind*, Preference*   #   иерархия: глобальные ↔ настройки вида, 4 корзины возраст×пол
+      IPresettable                  #   мост к сериализации пресетов
+      KindPrioritySettingsLegacy    #   чтение сейвов до рефакторинга правил
+      Rules/                        #   правила приоритетов: BasePriorityRule + наследники
+                                    #   (беременность, привязанность, болезни, тренировка) +
+                                    #   SlaughterCondition (устаревший формат сейвов)
+      Validation/                   #   осевая валидация списков правил: сет состояний по осям,
+                                    #   Duplicate/Coverage/SetClosure валидаторы
+      UI/
+        Dialog_KindSlaughterSettings        # окно настроек вида (3 вкладки)
+        KindSlaughterSettingsDialog*Tab     # вкладки: Общие / Приоритеты / Особые правила
+        BaseKindSlaughterSettingsTab, IKindSlaughterSettingsDialogTab
+        KindSlaughterSettingsTabListHelper  # общие элементы строк вкладок
+        PreferenceSettingsPanel              # панель направлений возраста (вкладка Приоритеты)
+        ListSectionState                    # скролл/выделение секции списка
+        Alert_ConditionProblems             # алерт о проблемах валидации настроек
+    Presets/                        # ФИЧА: работа с файлами пресетов (XML, persistentDataPath)
+      PresetIO                      #   листинг/экспорт/применение, три уровня All/Kind/List
+      Dtos/                         #   XML-формы (по классу на файл), incl. старые форматы
+      UI/
+        Dialog_PresetBrowser               # браузер пресетов All/Kind/List
+        Dialog_ConditionPresetBrowser      # браузер пресетов корзин списков правил
     Integrations/
-      AnimalTraitsSystem/         # вся интеграция с ATS: доступ (AnimalTraitsAccess),
-                                  # свои правила, настройки и UI-секции списков
+      AnimalTraitsSystem/           # ИНТЕГРАЦИЯ ATS: весь код про чужой мод — здесь
+        AnimalTraitsAccess          #   доступ к ATS API (черты-hediff, дефы, цвета, тултипы)
+        Common/                     #   enums ATS (наследуемость, тип черты)
+        Rules/                      #   правила ATS: черта конкретная/общая, keep/force-cull списки
+        Settings/                   #   KindTraitsSettings: списки keep/force-cull вида
+        UI/                         #   секции списков черт (вкладка «Особые правила»), кнопка дефа
 ```
 
 ## Правила зависимостей
@@ -43,26 +68,28 @@ Core      → (никто)
 Settings  → Core
 Presets   → Core, Settings        # DTO правил конвертирует в классы Settings
 Slaughter → Core, Settings        # читает настройки, строит список забоя
-UI        → все                   # внешний слой: собирает фичи в окна
-Integrations/ATS → Core, Settings # правила реализуют контракты Settings;
-                                  # свой UI внутри; в Slaughter/Presets не лезет
+UI (общий)→ Core
+Integrations/ATS → Core, Settings, UI(общий)   # свои правила/настройки/UI внутри
+любой UI фичи → Core, свой срез, общие UI/Settings по необходимости
 ```
 
 Запрещено (и на что смотреть в ревью):
 
-- `Core`, `Settings`, `Presets`, `Slaughter` не ссылаются на `UI` и не знают про окна;
-- `Settings` не знает про файлы (сериализацию пресетов делает `Presets`);
+- `Core`, `Settings`, `Presets`, `Slaughter` (модельная часть) не ссылаются на UI и не знают про окна;
+- `Settings` не знает про файлы — сериализацию пресетов делает `Presets`;
 - интеграции не тянут свои типы в ядро — только реализуют его контракты
-  (`IPresettableRuleSet`, `BasePriorityRule`), доступ к чужому API — через свой Access-класс.
+  (`BasePriorityRule`, `IPresettableRuleSet`), доступ к чужому API — через свой Access-класс;
+- новый экран идёт в `UI/` своей фичи, а не в общий `UI/` — общий только если нужен двум+ фичам.
 
 ## Куда что класть
 
-- **Новый вид правила приоритета** — `Settings/Rules/` (+ набор валидации в `Settings/Validation/`,
-  если у правила новая ось);
-- **новый контрол** — `UI/Controls/`; новое окно/вкладка — `UI/Windows/`;
-- **новый формат пресета/файловая операция** — `Presets/`;
-- **изменение алгоритма забоя** — `Slaughter/` (+ Harmony-патч в `Slaughter/Patches/`);
-- **новая интеграция** — `Integrations/<ModName>/` со своей папкой Access/Rules/UI,
+- **новый вид правила приоритета** — `Settings/Rules/` (+ свой сет в `Settings/Validation/`, если
+  у правила новая ось); его доп. контрол — контракт на правиле, отрисовка — в `Settings/UI`;
+- **новый контрол/окно общего назначения** — `UI/Controls/` (или `UI/<Группа>/`);
+- **новый формат пресета/файловая операция** — `Presets/` (+ свой браузер в `Presets/UI/`);
+- **изменение алгоритма забоя** — `Slaughter/` (+ патч в `Slaughter/Patches/`);
+- **новая колонка/алерт своей фичи** — `<фича>/UI/`;
+- **новая интеграция** — `Integrations/<ModName>/` со своими Access/Rules/Settings/UI
   по образцу `AnimalTraitsSystem`.
 
 ## Спецификация поведения

@@ -49,7 +49,7 @@ ATS (`packageId = luved.animaltraits`), Steam-Workshop ID 3652630316. Исход
 
 ## Animal Slaughter Manager (`namespace ASM`)
 
-Весь код — в `Source/AnimalSlaughterManager/src/`, срезы по фичам (подробно — `Docs/Architecture.md`): `Core/` (ключи, константы, SettingsChanges, общие enums), `Slaughter/` (`ASM_MapComp`, `SlaughterListBuilder`, `PregnancyUtility`, `Patches/`), `Settings/` (модель настроек, `Rules/`, `Validation/`), `Presets/` (`PresetIO`, `Dtos/`), `UI/` (`Windows/`, `Controls/`, `Columns/`, `Alerts/`), `Integrations/AnimalTraitsSystem/` (вся интеграция с ATS: Access, правила, настройки, UI). Правила зависимостей: Core ни на кого; Settings/Presets/Slaughter не знают UI; интеграции не лезут во внутренние срезы.
+Весь код — в `Source/AnimalSlaughterManager/src/`, вертикальные срезы по фичам, каждая владеет своим UI (подробно и с картой классов — `Docs/Architecture.md`): `Core/` (ключи, константы, SettingsChanges, общие enums), `UI/` (только общие переиспользуемые примитивы: Controls/, TraitPicker/, UIConstants), `Slaughter/` (движок забоя + `Patches/` + `UI/` c окном менеджера и Columns/), `Settings/` (модель, `Rules/`, `Validation/` + `UI/` с окном настроек вида, вкладками и алертом), `Presets/` (`PresetIO`, `Dtos/` + `UI/` с браузерами пресетов), `Integrations/AnimalTraitsSystem/` (вся интеграция с ATS). Правила зависимостей: Core ни на кого; модельные части срезов не знают UI; интеграции не лезут во внутренние срезы.
 
 Ключевое:
 - **`ASM_MapComp.Recompute`** порядок: (1) vanilla per-config cull по лимитам с приоритетами по корзинам; (2) ATS force-cull; (3) forceCull-черты; (4) keep-trait защита (резервируется до забоя, входит в порог). Защита перевешивает forceCull.
