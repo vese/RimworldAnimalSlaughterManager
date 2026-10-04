@@ -2,8 +2,8 @@
 
 Мод построен по **Vertical Slice Architecture**: код сгруппирован по фичам-вертикалям,
 и каждая фича владеет всем своим — моделью, логикой и своим UI (`<фича>/UI/`).
-Общий `src/UI/` — только переиспользуемые примитивы интерфейса, «всё вперемешку» там нет.
-Интеграции со сторонними модами изолированы в `Integrations/` и во внутренние срезы не заглядывают.
+Общий `src/UI/` — только переиспользуемые примитивы интерфейса. Интеграции со сторонними
+модами изолированы в `Integrations/` и во внутренние срезы не заглядывают.
 
 ## Структура
 
@@ -12,18 +12,18 @@ Source/AnimalSlaughterManager/
   AnimalSlaughterManager.csproj     # SDK-style, net472, неявные включения *.cs
   src/
     ASMMod.cs, ASMSettings.cs       # точка входа мода и его настройки (логирование)
+    HarmonyInit.cs                  # bootstrap Harmony-патчей мода
     Core/                           # сквозное ядро — ни на кого не ссылается
     UI/                             # ОБЩИЙ UI: переиспользуемые примитивы
       UIConstants.cs                #   размеры/отступы/цвета интерфейса
       Controls/                     #   Dropdown + DropdownController, GrayFloatMenuOption
       TraitPicker/                  #   таблица черт: базовая Dialog_TraitTable + Picker (одиночный
                                     #   выбор) + FlagPicker (пары ✓/✗) — юзают и Settings, и ATS
-    Slaughter/                      # ФИЧА: движок забоя
+    Engine/                         # ФИЧА: движок забоя
       ASM_MapComp                   #   состояние карты: настройки видов, защита, беременные режимы
       SlaughterListBuilder          #   построение списка забоя поверх ванильного авторезня
       PregnancyUtility              #   «беременность» incl. яйцекладущие (hediff + eggProgress)
-      Patches/                      #   Harmony: авторез (AnimalsToSlaughter), кэш Notify_*,
-                                    #   колонки вкладки Питомцы, гизмо переключения защиты
+      Patches/                      #   точки входа ванили в движок (см. перечень ниже)
       UI/
         Dialog_SlaughterManager     #   главное окно управления забоем (лимиты по видам)
         Columns/                    #   колонки вкладки Питомцы (индивидуальная защита)
@@ -59,6 +59,18 @@ Source/AnimalSlaughterManager/
         UI/                         #   секции списков черт (вкладка «Особые правила»), кнопка дефа
 ```
 
+## Что мод патчит в ванили (`Engine/Patches/`)
+
+Патчи — точки входа ванили в движок, лежат рядом с кодом, который пускают в ход:
+
+- `Patch_AutoSlaughter` — результат `AutoSlaughterManager.AnimalsToSlaughter` подменяется
+  списком `SlaughterListBuilder`, когда есть кастомизация;
+- `Patch_Notify` — ванильные `Notify_*` (изменение лимитов и т.п.) сбрасывают кэш списка;
+- `Patch_AnimalsTab` — колонки мода в таблице вкладки «Питомцы»;
+- `Patch_PawnGizmos` — гизмо переключения индивидуальной защиты на животном.
+
+(`HarmonyInit` — bootstrap всех патчей — лежит в корне `src/`, у точки входа мода.)
+
 ## Правила зависимостей
 
 Стрелка «A → B» означает «A может ссылаться на B».
@@ -67,7 +79,7 @@ Source/AnimalSlaughterManager/
 Core      → (никто)
 Settings  → Core
 Presets   → Core, Settings        # DTO правил конвертирует в классы Settings
-Slaughter → Core, Settings        # читает настройки, строит список забоя
+Engine    → Core, Settings        # читает настройки, строит список забоя
 UI (общий)→ Core
 Integrations/ATS → Core, Settings, UI(общий)   # свои правила/настройки/UI внутри
 любой UI фичи → Core, свой срез, общие UI/Settings по необходимости
@@ -75,7 +87,7 @@ Integrations/ATS → Core, Settings, UI(общий)   # свои правила/
 
 Запрещено (и на что смотреть в ревью):
 
-- `Core`, `Settings`, `Presets`, `Slaughter` (модельная часть) не ссылаются на UI и не знают про окна;
+- `Core`, `Settings`, `Presets`, `Engine` (модельная часть) не ссылаются на UI и не знают про окна;
 - `Settings` не знает про файлы — сериализацию пресетов делает `Presets`;
 - интеграции не тянут свои типы в ядро — только реализуют его контракты
   (`BasePriorityRule`, `IPresettableRuleSet`), доступ к чужому API — через свой Access-класс;
@@ -87,7 +99,8 @@ Integrations/ATS → Core, Settings, UI(общий)   # свои правила/
   у правила новая ось); его доп. контрол — контракт на правиле, отрисовка — в `Settings/UI`;
 - **новый контрол/окно общего назначения** — `UI/Controls/` (или `UI/<Группа>/`);
 - **новый формат пресета/файловая операция** — `Presets/` (+ свой браузер в `Presets/UI/`);
-- **изменение алгоритма забоя** — `Slaughter/` (+ патч в `Slaughter/Patches/`);
+- **изменение алгоритма забоя** — `Engine/` (+ патч-точку входа в `Engine/Patches/` с записью
+  в перечень выше);
 - **новая колонка/алерт своей фичи** — `<фича>/UI/`;
 - **новая интеграция** — `Integrations/<ModName>/` со своими Access/Rules/Settings/UI
   по образцу `AnimalTraitsSystem`.
