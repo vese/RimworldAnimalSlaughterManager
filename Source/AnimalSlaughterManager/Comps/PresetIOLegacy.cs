@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml.Serialization;
 
 namespace ASM;
 
@@ -17,18 +16,13 @@ public static class PresetIOLegacy
     /// <summary>Adds root-folder presets to an All-scope listing (they have no scope folder).</summary>
     public static void AddRootPresets(List<PresetEntry> result)
     {
-        if (!Directory.Exists(PresetIO.RootFolder))
-        {
-            return;
-        }
-
-        foreach (var p in Directory.GetFiles(PresetIO.RootFolder, "*.xml", SearchOption.TopDirectoryOnly))
+        foreach (var p in PresetIO.Store.Files(PresetIO.RootFolder))
         {
             result.Add(new PresetEntry
             {
                 name = Path.GetFileNameWithoutExtension(p),
                 path = p,
-                date = File.GetLastWriteTime(p),
+                date = PresetIO.Store.LastWrite(p),
                 scope = PresetScope.All
             });
         }
@@ -38,20 +32,13 @@ public static class PresetIOLegacy
     /// file is not one (the current-format reader falls back here).</summary>
     public static List<BasePriorityRule>? TryReadConditions(PresetEntry entry)
     {
-        try
-        {
-            var ser = new XmlSerializer(typeof(ConditionPresetDto));
-            using (var r = new StreamReader(entry.path))
-            {
-                var dto = (ConditionPresetDto)ser.Deserialize(r);
 #pragma warning disable CS0618
-                return dto.conditions.Select(c => KindPrioritySettingsLegacy.Convert(c.ToCondition())).Where(c => c != null).ToList();
+        var conditions = PresetFormats.ReadConditionPreset(PresetIO.Store.ReadText(entry.path));
+
+        return conditions?
+            .Select(c => KindPrioritySettingsLegacy.Convert(c.ToCondition()))
+            .Where(c => c != null)
+            .ToList();
 #pragma warning restore CS0618
-            }
-        }
-        catch
-        {
-            return null;
-        }
     }
 }
