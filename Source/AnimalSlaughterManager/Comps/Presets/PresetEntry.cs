@@ -13,7 +13,7 @@ namespace ASM;
         public string path;
         public DateTime date;
         public PresetScope scope;
-        public CondBucket? condBucket;
+        public (bool Male, bool Adult)? condBucket;
 
         /// <summary>Rank for delete-gating: a context may only delete presets at or below its own rank.</summary>
         public int Rank => scope == PresetScope.All ? 3 : scope == PresetScope.Kind ? 2 : 1;

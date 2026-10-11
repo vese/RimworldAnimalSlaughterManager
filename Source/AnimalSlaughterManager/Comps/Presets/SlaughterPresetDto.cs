@@ -19,7 +19,7 @@ namespace ASM;
             foreach (var kv in comp.kindSettings)
             {
                 if (kv.Value == null || !kv.Value.Customized) continue;
-                dto.Kinds.Add(KindDto.From(kv.Key, kv.Value));
+                dto.Kinds.Add(KindDto.Capture(kv.Key, kv.Value));
             }
             return dto;
         }

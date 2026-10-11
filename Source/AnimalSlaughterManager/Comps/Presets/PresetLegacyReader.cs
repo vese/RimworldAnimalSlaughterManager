@@ -16,13 +16,13 @@ public static class PresetLegacyReader
     /// <summary>Adds root-folder presets to an All-scope listing (they have no scope folder).</summary>
     public static void AddRootPresets(List<PresetEntry> result)
     {
-        foreach (var p in PresetRepository.Store.Files(PresetRepository.RootFolder))
+        foreach (var p in PresetRepository.Store.GetFiles(PresetRepository.RootFolder))
         {
             result.Add(new PresetEntry
             {
                 name = Path.GetFileNameWithoutExtension(p),
                 path = p,
-                date = PresetRepository.Store.LastWrite(p),
+                date = PresetRepository.Store.GetLastWriteTime(p),
                 scope = PresetScope.All
             });
         }

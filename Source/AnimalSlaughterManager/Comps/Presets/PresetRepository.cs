@@ -67,13 +67,13 @@ namespace ASM;
             var result = new List<PresetEntry>();
             void AddFolder(string dir)
             {
-                foreach (var p in Store.Files(dir))
+                foreach (var p in Store.GetFiles(dir))
                 {
                     result.Add(new PresetEntry
                     {
                         name = Path.GetFileNameWithoutExtension(p),
                         path = p,
-                        date = Store.LastWrite(p),
+                        date = Store.GetLastWriteTime(p),
                         scope = scope
                     });
                 }
@@ -110,7 +110,7 @@ namespace ASM;
         {
             Store.EnsureFolder(ScopeFolder(PresetScope.Kind));
             var dto = new SlaughterPresetDto();
-            dto.Kinds.Add(KindDto.From(animalDef, ks));
+            dto.Kinds.Add(KindDto.Capture(animalDef, ks));
             Serialize(name, ScopeFolder(PresetScope.Kind), dto);
         }
 
@@ -129,17 +129,26 @@ namespace ASM;
 
         // ---- Condition list presets ----------------------------------------------------------
 
-        private static string CondFolder(CondBucket bucket) => Path.Combine(RootFolder, FolderList, FolderConditions, bucket.ToString());
+        private static string CondFolder((bool Male, bool Adult) bucket) => Path.Combine(RootFolder, FolderList, FolderConditions, BucketFolderName(bucket));
+
+        // Folder names predate the tuple keys — same age×sex buckets as the settings themselves.
+        private static string BucketFolderName((bool Male, bool Adult) bucket) => bucket switch
+        {
+            (true, true) => "AdultMale",
+            (true, false) => "YoungMale",
+            (false, true) => "AdultFemale",
+            _ => "YoungFemale",
+        };
 
         // A condition-list preset rides the common SlaughterPresetDto carrier: one KindDto with
         // the rules in the bucket's own list. The bucket is the preset's ORIGIN — on apply the
         // rules go to whatever bucket is targeted (cross-bucket import).
-        public static void ExportConditions(string name, CondBucket bucket, List<BasePriorityRule> rules)
+        public static void ExportConditions(string name, (bool Male, bool Adult) bucket, List<BasePriorityRule> rules)
         {
             Store.EnsureFolder(CondFolder(bucket));
 
             var kd = new KindDto { animal = "" };
-            kd.BucketRules(bucket).AddRange(rules.Select(PriorityRuleDto.From));
+            kd.GetBucketRules(bucket).AddRange(rules.Select(PriorityRuleDto.From));
 
             var dto = new SlaughterPresetDto();
             dto.Kinds.Add(kd);
@@ -157,7 +166,7 @@ namespace ASM;
             {
                 case PresetSerializer.CarrierRoot:
                     var kd = PresetSerializer.ReadCarrier(text)?.Kinds?.FirstOrDefault();
-                    return kd == null ? null : RulesOf(kd.ConditionRules());
+                    return kd == null ? null : RulesOf(kd.GetConditionRules());
                 case PresetSerializer.RulePresetRoot:
                     return RulesOf(PresetSerializer.ReadRulePreset(text));
                 default:
@@ -170,7 +179,7 @@ namespace ASM;
 
         /// <summary>Rules of one bucket taken from a Kind/All preset (the source kind's defName
         /// is ignored — the slice applies to any target kind). Null when there is no such slice.</summary>
-        public static List<BasePriorityRule>? ReadKindRules(PresetEntry entry, CondBucket bucket)
+        public static List<BasePriorityRule>? ReadKindRules(PresetEntry entry, (bool Male, bool Adult) bucket)
         {
             var kd = PresetSerializer.ReadCarrier(Store.ReadText(entry.path))?.Kinds?.FirstOrDefault();
 
@@ -179,69 +188,43 @@ namespace ASM;
                 return null;
             }
 
-            return RulesOf(kd.BucketRules(bucket));
+            return RulesOf(kd.GetBucketRules(bucket));
         }
 
-        public static List<PresetEntry> ListConditionPresets(CondBucket bucket)
+        public static List<PresetEntry> ListConditionPresets()
         {
             var result = new List<PresetEntry>();
-            void AddFolder(string dir, CondBucket? b)
+
+            void AddFolder(string dir, (bool Male, bool Adult)? bucket)
             {
-                foreach (var p in Store.Files(dir))
+                foreach (var p in Store.GetFiles(dir))
                 {
-                    result.Add(new PresetEntry { name = Path.GetFileNameWithoutExtension(p), path = p, date = Store.LastWrite(p), scope = PresetScope.List, condBucket = b });
+                    result.Add(new PresetEntry { name = Path.GetFileNameWithoutExtension(p), path = p, date = Store.GetLastWriteTime(p), scope = PresetScope.List, condBucket = bucket });
                 }
             }
 
-            // Own bucket + all other condition buckets (cross-bucket import).
-            foreach (CondBucket b in Enum.GetValues(typeof(CondBucket)))
-            {
-                AddFolder(CondFolder(b), b);
-            }
+            // Every condition bucket (cross-bucket import).
+            AddFolder(CondFolder((true, true)), (true, true));
+            AddFolder(CondFolder((true, false)), (true, false));
+            AddFolder(CondFolder((false, true)), (false, true));
+            AddFolder(CondFolder((false, false)), (false, false));
 
             return result.OrderByDescending(e => e.date).ThenBy(e => e.name).ToList();
         }
 
-        // ---- Apply ---------------------------------------------------------------------------
+        // ---- Reading for the callers to apply themselves -------------------------------------
 
-        /// <summary>Apply a whole all-animals preset to the map (all configured kinds).</summary>
-        public static void ApplyAll(PresetEntry entry, ASM_MapComp comp)
+        /// <summary>The whole All-scope carrier; the caller applies it to the map itself.</summary>
+        public static SlaughterPresetDto? ReadCarrier(PresetEntry entry)
         {
-            var dto = PresetSerializer.ReadCarrier(Store.ReadText(entry.path));
-            if (dto == null)
-            {
-                return;
-            }
-            dto.ApplyTo(comp);
-            comp.MarkDirty();
+            return PresetSerializer.ReadCarrier(Store.ReadText(entry.path));
         }
 
-        /// <summary>Apply a preset's full per-kind settings to <paramref name="targetKs"/>.
-        /// Works for Kind-scope presets (the single kind) and All-scope presets (the slice whose
-        /// animal matches <paramref name="targetDef"/>). Returns false if an All preset has no
-        /// slice for this kind.</summary>
-        public static bool ApplyKindSettings(PresetEntry entry, ThingDef targetDef, KindSettings targetKs)
+        /// <summary>The preset's kind slice: Kind-scope presets carry the single kind, All-scope
+        /// presets the slice matching the target def. The caller applies it to the settings itself.</summary>
+        public static KindDto? ReadKindSlice(PresetEntry entry, ThingDef targetDef)
         {
-            var kd = RelevantKindDto(entry, targetDef);
-            if (kd == null)
-            {
-                return false;
-            }
-            kd.ApplyTo(targetKs);
-            return true;
-        }
-
-        /// <summary>Apply a preset's rules into <paramref name="ruleSet"/>. Works for List-scope
-        /// presets (their rule list), and Kind/All presets (the slice for <paramref name="targetDef"/>).
-        /// Returns false when the preset has no slice for this kind.</summary>
-        public static bool ApplyList(PresetEntry entry, ThingDef targetDef, IPresettableRuleSet ruleSet)
-        {
-            var kd = RelevantKindDto(entry, targetDef);
-            if (kd == null)
-            {
-                return false;
-            }
-            return ruleSet.Load(kd);
+            return RelevantKindDto(entry, targetDef);
         }
 
         public static void Delete(PresetEntry entry)

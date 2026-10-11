@@ -390,12 +390,37 @@ namespace ASM
             switch (scope)
             {
                 case PresetScope.All:
-                    PresetRepository.ApplyAll(e, comp);
+                {
+                    var dto = PresetRepository.ReadCarrier(e);
+
+                    if (dto != null)
+                    {
+                        dto.ApplyTo(comp);
+                        comp.MarkDirty();
+                    }
+                    else
+                    {
+                        ok = false;
+                    }
+
                     break;
+                }
                 case PresetScope.Kind:
-                    ok = PresetRepository.ApplyKindSettings(e, kind, Settings);
+                {
+                    var kd = PresetRepository.ReadKindSlice(e, kind);
+
+                    if (kd != null)
+                    {
+                        kd.ApplyTo(Settings);
+                    }
+                    else
+                    {
+                        ok = false;
+                    }
+
                     SettingsChanges.Raise();
                     break;
+                }
                 default:
                     ok = applyList!(e);
                     SettingsChanges.Raise();

@@ -16,7 +16,7 @@ namespace ASM
     public class Dialog_ConditionPresetBrowser : Window
     {
         private readonly ASM_MapComp comp;
-        private readonly CondBucket bucket;
+        
         private readonly KindPrioritySettings prioritySettings;
         private readonly bool male;
         private readonly bool adult;
@@ -36,25 +36,25 @@ namespace ASM
         public Dialog_ConditionPresetBrowser(ASM_MapComp comp, bool male, bool adult, KindPrioritySettings prioritySettings)
         {
             this.comp = comp;
-            bucket = male ? (adult ? CondBucket.AdultMale : CondBucket.YoungMale) : (adult ? CondBucket.AdultFemale : CondBucket.YoungFemale);
+
             this.prioritySettings = prioritySettings;
             this.male = male;
             this.adult = adult;
             doCloseX = true;
             draggable = true;
             resizeable = true;
-            optionalTitle = ASMKeys.CondPresetTitle.Translate(BucketLabel(bucket));
+            optionalTitle = ASMKeys.CondPresetTitle.Translate(BucketLabel(male, adult));
         }
 
         private bool HasData => prioritySettings.Get(male, adult).Count > 0;
 
-        private static string BucketLabel(CondBucket b)
+        private static string BucketLabel(bool male, bool adult)
         {
-            switch (b)
+            switch (male, adult)
             {
-                case CondBucket.AdultMale: return ASMKeys.AdultMales.Translate();
-                case CondBucket.YoungMale: return ASMKeys.YoungMales.Translate();
-                case CondBucket.AdultFemale: return ASMKeys.AdultFemales.Translate();
+                case (true, true): return ASMKeys.AdultMales.Translate();
+                case (true, false): return ASMKeys.YoungMales.Translate();
+                case (false, true): return ASMKeys.AdultFemales.Translate();
                 default: return ASMKeys.YoungFemales.Translate();
             }
         }
@@ -165,7 +165,7 @@ namespace ASM
         private List<PresetEntry> Gather()
         {
             var entries = new List<PresetEntry>();
-            if (showCond) entries.AddRange(PresetRepository.ListConditionPresets(bucket));
+            if (showCond) entries.AddRange(PresetRepository.ListConditionPresets());
             if (showKind) entries.AddRange(PresetRepository.ListPresets(PresetScope.Kind));
             if (showAll) entries.AddRange(PresetRepository.ListPresets(PresetScope.All));
             entries = entries.OrderByDescending(e => e.date).ThenBy(e => e.name).ToList();
@@ -178,7 +178,7 @@ namespace ASM
         private void DrawEntryRow(Rect row, PresetEntry e, int index)
         {
             bool isCondPreset = e.scope == PresetScope.List && e.condBucket != null;
-            bool sameBucket = e.condBucket == bucket;
+            bool sameBucket = e.condBucket == (male, adult);
             bool isKindOrAll = e.scope == PresetScope.Kind || e.scope == PresetScope.All;
             bool canOverwrite = isCondPreset && sameBucket && HasData;
             if (index % 2 == 1) Widgets.DrawAltRect(row);
@@ -188,8 +188,8 @@ namespace ASM
             // Mark width: wide enough for the longest bucket label (e.g. "Молодые самки").
             Text.Font = GameFont.Tiny;
             float markW = Mathf.Max(80f, Mathf.Max(
-                Text.CalcSize(BucketLabel(CondBucket.AdultMale)).x,
-                Text.CalcSize(BucketLabel(CondBucket.YoungFemale)).x) + 8f);
+                Text.CalcSize(BucketLabel(true, true)).x,
+                Text.CalcSize(BucketLabel(false, false)).x) + 8f);
             Text.Font = GameFont.Small;
 
             // Columns right-to-left: delete, load, overwrite (left of load), date, mark, name.
@@ -208,7 +208,7 @@ namespace ASM
             // Mark column: scope mark for cross-scope/cross-bucket (reserved even if empty).
             string mark = null;
             if (isKindOrAll) mark = e.scope == PresetScope.All ? ASMKeys.PresetAllMark.Translate() : ASMKeys.PresetKindMark.Translate();
-            else if (isCondPreset && !sameBucket) mark = BucketLabel(e.condBucket.Value);
+            else if (isCondPreset && !sameBucket) mark = BucketLabel(e.condBucket.Value.Male, e.condBucket.Value.Adult);
             if (mark != null)
             {
                 GUI.color = Color.cyan;
@@ -258,20 +258,20 @@ namespace ASM
         {
             string name = (nameBuffer ?? "").Trim();
             if (name.NullOrEmpty()) return;
-            PresetRepository.ExportConditions(name, bucket, prioritySettings.Get(male, adult));
+            PresetRepository.ExportConditions(name, (male, adult), prioritySettings.Get(male, adult));
             Messages.Message(ASMKeys.PresetSaved.Translate(name), MessageTypeDefOf.TaskCompletion, false);
             nameBuffer = "";
         }
 
         private void OverwriteByName(string name)
         {
-            PresetRepository.ExportConditions(name, bucket, prioritySettings.Get(male, adult));
+            PresetRepository.ExportConditions(name, (male, adult), prioritySettings.Get(male, adult));
             Messages.Message(ASMKeys.PresetOverwritten.Translate(name), MessageTypeDefOf.TaskCompletion, false);
         }
 
         private void OverwriteEntry(PresetEntry e)
         {
-            PresetRepository.ExportConditions(e.name, bucket, prioritySettings.Get(male, adult));
+            PresetRepository.ExportConditions(e.name, (male, adult), prioritySettings.Get(male, adult));
             Messages.Message(ASMKeys.PresetOverwritten.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
         }
 
@@ -289,11 +289,11 @@ namespace ASM
             }
 
             // Kind or All preset — take the matching bucket slice.
-            var rules = PresetRepository.ReadKindRules(e, bucket);
+            var rules = PresetRepository.ReadKindRules(e, (male, adult));
 
             if (rules == null || rules.Count == 0)
             {
-                Messages.Message(ASMKeys.PresetNoSlice.Translate(BucketLabel(bucket)), MessageTypeDefOf.RejectInput, false);
+                Messages.Message(ASMKeys.PresetNoSlice.Translate(BucketLabel(male, adult)), MessageTypeDefOf.RejectInput, false);
                 return;
             }
 
