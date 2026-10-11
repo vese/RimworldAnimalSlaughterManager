@@ -40,48 +40,22 @@ public static class SlaughterListBuilder
 
     // Breeding-stock (keep-trait) protection is reserved up front: these animals are never
     // slaughtered (it overrides even force-cull) AND they count toward the cull thresholds,
-    // so a protected animal is part of the limit rather than kept on top of it.
+    // so a protected animal is part of the limit rather than kept on top of it. The selection
+    // itself belongs to the traits integration.
     private static HashSet<Pawn> ReserveKeepTraits(ASM_MapComp comp)
     {
         var reserved = new HashSet<Pawn>();
 
         foreach (var kv in comp.kindSettings)
         {
-            var ks = kv.Value;
-
-            if (ks?.traitsSettings.protectRuleSet.HasRules != true)
+            if (kv.Value == null)
             {
                 continue;
             }
 
-            var kindPawns = new List<Pawn>();
-
-            foreach (var pa in comp.map.mapPawns.SpawnedColonyAnimals)
+            foreach (var pawn in IntegrationRegistry.Traits.SelectKeepReserved(comp.map, kv.Key, kv.Value))
             {
-                if (pa.def == kv.Key)
-                {
-                    kindPawns.Add(pa);
-                }
-            }
-
-            foreach (var tt in ks.traitsSettings.protectRuleSet.rules)
-            {
-                if (tt?.trait == null || tt.keepCount <= 0)
-                {
-                    continue;
-                }
-
-                var keepNow = SelectToKeep(kindPawns, tt);
-
-                foreach (var p in keepNow)
-                {
-                    reserved.Add(p);
-                }
-
-                if (ASMMod.Settings?.enableLogging == true)
-                {
-                    Log.Message($"[ASM] keep-trait kind={kv.Key.defName} trait={tt.trait.defName} filter={tt.inheritMode} traitInheritable={IntegrationRegistry.Traits.IsInheritable(tt.trait)} keepCount={tt.keepCount} ageScope={tt.ageScope} genderScope={tt.genderScope} reserved={keepNow.Count}");
-                }
+                reserved.Add(pawn);
             }
         }
 
@@ -129,7 +103,7 @@ public static class SlaughterListBuilder
         {
             var ks = kv.Value;
 
-            if (ks?.traitsSettings.forceCullRuleSet == null || !ks.traitsSettings.forceCullRuleSet.HasRules)
+            if (ks == null || !IntegrationRegistry.Traits.HasForceCullRules(ks))
             {
                 continue;
             }
@@ -251,29 +225,12 @@ public static class SlaughterListBuilder
     /// <summary>Animals of this kind that match a breeding ("keep") trait target and are protected from slaughter.</summary>
     public static int CountKeptByTraits(ASM_MapComp comp, ThingDef def)
     {
-        if (!comp.kindSettings.TryGetValue(def, out var ks) || ks?.traitsSettings.protectRuleSet == null || !ks.traitsSettings.protectRuleSet.HasRules)
+        if (!comp.kindSettings.TryGetValue(def, out var ks) || ks == null)
         {
             return 0;
         }
-        int n = 0;
-        foreach (var pa in comp.map.mapPawns.SpawnedColonyAnimals)
-        {
-            if (pa.def != def)
-            {
-                continue;
-            }
-            foreach (var tt in ks.traitsSettings.protectRuleSet.rules)
-            {
-                if (tt.trait != null && IntegrationRegistry.Traits.HasTrait(pa, tt.trait)
-                    && AgeMatches(pa, tt.ageScope) && GenderMatches(pa, tt.genderScope)
-                    && InheritableMatches(tt.trait, tt.inheritMode))
-                {
-                    n++;
-                    break;
-                }
-            }
-        }
-        return n;
+
+        return IntegrationRegistry.Traits.CountKept(comp.map, def, ks);
     }
 
     /// <summary>Animals of this kind individually marked protected.</summary>
@@ -427,93 +384,5 @@ public static class SlaughterListBuilder
         return false;
     }
 
-    private static bool HasForceCullTrait(Pawn p, KindSettings ks)
-    {
-        if (ks?.traitsSettings.forceCullRuleSet == null)
-        {
-            return false;
-        }
-        foreach (var ct in ks.traitsSettings.forceCullRuleSet.rules)
-        {
-            if (ct.trait != null && IntegrationRegistry.Traits.HasTrait(p, ct.trait)
-                && AgeMatches(p, ct.ageScope) && GenderMatches(p, ct.genderScope)
-                && InheritableMatches(ct.trait, ct.inheritMode))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static bool AgeMatches(Pawn p, AgeScope scope)
-    {
-        bool repro = p.ageTracker.CurLifeStage.reproductive;
-        switch (scope)
-        {
-            case AgeScope.Adult: return repro;
-            case AgeScope.Young: return !repro;
-            default: return true;
-        }
-    }
-
-    public static bool GenderMatches(Pawn p, GenderScope scope)
-    {
-        switch (scope)
-        {
-            case GenderScope.Male: return p.gender == Gender.Male;
-            case GenderScope.Female: return p.gender == Gender.Female;
-            default: return true;
-        }
-    }
-
-    public static bool InheritableMatches(HediffDef trait, TraitInheritability mode)
-    {
-        switch (mode)
-        {
-            case TraitInheritability.Inheritable: return IntegrationRegistry.Traits.IsInheritable(trait);
-            case TraitInheritability.NonInheritable: return !IntegrationRegistry.Traits.IsInheritable(trait);
-            default: return true;
-        }
-    }
-
-    private static List<Pawn> SelectToKeep(List<Pawn> kindPawns, TraitProtectRule tt)
-    {
-        var keep = new List<Pawn>();
-        if (!InheritableMatches(tt.trait, tt.inheritMode))
-        {
-            return keep;
-        }
-
-        var bearers = kindPawns
-            .Where(p => IntegrationRegistry.Traits.HasTrait(p, tt.trait) && AgeMatches(p, tt.ageScope) && GenderMatches(p, tt.genderScope))
-            .OrderBy(p => p.ageTracker.AgeBiologicalTicks)
-            .ToList();
-
-        bool biasPair = tt.inheritMode != TraitInheritability.NonInheritable && IntegrationRegistry.Traits.IsInheritable(tt.trait);
-        if (biasPair)
-        {
-            var male = bearers.FirstOrDefault(p => p.gender == Gender.Male && p.ageTracker.CurLifeStage.reproductive);
-            var female = bearers.FirstOrDefault(p => p.gender == Gender.Female && p.ageTracker.CurLifeStage.reproductive);
-            if (male != null)
-            {
-                keep.Add(male);
-            }
-            if (female != null)
-            {
-                keep.Add(female);
-            }
-        }
-        foreach (var b in bearers)
-        {
-            if (keep.Count >= tt.keepCount)
-            {
-                break;
-            }
-            if (!keep.Contains(b))
-            {
-                keep.Add(b);
-            }
-        }
-        return keep;
-    }
+    private static bool HasForceCullTrait(Pawn p, KindSettings ks) => IntegrationRegistry.Traits.ShouldForceCullBySettings(p, ks);
 }

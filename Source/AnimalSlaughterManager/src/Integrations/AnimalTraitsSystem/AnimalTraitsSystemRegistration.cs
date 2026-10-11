@@ -13,6 +13,10 @@ public static class AnimalTraitsSystemRegistration
 {
     static AnimalTraitsSystemRegistration()
     {
+        // The kind-settings provider is registered unconditionally: the settings data
+        // survives ATS being disabled (the types live in this assembly).
+        IntegrationRegistry.RegisterKindSettings(new KindTraitsSettings.Provider());
+
         if (ModsConfig.IsActive(AnimalTraitsIntegration.PackageId))
         {
             IntegrationRegistry.RegisterTraits(new AnimalTraitsIntegration());

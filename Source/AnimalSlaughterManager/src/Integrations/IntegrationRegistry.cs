@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Verse;
 
@@ -16,6 +17,20 @@ public static class IntegrationRegistry
     private static ITraitsIntegration traits = new NoneTraitsIntegration();
 
     public static ITraitsIntegration Traits => traits;
+
+    private static readonly List<IKindIntegrationSettingsProvider> kindSettingsProviders = [];
+
+    /// <summary>Providers of integration-owned kind settings, registered unconditionally
+    /// (the settings survive their mod being disabled).</summary>
+    public static IReadOnlyList<IKindIntegrationSettingsProvider> KindSettingsProviders => kindSettingsProviders;
+
+    public static void RegisterKindSettings(IKindIntegrationSettingsProvider provider)
+    {
+        if (kindSettingsProviders.All(p => p.KindSettingsKey != provider.KindSettingsKey))
+        {
+            kindSettingsProviders.Add(provider);
+        }
+    }
 
     public static void RegisterTraits(ITraitsIntegration implementation)
     {
@@ -51,4 +66,14 @@ public sealed class NoneTraitsIntegration : ITraitsIntegration
     }
 
     public IKindSlaughterSettingsDialogTab? CreateSpecialRulesTab(KindSettings settings) => null;
+
+    public IReadOnlyCollection<Pawn> SelectKeepReserved(Map map, ThingDef kind, KindSettings ks) => Array.Empty<Pawn>();
+
+    public int CountKept(Map map, ThingDef kind, KindSettings ks) => 0;
+
+    public bool ShouldForceCullBySettings(Pawn pawn, KindSettings ks) => false;
+
+    public bool HasKeepRules(KindSettings ks) => false;
+
+    public bool HasForceCullRules(KindSettings ks) => false;
 }

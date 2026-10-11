@@ -165,8 +165,8 @@ namespace ASM
             bool hasKs = comp.kindSettings.TryGetValue(def, out var ks) && ks != null;
             // Indicator categories. Individual protection is intentionally NOT indicated here
             // (it has its own column); only per-kind trait/priority settings are.
-            bool hasProtection = hasKs && ks.HasProtectionSettings;
-            bool hasForceCull = hasKs && ks.HasForceCullSettings;
+            bool hasProtection = hasKs && IntegrationRegistry.Traits.HasKeepRules(ks);
+            bool hasForceCull = hasKs && IntegrationRegistry.Traits.HasForceCullRules(ks);
             bool hasPriority = hasKs && comp.KindHasCustomPrefs(def);
             CountKind(def, config, out int total, out int m, out int my, out int f, out int fy, out int preg, out int bond);
 

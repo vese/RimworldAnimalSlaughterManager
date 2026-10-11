@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using RimWorld;
 using UnityEngine;
 using Verse;
 
@@ -64,5 +66,167 @@ public sealed class AnimalTraitsIntegration : ITraitsIntegration
         options.Add(new FloatMenuOption(labelKey.Translate(), () => addRule(factory())));
 
     public IKindSlaughterSettingsDialogTab? CreateSpecialRulesTab(KindSettings settings) =>
-        new KindSlaughterSettingsDialogSpecialRulesTab(settings.traitsSettings);
+        new KindSlaughterSettingsDialogSpecialRulesTab(KindTraitsSettings.Of(settings));
+
+    // ---- Slaughter-engine services ---------------------------------------------------------
+
+    public bool HasKeepRules(KindSettings ks) => KindTraitsSettings.Of(ks).protectRuleSet.HasRules;
+
+    public bool HasForceCullRules(KindSettings ks) => KindTraitsSettings.Of(ks).forceCullRuleSet.HasRules;
+
+    public IReadOnlyCollection<Pawn> SelectKeepReserved(Map map, ThingDef kind, KindSettings ks)
+    {
+        var reserved = new List<Pawn>();
+        var settings = KindTraitsSettings.Of(ks);
+
+        if (!settings.protectRuleSet.HasRules)
+        {
+            return reserved;
+        }
+
+        var kindPawns = map.mapPawns.SpawnedColonyAnimals.Where(p => p.def == kind).ToList();
+
+        foreach (var tt in settings.protectRuleSet.rules)
+        {
+            if (tt?.trait == null || tt.keepCount <= 0)
+            {
+                continue;
+            }
+
+            reserved.AddRange(SelectToKeep(kindPawns, tt));
+        }
+
+        return reserved;
+    }
+
+    public int CountKept(Map map, ThingDef kind, KindSettings ks)
+    {
+        var settings = KindTraitsSettings.Of(ks);
+        int n = 0;
+
+        foreach (var pa in map.mapPawns.SpawnedColonyAnimals)
+        {
+            if (pa.def != kind)
+            {
+                continue;
+            }
+
+            foreach (var tt in settings.protectRuleSet.rules)
+            {
+                if (tt.trait != null && HasTrait(pa, tt.trait)
+                    && AgeMatches(pa, tt.ageScope) && GenderMatches(pa, tt.genderScope)
+                    && InheritableMatches(tt.trait, tt.inheritMode))
+                {
+                    n++;
+                    break;
+                }
+            }
+        }
+
+        return n;
+    }
+
+    public bool ShouldForceCullBySettings(Pawn pawn, KindSettings ks)
+    {
+        foreach (var ct in KindTraitsSettings.Of(ks).forceCullRuleSet.rules)
+        {
+            if (ct.trait != null && HasTrait(pawn, ct.trait)
+                && AgeMatches(pawn, ct.ageScope) && GenderMatches(pawn, ct.genderScope)
+                && InheritableMatches(ct.trait, ct.inheritMode))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool AgeMatches(Pawn p, AgeScope scope)
+    {
+        bool repro = p.ageTracker.CurLifeStage.reproductive;
+
+        switch (scope)
+        {
+            case AgeScope.Adult:
+                return repro;
+            case AgeScope.Young:
+                return !repro;
+            default:
+                return true;
+        }
+    }
+
+    private static bool GenderMatches(Pawn p, GenderScope scope)
+    {
+        switch (scope)
+        {
+            case GenderScope.Male:
+                return p.gender == Gender.Male;
+            case GenderScope.Female:
+                return p.gender == Gender.Female;
+            default:
+                return true;
+        }
+    }
+
+    private static bool InheritableMatches(HediffDef trait, TraitInheritability mode)
+    {
+        switch (mode)
+        {
+            case TraitInheritability.Inheritable:
+                return AnimalTraitsAccess.IsInheritable(trait);
+            case TraitInheritability.NonInheritable:
+                return !AnimalTraitsAccess.IsInheritable(trait);
+            default:
+                return true;
+        }
+    }
+
+    private static List<Pawn> SelectToKeep(List<Pawn> kindPawns, TraitProtectRule tt)
+    {
+        var keep = new List<Pawn>();
+
+        if (!InheritableMatches(tt.trait, tt.inheritMode))
+        {
+            return keep;
+        }
+
+        var bearers = kindPawns
+            .Where(p => AnimalTraitsAccess.HasTrait(p, tt.trait) && AgeMatches(p, tt.ageScope) && GenderMatches(p, tt.genderScope))
+            .OrderBy(p => p.ageTracker.AgeBiologicalTicks)
+            .ToList();
+
+        bool biasPair = tt.inheritMode != TraitInheritability.NonInheritable && AnimalTraitsAccess.IsInheritable(tt.trait);
+
+        if (biasPair)
+        {
+            var male = bearers.FirstOrDefault(p => p.gender == Gender.Male && p.ageTracker.CurLifeStage.reproductive);
+            var female = bearers.FirstOrDefault(p => p.gender == Gender.Female && p.ageTracker.CurLifeStage.reproductive);
+
+            if (male != null)
+            {
+                keep.Add(male);
+            }
+
+            if (female != null)
+            {
+                keep.Add(female);
+            }
+        }
+
+        foreach (var b in bearers)
+        {
+            if (keep.Count >= tt.keepCount)
+            {
+                break;
+            }
+
+            if (!keep.Contains(b))
+            {
+                keep.Add(b);
+            }
+        }
+
+        return keep;
+    }
 }

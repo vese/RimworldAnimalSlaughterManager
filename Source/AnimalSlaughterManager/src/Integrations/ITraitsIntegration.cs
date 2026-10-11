@@ -41,4 +41,22 @@ public interface ITraitsIntegration
 
     /// <summary>The per-kind tab with the integration's special rules; null = none.</summary>
     IKindSlaughterSettingsDialogTab? CreateSpecialRulesTab(KindSettings settings);
+
+    // ---- Slaughter-engine services (keep/force-cull by the integration's own settings) ----
+
+    /// <summary>Animals of the kind reserved as breeding stock by the keep rules (never
+    /// slaughtered, counted toward the thresholds).</summary>
+    IReadOnlyCollection<Pawn> SelectKeepReserved(Map map, ThingDef kind, KindSettings ks);
+
+    /// <summary>Animals of the kind currently matching a keep rule.</summary>
+    int CountKept(Map map, ThingDef kind, KindSettings ks);
+
+    /// <summary>True when the animal matches a force-cull rule of the kind's settings.</summary>
+    bool ShouldForceCullBySettings(Pawn pawn, KindSettings ks);
+
+    /// <summary>The kind has keep rules at all.</summary>
+    bool HasKeepRules(KindSettings ks);
+
+    /// <summary>The kind has force-cull rules at all.</summary>
+    bool HasForceCullRules(KindSettings ks);
 }

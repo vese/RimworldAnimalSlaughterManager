@@ -21,6 +21,11 @@
   настройки и UI (`UI/KindSlaughterSettingsDialogSpecialRulesTab`, секции списков).
 
 ## Правила
+- Модель ядра (`KindSettings`, `KindDto`) не содержит типов интеграций: свои настройки живут в
+  `KindSettings.integrationData` по ключу провайдера (`IKindIntegrationSettings`), в пресетах —
+  как XML-секция (`KindDto.IntegrationSections`); легаси-плоские узлы пресетов читаются.
+- Сейв: настройки интеграций хранятся словарём (dataVersion 2); старые сейвы читаются
+  v1-мостом (плоские ключи читает сам класс настроек, затем переезжает под свой ключ).
 
 - Вне `src/Integrations/<Mod>/` — ни одной ссылки на обёртки/типы чужого мода, только
   `IntegrationRegistry.Traits` (контракт).

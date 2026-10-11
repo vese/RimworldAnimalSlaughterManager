@@ -97,7 +97,7 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
         {
             Find.WindowStack.Add(new Dialog_PresetBrowser(comp, PresetScope.List, animalDef, PresetsTitleKey.Translate(animalDef.LabelCap),
                 name => PresetRepository.ExportList(name, animalDef, RuleSet),
-                e => PresetRepository.ReadKindSlice(e, animalDef) is { } kd && RuleSet.Load(kd),
+                e => PresetRepository.ReadKindSlice(e, animalDef) is { } kd && RuleSet.ReadXml(XmlSections.Wrap(kd.IntegrationSections)),
                 () => RuleSet.HasRules));
         }
 
