@@ -13,7 +13,7 @@ namespace ASM;
 /// dispatch between the current and historical formats, and the condition-bucket mapping.
 /// No RimWorld types here — this is the unit-testable core under <see cref="PresetRepository"/>.
 /// </summary>
-public static class PresetFormats
+public static class PresetSerializer
 {
     // XmlSerializer generates a serialization assembly on first use — cache the instances.
     /// <summary>Root element names pairing the [XmlRoot] values of the DTO carriers; the
@@ -109,24 +109,5 @@ public static class PresetFormats
         }
 
         return null;
-    }
-
-    /// <summary>The rule list a condition preset's bucket is stored in.</summary>
-    public static List<PriorityRuleDto> BucketRuleDtos(KindDto kd, CondBucket bucket) => bucket switch
-    {
-        CondBucket.AdultMale => kd.PrioRulesAdultMale,
-        CondBucket.YoungMale => kd.PrioRulesYoungMale,
-        CondBucket.AdultFemale => kd.PrioRulesAdultFemale,
-        _ => kd.PrioRulesYoungFemale,
-    };
-
-    /// <summary>The single non-empty bucket list — a condition preset stores exactly one; the
-    /// bucket is the preset's origin, the rules apply to whatever bucket is targeted.</summary>
-    public static List<PriorityRuleDto>? ConditionRuleDtos(KindDto kd)
-    {
-        var rules = new[] { kd.PrioRulesAdultMale, kd.PrioRulesYoungMale, kd.PrioRulesAdultFemale, kd.PrioRulesYoungFemale }
-            .FirstOrDefault(l => l != null && l.Count > 0);
-
-        return rules?.ToList();
     }
 }

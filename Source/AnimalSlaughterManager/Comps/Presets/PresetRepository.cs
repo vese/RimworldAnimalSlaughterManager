@@ -139,7 +139,7 @@ namespace ASM;
             Store.EnsureFolder(CondFolder(bucket));
 
             var kd = new KindDto { animal = "" };
-            PresetFormats.BucketRuleDtos(kd, bucket).AddRange(rules.Select(PriorityRuleDto.From));
+            kd.BucketRules(bucket).AddRange(rules.Select(PriorityRuleDto.From));
 
             var dto = new SlaughterPresetDto();
             dto.Kinds.Add(kd);
@@ -153,13 +153,13 @@ namespace ASM;
         {
             var text = Store.ReadText(entry.path);
 
-            switch (PresetFormats.RootElementOf(text))
+            switch (PresetSerializer.RootElementOf(text))
             {
-                case PresetFormats.CarrierRoot:
-                    var kd = PresetFormats.ReadCarrier(text)?.Kinds?.FirstOrDefault();
-                    return kd == null ? null : RulesOf(PresetFormats.ConditionRuleDtos(kd));
-                case PresetFormats.RulePresetRoot:
-                    return RulesOf(PresetFormats.ReadRulePreset(text));
+                case PresetSerializer.CarrierRoot:
+                    var kd = PresetSerializer.ReadCarrier(text)?.Kinds?.FirstOrDefault();
+                    return kd == null ? null : RulesOf(kd.ConditionRules());
+                case PresetSerializer.RulePresetRoot:
+                    return RulesOf(PresetSerializer.ReadRulePreset(text));
                 default:
                     return PresetLegacyReader.TryReadConditions(entry);
             }
@@ -172,14 +172,14 @@ namespace ASM;
         /// is ignored — the slice applies to any target kind). Null when there is no such slice.</summary>
         public static List<BasePriorityRule>? ReadKindRules(PresetEntry entry, CondBucket bucket)
         {
-            var kd = PresetFormats.ReadCarrier(Store.ReadText(entry.path))?.Kinds?.FirstOrDefault();
+            var kd = PresetSerializer.ReadCarrier(Store.ReadText(entry.path))?.Kinds?.FirstOrDefault();
 
             if (kd == null)
             {
                 return null;
             }
 
-            return RulesOf(PresetFormats.BucketRuleDtos(kd, bucket));
+            return RulesOf(kd.BucketRules(bucket));
         }
 
         public static List<PresetEntry> ListConditionPresets(CondBucket bucket)
@@ -207,7 +207,7 @@ namespace ASM;
         /// <summary>Apply a whole all-animals preset to the map (all configured kinds).</summary>
         public static void ApplyAll(PresetEntry entry, ASM_MapComp comp)
         {
-            var dto = PresetFormats.ReadCarrier(Store.ReadText(entry.path));
+            var dto = PresetSerializer.ReadCarrier(Store.ReadText(entry.path));
             if (dto == null)
             {
                 return;
@@ -257,7 +257,7 @@ namespace ASM;
 
         private static KindDto? RelevantKindDto(PresetEntry? entry, ThingDef targetDef)
         {
-            var dto = PresetFormats.ReadCarrier(entry == null ? null : Store.ReadText(entry.path));
+            var dto = PresetSerializer.ReadCarrier(entry == null ? null : Store.ReadText(entry.path));
             if (dto?.Kinds == null || dto.Kinds.Count == 0)
             {
                 return null;
@@ -274,7 +274,7 @@ namespace ASM;
 
         private static void Serialize(string name, string folder, SlaughterPresetDto dto)
         {
-            Store.WriteText(Path.Combine(folder, Sanitize(name) + ".xml"), PresetFormats.SerializeToText(dto));
+            Store.WriteText(Path.Combine(folder, Sanitize(name) + ".xml"), PresetSerializer.SerializeToText(dto));
         }
 
         private static string Sanitize(string name)

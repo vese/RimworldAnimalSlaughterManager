@@ -33,7 +33,7 @@ public static class PresetLegacyReader
     public static List<BasePriorityRule>? TryReadConditions(PresetEntry entry)
     {
 #pragma warning disable CS0612, CS0618
-        var conditions = PresetFormats.ReadConditionPreset(PresetRepository.Store.ReadText(entry.path));
+        var conditions = PresetSerializer.ReadConditionPreset(PresetRepository.Store.ReadText(entry.path));
 
         if (conditions == null)
         {

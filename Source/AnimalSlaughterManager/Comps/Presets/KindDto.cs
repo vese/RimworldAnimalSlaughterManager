@@ -47,4 +47,23 @@ namespace ASM;
             ks.Reset();
             ks.Load(this);
         }
+
+        /// <summary>The rule list a condition preset's bucket is stored in.</summary>
+        public List<PriorityRuleDto> BucketRules(CondBucket bucket) => bucket switch
+        {
+            CondBucket.AdultMale => PrioRulesAdultMale,
+            CondBucket.YoungMale => PrioRulesYoungMale,
+            CondBucket.AdultFemale => PrioRulesAdultFemale,
+            _ => PrioRulesYoungFemale,
+        };
+
+        /// <summary>The single non-empty bucket list — a condition preset stores exactly one;
+        /// the bucket is the preset's origin, the rules apply to whatever bucket is targeted.</summary>
+        public List<PriorityRuleDto>? ConditionRules()
+        {
+            var rules = new[] { PrioRulesAdultMale, PrioRulesYoungMale, PrioRulesAdultFemale, PrioRulesYoungFemale }
+                .FirstOrDefault(l => l != null && l.Count > 0);
+
+            return rules?.ToList();
+        }
     }
