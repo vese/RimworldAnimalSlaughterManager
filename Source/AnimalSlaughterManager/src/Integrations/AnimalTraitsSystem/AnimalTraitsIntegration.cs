@@ -8,39 +8,19 @@ using Verse;
 namespace ASM;
 
 /// <summary>
-/// The Animal Traits System integration: adapts <see cref="AnimalTraitsAccess"/> (the foreign
-/// mod's API wrapper) to <see cref="IAnimalContentIntegration"/>. Registered at startup when ATS is
-/// active; nothing outside this folder references ATS wrappers.
+/// The Animal Traits System integration adapter: implements the core's service contracts over
+/// <see cref="AnimalTraitsAccess"/> (the foreign mod's API wrapper). Registered at startup when
+/// ATS is active; nothing outside this folder references ATS wrappers.
 /// </summary>
-public sealed class AnimalTraitsIntegration : IAnimalContentIntegration
+public sealed class AnimalTraitsIntegration :
+    IRuleOptionsSource, ISettingsTabSource, IPawnSlaughterSignals, IKeepReserveSource, IKindForceCullSource, IExternalForceCullSource
 {
     public const string PackageId = "luved.animaltraits";
 
-    public bool Active => AnimalTraitsAccess.IsATSActive;
-
-    public bool HasAvailableTraits => AnimalTraitsAccess.HasAvailableTraits;
-
-    public IReadOnlyList<HediffDef> KnownTraitDefs => AnimalTraitsAccess.KnownTraitDefs;
-
-    public bool HasTrait(Pawn? pawn, HediffDef? def) => AnimalTraitsAccess.HasTrait(pawn, def);
-
-    public bool IsInheritable(HediffDef def) => AnimalTraitsAccess.IsInheritable(def);
-
-    public IReadOnlyCollection<string> CullTraitDefNames => AnimalTraitsAccess.GetCullTraitDefNames();
-
-    public bool ShouldCull(Pawn pawn, IReadOnlyCollection<string> cullTraitDefNames) =>
-        AnimalTraitsAccess.ShouldCull(pawn, cullTraitDefNames as HashSet<string> ?? [.. cullTraitDefNames]);
-
-    public Color TraitColor(HediffDef def) => AnimalTraitsAccess.TraitColor(def);
-
-    public string TraitTip(HediffDef def) => AnimalTraitsAccess.TraitTip(def);
-
-    public string FormatStatFactor(float factor) => AnimalTraitsAccess.FormatStatFactor(factor);
-
-    public void AddRuleMenuOptions(List<FloatMenuOption> options, Action<BasePriorityRule> addRule)
+    public void AddRuleOptions(List<FloatMenuOption> options, Action<BasePriorityRule> addRule)
     {
         // Trait options only when ATS trait content is actually loaded.
-        if (!HasAvailableTraits)
+        if (!AnimalTraitsAccess.HasAvailableTraits)
         {
             return;
         }
@@ -65,8 +45,36 @@ public sealed class AnimalTraitsIntegration : IAnimalContentIntegration
     private static void AddOption(List<FloatMenuOption> options, string labelKey, Func<BasePriorityRule> factory, Action<BasePriorityRule> addRule) =>
         options.Add(new FloatMenuOption(labelKey.Translate(), () => addRule(factory())));
 
-    public IKindSlaughterSettingsDialogTab? CreateSpecialRulesTab(KindSettings settings) =>
+    public IKindSlaughterSettingsDialogTab? CreateTab(KindSettings settings) =>
         new KindSlaughterSettingsDialogSpecialRulesTab(KindTraitsSettings.Of(settings));
+
+    public (int Good, int Bad) SignalsOf(Pawn pawn)
+    {
+        // Tie-breaker signals of the bucket sort: good traits last, bad traits first.
+        int good = 0, bad = 0;
+
+        foreach (var def in AnimalTraitsAccess.KnownTraitDefs)
+        {
+            if (AnimalTraitsAccess.HasTrait(pawn, def))
+            {
+                if (def.isBad)
+                {
+                    bad++;
+                }
+                else
+                {
+                    good++;
+                }
+            }
+        }
+
+        return (good, bad);
+    }
+
+    public bool HasCullRules => AnimalTraitsAccess.GetCullTraitDefNames().Count > 0;
+
+    public bool ShouldCull(Pawn pawn) =>
+        AnimalTraitsAccess.ShouldCull(pawn, AnimalTraitsAccess.GetCullTraitDefNames());
 
     // ---- Slaughter-engine services ---------------------------------------------------------
 
@@ -113,7 +121,7 @@ public sealed class AnimalTraitsIntegration : IAnimalContentIntegration
 
             foreach (var tt in settings.protectRuleSet.rules)
             {
-                if (tt.trait != null && HasTrait(pa, tt.trait)
+                if (tt.trait != null && AnimalTraitsAccess.HasTrait(pa, tt.trait)
                     && AgeMatches(pa, tt.ageScope) && GenderMatches(pa, tt.genderScope)
                     && InheritableMatches(tt.trait, tt.inheritMode))
                 {
@@ -126,11 +134,11 @@ public sealed class AnimalTraitsIntegration : IAnimalContentIntegration
         return n;
     }
 
-    public bool ShouldForceCullBySettings(Pawn pawn, KindSettings ks)
+    public bool ShouldForceCull(Pawn pawn, KindSettings ks)
     {
         foreach (var ct in KindTraitsSettings.Of(ks).forceCullRuleSet.rules)
         {
-            if (ct.trait != null && HasTrait(pawn, ct.trait)
+            if (ct.trait != null && AnimalTraitsAccess.HasTrait(pawn, ct.trait)
                 && AgeMatches(pawn, ct.ageScope) && GenderMatches(pawn, ct.genderScope)
                 && InheritableMatches(ct.trait, ct.inheritMode))
             {

@@ -54,7 +54,7 @@ public class Dialog_KindSlaughterSettings : Window
             new KindSlaughterSettingsDialogGeneralTab(comp.kindSettings, comp.globalSettings)
         ];
 
-        var specialRulesTab = IntegrationRegistry.AnimalContent.CreateSpecialRulesTab(settings);
+        var specialRulesTab = IntegrationRegistry.Services<ISettingsTabSource>()            .Select(source => source.CreateTab(settings))            .FirstOrDefault(tab => tab != null);
 
         if (specialRulesTab != null)
         {

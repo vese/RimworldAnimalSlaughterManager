@@ -81,7 +81,7 @@ public class KindSettings : IExposable, IPresettable
             // v1: the integration settings were a flat field of this node. The (single, the
             // traits) provider's settings read the same keys right here, then move under their
             // own key at PostLoadInit; the save is rewritten in the current format.
-            var providers = IntegrationRegistry.KindSettingsProviders;
+            var providers = IntegrationRegistry.Services<IKindIntegrationSettingsProvider>();
 
             if (Scribe.mode == LoadSaveMode.LoadingVars && pendingLegacy == null && providers.Count > 0)
             {

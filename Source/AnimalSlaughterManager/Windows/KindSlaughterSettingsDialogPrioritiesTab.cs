@@ -396,7 +396,12 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         AddRuleOption(options, ASMKeys.CondTrainingFull.Translate(), male, adult, () => new TrainingGeneralPriorityRule { type = TrainingGeneralType.Full });
 
         // The trait options come from the traits integration (none registered = no options).
-        IntegrationRegistry.AnimalContent.AddRuleMenuOptions(options, rule => settings.prioritySettings.Add(male, adult, rule));
+        {
+            foreach (var source in IntegrationRegistry.Services<IRuleOptionsSource>())
+            {
+                source.AddRuleOptions(options, rule => settings.prioritySettings.Add(male, adult, rule));
+            }
+        }
 
         Find.WindowStack.Add(new FloatMenu(options));
     }

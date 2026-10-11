@@ -5,8 +5,8 @@ namespace ASM;
 
 /// <summary>
 /// Self-registration of the Animal Traits System integration: RimWorld runs every
-/// [StaticConstructorOnStartup] type, so the integration registers itself when its foreign
-/// mod is active — the core never names its integrations, it only knows the registry contracts.
+/// [StaticConstructorOnStartup] type, so the integration registers its services when its
+/// foreign mod is active — the core resolves them through the registry contracts only.
 /// </summary>
 [StaticConstructorOnStartup]
 public static class AnimalTraitsSystemRegistration
@@ -15,11 +15,19 @@ public static class AnimalTraitsSystemRegistration
     {
         // The kind-settings provider is registered unconditionally: the settings data
         // survives ATS being disabled (the types live in this assembly).
-        IntegrationRegistry.RegisterKindSettings(new KindTraitsSettings.Provider());
+        IntegrationRegistry.Add<IKindIntegrationSettingsProvider>(new KindTraitsSettings.Provider());
 
-        if (ModsConfig.IsActive(AnimalTraitsIntegration.PackageId))
+        if (!ModsConfig.IsActive(AnimalTraitsIntegration.PackageId))
         {
-            IntegrationRegistry.RegisterAnimalContent(new AnimalTraitsIntegration());
+            return;
         }
+
+        var integration = new AnimalTraitsIntegration();
+        IntegrationRegistry.Add<IRuleOptionsSource>(integration);
+        IntegrationRegistry.Add<ISettingsTabSource>(integration);
+        IntegrationRegistry.Add<IPawnSlaughterSignals>(integration);
+        IntegrationRegistry.Add<IKeepReserveSource>(integration);
+        IntegrationRegistry.Add<IKindForceCullSource>(integration);
+        IntegrationRegistry.Add<IExternalForceCullSource>(integration);
     }
 }
