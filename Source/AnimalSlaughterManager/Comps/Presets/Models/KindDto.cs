@@ -9,7 +9,8 @@ namespace ASM;
 
 public class KindDto
 {
-    [XmlAttribute] public string animal;
+    [XmlAttribute]
+        public string animal;
     public string malePref;
     public string femalePref;
     public string maleYoungPref;

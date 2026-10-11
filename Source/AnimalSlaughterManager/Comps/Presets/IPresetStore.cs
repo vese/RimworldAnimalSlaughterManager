@@ -10,9 +10,6 @@ public interface IPresetStore
     /// <summary>Paths of the <c>*.xml</c> files directly inside the folder (missing folder — empty).</summary>
     IEnumerable<string> GetFiles(string folder);
 
-    /// <summary>Creates the folder (and parents) when missing.</summary>
-    void EnsureFolder(string folder);
-
     string? ReadText(string path);
 
     void WriteText(string path, string text);

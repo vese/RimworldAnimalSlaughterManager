@@ -102,13 +102,11 @@ namespace ASM;
 
         public static void ExportAll(string name, ASM_MapComp comp)
         {
-            Store.EnsureFolder(ScopeFolder(PresetScope.All));
             Serialize(name, ScopeFolder(PresetScope.All), SlaughterPresetDto.From(comp));
         }
 
         public static void ExportKind(string name, ThingDef animalDef, KindSettings ks)
         {
-            Store.EnsureFolder(ScopeFolder(PresetScope.Kind));
             var dto = new SlaughterPresetDto();
             dto.Kinds.Add(KindDto.Capture(animalDef, ks));
             Serialize(name, ScopeFolder(PresetScope.Kind), dto);
@@ -117,7 +115,6 @@ namespace ASM;
         public static void ExportList(string name, ThingDef animalDef, IPresettableRuleSet ruleSet)
         {
             var folder = Path.Combine(ScopeFolder(PresetScope.List), ruleSet.PresetsFolder);
-            Store.EnsureFolder(folder);
 
             var full = new KindDto { animal = animalDef.defName };
             ruleSet.Save(full);
@@ -145,7 +142,6 @@ namespace ASM;
         // rules go to whatever bucket is targeted (cross-bucket import).
         public static void ExportConditions(string name, (bool Male, bool Adult) bucket, List<BasePriorityRule> rules)
         {
-            Store.EnsureFolder(CondFolder(bucket));
 
             var kd = new KindDto { animal = "" };
             kd.GetBucketRules(bucket).AddRange(rules.Select(PriorityRuleDto.From));

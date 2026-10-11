@@ -10,11 +10,20 @@ public sealed class FilePresetStore : IPresetStore
     public IEnumerable<string> GetFiles(string folder) =>
         Directory.Exists(folder) ? Directory.GetFiles(folder, "*.xml", SearchOption.TopDirectoryOnly) : Array.Empty<string>();
 
-    public void EnsureFolder(string folder) => Directory.CreateDirectory(folder);
 
     public string? ReadText(string path) => File.Exists(path) ? File.ReadAllText(path) : null;
 
-    public void WriteText(string path, string text) => File.WriteAllText(path, text);
+    public void WriteText(string path, string text)
+    {
+        var folder = Path.GetDirectoryName(path);
+
+        if (!string.IsNullOrEmpty(folder))
+        {
+            Directory.CreateDirectory(folder);
+        }
+
+        File.WriteAllText(path, text);
+    }
 
     public void Delete(string path)
     {
