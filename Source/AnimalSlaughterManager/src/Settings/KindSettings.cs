@@ -110,14 +110,14 @@ public class KindSettings : IExposable, IPresettable
         preferenceSettings.Save(dto);
         prioritySettings.Save(dto);
 
-        var holder = XmlSections.Holder();
+        var holder = PresetSectionXml.Holder();
 
         foreach (var settings in integrationData.Values)
         {
             settings.WriteXml(holder);
         }
 
-        foreach (var el in XmlSections.Children(holder))
+        foreach (var el in PresetSectionXml.Children(holder))
         {
             dto.IntegrationSections.Add(el);
         }
@@ -128,7 +128,7 @@ public class KindSettings : IExposable, IPresettable
         preferenceSettings.Load(dto);
         prioritySettings.Load(dto);
 
-        var kind = XmlSections.Wrap(dto.IntegrationSections);
+        var kind = PresetSectionXml.Wrap(dto.IntegrationSections);
 
         foreach (var settings in integrationData.Values)
         {
