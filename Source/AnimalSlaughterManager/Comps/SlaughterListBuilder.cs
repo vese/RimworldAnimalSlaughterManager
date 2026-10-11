@@ -80,7 +80,7 @@ public static class SlaughterListBuilder
 
                 if (ASMMod.Settings?.enableLogging == true)
                 {
-                    Log.Message($"[ASM] keep-trait kind={kv.Key.defName} trait={tt.trait.defName} filter={tt.inheritMode} traitInheritable={AnimalTraitsAccess.IsInheritable(tt.trait)} keepCount={tt.keepCount} ageScope={tt.ageScope} genderScope={tt.genderScope} reserved={keepNow.Count}");
+                    Log.Message($"[ASM] keep-trait kind={kv.Key.defName} trait={tt.trait.defName} filter={tt.inheritMode} traitInheritable={IntegrationRegistry.Traits.IsInheritable(tt.trait)} keepCount={tt.keepCount} ageScope={tt.ageScope} genderScope={tt.genderScope} reserved={keepNow.Count}");
                 }
             }
         }
@@ -90,12 +90,12 @@ public static class SlaughterListBuilder
 
     private static void AddAtsForceCull(ASM_MapComp comp, List<Pawn> slaughter, HashSet<Pawn> reserved)
     {
-        if (!AnimalTraitsAccess.IsATSActive)
+        if (!IntegrationRegistry.Traits.Active)
         {
             return;
         }
 
-        var cullSet = AnimalTraitsAccess.GetCullTraitDefNames();
+        var cullSet = IntegrationRegistry.Traits.CullTraitDefNames;
 
         if (cullSet.Count == 0)
         {
@@ -109,7 +109,7 @@ public static class SlaughterListBuilder
                 continue;
             }
 
-            if (AnimalTraitsAccess.ShouldCull(pawn, cullSet))
+            if (IntegrationRegistry.Traits.ShouldCull(pawn, cullSet))
             {
                 slaughter.Add(pawn);
             }
@@ -159,7 +159,7 @@ public static class SlaughterListBuilder
         var all = new List<Pawn>();
         // Precompute each pawn's slaughter tie-breaker signals once (pregnancy, good/bad trait
         // counts, sickness) so the per-bucket sort doesn't re-scan hediffs per comparison.
-        var traitDefs = AnimalTraitsAccess.KnownTraitDefs;
+        var traitDefs = IntegrationRegistry.Traits.KnownTraitDefs;
         var vitals = new Dictionary<Pawn, PawnVitals>();
         PregnantMode pregMode = comp.ResolvePregnantMode(config.animal, config.allowSlaughterPregnant);
 
@@ -264,7 +264,7 @@ public static class SlaughterListBuilder
             }
             foreach (var tt in ks.traitsSettings.protectRuleSet.rules)
             {
-                if (tt.trait != null && AnimalTraitsAccess.HasTrait(pa, tt.trait)
+                if (tt.trait != null && IntegrationRegistry.Traits.HasTrait(pa, tt.trait)
                     && AgeMatches(pa, tt.ageScope) && GenderMatches(pa, tt.genderScope)
                     && InheritableMatches(tt.trait, tt.inheritMode))
                 {
@@ -391,7 +391,7 @@ public static class SlaughterListBuilder
         for (int i = 0; i < traitDefs.Count; i++)
         {
             var def = traitDefs[i];
-            if (AnimalTraitsAccess.HasTrait(p, def))
+            if (IntegrationRegistry.Traits.HasTrait(p, def))
             {
                 if (def.isBad)
                 {
@@ -435,7 +435,7 @@ public static class SlaughterListBuilder
         }
         foreach (var ct in ks.traitsSettings.forceCullRuleSet.rules)
         {
-            if (ct.trait != null && AnimalTraitsAccess.HasTrait(p, ct.trait)
+            if (ct.trait != null && IntegrationRegistry.Traits.HasTrait(p, ct.trait)
                 && AgeMatches(p, ct.ageScope) && GenderMatches(p, ct.genderScope)
                 && InheritableMatches(ct.trait, ct.inheritMode))
             {
@@ -470,8 +470,8 @@ public static class SlaughterListBuilder
     {
         switch (mode)
         {
-            case TraitInheritability.Inheritable: return AnimalTraitsAccess.IsInheritable(trait);
-            case TraitInheritability.NonInheritable: return !AnimalTraitsAccess.IsInheritable(trait);
+            case TraitInheritability.Inheritable: return IntegrationRegistry.Traits.IsInheritable(trait);
+            case TraitInheritability.NonInheritable: return !IntegrationRegistry.Traits.IsInheritable(trait);
             default: return true;
         }
     }
@@ -485,11 +485,11 @@ public static class SlaughterListBuilder
         }
 
         var bearers = kindPawns
-            .Where(p => AnimalTraitsAccess.HasTrait(p, tt.trait) && AgeMatches(p, tt.ageScope) && GenderMatches(p, tt.genderScope))
+            .Where(p => IntegrationRegistry.Traits.HasTrait(p, tt.trait) && AgeMatches(p, tt.ageScope) && GenderMatches(p, tt.genderScope))
             .OrderBy(p => p.ageTracker.AgeBiologicalTicks)
             .ToList();
 
-        bool biasPair = tt.inheritMode != TraitInheritability.NonInheritable && AnimalTraitsAccess.IsInheritable(tt.trait);
+        bool biasPair = tt.inheritMode != TraitInheritability.NonInheritable && IntegrationRegistry.Traits.IsInheritable(tt.trait);
         if (biasPair)
         {
             var male = bearers.FirstOrDefault(p => p.gender == Gender.Male && p.ageTracker.CurLifeStage.reproductive);
