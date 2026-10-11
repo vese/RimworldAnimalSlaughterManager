@@ -7,8 +7,9 @@ namespace ASM;
 
 /// <summary>
 /// The integration registry: the core asks it for integration services, never for foreign-mod
-/// wrappers directly. Integrations register themselves at startup (see
-/// <c>IntegrationsBootstrap</c>); the default answers implement the no-integration behavior.
+/// wrappers directly, and never names an integration by type. Integrations register themselves
+/// at startup from their own folder (their [StaticConstructorOnStartup] registration class);
+/// until then the default answers implement the no-integration behavior.
 /// </summary>
 public static class IntegrationRegistry
 {
