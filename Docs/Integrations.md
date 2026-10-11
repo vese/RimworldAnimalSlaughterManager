@@ -11,8 +11,10 @@
 - **`IntegrationRegistry`** — точка доступа ядра: `IntegrationRegistry.Traits`. Пока интеграция
   не зарегистрирована, работает `NoneTraitsIntegration` (NullObject: «ничего нет»), поэтому
   вызывающим не нужны проверки активности.
-- **`IntegrationsBootstrap`** (`[StaticConstructorOnStartup]`) — composition root: единственное
-  место, перечисляющее интеграции; добавление интеграции = строка здесь + папка.
+- **Саморегистрация** — каждая интеграция в своей папке имеет класс `[StaticConstructorOnStartup]`
+  (у ATS — `AnimalTraitsSystemRegistration`), который при активном чужом моде регистрирует её
+  в реестре. Ядро не называет интеграции по имени: новая интеграция = только своя папка,
+  ни одной правки вне её.
 - **`AnimalTraitsIntegration`** (`src/Integrations/AnimalTraitsSystem/`) — адаптер ATS:
   реализует контракт над `AnimalTraitsAccess` (обёрткой чужого API). Вся папка ATS — свои
   модели (`Models/TraitDto`), свой сет валидации (`Validation/AnimalTraitSet`), свои правила,
@@ -25,4 +27,4 @@
 - Новая услуга: метод в `ITraitsIntegration` + реализация в адаптере; `NoneTraitsIntegration`
   получает «пустое» поведение.
 - Новая интеграция: папка по образцу ATS + контракт (свой или расширение существующего) +
-  регистрация в `IntegrationsBootstrap`.
+  свой класс саморегистрации `[StaticConstructorOnStartup]` внутри папки.
