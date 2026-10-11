@@ -9,11 +9,16 @@ namespace ASM;
 
     public class TraitDto
     {
-        [XmlAttribute] public string trait;
-        [XmlAttribute] public int keepCount = 1;
-        [XmlAttribute] public string ageScope = "Both";
-        [XmlAttribute] public string genderScope = "Any";
-        [XmlAttribute] public string inheritMode = "Both";
+        [XmlAttribute]
+        public string trait;
+        [XmlAttribute]
+        public int keepCount = 1;
+        [XmlAttribute]
+        public string ageScope = "Both";
+        [XmlAttribute]
+        public string genderScope = "Any";
+        [XmlAttribute]
+        public string inheritMode = "Both";
 
         public static TraitDto From(TraitProtectRule t) => new TraitDto
         {

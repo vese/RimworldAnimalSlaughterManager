@@ -226,11 +226,11 @@ namespace ASM
         {
             var entries = new List<PresetEntry>();
             // Higher scopes are visible for cross-level application.
-            if (scope == PresetScope.Kind) entries.AddRange(PresetIO.ListPresets(PresetScope.All));
+            if (scope == PresetScope.Kind) entries.AddRange(PresetRepository.ListPresets(PresetScope.All));
             if (scope == PresetScope.List)
             {
-                entries.AddRange(PresetIO.ListPresets(PresetScope.Kind));
-                entries.AddRange(PresetIO.ListPresets(PresetScope.All));
+                entries.AddRange(PresetRepository.ListPresets(PresetScope.Kind));
+                entries.AddRange(PresetRepository.ListPresets(PresetScope.All));
             }
             entries = entries.OrderByDescending(e => e.date).ThenBy(e => e.name).ToList();
 
@@ -320,7 +320,7 @@ namespace ASM
                     string confirm = scope == PresetScope.List
                         ? ASMKeys.ConfirmDeleteList.Translate(n.name)
                         : scope == PresetScope.Kind ? ASMKeys.ConfirmDeleteKind.Translate(n.name) : ASMKeys.ConfirmDelete.Translate(n.name);
-                    Find.WindowStack.Add(new Dialog_MessageBox(confirm, ASMKeys.DeletePreset.Translate(), () => PresetIO.Delete(n),
+                    Find.WindowStack.Add(new Dialog_MessageBox(confirm, ASMKeys.DeletePreset.Translate(), () => PresetRepository.Delete(n),
                         "No".Translate()) { doCloseX = true });
                 }
             }
@@ -363,8 +363,8 @@ namespace ASM
         {
             switch (scope)
             {
-                case PresetScope.All: PresetIO.ExportAll(e.name, comp); break;
-                case PresetScope.Kind: PresetIO.ExportKind(e.name, kind, Settings); break;
+                case PresetScope.All: PresetRepository.ExportAll(e.name, comp); break;
+                case PresetScope.Kind: PresetRepository.ExportKind(e.name, kind, Settings); break;
                 default: exportList!(e.name); break;
             }
             Messages.Message(ASMKeys.PresetOverwritten.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
@@ -376,8 +376,8 @@ namespace ASM
             if (name.NullOrEmpty()) return;
             switch (scope)
             {
-                case PresetScope.All: PresetIO.ExportAll(name, comp); break;
-                case PresetScope.Kind: PresetIO.ExportKind(name, kind, Settings); break;
+                case PresetScope.All: PresetRepository.ExportAll(name, comp); break;
+                case PresetScope.Kind: PresetRepository.ExportKind(name, kind, Settings); break;
                 default: exportList!(name); break;
             }
             Messages.Message(ASMKeys.PresetSaved.Translate(name), MessageTypeDefOf.TaskCompletion, false);
@@ -390,12 +390,37 @@ namespace ASM
             switch (scope)
             {
                 case PresetScope.All:
-                    PresetIO.ApplyAll(e, comp);
+                {
+                    var dto = PresetRepository.ReadCarrier(e);
+
+                    if (dto != null)
+                    {
+                        dto.ApplyTo(comp);
+                        comp.MarkDirty();
+                    }
+                    else
+                    {
+                        ok = false;
+                    }
+
                     break;
+                }
                 case PresetScope.Kind:
-                    ok = PresetIO.ApplyKindSettings(e, kind, Settings);
+                {
+                    var kd = PresetRepository.ReadKindSlice(e, kind);
+
+                    if (kd != null)
+                    {
+                        kd.ApplyTo(Settings);
+                    }
+                    else
+                    {
+                        ok = false;
+                    }
+
                     SettingsChanges.Raise();
                     break;
+                }
                 default:
                     ok = applyList!(e);
                     SettingsChanges.Raise();

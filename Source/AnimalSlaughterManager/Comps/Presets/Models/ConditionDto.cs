@@ -10,12 +10,18 @@ namespace ASM;
     /// <summary>XML-serializable form of SlaughterCondition for preset files (stores defNames).</summary>
     public class ConditionDto
     {
-        [XmlAttribute] public string type;
-        [XmlAttribute] public bool has = true;
-        [XmlAttribute] public string trait;
-        [XmlAttribute] public string disease;
-        [XmlAttribute] public string trainable;
-        [XmlAttribute] public string inheritMode;
+        [XmlAttribute]
+        public string type;
+        [XmlAttribute]
+        public bool has = true;
+        [XmlAttribute]
+        public string trait;
+        [XmlAttribute]
+        public string disease;
+        [XmlAttribute]
+        public string trainable;
+        [XmlAttribute]
+        public string inheritMode;
 
         public static ConditionDto From(SlaughterCondition c) => new ConditionDto
         {

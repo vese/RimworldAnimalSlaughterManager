@@ -19,13 +19,20 @@ namespace ASM;
         private const string Trait = nameof(TraitPriorityRule);
         private const string TraitGeneral = nameof(TraitGeneralPriorityRule);
 
-        [XmlAttribute] public string rule;
-        [XmlAttribute] public bool has = true;
-        [XmlAttribute] public string trait;
-        [XmlAttribute] public string disease;
-        [XmlAttribute] public string trainable;
-        [XmlAttribute] public string generalType;
-        [XmlAttribute] public string inheritability;
+        [XmlAttribute]
+        public string rule;
+        [XmlAttribute]
+        public bool has = true;
+        [XmlAttribute]
+        public string trait;
+        [XmlAttribute]
+        public string disease;
+        [XmlAttribute]
+        public string trainable;
+        [XmlAttribute]
+        public string generalType;
+        [XmlAttribute]
+        public string inheritability;
 
         public static PriorityRuleDto From(BasePriorityRule r) => r switch
         {
