@@ -1,435 +1,204 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace ASM
+namespace ASM;
+
+/// <summary>
+/// Preset browser for the trait/settings scopes:
+/// <c>All</c> — every kind (opened from the slaughter manager), <c>Kind</c> — one kind's full
+/// settings, <c>List</c> — a single trait list (opened from a section's preset button). A
+/// higher-scope preset can be applied to a narrower target (only the target's slice is used);
+/// such presets carry a scope mark and cannot be deleted from a narrower context. The frame
+/// (search/toggles/rows/save) lives in <see cref="Dialog_PresetBrowserBase"/>.
+/// </summary>
+public class Dialog_PresetBrowser : Dialog_PresetBrowserBase
 {
-    /// <summary>
-    /// Unified preset manager for all three scopes:
-    /// <list type="bullet">
-    /// <item><description><c>All</c> — every kind (opened from the slaughter manager).</description></item>
-    /// <item><description><c>Kind</c> — one kind's full settings (opened from the per-kind window).</description></item>
-    /// <item><description><c>List</c> — a single trait list for one kind (opened from a section's preset button).</description></item>
-    /// </list>
-    /// Layout mirrors RimWorld's save/load list: a search row at the top (a magnifier + filter field
-    /// spanning the left half, with a clear ✕ right after it, and scope-type toggles on the right half)
-    /// and a save row pinned to the bottom; rows are zebra-striped with a top margin and side padding;
-    /// a trash-icon delete button sits to the right of the load button, and same-scope rows also carry
-    /// an overwrite button. The date is shown in a tiny font so it fits on one line. Lower-scope
-    /// contexts also list higher-scope presets so they can be applied to the narrower target (only the
-    /// target's slice is used); such presets are clearly marked in a dedicated column and cannot be
-    /// deleted here (a preset is deletable only from a context at or above its own scope). Every row
-    /// reserves the same set of columns, so columns stay aligned even when a row has no delete button,
-    /// no overwrite button or no scope mark. Presets are sorted newest-first and can be filtered by
-    /// name and by scope type. The save row is disabled when there is nothing to save or no name typed.
-    /// </summary>
-    public class Dialog_PresetBrowser : Window
+    private readonly ASM_MapComp comp;
+    private readonly PresetScope scope;
+    private readonly ThingDef kind;
+    private readonly string? listTitle;
+    private readonly Action<string>? exportList;
+    private readonly Func<PresetEntry, bool>? applyList;
+    private readonly Func<bool>? hasListData;
+
+    private int ContextRank => scope == PresetScope.All ? 3 : scope == PresetScope.Kind ? 2 : 1;
+    private KindSettings Settings => comp.GetSettings(kind);
+
+    public Dialog_PresetBrowser(ASM_MapComp comp, PresetScope scope, ThingDef kind)
+        : this(comp, scope, kind, null, null, null, null)
     {
-        private readonly ASM_MapComp comp;
-        private readonly PresetScope scope;
-        private readonly ThingDef kind;
-        private readonly string? listTitle;
-        private readonly Action<string>? exportList;
-        private readonly Func<PresetEntry, bool>? applyList;
-        private readonly Func<bool>? hasListData;
+    }
 
-        private Vector2 scroll;
-        private float listHeight = 9999f;
-        private string nameBuffer = "";
-        private string filterBuffer = "";
-        private bool showAll = true, showKind = true, showList = true;
+    public Dialog_PresetBrowser(ASM_MapComp comp, PresetScope scope, ThingDef kind,
+        string? listTitle, Action<string>? exportList, Func<PresetEntry, bool>? applyList,
+        Func<bool>? hasListData = null)
+    {
+        this.comp = comp;
+        this.scope = scope;
+        this.kind = kind;
+        this.listTitle = listTitle;
+        this.exportList = exportList;
+        this.applyList = applyList;
+        this.hasListData = hasListData;
+        optionalTitle = PresetTitle();
+    }
 
-        private const float Gap = 6f;     // consistent vertical gap (title→filter→rows→rows)
-        private const float PadX = 8f;    // row left/right padding
-        private const float RowH = 30f;
-
-        private int ContextRank => scope == PresetScope.All ? 3 : scope == PresetScope.Kind ? 2 : 1;
-        private KindSettings Settings => comp.GetSettings(kind);
-
-        public override Vector2 InitialSize => new Vector2(820f, 600f);
-
-        public Dialog_PresetBrowser(ASM_MapComp comp, PresetScope scope, ThingDef kind)
-            : this(comp, scope, kind, null, null, null, null)
+    private string PresetTitle()
+    {
+        if (scope == PresetScope.List && listTitle != null)
         {
+            return listTitle;
         }
 
-        public Dialog_PresetBrowser(ASM_MapComp comp, PresetScope scope, ThingDef kind,
-            string? listTitle, Action<string>? exportList, Func<PresetEntry, bool>? applyList,
-            Func<bool>? hasListData = null)
+        string kindLabel = kind != null ? kind.LabelCap.ToString() : "";
+
+        switch (scope)
         {
-            this.comp = comp;
-            this.scope = scope;
-            this.kind = kind;
-            this.listTitle = listTitle;
-            this.exportList = exportList;
-            this.applyList = applyList;
-            this.hasListData = hasListData;
-            doCloseX = true;
-            draggable = true;
-            resizeable = true;
-            optionalTitle = PresetTitle();
+            case PresetScope.Kind:
+                return ASMKeys.PresetTitleKind.Translate(kindLabel);
+            default:
+                return ASMKeys.PresetTitleAll.Translate();
         }
+    }
 
-        private string PresetTitle()
+    // ---- Policy ---------------------------------------------------------------------------
+
+    protected override bool ShowScopeToggles => scope != PresetScope.All;
+
+    // A scope is relevant in this context if it is the context's own scope or any broader one;
+    // the browser's own List scope shows the trait lists of this flavor (Keep/ForceCull).
+    protected override bool ScopeVisible(PresetScope s) => ScopeRank(s) >= ContextRank;
+
+    protected override IEnumerable<PresetEntry> ListEntries() => PresetRepository.ListPresets(PresetScope.List);
+
+    private static int ScopeRank(PresetScope s) => s == PresetScope.All ? 3 : s == PresetScope.Kind ? 2 : 1;
+
+    protected override bool HasData()
+    {
+        switch (scope)
         {
-            if (scope == PresetScope.List && listTitle != null)
-            {
-                return listTitle;
-            }
-
-            string kindLabel = kind != null ? kind.LabelCap.ToString() : "";
-            switch (scope)
-            {
-                case PresetScope.Kind:
-                    return ASMKeys.PresetTitleKind.Translate(kindLabel);
-                default:
-                    return ASMKeys.PresetTitleAll.Translate();
-            }
+            case PresetScope.All:
+                return comp.kindSettings.Values.Any(k => k != null && k.Customized);
+            case PresetScope.Kind:
+                return Settings.Customized;
+            default:
+                return hasListData?.Invoke() ?? false;
         }
+    }
 
-        public override void DoWindowContents(Rect inRect)
+    protected override void Save(string name)
+    {
+        switch (scope)
         {
-            Text.Font = GameFont.Small;
-
-            float btnW = Mathf.Max(96f, Text.CalcSize(ASMKeys.SavePreset.Translate()).x + 18f);
-
-            // --- Top: search row, one Gap below the title. Magnifier + filter field spanning the left
-            // half with a clear ✕ right after it; scope-type toggles fill the right half (skipped for
-            // the All-scope browser which only shows one type). ---
-            float y = inRect.y + Gap;
-            const float topH = 28f;
-            const float icon = 22f, gap = 6f, clearGap = 10f;
-            bool showToggles = scope != PresetScope.All;
-            float mid = showToggles ? inRect.x + inRect.width * 0.5f : inRect.xMax - icon - clearGap;
-            GUI.DrawTexture(new Rect(inRect.x, y + (topH - icon) / 2f, icon, icon), TexButton.Search);
-            float fieldX = inRect.x + icon + gap;
-            float fieldEnd = mid - icon - clearGap;
-            filterBuffer = Widgets.TextField(new Rect(fieldX, y + 1f, fieldEnd - fieldX, 26f), filterBuffer);
-            Rect clearBtn = new Rect(mid - icon, y + (topH - icon) / 2f, icon, icon);
-            TooltipHandler.TipRegion(clearBtn, ASMKeys.Clear.Translate());
-            if (Widgets.ButtonImage(clearBtn, TexButton.CloseXSmall))
-                filterBuffer = "";
-            if (!showToggles) { y += topH + Gap; }
-            else
-            {
-                // Scope-type filters (only the scopes visible in this context), right-aligned to the
-                // window edge.
-                var scopes = new List<PresetScope> { PresetScope.List, PresetScope.Kind, PresetScope.All };
-                float toggleW = 0f;
-                foreach (var sc in scopes)
-                    if (ScopeVisible(sc)) toggleW += ScopeToggleWidth(sc) + Gap;
-                float tx = inRect.xMax - toggleW + Gap;
-                foreach (var sc in scopes)
-                    DrawScopeToggle(ref tx, y, sc);
-                y += topH + Gap;
-            }
-
-            // --- Bottom: save row (name field + Save button). ---
-            const float saveRowH = 30f;
-            float listBottom = inRect.yMax - saveRowH - Gap;
-
-            // --- Middle: the preset list. ---
-            var entries = Gather();
-            Rect outRect = new Rect(inRect.x, y, inRect.width, listBottom - y);
-            Rect view = new Rect(inRect.x, y, inRect.width - 16f, Mathf.Max(listHeight, outRect.height));
-            Widgets.BeginScrollView(outRect, ref scroll, view);
-
-            float cy = view.y;
-            if (entries.Count == 0)
-            {
-                GUI.color = Color.gray;
-                Widgets.Label(new Rect(view.x, cy + 4f, view.width, 24f),
-                    filterBuffer.Trim().NullOrEmpty() ? ASMKeys.NoPresets.Translate() : ASMKeys.NoPresetsFiltered.Translate());
-                GUI.color = Color.white;
-                cy += 28f;
-            }
-            int i = 0;
-            foreach (var e in entries)
-            {
-                // Each row: top margin (Gap between rows) and left/right padding (PadX).
-                Rect row = new Rect(view.x + PadX, cy, view.width - 2f * PadX, RowH);
-                DrawEntryRow(row, e, i);
-                cy += RowH + Gap;
-                i++;
-            }
-            listHeight = Mathf.Max(cy - view.y, outRect.height);
-            Widgets.EndScrollView();
-
-            // Save row: name field + Save. Disabled when nothing to save or no name.
-            bool hasData = HasSomethingToSave();
-            bool canSave = hasData && !nameBuffer.Trim().NullOrEmpty();
-            float sy = inRect.yMax - saveRowH + 2f;
-            GUI.enabled = hasData;
-            nameBuffer = Widgets.TextField(new Rect(inRect.x, sy, inRect.width - btnW - gap, 26f), nameBuffer);
-            if (Widgets.ButtonText(new Rect(inRect.xMax - btnW, sy, btnW, 26f), ASMKeys.SavePreset.Translate(), active: canSave) && canSave)
-                TrySave();
-            GUI.enabled = true;
+            case PresetScope.All:
+                PresetRepository.ExportAll(name, comp);
+                break;
+            case PresetScope.Kind:
+                PresetRepository.ExportKind(name, kind, Settings);
+                break;
+            default:
+                exportList!(name);
+                break;
         }
+    }
 
-        private static int ScopeRank(PresetScope s) => s == PresetScope.All ? 3 : s == PresetScope.Kind ? 2 : 1;
-
-        private static float ScopeToggleWidth(PresetScope s)
+    protected override bool Apply(PresetEntry entry)
+    {
+        switch (scope)
         {
-            string mark = s == PresetScope.All ? ASMKeys.PresetAllMark.Translate()
-                        : s == PresetScope.Kind ? ASMKeys.PresetKindMark.Translate()
-                        : ASMKeys.PresetListMark.Translate();
-            const float iconS = 20f;
-            return iconS + 4f + Text.CalcSize(mark).x + 8f;
-        }
-        // A scope is relevant in this context if it is the context's own scope or any broader one.
-        private bool ScopeVisible(PresetScope s) => ScopeRank(s) >= ContextRank;
-        private bool ScopeShown(PresetScope s) => s == PresetScope.All ? showAll : s == PresetScope.Kind ? showKind : showList;
-
-        private void DrawScopeToggle(ref float tx, float y, PresetScope s)
-        {
-            if (!ScopeVisible(s)) return;
-            bool on = ScopeShown(s);
-            string mark = s == PresetScope.All ? ASMKeys.PresetAllMark.Translate()
-                        : s == PresetScope.Kind ? ASMKeys.PresetKindMark.Translate()
-                        : ASMKeys.PresetListMark.Translate();
-            const float iconS = 20f;
-            float labelW = Text.CalcSize(mark).x;
-            float tw = iconS + 4f + labelW + 8f;
-            Rect r = new Rect(tx, y + 1f, tw, 26f);
-            Widgets.DrawHighlightIfMouseover(r);
-            // Indicator: green check (shown) or red X (hidden).
-            Rect iconRect = new Rect(r.x, r.y + (r.height - iconS) / 2f, iconS, iconS);
-            if (on)
+            case PresetScope.All:
             {
-                GUI.color = Color.green;
-                Widgets.CheckboxDraw(iconRect.x, iconRect.y, true, false, iconS);
-                GUI.color = Color.white;
-            }
-            else
-            {
-                GUI.color = Color.red;
-                GUI.DrawTexture(iconRect, TexButton.CloseXSmall);
-                GUI.color = Color.white;
-            }
-            Text.Anchor = TextAnchor.MiddleLeft;
-            Widgets.Label(new Rect(iconRect.xMax + 4f, r.y, labelW + 4f, r.height), mark);
-            Text.Anchor = TextAnchor.UpperLeft;
-            if (Widgets.ButtonInvisible(r))
-            {
-                if (s == PresetScope.All) showAll = !showAll;
-                else if (s == PresetScope.Kind) showKind = !showKind;
-                else showList = !showList;
-            }
-            tx += tw + Gap;
-        }
+                var dto = PresetRepository.ReadCarrier(entry);
 
-        private List<PresetEntry> Gather()
-        {
-            var entries = new List<PresetEntry>();
-            // Higher scopes are visible for cross-level application.
-            if (scope == PresetScope.Kind) entries.AddRange(PresetRepository.ListPresets(PresetScope.All));
-            if (scope == PresetScope.List)
-            {
-                entries.AddRange(PresetRepository.ListPresets(PresetScope.Kind));
-                entries.AddRange(PresetRepository.ListPresets(PresetScope.All));
-            }
-            entries = entries.OrderByDescending(e => e.date).ThenBy(e => e.name).ToList();
-
-            string f = filterBuffer.Trim();
-            if (!f.NullOrEmpty())
-                entries = entries.Where(e => e.name.IndexOf(f, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
-            // Scope-type filter (the toggles next to the search field).
-            entries = entries.Where(e => ScopeShown(e.scope)).ToList();
-            return entries;
-        }
-
-        private void DrawEntryRow(Rect row, PresetEntry e, int index)
-        {
-            bool deletable = e.DeletableFrom(ContextRank);
-            bool crossLevel = e.scope != scope;
-            string mark = crossLevel ? CrossLevelMark(e) : null;
-
-            // Zebra rows, like the save/load list.
-            if (index % 2 == 1) Widgets.DrawAltRect(row);
-
-            // Columns always reserved right-to-left. Overwrite (left of Load) only shown
-            // for same-scope rows when there is data to overwrite with.
-            float loadW = Mathf.Max(96f, Text.CalcSize(ASMKeys.LoadPreset.Translate()).x + 18f);
-            float overW = Mathf.Max(96f, Text.CalcSize(ASMKeys.OverwritePreset.Translate()).x + 18f);
-            float extraW = Mathf.Max(60f, Text.CalcSize(ASMKeys.PresetAllMark.Translate()).x + 6f);
-            const float delW = 26f, dateW = 86f, gap = 6f;
-
-            float right = row.xMax;
-            Rect delRect = new Rect(right - delW, row.y + 2f, delW, 26f);
-            right -= delW + gap;
-            Rect loadBtn = new Rect(right - loadW, row.y + 2f, loadW, 26f);
-            right -= loadW + gap;
-            Rect overBtn = new Rect(right - overW, row.y + 2f, overW, 26f);
-            right -= overW + gap;
-            Rect dateRect = new Rect(right - dateW, row.y + 4f, dateW, 22f);
-            right -= dateW + gap;
-            Rect extraRect = new Rect(right - extraW, row.y + 4f, extraW, 22f);
-            right -= extraW + gap;
-            Rect nameRect = new Rect(row.x, row.y + 5f, Mathf.Max(right - row.x, 40f), 22f);
-
-            var captured = e;
-
-            // 1st column — name.
-            Text.Anchor = TextAnchor.MiddleLeft;
-            Widgets.Label(nameRect, e.name);
-            Text.Anchor = TextAnchor.UpperLeft;
-
-            // Extra column — scope mark (cross-level) or empty (same scope).
-            if (mark != null)
-            {
-                GUI.color = Color.cyan;
-                Text.Anchor = TextAnchor.MiddleRight;
-                Widgets.Label(extraRect, mark);
-                Text.Anchor = TextAnchor.UpperLeft;
-                GUI.color = Color.white;
-            }
-
-            // Date — Tiny font so it fits on one line (like the save/load window).
-            Text.Font = GameFont.Tiny;
-            GUI.color = Color.gray;
-            Widgets.Label(dateRect, e.date.ToString("yyyy-MM-dd HH:mm"));
-            GUI.color = Color.white;
-            Text.Font = GameFont.Small;
-
-            // Overwrite button (left of Load, same-scope rows with data only).
-            if (!crossLevel && HasSomethingToSave())
-            {
-                if (Widgets.ButtonText(overBtn, ASMKeys.OverwritePreset.Translate()))
+                if (dto == null)
                 {
-                    var n = captured;
-                    Find.WindowStack.Add(new Dialog_MessageBox(ASMKeys.ConfirmOverwrite.Translate(n.name),
-                        ASMKeys.OverwritePreset.Translate(), () => OverwriteEntry(n),
-                        "No".Translate()) { doCloseX = true });
+                    return false;
                 }
+
+                dto.ApplyTo(comp);
+                comp.MarkDirty();
+                return true;
             }
-
-            if (crossLevel) TooltipHandler.TipRegion(row, CrossLevelTip(e));
-
-            if (Widgets.ButtonText(loadBtn, ASMKeys.LoadPreset.Translate()))
-                ApplyEntry(captured);
-            if (deletable)
+            case PresetScope.Kind:
             {
-                TooltipHandler.TipRegion(delRect, ASMKeys.DeletePreset.Translate());
-                if (Widgets.ButtonImage(delRect, TexButton.Delete))
+                var kd = PresetRepository.ReadKindSlice(entry, kind);
+                SettingsChanges.Raise();
+
+                if (kd == null)
                 {
-                    var n = captured;
-                    string confirm = scope == PresetScope.List
-                        ? ASMKeys.ConfirmDeleteList.Translate(n.name)
-                        : scope == PresetScope.Kind ? ASMKeys.ConfirmDeleteKind.Translate(n.name) : ASMKeys.ConfirmDelete.Translate(n.name);
-                    Find.WindowStack.Add(new Dialog_MessageBox(confirm, ASMKeys.DeletePreset.Translate(), () => PresetRepository.Delete(n),
-                        "No".Translate()) { doCloseX = true });
+                    return false;
                 }
+
+                kd.ApplyTo(Settings);
+                return true;
             }
-        }
-
-        // e.g. "[Все виды] " for an All-scope preset shown in a Kind/List context.
-        private string CrossLevelMark(PresetEntry e)
-        {
-            if (e.scope == PresetScope.All) return ASMKeys.PresetAllMark.Translate();
-            if (e.scope == PresetScope.Kind) return ASMKeys.PresetKindMark.Translate();
-            return null;
-        }
-
-        private string CrossLevelTip(PresetEntry e)
-        {
-            string kindLabel = kind != null ? kind.LabelCap.ToString() : "";
-            if (scope == PresetScope.Kind && e.scope == PresetScope.All)
-                return ASMKeys.TipAllToKind.Translate(kindLabel);
-            if (scope == PresetScope.List)
+            default:
             {
-                string ln = listTitle ?? "";
-                if (e.scope == PresetScope.All) return ASMKeys.TipAllToList.Translate(ln, kindLabel);
-                if (e.scope == PresetScope.Kind) return ASMKeys.TipKindToList.Translate(ln, kindLabel);
+                bool ok = applyList!(entry);
+                SettingsChanges.Raise();
+                return ok;
             }
-            return null;
         }
+    }
 
-        // True when the current target actually has settings worth saving (so the save row is enabled).
-        private bool HasSomethingToSave()
+    protected override string NoSliceLabel() => kind.LabelCap;
+
+    // Mark cross-level presets with their scope ("[Все виды]" in a Kind/List context).
+    protected override string? MarkOf(PresetEntry entry) => entry.scope != scope ? CrossLevelMark(entry) : null;
+
+    protected override string? RowTip(PresetEntry entry) => entry.scope != scope ? CrossLevelTip(entry) : null;
+
+    protected override bool CanOverwrite(PresetEntry entry) => entry.scope == scope && HasData();
+
+    protected override bool CanDelete(PresetEntry entry) => entry.DeletableFrom(ContextRank);
+
+    protected override string ConfirmDelete(PresetEntry entry) => scope == PresetScope.List
+        ? ASMKeys.ConfirmDeleteList.Translate(entry.name)
+        : scope == PresetScope.Kind ? ASMKeys.ConfirmDeleteKind.Translate(entry.name) : ASMKeys.ConfirmDelete.Translate(entry.name);
+
+    private static string? CrossLevelMark(PresetEntry e)
+    {
+        if (e.scope == PresetScope.All)
         {
-            switch (scope)
-            {
-                case PresetScope.All: return comp.kindSettings.Values.Any(k => k != null && k.Customized);
-                case PresetScope.Kind: return Settings.Customized;
-                default: return hasListData?.Invoke() ?? false;
-            }
+            return ASMKeys.PresetAllMark.Translate();
         }
 
-        private void OverwriteEntry(PresetEntry e)
+        if (e.scope == PresetScope.Kind)
         {
-            switch (scope)
-            {
-                case PresetScope.All: PresetRepository.ExportAll(e.name, comp); break;
-                case PresetScope.Kind: PresetRepository.ExportKind(e.name, kind, Settings); break;
-                default: exportList!(e.name); break;
-            }
-            Messages.Message(ASMKeys.PresetOverwritten.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
+            return ASMKeys.PresetKindMark.Translate();
         }
 
-        private void TrySave()
+        return null;
+    }
+
+    private string CrossLevelTip(PresetEntry e)
+    {
+        string kindLabel = kind != null ? kind.LabelCap.ToString() : "";
+
+        if (scope == PresetScope.Kind && e.scope == PresetScope.All)
         {
-            string name = (nameBuffer ?? "").Trim();
-            if (name.NullOrEmpty()) return;
-            switch (scope)
-            {
-                case PresetScope.All: PresetRepository.ExportAll(name, comp); break;
-                case PresetScope.Kind: PresetRepository.ExportKind(name, kind, Settings); break;
-                default: exportList!(name); break;
-            }
-            Messages.Message(ASMKeys.PresetSaved.Translate(name), MessageTypeDefOf.TaskCompletion, false);
-            nameBuffer = "";
+            return ASMKeys.TipAllToKind.Translate(kindLabel);
         }
 
-        private void ApplyEntry(PresetEntry e)
+        if (scope == PresetScope.List)
         {
-            bool ok = true;
-            switch (scope)
+            string ln = listTitle ?? "";
+
+            if (e.scope == PresetScope.All)
             {
-                case PresetScope.All:
-                {
-                    var dto = PresetRepository.ReadCarrier(e);
-
-                    if (dto != null)
-                    {
-                        dto.ApplyTo(comp);
-                        comp.MarkDirty();
-                    }
-                    else
-                    {
-                        ok = false;
-                    }
-
-                    break;
-                }
-                case PresetScope.Kind:
-                {
-                    var kd = PresetRepository.ReadKindSlice(e, kind);
-
-                    if (kd != null)
-                    {
-                        kd.ApplyTo(Settings);
-                    }
-                    else
-                    {
-                        ok = false;
-                    }
-
-                    SettingsChanges.Raise();
-                    break;
-                }
-                default:
-                    ok = applyList!(e);
-                    SettingsChanges.Raise();
-                    break;
+                return ASMKeys.TipAllToList.Translate(ln, kindLabel);
             }
-            if (ok)
-                Messages.Message(ASMKeys.PresetLoaded.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
-            else
-                Messages.Message(ASMKeys.PresetNoSlice.Translate(kind.LabelCap), MessageTypeDefOf.RejectInput, false);
+
+            if (e.scope == PresetScope.Kind)
+            {
+                return ASMKeys.TipKindToList.Translate(ln, kindLabel);
+            }
         }
+
+        return null;
     }
 }
