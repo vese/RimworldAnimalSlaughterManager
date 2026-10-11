@@ -1,10 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-using ASM;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -30,7 +28,7 @@ namespace ASM
     /// </summary>
     public static class PresetIO
     {
-        private static string RootFolder => Path.Combine(Application.persistentDataPath, "AnimalSlaughterManagerPresets");
+        internal static string RootFolder => Path.Combine(Application.persistentDataPath, "AnimalSlaughterManagerPresets");
 
         private static string ScopeFolder(PresetScope scope)
         {
@@ -71,9 +69,12 @@ namespace ASM
                 AddFolder(ScopeFolder(scope));
             }
 
-            // Legacy: presets saved by older versions live in the root folder and are all-animals.
+            // Presets saved before scopes existed live in the root folder.
             if (scope == PresetScope.All)
-                AddFolder(RootFolder);
+            {
+                PresetIOLegacy.AddRootPresets(result);
+            }
+
             return result.OrderByDescending(e => e.date).ThenBy(e => e.name).ToList();
         }
 
@@ -119,7 +120,7 @@ namespace ASM
                 ser.Serialize(w, dto);
         }
 
-        public static List<BasePriorityRule> ApplyConditions(PresetEntry entry)
+        public static List<BasePriorityRule>? ApplyConditions(PresetEntry entry)
         {
             try
             {
@@ -132,27 +133,8 @@ namespace ASM
             }
             catch
             {
-                return ReadLegacyConditions(entry);
-            }
-        }
-
-        // Presets saved before the priority-rule refactor stored SlaughterCondition lists.
-        private static List<BasePriorityRule> ReadLegacyConditions(PresetEntry entry)
-        {
-            try
-            {
-                var ser = new XmlSerializer(typeof(ConditionPresetDto));
-                using (var r = new StreamReader(entry.path))
-                {
-                    var dto = (ConditionPresetDto)ser.Deserialize(r);
-#pragma warning disable CS0618
-                    return dto.conditions.Select(c => KindPrioritySettingsLegacy.Convert(c.ToCondition())).Where(c => c != null).ToList();
-#pragma warning restore CS0618
-                }
-            }
-            catch
-            {
-                return null;
+                // Before the priority-rule refactor, condition presets stored SlaughterCondition lists.
+                return PresetIOLegacy.TryReadConditions(entry);
             }
         }
 
@@ -285,8 +267,7 @@ namespace ASM
     /// <summary>Preset breadth: All-animals &gt; single Kind &gt; single List.</summary>
     public enum PresetScope { All, Kind, List }
 
-    /// <summary>Which of the four trait lists a List-scope preset holds.</summary>
-    /// <summary>Which of the four condition buckets a List-scope condition preset holds.</summary>
+    /// <summary>Which of the four buckets a List-scope preset holds (trait lists of old, condition buckets now).</summary>
     public enum CondBucket { AdultMale, YoungMale, AdultFemale, YoungFemale }
 
 }
