@@ -84,7 +84,7 @@ public abstract class Dialog_TraitTable : Window
         resizeable = true;
         absorbInputAroundWindow = true;
 
-        rows = IntegrationRegistry.Traits.KnownTraitDefs.Select(MakeRow).ToList();
+        rows = IntegrationRegistry.AnimalContent.KnownTraitDefs.Select(MakeRow).ToList();
         var statCols = rows.SelectMany(r => r.statValues.Keys).Distinct().OrderBy(s => s.label).ToList();
         var capCols = rows.SelectMany(r => r.capValues.Keys).Distinct().OrderBy(c => c.label).ToList();
 
@@ -127,7 +127,7 @@ public abstract class Dialog_TraitTable : Window
                         // Store the delta (factor - 1) so sorting by magnitude works across offset/factor traits;
                         // display as a signed percent via the shared formatter.
                         r.statValues[sm.stat] = sm.value - 1f;
-                        r.statStrings[sm.stat] = IntegrationRegistry.Traits.FormatStatFactor(sm.value);
+                        r.statStrings[sm.stat] = IntegrationRegistry.AnimalContent.FormatStatFactor(sm.value);
                     }
                 if (stage.capMods != null)
                     foreach (var cm in stage.capMods)
@@ -380,14 +380,14 @@ public abstract class Dialog_TraitTable : Window
         switch (col.kind)
         {
             case ColKind.Name:
-                GUI.color = IntegrationRegistry.Traits.TraitColor(r.def);
+                GUI.color = IntegrationRegistry.AnimalContent.TraitColor(r.def);
                 Text.Anchor = TextAnchor.MiddleLeft;
                 bool wrap = Text.WordWrap;
                 Text.WordWrap = false;
                 Widgets.Label(new Rect(cell.x + 2f, cell.y, cell.width - 2f, cell.height), r.def.LabelCap);
                 Text.WordWrap = wrap;
                 GUI.color = Color.white;
-                TooltipHandler.TipRegion(cell, IntegrationRegistry.Traits.TraitTip(r.def));
+                TooltipHandler.TipRegion(cell, IntegrationRegistry.AnimalContent.TraitTip(r.def));
                 break;
             case ColKind.Type:
                 GUI.color = r.isBad ? NegativeColor : PositiveColor;

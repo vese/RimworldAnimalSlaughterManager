@@ -15,12 +15,12 @@ namespace ASM;
 /// </summary>
 public static class IntegrationRegistry
 {
-    private static readonly List<ITraitsIntegration> traitsIntegrations = [];
+    private static readonly List<IAnimalContentIntegration> animalContentIntegrations = [];
 
     /// <summary>All registered traits integrations combined; the no-integration behavior when
     /// the list is empty. The aggregate implements the same contract, so callers never care
     /// how many are registered.</summary>
-    public static ITraitsIntegration Traits => new TraitsIntegrationAggregate(traitsIntegrations);
+    public static IAnimalContentIntegration AnimalContent => new AnimalContentAggregate(animalContentIntegrations);
 
     private static readonly List<IKindIntegrationSettingsProvider> kindSettingsProviders = [];
 
@@ -28,9 +28,9 @@ public static class IntegrationRegistry
     /// (the settings survive their mod being disabled).</summary>
     public static IReadOnlyList<IKindIntegrationSettingsProvider> KindSettingsProviders => kindSettingsProviders;
 
-    public static void RegisterTraits(ITraitsIntegration implementation)
+    public static void RegisterAnimalContent(IAnimalContentIntegration implementation)
     {
-        traitsIntegrations.Add(implementation);
+        animalContentIntegrations.Add(implementation);
     }
 
     public static void RegisterKindSettings(IKindIntegrationSettingsProvider provider)
@@ -45,11 +45,11 @@ public static class IntegrationRegistry
 /// <summary>Combines every registered traits integration under one contract: set-like
 /// services union, menu/selection services delegate to all, single-answer services answer
 /// "any". With nothing registered this is the no-integration behavior.</summary>
-public sealed class TraitsIntegrationAggregate : ITraitsIntegration
+public sealed class AnimalContentAggregate : IAnimalContentIntegration
 {
-    private readonly IReadOnlyList<ITraitsIntegration> items;
+    private readonly IReadOnlyList<IAnimalContentIntegration> items;
 
-    public TraitsIntegrationAggregate(IReadOnlyList<ITraitsIntegration> items)
+    public AnimalContentAggregate(IReadOnlyList<IAnimalContentIntegration> items)
     {
         this.items = items;
     }

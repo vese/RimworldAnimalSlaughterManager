@@ -19,7 +19,7 @@ public static class AnimalTraitsSystemRegistration
 
         if (ModsConfig.IsActive(AnimalTraitsIntegration.PackageId))
         {
-            IntegrationRegistry.RegisterTraits(new AnimalTraitsIntegration());
+            IntegrationRegistry.RegisterAnimalContent(new AnimalTraitsIntegration());
         }
     }
 }

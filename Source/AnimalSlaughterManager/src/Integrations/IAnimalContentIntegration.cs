@@ -7,11 +7,11 @@ namespace ASM;
 
 /// <summary>
 /// The core's contract for an animal-traits mod integration. The rest of the mod talks to
-/// <see cref="IntegrationRegistry.Traits"/> only — no direct references to the foreign mod's
+/// <see cref="IntegrationRegistry.AnimalContent"/> only — no direct references to the foreign mod's
 /// wrappers outside the integration's own folder. The no-integration implementation answers
 /// "nothing" to everything, so callers need no activity gates.
 /// </summary>
-public interface ITraitsIntegration
+public interface IAnimalContentIntegration
 {
     bool Active { get; }
 

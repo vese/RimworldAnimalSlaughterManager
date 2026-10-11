@@ -9,10 +9,10 @@ namespace ASM;
 
 /// <summary>
 /// The Animal Traits System integration: adapts <see cref="AnimalTraitsAccess"/> (the foreign
-/// mod's API wrapper) to <see cref="ITraitsIntegration"/>. Registered at startup when ATS is
+/// mod's API wrapper) to <see cref="IAnimalContentIntegration"/>. Registered at startup when ATS is
 /// active; nothing outside this folder references ATS wrappers.
 /// </summary>
-public sealed class AnimalTraitsIntegration : ITraitsIntegration
+public sealed class AnimalTraitsIntegration : IAnimalContentIntegration
 {
     public const string PackageId = "luved.animaltraits";
 

@@ -53,7 +53,7 @@ public static class SlaughterListBuilder
                 continue;
             }
 
-            foreach (var pawn in IntegrationRegistry.Traits.SelectKeepReserved(comp.map, kv.Key, kv.Value))
+            foreach (var pawn in IntegrationRegistry.AnimalContent.SelectKeepReserved(comp.map, kv.Key, kv.Value))
             {
                 reserved.Add(pawn);
             }
@@ -64,12 +64,12 @@ public static class SlaughterListBuilder
 
     private static void AddAtsForceCull(ASM_MapComp comp, List<Pawn> slaughter, HashSet<Pawn> reserved)
     {
-        if (!IntegrationRegistry.Traits.Active)
+        if (!IntegrationRegistry.AnimalContent.Active)
         {
             return;
         }
 
-        var cullSet = IntegrationRegistry.Traits.CullTraitDefNames;
+        var cullSet = IntegrationRegistry.AnimalContent.CullTraitDefNames;
 
         if (cullSet.Count == 0)
         {
@@ -83,7 +83,7 @@ public static class SlaughterListBuilder
                 continue;
             }
 
-            if (IntegrationRegistry.Traits.ShouldCull(pawn, cullSet))
+            if (IntegrationRegistry.AnimalContent.ShouldCull(pawn, cullSet))
             {
                 slaughter.Add(pawn);
             }
@@ -103,7 +103,7 @@ public static class SlaughterListBuilder
         {
             var ks = kv.Value;
 
-            if (ks == null || !IntegrationRegistry.Traits.HasForceCullRules(ks))
+            if (ks == null || !IntegrationRegistry.AnimalContent.HasForceCullRules(ks))
             {
                 continue;
             }
@@ -133,7 +133,7 @@ public static class SlaughterListBuilder
         var all = new List<Pawn>();
         // Precompute each pawn's slaughter tie-breaker signals once (pregnancy, good/bad trait
         // counts, sickness) so the per-bucket sort doesn't re-scan hediffs per comparison.
-        var traitDefs = IntegrationRegistry.Traits.KnownTraitDefs;
+        var traitDefs = IntegrationRegistry.AnimalContent.KnownTraitDefs;
         var vitals = new Dictionary<Pawn, PawnVitals>();
         PregnantMode pregMode = comp.ResolvePregnantMode(config.animal, config.allowSlaughterPregnant);
 
@@ -230,7 +230,7 @@ public static class SlaughterListBuilder
             return 0;
         }
 
-        return IntegrationRegistry.Traits.CountKept(comp.map, def, ks);
+        return IntegrationRegistry.AnimalContent.CountKept(comp.map, def, ks);
     }
 
     /// <summary>Animals of this kind individually marked protected.</summary>
@@ -348,7 +348,7 @@ public static class SlaughterListBuilder
         for (int i = 0; i < traitDefs.Count; i++)
         {
             var def = traitDefs[i];
-            if (IntegrationRegistry.Traits.HasTrait(p, def))
+            if (IntegrationRegistry.AnimalContent.HasTrait(p, def))
             {
                 if (def.isBad)
                 {
@@ -384,5 +384,5 @@ public static class SlaughterListBuilder
         return false;
     }
 
-    private static bool HasForceCullTrait(Pawn p, KindSettings ks) => IntegrationRegistry.Traits.ShouldForceCullBySettings(p, ks);
+    private static bool HasForceCullTrait(Pawn p, KindSettings ks) => IntegrationRegistry.AnimalContent.ShouldForceCullBySettings(p, ks);
 }
