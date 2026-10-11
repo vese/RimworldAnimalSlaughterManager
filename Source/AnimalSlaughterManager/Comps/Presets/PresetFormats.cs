@@ -11,11 +11,17 @@ namespace ASM;
 /// <summary>
 /// The preset format layer, pure BCL: (de)serialization of the DTO carriers, root-element
 /// dispatch between the current and historical formats, and the condition-bucket mapping.
-/// No RimWorld types here — this is the unit-testable core under <see cref="PresetIO"/>.
+/// No RimWorld types here — this is the unit-testable core under <see cref="PresetRepository"/>.
 /// </summary>
 public static class PresetFormats
 {
     // XmlSerializer generates a serialization assembly on first use — cache the instances.
+    /// <summary>Root element names pairing the [XmlRoot] values of the DTO carriers; the
+    /// dispatcher matches them against a file root.</summary>
+    public const string CarrierRoot = "SlaughterPreset";
+    public const string RulePresetRoot = "RulePresetDto";
+    public const string ConditionPresetRoot = "ConditionPreset";
+
     private static readonly Dictionary<Type, XmlSerializer> serializers = new();
 
     public static XmlSerializer Serializer<T>() where T : class

@@ -11,18 +11,18 @@ namespace ASM;
 /// refactor). Remove this class together with <see cref="KindPrioritySettingsLegacy"/> when the
 /// save-compatibility horizon allows.
 /// </summary>
-public static class PresetIOLegacy
+public static class PresetLegacyReader
 {
     /// <summary>Adds root-folder presets to an All-scope listing (they have no scope folder).</summary>
     public static void AddRootPresets(List<PresetEntry> result)
     {
-        foreach (var p in PresetIO.Store.Files(PresetIO.RootFolder))
+        foreach (var p in PresetRepository.Store.Files(PresetRepository.RootFolder))
         {
             result.Add(new PresetEntry
             {
                 name = Path.GetFileNameWithoutExtension(p),
                 path = p,
-                date = PresetIO.Store.LastWrite(p),
+                date = PresetRepository.Store.LastWrite(p),
                 scope = PresetScope.All
             });
         }
@@ -32,13 +32,27 @@ public static class PresetIOLegacy
     /// file is not one (the current-format reader falls back here).</summary>
     public static List<BasePriorityRule>? TryReadConditions(PresetEntry entry)
     {
-#pragma warning disable CS0618
-        var conditions = PresetFormats.ReadConditionPreset(PresetIO.Store.ReadText(entry.path));
+#pragma warning disable CS0612, CS0618
+        var conditions = PresetFormats.ReadConditionPreset(PresetRepository.Store.ReadText(entry.path));
 
-        return conditions?
-            .Select(c => KindPrioritySettingsLegacy.Convert(c.ToCondition()))
-            .Where(c => c != null)
-            .ToList();
-#pragma warning restore CS0618
+        if (conditions == null)
+        {
+            return null;
+        }
+
+        var rules = new List<BasePriorityRule>();
+
+        foreach (var c in conditions)
+        {
+            var rule = KindPrioritySettingsLegacy.Convert(c.ToCondition());
+
+            if (rule != null)
+            {
+                rules.Add(rule);
+            }
+        }
+
+        return rules;
+#pragma warning restore CS0612, CS0618
     }
 }

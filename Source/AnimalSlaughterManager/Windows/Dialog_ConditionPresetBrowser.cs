@@ -165,9 +165,9 @@ namespace ASM
         private List<PresetEntry> Gather()
         {
             var entries = new List<PresetEntry>();
-            if (showCond) entries.AddRange(PresetIO.ListConditionPresets(bucket));
-            if (showKind) entries.AddRange(PresetIO.ListPresets(PresetScope.Kind));
-            if (showAll) entries.AddRange(PresetIO.ListPresets(PresetScope.All));
+            if (showCond) entries.AddRange(PresetRepository.ListConditionPresets(bucket));
+            if (showKind) entries.AddRange(PresetRepository.ListPresets(PresetScope.Kind));
+            if (showAll) entries.AddRange(PresetRepository.ListPresets(PresetScope.All));
             entries = entries.OrderByDescending(e => e.date).ThenBy(e => e.name).ToList();
             string f = filterBuffer.Trim();
             if (!f.NullOrEmpty())
@@ -249,7 +249,7 @@ namespace ASM
             {
                 var n = captured;
                 Find.WindowStack.Add(new Dialog_MessageBox(ASMKeys.ConfirmDelete.Translate(n.name),
-                    ASMKeys.DeletePreset.Translate(), () => PresetIO.Delete(n),
+                    ASMKeys.DeletePreset.Translate(), () => PresetRepository.Delete(n),
                     "No".Translate()) { doCloseX = true });
             }
         }
@@ -258,20 +258,20 @@ namespace ASM
         {
             string name = (nameBuffer ?? "").Trim();
             if (name.NullOrEmpty()) return;
-            PresetIO.ExportConditions(name, bucket, prioritySettings.Get(male, adult));
+            PresetRepository.ExportConditions(name, bucket, prioritySettings.Get(male, adult));
             Messages.Message(ASMKeys.PresetSaved.Translate(name), MessageTypeDefOf.TaskCompletion, false);
             nameBuffer = "";
         }
 
         private void OverwriteByName(string name)
         {
-            PresetIO.ExportConditions(name, bucket, prioritySettings.Get(male, adult));
+            PresetRepository.ExportConditions(name, bucket, prioritySettings.Get(male, adult));
             Messages.Message(ASMKeys.PresetOverwritten.Translate(name), MessageTypeDefOf.TaskCompletion, false);
         }
 
         private void OverwriteEntry(PresetEntry e)
         {
-            PresetIO.ExportConditions(e.name, bucket, prioritySettings.Get(male, adult));
+            PresetRepository.ExportConditions(e.name, bucket, prioritySettings.Get(male, adult));
             Messages.Message(ASMKeys.PresetOverwritten.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
         }
 
@@ -279,7 +279,7 @@ namespace ASM
         {
             if (e.scope == PresetScope.List && e.condBucket != null)
             {
-                var loaded = PresetIO.ApplyConditions(e);
+                var loaded = PresetRepository.ApplyConditions(e);
                 if (loaded != null)
                 {
                     prioritySettings.ReplaceAll(male, adult, loaded);
@@ -289,7 +289,7 @@ namespace ASM
             }
 
             // Kind or All preset — take the matching bucket slice.
-            var rules = PresetIO.ReadKindRules(e, bucket);
+            var rules = PresetRepository.ReadKindRules(e, bucket);
 
             if (rules == null || rules.Count == 0)
             {

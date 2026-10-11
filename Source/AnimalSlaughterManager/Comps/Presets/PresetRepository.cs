@@ -8,8 +8,8 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace ASM
-{
+namespace ASM;
+
     /// <summary>
     /// Export/import slaughter configuration so it can be reused across games.
     ///
@@ -30,8 +30,16 @@ namespace ASM
     /// All file access goes through <see cref="Store"/> and paths are rooted at
     /// <see cref="RootFolder"/> — both swappable, so the format logic is unit-testable.
     /// </summary>
-    public static class PresetIO
+    public static class PresetRepository
     {
+        // Preset tree layout under the game persistentDataPath.
+        private const string RootFolderName = "AnimalSlaughterManagerPresets";
+        private const string FolderAll = "All";
+        private const string FolderKind = "Kind";
+        private const string FolderList = "List";
+        private const string FolderKeep = "Keep";
+        private const string FolderForceCull = "ForceCull";
+        private const string FolderConditions = "Conditions";
         /// <summary>File access of the preset subsystem; tests may substitute their own store.</summary>
         internal static IPresetStore Store { get; set; } = new FilePresetStore();
 
@@ -41,15 +49,15 @@ namespace ASM
         internal static string RootFolder => RootFolderOverride ?? GameRoot();
 
         // Kept apart so that RootFolder never touches UnityEngine unless the game really asks.
-        private static string GameRoot() => Path.Combine(Application.persistentDataPath, "AnimalSlaughterManagerPresets");
+        private static string GameRoot() => Path.Combine(Application.persistentDataPath, RootFolderName);
 
         private static string ScopeFolder(PresetScope scope)
         {
             switch (scope)
             {
-                case PresetScope.All: return Path.Combine(RootFolder, "All");
-                case PresetScope.Kind: return Path.Combine(RootFolder, "Kind");
-                default: return Path.Combine(RootFolder, "List");
+                case PresetScope.All: return Path.Combine(RootFolder, FolderAll);
+                case PresetScope.Kind: return Path.Combine(RootFolder, FolderKind);
+                default: return Path.Combine(RootFolder, FolderList);
             }
         }
 
@@ -73,8 +81,8 @@ namespace ASM
 
             if (scope == PresetScope.List)
             {
-                AddFolder(Path.Combine(ScopeFolder(scope), "Keep"));
-                AddFolder(Path.Combine(ScopeFolder(scope), "ForceCull"));
+                AddFolder(Path.Combine(ScopeFolder(scope), FolderKeep));
+                AddFolder(Path.Combine(ScopeFolder(scope), FolderForceCull));
             }
             else
             {
@@ -84,7 +92,7 @@ namespace ASM
             // Presets saved before scopes existed live in the root folder.
             if (scope == PresetScope.All)
             {
-                PresetIOLegacy.AddRootPresets(result);
+                PresetLegacyReader.AddRootPresets(result);
             }
 
             return result.OrderByDescending(e => e.date).ThenBy(e => e.name).ToList();
@@ -121,7 +129,7 @@ namespace ASM
 
         // ---- Condition list presets ----------------------------------------------------------
 
-        private static string CondFolder(CondBucket bucket) => Path.Combine(RootFolder, "List", "Conditions", bucket.ToString());
+        private static string CondFolder(CondBucket bucket) => Path.Combine(RootFolder, FolderList, FolderConditions, bucket.ToString());
 
         // A condition-list preset rides the common SlaughterPresetDto carrier: one KindDto with
         // the rules in the bucket's own list. The bucket is the preset's ORIGIN — on apply the
@@ -147,13 +155,13 @@ namespace ASM
 
             switch (PresetFormats.RootElementOf(text))
             {
-                case "SlaughterPreset":
+                case PresetFormats.CarrierRoot:
                     var kd = PresetFormats.ReadCarrier(text)?.Kinds?.FirstOrDefault();
                     return kd == null ? null : RulesOf(PresetFormats.ConditionRuleDtos(kd));
-                case "RulePresetDto":
+                case PresetFormats.RulePresetRoot:
                     return RulesOf(PresetFormats.ReadRulePreset(text));
                 default:
-                    return PresetIOLegacy.TryReadConditions(entry);
+                    return PresetLegacyReader.TryReadConditions(entry);
             }
         }
 
@@ -200,7 +208,10 @@ namespace ASM
         public static void ApplyAll(PresetEntry entry, ASM_MapComp comp)
         {
             var dto = PresetFormats.ReadCarrier(Store.ReadText(entry.path));
-            if (dto == null) return;
+            if (dto == null)
+            {
+                return;
+            }
             dto.ApplyTo(comp);
             comp.MarkDirty();
         }
@@ -212,7 +223,10 @@ namespace ASM
         public static bool ApplyKindSettings(PresetEntry entry, ThingDef targetDef, KindSettings targetKs)
         {
             var kd = RelevantKindDto(entry, targetDef);
-            if (kd == null) return false;
+            if (kd == null)
+            {
+                return false;
+            }
             kd.ApplyTo(targetKs);
             return true;
         }
@@ -223,23 +237,32 @@ namespace ASM
         public static bool ApplyList(PresetEntry entry, ThingDef targetDef, IPresettableRuleSet ruleSet)
         {
             var kd = RelevantKindDto(entry, targetDef);
-            if (kd == null) return false;
+            if (kd == null)
+            {
+                return false;
+            }
             return ruleSet.Load(kd);
         }
 
         public static void Delete(PresetEntry entry)
         {
-            if (entry == null || string.IsNullOrEmpty(entry.path)) return;
+            if (entry == null || string.IsNullOrEmpty(entry.path))
+            {
+                return;
+            }
             Store.Delete(entry.path);
         }
 
         // ---- Helpers -------------------------------------------------------------------------
 
-        private static KindDto RelevantKindDto(PresetEntry entry, ThingDef targetDef)
+        private static KindDto? RelevantKindDto(PresetEntry? entry, ThingDef targetDef)
         {
-            var dto = PresetFormats.ReadCarrier(Store.ReadText(entry?.path));
-            if (dto?.Kinds == null || dto.Kinds.Count == 0) return null;
-            if (entry.scope == PresetScope.All)
+            var dto = PresetFormats.ReadCarrier(entry == null ? null : Store.ReadText(entry.path));
+            if (dto?.Kinds == null || dto.Kinds.Count == 0)
+            {
+                return null;
+            }
+            if (entry!.scope == PresetScope.All)
             {
                 // Find the slice for the target kind; if absent, nothing applies.
                 return dto.Kinds.FirstOrDefault(k => k.animal == targetDef.defName);
@@ -257,15 +280,10 @@ namespace ASM
         private static string Sanitize(string name)
         {
             foreach (char c in Path.GetInvalidFileNameChars())
+            {
                 name = name.Replace(c, '_');
+            }
+
             return name.Trim();
         }
     }
-
-    /// <summary>Preset breadth: All-animals &gt; single Kind &gt; single List.</summary>
-    public enum PresetScope { All, Kind, List }
-
-    /// <summary>Which of the four buckets a List-scope preset holds (trait lists of old, condition buckets now).</summary>
-    public enum CondBucket { AdultMale, YoungMale, AdultFemale, YoungFemale }
-
-}
