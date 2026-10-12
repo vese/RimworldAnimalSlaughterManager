@@ -9,9 +9,9 @@ Languages/                     — переводы
 Defs/                          — PawnColumnDef (колонка защиты)
 Textures/                      — иконки (щит, шестерёнка)
 Source/AnimalSlaughterManager/                  — главный проект: движок, окна, патчи, пресеты-браузеры
-Source/AnimalSlaughterManager.Integrations/            — контракты интеграций + общий слой (настройки,
+Source/AnimalSlaughterManager.Core/            — ядро: домен + контракты интеграций (настройки,
                                                  правила, валидация, пресеты-IO, общие контролы)
-Source/AnimalSlaughterManager.Integrations.AnimalTraitsSystem/ — ATS-интеграция (ссылается на Integrations)
+Source/AnimalSlaughterManager.Core.AnimalTraitsSystem/ — ATS-интеграция (ссылается на Core)
 ```
 
 ## Сборка

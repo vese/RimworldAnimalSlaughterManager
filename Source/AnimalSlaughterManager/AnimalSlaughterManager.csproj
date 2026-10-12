@@ -26,8 +26,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AnimalSlaughterManager.Integrations\AnimalSlaughterManager.Integrations.csproj" />
-    <ProjectReference Include="..\AnimalSlaughterManager.Integrations.AnimalTraitsSystem\AnimalSlaughterManager.Integrations.AnimalTraitsSystem.csproj" />
+    <ProjectReference Include="..\AnimalSlaughterManager.Core\AnimalSlaughterManager.Core.csproj" />
+    <ProjectReference Include="..\AnimalSlaughterManager.Core.AnimalTraitsSystem\AnimalSlaughterManager.Core.AnimalTraitsSystem.csproj" />
   </ItemGroup>
 
 </Project>

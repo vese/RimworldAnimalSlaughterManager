@@ -3,7 +3,7 @@
   <!-- RimWorld 1.6 mods target .NET Framework 4.7.2 (Unity 2022.3 / Mono). -->
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
-    <AssemblyName>AnimalSlaughterManager.Integrations.AnimalTraitsSystem</AssemblyName>
+    <AssemblyName>AnimalSlaughterManager.Core</AssemblyName>
     <RootNamespace>ASM</RootNamespace>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
@@ -14,12 +14,9 @@
     <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
   </PropertyGroup>
 
+  <!-- Compile-time RimWorld API only; the merged mod DLL is produced by the main project. -->
   <ItemGroup>
     <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" PrivateAssets="all" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\AnimalSlaughterManager.Integrations\AnimalSlaughterManager.Integrations.csproj" />
   </ItemGroup>
 
 </Project>
