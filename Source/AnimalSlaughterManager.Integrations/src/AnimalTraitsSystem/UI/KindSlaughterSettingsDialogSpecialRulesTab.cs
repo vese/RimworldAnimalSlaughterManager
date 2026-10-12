@@ -18,29 +18,29 @@ public class KindSlaughterSettingsDialogSpecialRulesTab(KindTraitsSettings trait
 
     public override TaggedString Name => ASMKeys.TabExceptions.Translate();
 
-    protected override List<(string Text, Action<ASM_MapComp, ThingDef, KindSettings> Action)> HeaderButtons { get; } =
+    protected override List<(string Text, Action<IKindSettingsHost, ThingDef, KindSettings> Action)> HeaderButtons { get; } =
     [
         (ASMKeys.KindPresets, OpenKindPresetsWindow),
         (ASMKeys.ResetSpecialRules, ResetTabSettings),
         (ASMKeys.ResetKind, ResetAllSettings),
     ];
 
-    private static void OpenKindPresetsWindow(ASM_MapComp comp, ThingDef animalDef, KindSettings _)
+    private static void OpenKindPresetsWindow(IKindSettingsHost comp, ThingDef animalDef, KindSettings _)
     {
-        Find.WindowStack.Add(new Dialog_PresetBrowser(comp, PresetScope.Kind, animalDef/*, null*/));
+        IntegrationServices.GetServices<IPresetWindows>()[0].OpenKindBrowser(comp, animalDef);
     }
 
-    private static void ResetTabSettings(ASM_MapComp comp, ThingDef animalDef, KindSettings settings)
+    private static void ResetTabSettings(IKindSettingsHost comp, ThingDef animalDef, KindSettings settings)
     {
         KindTraitsSettings.Of(settings).Reset();
     }
 
-    private static void ResetAllSettings(ASM_MapComp comp, ThingDef animalDef, KindSettings settings)
+    private static void ResetAllSettings(IKindSettingsHost comp, ThingDef animalDef, KindSettings settings)
     {
-        settings.Reset(comp.globalSettings);
+        settings.Reset(comp.GlobalSettings);
     }
 
-    protected override void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings settings, ASM_MapComp comp, ThingDef animalDef)
+    protected override void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings settings, IKindSettingsHost comp, ThingDef animalDef)
     {
         // TODO: move in ats specific
         if (!AnimalTraitsAccess.HasAvailableTraits)

@@ -15,7 +15,7 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
 
     protected abstract string PresetsTitleKey { get; }
 
-    public float Draw(float x, float y, float listWidth, float listHeight, ref ListSectionState listState, ASM_MapComp comp, ThingDef animalDef)
+    public float Draw(float x, float y, float listWidth, float listHeight, ref ListSectionState listState, IKindSettingsHost comp, ThingDef animalDef)
     {
         // Row 1: title.
         var left = x;
@@ -66,7 +66,7 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
         return height;
     }
 
-    private float DrawButtons(float x, float y, ASM_MapComp comp, ThingDef animalDef)
+    private float DrawButtons(float x, float y, IKindSettingsHost comp, ThingDef animalDef)
     {
         var color = GUI.color;
         var font = Text.Font;
@@ -95,10 +95,10 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
 
         if (Widgets.ButtonText(presetBtn, presetButtonText))
         {
-            Find.WindowStack.Add(new Dialog_PresetBrowser(comp, PresetScope.List, animalDef, PresetsTitleKey.Translate(animalDef.LabelCap),
+            IntegrationServices.GetServices<IPresetWindows>()[0].OpenListBrowser(comp, animalDef, PresetsTitleKey.Translate(animalDef.LabelCap).ToString(),
                 name => PresetRepository.ExportList(name, animalDef, RuleSet),
                 e => PresetRepository.ReadKindSlice(e, animalDef) is { } kd && RuleSet.ReadXml(PresetSectionSerialization.Wrap(kd.IntegrationSections)),
-                () => RuleSet.HasRules));
+                () => RuleSet.HasRules);
         }
 
         var clearButtonText = ASMKeys.ClearList.Translate();
@@ -141,7 +141,7 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
 
     protected abstract float DrawHeader(float x, float y, float width);
 
-    private void DrawList(float x, float y, float listWidth, float listHeight, ref ListSectionState listState, ASM_MapComp comp)
+    private void DrawList(float x, float y, float listWidth, float listHeight, ref ListSectionState listState, IKindSettingsHost comp)
     {
         var top = y;
         var rowHeight = Text.LineHeight + UIConstants.TextPaddingY;

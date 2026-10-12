@@ -100,9 +100,9 @@ namespace ASM;
 
         // ---- Export --------------------------------------------------------------------------
 
-        public static void ExportAll(string name, ASM_MapComp comp)
+        public static void ExportAll(string name, IKindSettingsHost comp)
         {
-            Serialize(name, ScopeFolder(PresetScope.All), SlaughterPresetDto.From(comp));
+            Serialize(name, ScopeFolder(PresetScope.All), SlaughterPresetDto.From(comp.AllKindSettings));
         }
 
         public static void ExportKind(string name, ThingDef animalDef, KindSettings ks)

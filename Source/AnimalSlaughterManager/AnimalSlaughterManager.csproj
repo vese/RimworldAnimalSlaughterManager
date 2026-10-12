@@ -25,4 +25,9 @@
     <PackageReference Include="Lib.Harmony" Version="2.*" PrivateAssets="all" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AnimalSlaughterManager.Integrations\AnimalSlaughterManager.Integrations.csproj" />
+    <ProjectReference Include="..\AnimalSlaughterManager.Integrations.AnimalTraitsSystem\AnimalSlaughterManager.Integrations.AnimalTraitsSystem.csproj" />
+  </ItemGroup>
+
 </Project>
