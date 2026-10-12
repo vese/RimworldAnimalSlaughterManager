@@ -18,18 +18,18 @@ public static class AnimalTraitsSystemRegistration
     {
         // The kind-settings provider is registered unconditionally: the settings data
         // survives ATS being disabled (the types live in this assembly).
-        IntegrationRegistry.Add<IKindIntegrationSettingsProvider>(new KindTraitsSettings.Provider());
+        IntegrationServices.Add<IKindIntegrationSettingsProvider>(new KindTraitsSettings.Provider());
 
         if (!ModsConfig.IsActive(PackageId))
         {
             return;
         }
 
-        IntegrationRegistry.Add<IRuleOptionsSource>(new TraitRuleOptions());
-        IntegrationRegistry.Add<ISettingsTabSource>(new TraitSettingsTab());
-        IntegrationRegistry.Add<IPawnSlaughterSignals>(new TraitSlaughterSignals());
-        IntegrationRegistry.Add<IKeepReserveSource>(new TraitKeepReserve());
-        IntegrationRegistry.Add<IKindForceCullSource>(new TraitKindForceCull());
-        IntegrationRegistry.Add<IExternalForceCullSource>(new AtsExternalForceCull());
+        IntegrationServices.Add<IRuleOptionsSource>(new TraitRuleOptions());
+        IntegrationServices.Add<ISettingsTabSource>(new TraitSettingsTab());
+        IntegrationServices.Add<IPawnSlaughterSignals>(new TraitSlaughterSignals());
+        IntegrationServices.Add<IKeepReserveSource>(new TraitKeepReserve());
+        IntegrationServices.Add<IKindForceCullSource>(new TraitKindForceCull());
+        IntegrationServices.Add<IExternalForceCullSource>(new AtsExternalForceCull());
     }
 }

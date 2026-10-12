@@ -397,7 +397,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
         // The trait options come from the traits integration (none registered = no options).
         {
-            foreach (var source in IntegrationRegistry.Services<IRuleOptionsSource>())
+            foreach (var source in IntegrationServices.GetServices<IRuleOptionsSource>())
             {
                 source.AddRuleOptions(options, rule => settings.prioritySettings.Add(male, adult, rule));
             }

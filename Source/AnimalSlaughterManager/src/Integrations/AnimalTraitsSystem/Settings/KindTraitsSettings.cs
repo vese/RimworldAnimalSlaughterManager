@@ -180,7 +180,7 @@ public class KindTraitsSettings : IKindIntegrationSettings
             ForceCullTraits = forceCullRuleSet.rules.Select(TraitDto.From).ToList(),
         };
 
-        PresetSectionXml.Serialize(parent, section);
+        PresetSectionSerialization.Serialize(parent, section);
     }
 
     public void ReadXml(XmlElement kind)
@@ -192,7 +192,7 @@ public class KindTraitsSettings : IKindIntegrationSettings
 
         if (section != null)
         {
-            var dto = PresetSectionXml.Deserialize<TraitsSectionDto>(section);
+            var dto = PresetSectionSerialization.Deserialize<TraitsSectionDto>(section);
 
             if (dto != null)
             {
@@ -207,14 +207,14 @@ public class KindTraitsSettings : IKindIntegrationSettings
 
         if (legacyKeep != null)
         {
-            FillRules(PresetSectionXml.Deserialize<KeepTraitsListDto>(legacyKeep)?.Trait, null);
+            FillRules(PresetSectionSerialization.Deserialize<KeepTraitsListDto>(legacyKeep)?.Trait, null);
         }
 
         var legacyCull = kind[nameof(TraitsSectionDto.ForceCullTraits)];
 
         if (legacyCull != null)
         {
-            FillRules(null, PresetSectionXml.Deserialize<ForceCullTraitsListDto>(legacyCull)?.Trait);
+            FillRules(null, PresetSectionSerialization.Deserialize<ForceCullTraitsListDto>(legacyCull)?.Trait);
         }
     }
 
@@ -254,7 +254,7 @@ public class ProtectRuleSet() : KindTraitsRuleSet<TraitProtectRule>
 
     public override void WriteXml(XmlElement parent)
     {
-        PresetSectionXml.Serialize(parent, new KeepTraitsListDto { Trait = rules.Select(TraitDto.From).ToList() });
+        PresetSectionSerialization.Serialize(parent, new KeepTraitsListDto { Trait = rules.Select(TraitDto.From).ToList() });
     }
 
     public override bool ReadXml(XmlElement kind)
@@ -268,7 +268,7 @@ public class ProtectRuleSet() : KindTraitsRuleSet<TraitProtectRule>
 
         rules.Clear();
 
-        foreach (var t in (PresetSectionXml.Deserialize<KeepTraitsListDto>(list)?.Trait ?? []).Select(t => t.ToTarget()))
+        foreach (var t in (PresetSectionSerialization.Deserialize<KeepTraitsListDto>(list)?.Trait ?? []).Select(t => t.ToTarget()))
         {
             if (t != null)
             {
@@ -290,7 +290,7 @@ public class ForceCullRuleSet() : KindTraitsRuleSet<TraitRule>
 
     public override void WriteXml(XmlElement parent)
     {
-        PresetSectionXml.Serialize(parent, new ForceCullTraitsListDto { Trait = rules.Select(TraitDto.From).ToList() });
+        PresetSectionSerialization.Serialize(parent, new ForceCullTraitsListDto { Trait = rules.Select(TraitDto.From).ToList() });
     }
 
     public override bool ReadXml(XmlElement kind)
@@ -304,7 +304,7 @@ public class ForceCullRuleSet() : KindTraitsRuleSet<TraitRule>
 
         rules.Clear();
 
-        foreach (var c in (PresetSectionXml.Deserialize<ForceCullTraitsListDto>(list)?.Trait ?? []).Select(t => t.ToCull()))
+        foreach (var c in (PresetSectionSerialization.Deserialize<ForceCullTraitsListDto>(list)?.Trait ?? []).Select(t => t.ToCull()))
         {
             if (c != null)
             {

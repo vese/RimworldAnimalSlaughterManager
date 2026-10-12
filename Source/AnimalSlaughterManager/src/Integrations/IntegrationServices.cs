@@ -11,7 +11,7 @@ namespace ASM;
 /// a contract and never knows the concrete types. Registrations come from each integration's
 /// own [StaticConstructorOnStartup] class (or from a foreign mod hosting an integration).
 /// </summary>
-public static class IntegrationRegistry
+public static class IntegrationServices
 {
     private static readonly Dictionary<Type, List<object>> services = new();
 
@@ -33,7 +33,7 @@ public static class IntegrationRegistry
     }
 
     /// <summary>Every registered implementation of the contract, in registration order.</summary>
-    public static IReadOnlyList<TContract> Services<TContract>()
+    public static IReadOnlyList<TContract> GetServices<TContract>()
         where TContract : class
     {
         return services.TryGetValue(typeof(TContract), out var list) ? list.Cast<TContract>().ToList() : [];

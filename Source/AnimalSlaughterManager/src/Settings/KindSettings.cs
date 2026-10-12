@@ -81,7 +81,7 @@ public class KindSettings : IExposable, IPresettable
             // v1: the integration settings were a flat field of this node. The (single, the
             // traits) provider's settings read the same keys right here, then move under their
             // own key at PostLoadInit; the save is rewritten in the current format.
-            var providers = IntegrationRegistry.Services<IKindIntegrationSettingsProvider>();
+            var providers = IntegrationServices.GetServices<IKindIntegrationSettingsProvider>();
 
             if (Scribe.mode == LoadSaveMode.LoadingVars && pendingLegacy == null && providers.Count > 0)
             {
@@ -110,14 +110,14 @@ public class KindSettings : IExposable, IPresettable
         preferenceSettings.Save(dto);
         prioritySettings.Save(dto);
 
-        var holder = PresetSectionXml.Holder();
+        var holder = PresetSectionSerialization.Holder();
 
         foreach (var settings in integrationData.Values)
         {
             settings.WriteXml(holder);
         }
 
-        foreach (var el in PresetSectionXml.Children(holder))
+        foreach (var el in PresetSectionSerialization.Children(holder))
         {
             dto.IntegrationSections.Add(el);
         }
@@ -128,7 +128,7 @@ public class KindSettings : IExposable, IPresettable
         preferenceSettings.Load(dto);
         prioritySettings.Load(dto);
 
-        var kind = PresetSectionXml.Wrap(dto.IntegrationSections);
+        var kind = PresetSectionSerialization.Wrap(dto.IntegrationSections);
 
         foreach (var settings in integrationData.Values)
         {

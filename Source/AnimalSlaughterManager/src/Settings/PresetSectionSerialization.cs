@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 
 namespace ASM;
 
-internal static class PresetSectionXml
+internal static class PresetSectionSerialization
 {
     /// <summary>A detached parent element to write sections into.</summary>
     public static XmlElement Holder()
