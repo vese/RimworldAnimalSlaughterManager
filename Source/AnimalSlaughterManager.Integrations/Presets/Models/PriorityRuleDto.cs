@@ -1,86 +1,123 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
+using System;
+using System.Linq;
+using System.Reflection;
 using System.Xml.Serialization;
 using RimWorld;
 using Verse;
 
 namespace ASM;
 
-    /// <summary>XML form of one BasePriorityRule: the rule type name plus its parameters.</summary>
-    public class PriorityRuleDto
+/// <summary>
+/// XML form of one priority rule: the rule type name plus its parameters. Deliberately
+/// type-agnostic — the parameters copy by field name through reflection, so rules from any
+/// assembly (integration rules included) round-trip without this DTO referencing their types.
+/// Field conventions: defs as defName strings (trait → HediffDef, trainable → TrainableDef,
+/// disease → HediffDef), enums as names.
+/// </summary>
+public class PriorityRuleDto
+{
+    [XmlAttribute]
+    public string rule;
+    [XmlAttribute]
+    public bool has = true;
+    [XmlAttribute]
+    public string trait;
+    [XmlAttribute]
+    public string disease;
+    [XmlAttribute]
+    public string trainable;
+    [XmlAttribute]
+    public string generalType;
+    [XmlAttribute]
+    public string inheritability;
+
+    public static PriorityRuleDto From(BasePriorityRule r)
     {
-        private const string Pregnancy = nameof(PregnancyPriorityRule);
-        private const string Bond = nameof(BondPriorityRule);
-        private const string DiseaseAny = nameof(DiseaseAnyPriorityRule);
-        private const string Disease = nameof(DiseasePriorityRule);
-        private const string Training = nameof(TrainingPriorityRule);
-        private const string TrainingGeneral = nameof(TrainingGeneralPriorityRule);
-        private const string Trait = nameof(TraitPriorityRule);
-        private const string TraitGeneral = nameof(TraitGeneralPriorityRule);
+        var dto = new PriorityRuleDto { rule = r.GetType().Name };
 
-        [XmlAttribute]
-        public string rule;
-        [XmlAttribute]
-        public bool has = true;
-        [XmlAttribute]
-        public string trait;
-        [XmlAttribute]
-        public string disease;
-        [XmlAttribute]
-        public string trainable;
-        [XmlAttribute]
-        public string generalType;
-        [XmlAttribute]
-        public string inheritability;
-
-        public static PriorityRuleDto From(BasePriorityRule r) => r switch
+        foreach (var field in typeof(PriorityRuleDto).GetFields())
         {
-            PregnancyPriorityRule x => new PriorityRuleDto { rule = Pregnancy, has = x.has },
-            BondPriorityRule x => new PriorityRuleDto { rule = Bond, has = x.has },
-            DiseaseAnyPriorityRule x => new PriorityRuleDto { rule = DiseaseAny, has = x.has },
-            DiseasePriorityRule x => new PriorityRuleDto { rule = Disease, has = x.has, disease = x.disease?.defName },
-            TrainingPriorityRule x => new PriorityRuleDto { rule = Training, has = x.has, trainable = x.trainable?.defName },
-            TrainingGeneralPriorityRule x => new PriorityRuleDto { rule = TrainingGeneral, generalType = x.type.ToString() },
-            TraitPriorityRule x => new PriorityRuleDto { rule = Trait, has = x.has, trait = x.trait?.defName, inheritability = x.inheritability.ToString() },
-            TraitGeneralPriorityRule x => new PriorityRuleDto { rule = TraitGeneral, has = x.has, generalType = x.type.ToString(), inheritability = x.inheritability.ToString() },
-            _ => new PriorityRuleDto { rule = "" },
-        };
-
-        public BasePriorityRule ToRule()
-        {
-            switch (rule)
+            if (field.Name == nameof(rule))
             {
-                case Pregnancy:
-                    return new PregnancyPriorityRule { has = has };
-                case Bond:
-                    return new BondPriorityRule { has = has };
-                case DiseaseAny:
-                    return new DiseaseAnyPriorityRule { has = has };
-                case Disease:
-                    return new DiseasePriorityRule { has = has, disease = DefDatabase<HediffDef>.GetNamedSilentFail(disease ?? "") };
-                case Training:
-                    return new TrainingPriorityRule { has = has, trainable = DefDatabase<TrainableDef>.GetNamedSilentFail(trainable ?? "") };
-                case TrainingGeneral:
-                    return Enum.TryParse(generalType, out TrainingGeneralType tg)
-                        ? new TrainingGeneralPriorityRule { type = tg }
-                        : null;
-                case Trait:
-                    return new TraitPriorityRule
-                    {
-                        has = has,
-                        trait = DefDatabase<HediffDef>.GetNamedSilentFail(trait ?? ""),
-                        inheritability = ParseInheritability(),
-                    };
-                case TraitGeneral:
-                    return Enum.TryParse(generalType, out TraitType tt)
-                        ? new TraitGeneralPriorityRule { has = has, type = tt, inheritability = ParseInheritability() }
-                        : null;
-                default:
-                    return null;
+                continue;
+            }
+
+            var source = r.GetType().GetField(field.Name, BindingFlags.Public | BindingFlags.Instance);
+
+            if (source == null)
+            {
+                continue;
+            }
+
+            var value = source.GetValue(r);
+            field.SetValue(dto, value switch
+            {
+                null => null,
+                Def def => def.defName,
+                Enum e => e.ToString(),
+                bool b => b,
+                _ => null,
+            });
+        }
+
+        return dto;
+    }
+
+    public BasePriorityRule? ToRule()
+    {
+        var type = Type.GetType("ASM." + rule, false);
+
+        if (type == null)
+        {
+            return null;
+        }
+
+        var instance = (BasePriorityRule?)Activator.CreateInstance(type);
+
+        if (instance == null)
+        {
+            return null;
+        }
+
+        foreach (var field in typeof(PriorityRuleDto).GetFields())
+        {
+            if (field.Name == nameof(rule))
+            {
+                continue;
+            }
+
+            var target = type.GetField(field.Name, BindingFlags.Public | BindingFlags.Instance);
+
+            if (target == null)
+            {
+                continue;
+            }
+
+            var value = field.GetValue(this);
+
+            if (target.FieldType == typeof(bool) || value == null)
+            {
+                continue; // bool keeps its default; nulls keep theirs
+            }
+
+            if (target.FieldType.IsSubclassOf(typeof(Def)))
+            {
+                var def = ResolveDef(target.FieldType, (string)value);
+                target.SetValue(instance, def);
+            }
+            else if (target.FieldType.IsEnum)
+            {
+                if (Enum.TryParse(target.FieldType, (string)value, out var parsed))
+                {
+                    target.SetValue(instance, parsed);
+                }
             }
         }
 
-        private TraitInheritability ParseInheritability() =>
-            Enum.TryParse(inheritability, out TraitInheritability ti) ? ti : TraitInheritability.Both;
+        return instance;
     }
+
+    private static Def? ResolveDef(Type defType, string defName) =>
+        GenDefDatabase.GetAllDefsInDatabaseForDef(defType).FirstOrDefault(d => d.defName == defName);
+}

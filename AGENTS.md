@@ -19,7 +19,7 @@ Source/AnimalSlaughterManager.Integrations.AnimalTraitsSystem/ — ATS-инте�
 Мод — SDK-style .csproj, `net472` (RimWorld 1.6 = Unity 2022.3 / Mono), ссылается на API через NuGet **`Krafs.Rimworld.Ref` 1.6.\*** (reference-only, игра для сборки не нужна) и **`Lib.Harmony` 2.\*** (только компиляция; сама библиотека уже в игре).
 
 ```bash
-dotnet build Source/AnimalSlaughterManager/AnimalSlaughterManager.csproj -c Release   # собирает все: ProjectReference на Integrations и ATS
+dotnet build Source/AnimalSlaughterManager/AnimalSlaughterManager.csproj -c Release   # одна DLL: три проекта + ILRepack-merge
 ```
 
 Собранные DLL коммитятся (в `.gitignore` исключены только `**/bin`, `**/obj`, `**/Assemblies/*.pdb|*.xml`). **Перед коммитом — собрать.**

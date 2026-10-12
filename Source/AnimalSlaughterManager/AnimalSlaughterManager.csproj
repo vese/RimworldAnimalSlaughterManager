@@ -20,14 +20,40 @@
 
   <ItemGroup>
     <!-- RimWorld 1.6 API (reference-only; nothing is copied into Assemblies/). -->
-    <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" PrivateAssets="all" />
+    <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" PrivateAssets="all" GeneratePathProperty="true" />
     <!-- Harmony ships inside RimWorld; we only need it at compile time. -->
-    <PackageReference Include="Lib.Harmony" Version="2.*" PrivateAssets="all" />
+    <PackageReference Include="Lib.Harmony" Version="2.*" PrivateAssets="all" GeneratePathProperty="true" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\AnimalSlaughterManager.Integrations\AnimalSlaughterManager.Integrations.csproj" />
     <ProjectReference Include="..\AnimalSlaughterManager.Integrations.AnimalTraitsSystem\AnimalSlaughterManager.Integrations.AnimalTraitsSystem.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <!-- Merge the three assemblies into the single mod DLL. -->
+    <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.37" PrivateAssets="all" />
+  </ItemGroup>
+
+  <Target Name="MergeIntoOneDll" AfterTargets="Build">
+    <ItemGroup>
+      <MergeInput Include="$(OutputPath)$(AssemblyName).dll" />
+      <MergeInput Include="$(OutputPath)AnimalSlaughterManager.Integrations.dll" />
+      <MergeInput Include="$(OutputPath)AnimalSlaughterManager.Integrations.AnimalTraitsSystem.dll" />
+    </ItemGroup>
+    <Message Text="Merging @(MergeInput) into $(OutputPath)$(AssemblyName).dll" Importance="high" />
+    <!-- The packer resolves references in the project directory: stage the reference-only
+         assemblies (Harmony, RimWorld) there for the merge, drop them after. -->
+    <ItemGroup>
+      <MergeResolveProbe Include="$(PkgLib_Harmony)\lib\net472\0Harmony.dll" />
+      <MergeResolveProbe Include="$(PkgKrafs_Rimworld_Ref)\ref\net472\Assembly-CSharp.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(MergeResolveProbe)" DestinationFolder="$(MSBuildProjectDirectory)" />
+    <ILRepack InputAssemblies="@(MergeInput)" OutputFile="$(OutputPath)$(AssemblyName).dll" Internalize="true" />
+  </Target>
+
+  <Target Name="RemoveMergedDlls" AfterTargets="MergeIntoOneDll">
+    <Delete Files="$(OutputPath)AnimalSlaughterManager.Integrations.dll;$(OutputPath)AnimalSlaughterManager.Integrations.AnimalTraitsSystem.dll" />
+    <Delete Files="@(MergeResolveProbe->'$(MSBuildProjectDirectory)\%(Filename)%(Extension)')" />
+  </Target>
 
 </Project>

@@ -78,24 +78,25 @@ public class KindPrioritySettingsLegacy
             has = slaughterCondition.has,
             trainable = slaughterCondition.trainable
         },
-        CondType.Trait => new TraitPriorityRule
+        CondType.Trait => new PriorityRuleDto
         {
+            rule = "TraitPriorityRule",
             has = slaughterCondition.has,
-            trait = slaughterCondition.trait,
-            inheritability = slaughterCondition.inheritMode
-        },
-        CondType.HasPositiveTrait => new TraitGeneralPriorityRule
+            trait = slaughterCondition.trait?.defName,
+            inheritability = slaughterCondition.inheritMode,
+        }.ToRule(),
+        CondType.HasPositiveTrait => new PriorityRuleDto
         {
+            rule = "TraitGeneralPriorityRule",
             has = slaughterCondition.has,
-            type = TraitType.Positive,
-            inheritability = TraitInheritability.Both
-        },
-        CondType.HasNegativeTrait => new TraitGeneralPriorityRule
+            generalType = "Positive",
+        }.ToRule(),
+        CondType.HasNegativeTrait => new PriorityRuleDto
         {
+            rule = "TraitGeneralPriorityRule",
             has = slaughterCondition.has,
-            type = TraitType.Negative,
-            inheritability = TraitInheritability.Both
-        },
+            generalType = "Negative",
+        }.ToRule(),
         _ => null,
     };
 }
