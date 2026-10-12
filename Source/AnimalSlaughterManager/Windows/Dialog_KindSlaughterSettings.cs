@@ -51,9 +51,15 @@ public class Dialog_KindSlaughterSettings : Window
         tabs =
         [
             new KindSlaughterSettingsDialogPrioritiesTab(comp, animalDef, settings),
-            new KindSlaughterSettingsDialogSpecialRulesTab(settings.traitsSettings),
             new KindSlaughterSettingsDialogGeneralTab(comp.kindSettings, comp.globalSettings)
         ];
+
+        var specialRulesTab = IntegrationServices.GetServices<ISettingsTabSource>()            .Select(source => source.CreateTab(settings))            .FirstOrDefault(tab => tab != null);
+
+        if (specialRulesTab != null)
+        {
+            tabs.Insert(1, specialRulesTab);
+        }
         currentTab = tabs.First();
     }
 

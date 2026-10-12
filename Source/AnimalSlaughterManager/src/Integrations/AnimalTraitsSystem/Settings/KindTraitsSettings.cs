@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 using Verse;
 
 namespace ASM;
@@ -34,9 +35,11 @@ public abstract class KindTraitsRuleSet<T> : IEditableTraitsRuleSet<T> where T :
 
     public abstract string PresetsFolder { get; }
 
-    public abstract void Save(KindDto dto);
+    public abstract string ListElementName { get; }
 
-    public abstract bool Load(KindDto dto);
+    public abstract void WriteXml(XmlElement parent);
+
+    public abstract bool ReadXml(XmlElement kind);
 
     public void Clear()
     {
@@ -122,26 +125,40 @@ public abstract class KindTraitsRuleSet<T> : IEditableTraitsRuleSet<T> where T :
     }
 }
 
-public class KindTraitsSettings : IPresettable
+/// <summary>
+/// The ATS-owned per-kind settings: the keep (breeding protection) and force-cull trait lists.
+/// Stored opaquely by the core under <see cref="SettingsKey"/>; in kind presets they ride as the
+/// integration's own section (the legacy flat children of earlier versions also read).
+/// </summary>
+public class KindTraitsSettings : IKindIntegrationSettings
 {
+    public const string SettingsKey = "atsTraits";
+
+    /// <summary>The storage provider: registered unconditionally, so the settings survive ATS
+    /// being disabled.</summary>
+    public sealed class Provider : IKindIntegrationSettingsProvider
+    {
+        public static readonly Provider Instance = new();
+
+        public string KindSettingsKey => SettingsKey;
+
+        public IKindIntegrationSettings CreateKindSettings() => new KindTraitsSettings();
+    }
+
+    /// <summary>The kind's ATS settings, created on first use.</summary>
+    public static KindTraitsSettings Of(KindSettings ks) => ks.GetOrCreateIntegration<KindTraitsSettings>(Provider.Instance);
+
     // Breeding: protect these animals from slaughter.
     public ProtectRuleSet protectRuleSet = new();
+
     // Force slaughter: cull these animals regardless of count/limits and other settings
     // (protection still wins at intersections).
     public ForceCullRuleSet forceCullRuleSet = new();
+
     /// <summary>True when this kind deviates from vanilla behaviour and must be recomputed.</summary>
     public bool Customized =>
         protectRuleSet.HasRules ||
-        forceCullRuleSet.HasRules;    ///// <summary>Priority customization: sex×age (older/younger) prefs, condition lists, or cull/spare trait lists.</summary>
-    //public bool HasPrioritySettings =>
-    //    cullTraits != null && cullTraits.Count > 0 ||
-    //    spareTraits != null && spareTraits.Count > 0;
-
-    /// <summary>Protection customization: breeding ("keep") trait targets (protect from slaughter).</summary>
-    public bool HasProtectionSettings => protectRuleSet.HasRules;
-
-    /// <summary>Force-slaughter customization: cull matching animals regardless of count/limits.</summary>
-    public bool HasForceCullSettings => forceCullRuleSet.HasRules;
+        forceCullRuleSet.HasRules;
 
     public void Reset()
     {
@@ -153,45 +170,59 @@ public class KindTraitsSettings : IPresettable
     {
         protectRuleSet.ExposeData("keepTraits");
         forceCullRuleSet.ExposeData("forceCullTraits");
-
-        //Scribe_Collections.Look(ref keepTraits.rules, "keepTraits", LookMode.Deep);
-        //Scribe_Collections.Look(ref forceCullTraits, "forceCullTraits", LookMode.Deep);
-        //Scribe_Collections.Look(ref cullTraits, "cullTraits", LookMode.Deep);
-        //Scribe_Collections.Look(ref spareTraits, "spareTraits", LookMode.Deep);
-
-        //if (Scribe.mode == LoadSaveMode.PostLoadInit)
-        //{
-        //    keepTraits ??= [];
-        //    forceCullTraits ??= [];
-        //    cullTraits ??= [];
-        //    spareTraits ??= [];
-
-        //    // A trait/disease/trainable def may resolve to null when the mod that defined it
-        //    // (e.g. Animal Traits System) was disabled on this save. Drop those dead entries so
-        //    // the settings don't fill up with no-op "?" rows. (This does not silence RimWorld's
-        //    // own "Could not load reference" log for hediffs still on the pawns — that is the
-        //    // base game resolving the save, outside this mod's control.)
-        //    keepTraits.RemoveAll(t => t == null || t.trait == null);
-        //    forceCullTraits.RemoveAll(t => t == null || t.trait == null);
-        //    cullTraits.RemoveAll(t => t == null || t.trait == null);
-        //    spareTraits.RemoveAll(t => t == null || t.trait == null);
-        //}
     }
 
-    public void Save(KindDto dto)
+    public void WriteXml(XmlElement parent)
     {
-        dto.KeepTraits = protectRuleSet.rules.Select(TraitDto.From).ToList();
-        dto.ForceCullTraits = forceCullRuleSet.rules.Select(TraitDto.From).ToList();
+        var section = new TraitsSectionDto
+        {
+            KeepTraits = protectRuleSet.rules.Select(TraitDto.From).ToList(),
+            ForceCullTraits = forceCullRuleSet.rules.Select(TraitDto.From).ToList(),
+        };
+
+        PresetSectionSerialization.Serialize(parent, section);
     }
 
-    public void Load(KindDto dto)
+    public void ReadXml(XmlElement kind)
     {
         protectRuleSet.rules.Clear();
         forceCullRuleSet.rules.Clear();
 
-        if (dto.KeepTraits != null)
+        var section = kind[SettingsKey];
+
+        if (section != null)
         {
-            foreach (var t in dto.KeepTraits.Select(t => t.ToTarget()))
+            var dto = PresetSectionSerialization.Deserialize<TraitsSectionDto>(section);
+
+            if (dto != null)
+            {
+                FillRules(dto.KeepTraits, dto.ForceCullTraits);
+            }
+
+            return;
+        }
+
+        // Presets saved before the section format carried the lists as direct children.
+        var legacyKeep = kind[nameof(TraitsSectionDto.KeepTraits)];
+
+        if (legacyKeep != null)
+        {
+            FillRules(PresetSectionSerialization.Deserialize<KeepTraitsListDto>(legacyKeep)?.Trait, null);
+        }
+
+        var legacyCull = kind[nameof(TraitsSectionDto.ForceCullTraits)];
+
+        if (legacyCull != null)
+        {
+            FillRules(null, PresetSectionSerialization.Deserialize<ForceCullTraitsListDto>(legacyCull)?.Trait);
+        }
+    }
+
+    private void FillRules(List<TraitDto>? keep, List<TraitDto>? cull)
+    {
+        if (keep != null)
+        {
+            foreach (var t in keep.Select(t => t.ToTarget()))
             {
                 if (t != null)
                 {
@@ -200,9 +231,9 @@ public class KindTraitsSettings : IPresettable
             }
         }
 
-        if (dto.ForceCullTraits != null)
+        if (cull != null)
         {
-            foreach (var c in dto.ForceCullTraits.Select(t => t.ToCull()))
+            foreach (var c in cull.Select(t => t.ToCull()))
             {
                 if (c != null)
                 {
@@ -219,19 +250,25 @@ public class ProtectRuleSet() : KindTraitsRuleSet<TraitProtectRule>
 
     public override string PresetsFolder => "Keep";
 
-    public override void Save(KindDto dto) =>
-        dto.KeepTraits = rules.Select(TraitDto.From).ToList();
+    public override string ListElementName => nameof(TraitsSectionDto.KeepTraits);
 
-    public override bool Load(KindDto dto)
+    public override void WriteXml(XmlElement parent)
     {
-        if (dto.KeepTraits == null)
+        PresetSectionSerialization.Serialize(parent, new KeepTraitsListDto { Trait = rules.Select(TraitDto.From).ToList() });
+    }
+
+    public override bool ReadXml(XmlElement kind)
+    {
+        var list = kind[ListElementName];
+
+        if (list == null)
         {
             return false;
         }
 
         rules.Clear();
 
-        foreach (var t in dto.KeepTraits.Select(t => t.ToTarget()))
+        foreach (var t in (PresetSectionSerialization.Deserialize<KeepTraitsListDto>(list)?.Trait ?? []).Select(t => t.ToTarget()))
         {
             if (t != null)
             {
@@ -249,19 +286,25 @@ public class ForceCullRuleSet() : KindTraitsRuleSet<TraitRule>
 
     public override string PresetsFolder => "ForceCull";
 
-    public override void Save(KindDto dto) =>
-        dto.ForceCullTraits = rules.Select(TraitDto.From).ToList();
+    public override string ListElementName => nameof(TraitsSectionDto.ForceCullTraits);
 
-    public override bool Load(KindDto dto)
+    public override void WriteXml(XmlElement parent)
     {
-        if (dto.ForceCullTraits == null)
+        PresetSectionSerialization.Serialize(parent, new ForceCullTraitsListDto { Trait = rules.Select(TraitDto.From).ToList() });
+    }
+
+    public override bool ReadXml(XmlElement kind)
+    {
+        var list = kind[ListElementName];
+
+        if (list == null)
         {
             return false;
         }
 
         rules.Clear();
 
-        foreach (var c in dto.ForceCullTraits.Select(t => t.ToCull()))
+        foreach (var c in (PresetSectionSerialization.Deserialize<ForceCullTraitsListDto>(list)?.Trait ?? []).Select(t => t.ToCull()))
         {
             if (c != null)
             {

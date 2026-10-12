@@ -117,7 +117,11 @@ namespace ASM;
             var folder = Path.Combine(ScopeFolder(PresetScope.List), ruleSet.PresetsFolder);
 
             var full = new KindDto { animal = animalDef.defName };
-            ruleSet.Save(full);
+
+            // The rule set writes its element into a detached holder — move it into the slice.
+            var holder = PresetSectionSerialization.Holder();
+            ruleSet.WriteXml(holder);
+            full.IntegrationSections.AddRange(PresetSectionSerialization.Children(holder));
 
             var dto = new SlaughterPresetDto();
             dto.Kinds.Add(full);

@@ -395,23 +395,12 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         AddRuleOption(options, ASMKeys.CondTrainingPartial.Translate(), male, adult, () => new TrainingGeneralPriorityRule { type = TrainingGeneralType.Partial });
         AddRuleOption(options, ASMKeys.CondTrainingFull.Translate(), male, adult, () => new TrainingGeneralPriorityRule { type = TrainingGeneralType.Full });
 
-        // Trait options only when ATS trait content is actually loaded.
-        if (AnimalTraitsAccess.HasAvailableTraits)
+        // The trait options come from the traits integration (none registered = no options).
         {
-            options.Add(new FloatMenuOption(ASMKeys.CondAddTrait.Translate(),
-                () => Find.WindowStack.Add(new Dialog_TraitFlagPicker(picked =>
-                {
-                    // TODO: 1 option for 1 trait def
-                    foreach ((HediffDef def, bool has) in picked)
-                    {
-                        settings.prioritySettings.Add(male, adult, new TraitPriorityRule { has = has, trait = def });
-                    }
-                }))));
-            // TODO: 1 option with TraitType.Both
-            AddRuleOption(options, ASMKeys.CondPositiveHas.Translate(), male, adult, () => new TraitGeneralPriorityRule { has = true, type = TraitType.Positive });
-            AddRuleOption(options, ASMKeys.CondPositiveMissing.Translate(), male, adult, () => new TraitGeneralPriorityRule { has = false, type = TraitType.Positive });
-            AddRuleOption(options, ASMKeys.CondNegativeHas.Translate(), male, adult, () => new TraitGeneralPriorityRule { has = true, type = TraitType.Negative });
-            AddRuleOption(options, ASMKeys.CondNegativeMissing.Translate(), male, adult, () => new TraitGeneralPriorityRule { has = false, type = TraitType.Negative });
+            foreach (var source in IntegrationServices.GetServices<IRuleOptionsSource>())
+            {
+                source.AddRuleOptions(options, rule => settings.prioritySettings.Add(male, adult, rule));
+            }
         }
 
         Find.WindowStack.Add(new FloatMenu(options));
