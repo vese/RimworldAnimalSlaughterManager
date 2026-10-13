@@ -11,7 +11,7 @@ Textures/                      — иконки (щит, шестерёнка)
 Source/AnimalSlaughterManager/                  — главный проект: движок, окна, патчи, пресеты-браузеры
 Source/AnimalSlaughterManager.Core/            — ядро: домен + контракты интеграций (настройки,
                                                  правила, валидация, пресеты-IO, общие контролы)
-Source/AnimalSlaughterManager.Core.AnimalTraitsSystem/ — ATS-интеграция (ссылается на Core)
+Source/AnimalSlaughterManager.Integrations.AnimalTraitsSystem/ — ATS-интеграция (ссылается на Core)
 ```
 
 ## Сборка
