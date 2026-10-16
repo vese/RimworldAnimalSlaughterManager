@@ -8,7 +8,10 @@ Assemblies/                    — собранная DLL
 Languages/                     — переводы
 Defs/                          — PawnColumnDef (колонка защиты)
 Textures/                      — иконки (щит, шестерёнка)
-Source/AnimalSlaughterManager/ — исходники (.csproj + src/)
+Source/AnimalSlaughterManager/                  — главный проект: движок, окна, патчи, пресеты-браузеры
+Source/AnimalSlaughterManager.Core/            — ядро: домен + контракты интеграций (настройки,
+                                                 правила, валидация, пресеты-IO, общие контролы)
+Source/AnimalSlaughterManager.Integrations.AnimalTraitsSystem/ — ATS-интеграция (ссылается на Core)
 ```
 
 ## Сборка
@@ -16,7 +19,7 @@ Source/AnimalSlaughterManager/ — исходники (.csproj + src/)
 Мод — SDK-style .csproj, `net472` (RimWorld 1.6 = Unity 2022.3 / Mono), ссылается на API через NuGet **`Krafs.Rimworld.Ref` 1.6.\*** (reference-only, игра для сборки не нужна) и **`Lib.Harmony` 2.\*** (только компиляция; сама библиотека уже в игре).
 
 ```bash
-dotnet build Source/AnimalSlaughterManager/AnimalSlaughterManager.csproj -c Release   # DLL → Assemblies/
+dotnet build Source/AnimalSlaughterManager/AnimalSlaughterManager.csproj -c Release   # три DLL (сборка главного тянет все проекты)
 ```
 
 Собранные DLL коммитятся (в `.gitignore` исключены только `**/bin`, `**/obj`, `**/Assemblies/*.pdb|*.xml`). **Перед коммитом — собрать.**

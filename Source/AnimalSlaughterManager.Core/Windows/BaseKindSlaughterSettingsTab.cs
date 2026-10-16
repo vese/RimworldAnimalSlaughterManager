@@ -19,13 +19,13 @@ public abstract class BaseKindSlaughterSettingsTab : IKindSlaughterSettingsDialo
 
     protected Vector2 topScroll;
 
-    protected virtual List<(string Text, Action<ASM_MapComp, ThingDef, KindSettings> Action)> HeaderButtons { get; } = [];
+    protected virtual List<(string Text, Action<IKindSettingsHost, ThingDef, KindSettings> Action)> HeaderButtons { get; } = [];
     protected virtual float ContentMinHeight { get; } = 0f;
     protected virtual float WindowMinHeight => HeaderHeight + UIConstants.GapY + TabBarHeight + UIConstants.GapY + ContentMinHeight;
 
     public abstract TaggedString Name { get; }
 
-    public void DoWindowContents(Rect inRect, ASM_MapComp comp, ThingDef animalDef, KindSettings settings, Action<float, float, float, float> drawTabBar)
+    public void DoWindowContents(Rect inRect, IKindSettingsHost comp, ThingDef animalDef, KindSettings settings, Action<float, float, float, float> drawTabBar)
     {
         if (inRect.height >= WindowMinHeight)
         {
@@ -41,7 +41,7 @@ public abstract class BaseKindSlaughterSettingsTab : IKindSlaughterSettingsDialo
         }
     }
 
-    private void DrawWindow(float x, float y, float width, float height, ASM_MapComp comp, ThingDef animalDef, KindSettings settings, Action<float, float, float, float> drawTabBar)
+    private void DrawWindow(float x, float y, float width, float height, IKindSettingsHost comp, ThingDef animalDef, KindSettings settings, Action<float, float, float, float> drawTabBar)
     {
         var top = y;
         DrawHeader(x, top, width, comp, animalDef, settings);
@@ -60,12 +60,12 @@ public abstract class BaseKindSlaughterSettingsTab : IKindSlaughterSettingsDialo
 
     // Header: animal icon + name on the left; the per-kind preset button and the two reset
     // buttons sit to the right of the name. On the General tab they are hidden.
-    protected void DrawHeader(float x, float y, float width, ASM_MapComp comp, ThingDef animalDef, KindSettings settings)
+    protected void DrawHeader(float x, float y, float width, IKindSettingsHost comp, ThingDef animalDef, KindSettings settings)
     {
         Widgets.ThingIcon(new Rect(x, y, HeaderIconSize, HeaderIconSize), animalDef);
         
         var right = x + width - HeaderMarginRight;
-        var buttons = new List<(TaggedString Text, Rect Rect, Action<ASM_MapComp, ThingDef, KindSettings> Action)>(HeaderButtons.Count);
+        var buttons = new List<(TaggedString Text, Rect Rect, Action<IKindSettingsHost, ThingDef, KindSettings> Action)>(HeaderButtons.Count);
 
         foreach (var button in HeaderButtons)
         {
@@ -92,7 +92,7 @@ public abstract class BaseKindSlaughterSettingsTab : IKindSlaughterSettingsDialo
         }
     }
 
-    protected abstract void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings settings, ASM_MapComp comp, ThingDef animalDef);
+    protected abstract void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings settings, IKindSettingsHost comp, ThingDef animalDef);
 
     protected static void DrawDivider(float x, float y, float width)
     {

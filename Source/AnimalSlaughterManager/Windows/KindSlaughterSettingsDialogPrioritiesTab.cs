@@ -7,7 +7,7 @@ using Verse;
 
 namespace ASM;
 
-public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef animalDef, KindSettings settings) : BaseKindSlaughterSettingsTab
+public class KindSlaughterSettingsDialogPrioritiesTab(IKindSettingsHost comp, ThingDef animalDef, KindSettings settings) : BaseKindSlaughterSettingsTab
 {
     private const int ListsCountInRow = 2;
 
@@ -18,7 +18,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
     public override TaggedString Name => ASMKeys.TabPriorities.Translate();
 
-    protected override List<(string Text, Action<ASM_MapComp, ThingDef, KindSettings> Action)> HeaderButtons { get; } =
+    protected override List<(string Text, Action<IKindSettingsHost, ThingDef, KindSettings> Action)> HeaderButtons { get; } =
     [
         (ASMKeys.KindPresets, OpenKindPresetsWindow),
         (ASMKeys.ResetPriorities, ResetTabSettings),
@@ -31,7 +31,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
     private readonly List<ListSectionState> listsStates = [.. KindPrioritySettings.keys.Select(x => new ListSectionState())];
 
-    protected override void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings _settings, ASM_MapComp _comp, ThingDef _animalDef)
+    protected override void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings _settings, IKindSettingsHost _comp, ThingDef _animalDef)
     {
         var top = preferenceSettingsPanel.Draw(x, y, width);
 
@@ -198,7 +198,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
 
         if (Widgets.ButtonText(presetBtn, presetButtonText))
         {
-            Find.WindowStack.Add(new Dialog_ConditionPresetBrowser(comp, male, adult, settings.prioritySettings));
+            Find.WindowStack.Add(new Dialog_ConditionPresetBrowser((ASM_MapComp)comp, male, adult, settings.prioritySettings));
         }
 
         var clearButtonText = ASMKeys.ClearList.Translate();
@@ -466,20 +466,20 @@ public class KindSlaughterSettingsDialogPrioritiesTab(ASM_MapComp comp, ThingDef
         Find.WindowStack.Add(new FloatMenu(options));
     }
 
-    private static void OpenKindPresetsWindow(ASM_MapComp comp, ThingDef animalDef, KindSettings _)
+    private static void OpenKindPresetsWindow(IKindSettingsHost comp, ThingDef animalDef, KindSettings _)
     {
-        Find.WindowStack.Add(new Dialog_PresetBrowser(comp, PresetScope.Kind, animalDef));
+        IntegrationServices.GetServices<IPresetWindows>()[0].OpenKindBrowser(comp, animalDef);
     }
 
-    private static void ResetTabSettings(ASM_MapComp comp, ThingDef animalDef, KindSettings settings)
+    private static void ResetTabSettings(IKindSettingsHost comp, ThingDef animalDef, KindSettings settings)
     {
-        settings.preferenceSettings.Reset(comp.globalSettings.preferenceSettings);
+        settings.preferenceSettings.Reset(comp.GlobalSettings.preferenceSettings);
         settings.prioritySettings.Reset();
     }
 
-    private static void ResetAllSettings(ASM_MapComp comp, ThingDef animalDef, KindSettings settings)
+    private static void ResetAllSettings(IKindSettingsHost comp, ThingDef animalDef, KindSettings settings)
     {
-        settings.Reset(comp.globalSettings);
+        settings.Reset(comp.GlobalSettings);
     }
 
 }

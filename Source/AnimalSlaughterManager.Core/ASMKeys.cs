@@ -7,7 +7,7 @@ namespace ASM
     /// в Languages/{English,Russian}/Keyed/ASM.xml. Использовать ASMKeys.X.Translate() вместо
     /// "ASM.X".Translate(), чтобы переименования ловились на этапе компиляции.
     /// </summary>
-    internal static class ASMKeys
+    public static class ASMKeys
     {
 
         /// <summary>ATSNotDetected</summary>

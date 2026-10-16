@@ -35,9 +35,9 @@ public class Dialog_KindSlaughterSettings : Window
 
     public override Vector2 InitialSize => new(WindowWidth, Screen.height * 0.85f);
 
-    public Dialog_KindSlaughterSettings(ASM_MapComp comp, ThingDef animalDef)
+    public Dialog_KindSlaughterSettings(IKindSettingsHost comp, ThingDef animalDef)
     {
-        this.comp = comp;
+        this.comp = (ASM_MapComp)comp;
         this.animalDef = animalDef;
         settings = comp.GetSettings(animalDef);
         doCloseX = true;
@@ -51,7 +51,7 @@ public class Dialog_KindSlaughterSettings : Window
         tabs =
         [
             new KindSlaughterSettingsDialogPrioritiesTab(comp, animalDef, settings),
-            new KindSlaughterSettingsDialogGeneralTab(comp.kindSettings, comp.globalSettings)
+            new KindSlaughterSettingsDialogGeneralTab(((ASM_MapComp)comp).kindSettings, comp.GlobalSettings)
         ];
 
         var specialRulesTab = IntegrationServices.GetServices<ISettingsTabSource>()            .Select(source => source.CreateTab(settings))            .FirstOrDefault(tab => tab != null);
