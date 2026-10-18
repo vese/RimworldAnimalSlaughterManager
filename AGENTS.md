@@ -4,19 +4,31 @@
 
 ```
 About/                         — метаданные мода
-Assemblies/                    — собранная DLL
+1.6/Assemblies/                — собранные DLL (мод, Core, ATS-интеграция)
 Languages/                     — переводы
 Defs/                          — PawnColumnDef (колонка защиты)
 Textures/                      — иконки (щит, шестерёнка)
-Source/AnimalSlaughterManager/ — исходники (.csproj + src/)
+Source/AnimalSlaughterManager/                  — главный проект: движок, окна, патчи, пресеты-браузеры
+Source/AnimalSlaughterManager.Core/            — ядро (фичи): Integrations/ (DI-реестр),
+                                                 Slaughter/ (.Shared контракты движка забоя),
+                                                 Settings/ (Global/Kind/Priorities), Presets/ (IO),
+                                                 Legacy/ (устаревшее по фичам), Ui/ (общие контролы)
+Source/AnimalSlaughterManager.Integrations.AnimalTraitsSystem/ — ATS-интеграция (ссылается на Core)
 ```
+
+Core: верхний уровень — фичи, внутри — по типам. Общее модуля/фичи и их внешние интерфейсы —
+в `.Shared/` соответствующего уровня; контракт лежит в `.Shared/` фичи-потребителя
+(`Slaughter/.Shared/` — движок, `Settings/Kind/.Shared/` — окно вида и данные интеграций,
+`Settings/Priorities/.Shared/` — меню правил, `Legacy/.Shared/` — легаси-конвертер).
+Устаревшее — в `Legacy/` по фичам. Дефолтные глобы `**/*.cs` не заходят в точечные папки —
+в Core.csproj добавлен явный `Compile Include="**/.Shared/**/*.cs"`.
 
 ## Сборка
 
 Мод — SDK-style .csproj, `net472` (RimWorld 1.6 = Unity 2022.3 / Mono), ссылается на API через NuGet **`Krafs.Rimworld.Ref` 1.6.\*** (reference-only, игра для сборки не нужна) и **`Lib.Harmony` 2.\*** (только компиляция; сама библиотека уже в игре).
 
 ```bash
-dotnet build Source/AnimalSlaughterManager/AnimalSlaughterManager.csproj -c Release   # DLL → Assemblies/
+dotnet build Source/AnimalSlaughterManager/AnimalSlaughterManager.csproj -c Release   # три DLL (сборка главного тянет все проекты)
 ```
 
 Собранные DLL коммитятся (в `.gitignore` исключены только `**/bin`, `**/obj`, `**/Assemblies/*.pdb|*.xml`). **Перед коммитом — собрать.**
@@ -47,13 +59,13 @@ ATS (`packageId = luved.animaltraits`), Steam-Workshop ID 3652630316. Исход
 
 ## Animal Slaughter Manager (`namespace ASM`)
 
-Структура `Source/AnimalSlaughterManager/src/` (C#-исходники): `Data/` (модели/энумы), `Comps/` (`ASM_MapComp`, `AnimalTraitsAccess`, `PresetIO`), `Patches/` (Harmony), `Windows/` (диалоги), `Columns/` (колонки вкладки Питомцы), `Alerts/` (Alert для конфликтов).
+Структура `Source/AnimalSlaughterManager/`: `Comps/` (`ASM_MapComp`, `SlaughterListBuilder`), `Patches/` (Harmony), `Windows/` (диалоги, вкладки, `PresetWindows`), `Columns/` (колонки вкладки Питомцы), `Alerts/` (Alert для конфликтов); в корне — `ASMMod`, `ASMSettings`.
 
 Ключевое:
 - **`ASM_MapComp.Recompute`** порядок: (1) vanilla per-config cull по лимитам с приоритетами по корзинам; (2) ATS force-cull; (3) forceCull-черты; (4) keep-trait защита (резервируется до забоя, входит в порог). Защита перевешивает forceCull.
 - **4 настройки возраста×пола** (глобальные, вкладка «Общие»): `globalMalePref` и т.д. — применяются ко всем видам как дефолтные. Per-kind override — на вкладке «Приоритеты».
-- **Списки условий приоритетов** (4 корзины: взрослые/молодые × самцы/самки): упорядоченные списки `SlaughterCondition` (верх = сохранение, низ = забой). Условия: беременность, привязанность, черта (наличие/отсутствие + наследуемость), болезнь, тренировка (не/обучено/полностью), положительные/отрицательные черты.
-- **`SlaughterCondition`**: `CondType` + `has` + `trait/disease/trainable` + `inheritMode`. `Matches(Pawn)` проверяет животное. Ранжирование: позиция в списке = приоритет.
+- **Списки правил приоритетов** (4 корзины: взрослые/молодые × самцы/самки): упорядоченные списки `BasePriorityRule` (верх = сохранение, низ = забой). Ванильные правила: беременность, привязанность, болезнь, тренировка; правила черт — из ATS-интеграции. Легаси-формат `SlaughterCondition` (`CondType` + `has` + defs + `inheritMode`) конвертируется при загрузке сейва/пресета; неизвестные ядру условия отдаются контрактам `ILegacyConditionConverter`.
+- Ранжирование: позиция в списке = приоритет.
 - **Валидация**: дубликаты и противоречия подсвечиваются (красный фон + Alert). Для тренировок: 2 из 3 состояний — нормально, все 3 или дубликаты — конфликт.
 - **Трёхзначная колонка беременных**: Never (галка) / Defer (пауза) / Always (галка). Defer: учитываются в пороге, но забиваются после родов.
 - **Яйцекладущие** считаются «беременными» (`CompEggLayer.eggProgress > 0` через рефлексию).
