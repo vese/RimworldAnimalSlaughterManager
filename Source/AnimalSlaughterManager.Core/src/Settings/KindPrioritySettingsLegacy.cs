@@ -8,11 +8,6 @@ namespace ASM;
 [Obsolete]
 public class KindPrioritySettingsLegacy
 {
-    // The ATS rule types live in the integration assembly (this one only references Core),
-    // so the DTO factory instantiates them by type name.
-    private const string TraitRuleName = "TraitPriorityRule";
-    private const string TraitGeneralRuleName = "TraitGeneralPriorityRule";
-
     public List<SlaughterCondition> prioAdultMale = [];
     public List<SlaughterCondition> prioYoungMale = [];
     public List<SlaughterCondition> prioAdultFemale = [];
@@ -83,25 +78,10 @@ public class KindPrioritySettingsLegacy
             has = slaughterCondition.has,
             trainable = slaughterCondition.trainable
         },
-        CondType.Trait => new PriorityRuleDto
-        {
-            rule = TraitRuleName,
-            has = slaughterCondition.has,
-            trait = slaughterCondition.trait?.defName,
-            inheritability = slaughterCondition.inheritMode.ToString(),
-        }.ToRule(),
-        CondType.HasPositiveTrait => new PriorityRuleDto
-        {
-            rule = TraitGeneralRuleName,
-            has = slaughterCondition.has,
-            generalType = nameof(TraitType.Positive),
-        }.ToRule(),
-        CondType.HasNegativeTrait => new PriorityRuleDto
-        {
-            rule = TraitGeneralRuleName,
-            has = slaughterCondition.has,
-            generalType = nameof(TraitType.Negative),
-        }.ToRule(),
-        _ => null,
+        // Concepts this core does not know (trait conditions) go to the integrations that
+        // own them; the first non-null rule wins.
+        _ => IntegrationServices.GetServices<ILegacyConditionConverter>()
+            .Select(converter => converter.Convert(slaughterCondition))
+            .FirstOrDefault(rule => rule != null),
     };
 }

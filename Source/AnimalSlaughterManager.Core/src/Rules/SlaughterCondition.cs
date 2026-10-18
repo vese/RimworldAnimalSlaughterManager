@@ -16,7 +16,9 @@ public class SlaughterCondition : IExposable
     public HediffDef? trait;
     public HediffDef? disease;
     public TrainableDef? trainable;
-    public TraitInheritability inheritMode = TraitInheritability.Both;
+    /// <summary>Serialized form of the owning integration's inheritability value (an ATS enum
+    /// name); this core does not parse it.</summary>
+    public string inheritMode = "";
 
     public SlaughterCondition() { }
     public SlaughterCondition(CondType type) { this.type = type; }
@@ -35,6 +37,6 @@ public class SlaughterCondition : IExposable
         Scribe_Defs.Look(ref trait, "trait");
         Scribe_Defs.Look(ref disease, "disease");
         Scribe_Defs.Look(ref trainable, "trainable");
-        Scribe_Values.Look(ref inheritMode, "inheritMode", TraitInheritability.Both);
+        Scribe_Values.Look(ref inheritMode, "inheritMode", "");
     }
 }
