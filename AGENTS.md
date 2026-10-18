@@ -4,13 +4,14 @@
 
 ```
 About/                         — метаданные мода
-Assemblies/                    — собранная DLL
+1.6/Assemblies/                — собранные DLL (мод, Core, ATS-интеграция)
 Languages/                     — переводы
 Defs/                          — PawnColumnDef (колонка защиты)
 Textures/                      — иконки (щит, шестерёнка)
 Source/AnimalSlaughterManager/                  — главный проект: движок, окна, патчи, пресеты-браузеры
-Source/AnimalSlaughterManager.Core/            — ядро: домен + контракты интеграций (настройки,
-                                                 правила, валидация, пресеты-IO, общие контролы)
+Source/AnimalSlaughterManager.Core/            — ядро (по фичам): Integrations/ (реестр + контракты),
+                                                 Settings/ (Global/Kind/Priorities/Models/Tabs),
+                                                 Presets/ (IO + Models), Ui/ (общие контролы)
 Source/AnimalSlaughterManager.Integrations.AnimalTraitsSystem/ — ATS-интеграция (ссылается на Core)
 ```
 
@@ -50,13 +51,13 @@ ATS (`packageId = luved.animaltraits`), Steam-Workshop ID 3652630316. Исход
 
 ## Animal Slaughter Manager (`namespace ASM`)
 
-Структура `Source/AnimalSlaughterManager/src/` (C#-исходники): `Data/` (модели/энумы), `Comps/` (`ASM_MapComp`, `AnimalTraitsAccess`, `PresetIO`), `Patches/` (Harmony), `Windows/` (диалоги), `Columns/` (колонки вкладки Питомцы), `Alerts/` (Alert для конфликтов).
+Структура `Source/AnimalSlaughterManager/`: `Comps/` (`ASM_MapComp`, `SlaughterListBuilder`), `Patches/` (Harmony), `Windows/` (диалоги, вкладки, `PresetWindows`), `Columns/` (колонки вкладки Питомцы), `Alerts/` (Alert для конфликтов); в корне — `ASMMod`, `ASMSettings`.
 
 Ключевое:
 - **`ASM_MapComp.Recompute`** порядок: (1) vanilla per-config cull по лимитам с приоритетами по корзинам; (2) ATS force-cull; (3) forceCull-черты; (4) keep-trait защита (резервируется до забоя, входит в порог). Защита перевешивает forceCull.
 - **4 настройки возраста×пола** (глобальные, вкладка «Общие»): `globalMalePref` и т.д. — применяются ко всем видам как дефолтные. Per-kind override — на вкладке «Приоритеты».
-- **Списки условий приоритетов** (4 корзины: взрослые/молодые × самцы/самки): упорядоченные списки `SlaughterCondition` (верх = сохранение, низ = забой). Условия: беременность, привязанность, черта (наличие/отсутствие + наследуемость), болезнь, тренировка (не/обучено/полностью), положительные/отрицательные черты.
-- **`SlaughterCondition`**: `CondType` + `has` + `trait/disease/trainable` + `inheritMode`. `Matches(Pawn)` проверяет животное. Ранжирование: позиция в списке = приоритет.
+- **Списки правил приоритетов** (4 корзины: взрослые/молодые × самцы/самки): упорядоченные списки `BasePriorityRule` (верх = сохранение, низ = забой). Ванильные правила: беременность, привязанность, болезнь, тренировка; правила черт — из ATS-интеграции. Легаси-формат `SlaughterCondition` (`CondType` + `has` + defs + `inheritMode`) конвертируется при загрузке сейва/пресета; неизвестные ядру условия отдаются контрактам `ILegacyConditionConverter`.
+- Ранжирование: позиция в списке = приоритет.
 - **Валидация**: дубликаты и противоречия подсвечиваются (красный фон + Alert). Для тренировок: 2 из 3 состояний — нормально, все 3 или дубликаты — конфликт.
 - **Трёхзначная колонка беременных**: Never (галка) / Defer (пауза) / Always (галка). Defer: учитываются в пороге, но забиваются после родов.
 - **Яйцекладущие** считаются «беременными» (`CompEggLayer.eggProgress > 0` через рефлексию).
