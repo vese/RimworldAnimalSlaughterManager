@@ -16,7 +16,7 @@ public class SlaughterCondition : IExposable
     public HediffDef? trait;
     public HediffDef? disease;
     public TrainableDef? trainable;
-    public string inheritMode = "Both";
+    public TraitInheritability inheritMode = TraitInheritability.Both;
 
     public SlaughterCondition() { }
     public SlaughterCondition(CondType type) { this.type = type; }
@@ -35,6 +35,6 @@ public class SlaughterCondition : IExposable
         Scribe_Defs.Look(ref trait, "trait");
         Scribe_Defs.Look(ref disease, "disease");
         Scribe_Defs.Look(ref trainable, "trainable");
-        Scribe_Values.Look(ref inheritMode, "inheritMode", "Both");
+        Scribe_Values.Look(ref inheritMode, "inheritMode", TraitInheritability.Both);
     }
 }

@@ -14,11 +14,11 @@ namespace ASM;
         [XmlAttribute]
         public int keepCount = 1;
         [XmlAttribute]
-        public string ageScope = "Both";
+        public string ageScope = nameof(AgeScope.Both);
         [XmlAttribute]
         public string genderScope = "Any";
         [XmlAttribute]
-        public string inheritMode = "Both";
+        public string inheritMode = nameof(TraitInheritability.Both);
 
         public static TraitDto From(TraitProtectRule t) => new TraitDto
         {

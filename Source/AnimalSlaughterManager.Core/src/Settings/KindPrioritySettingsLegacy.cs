@@ -8,6 +8,11 @@ namespace ASM;
 [Obsolete]
 public class KindPrioritySettingsLegacy
 {
+    // The ATS rule types live in the integration assembly (this one only references Core),
+    // so the DTO factory instantiates them by type name.
+    private const string TraitRuleName = "TraitPriorityRule";
+    private const string TraitGeneralRuleName = "TraitGeneralPriorityRule";
+
     public List<SlaughterCondition> prioAdultMale = [];
     public List<SlaughterCondition> prioYoungMale = [];
     public List<SlaughterCondition> prioAdultFemale = [];
@@ -80,22 +85,22 @@ public class KindPrioritySettingsLegacy
         },
         CondType.Trait => new PriorityRuleDto
         {
-            rule = "TraitPriorityRule",
+            rule = TraitRuleName,
             has = slaughterCondition.has,
             trait = slaughterCondition.trait?.defName,
-            inheritability = slaughterCondition.inheritMode,
+            inheritability = slaughterCondition.inheritMode.ToString(),
         }.ToRule(),
         CondType.HasPositiveTrait => new PriorityRuleDto
         {
-            rule = "TraitGeneralPriorityRule",
+            rule = TraitGeneralRuleName,
             has = slaughterCondition.has,
-            generalType = "Positive",
+            generalType = nameof(TraitType.Positive),
         }.ToRule(),
         CondType.HasNegativeTrait => new PriorityRuleDto
         {
-            rule = "TraitGeneralPriorityRule",
+            rule = TraitGeneralRuleName,
             has = slaughterCondition.has,
-            generalType = "Negative",
+            generalType = nameof(TraitType.Negative),
         }.ToRule(),
         _ => null,
     };

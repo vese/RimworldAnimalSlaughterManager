@@ -42,7 +42,7 @@ namespace ASM;
                 trait = string.IsNullOrEmpty(trait) ? null : DefDatabase<HediffDef>.GetNamedSilentFail(trait),
                 disease = string.IsNullOrEmpty(disease) ? null : DefDatabase<HediffDef>.GetNamedSilentFail(disease),
                 trainable = string.IsNullOrEmpty(trainable) ? null : DefDatabase<TrainableDef>.GetNamedSilentFail(trainable),
-                inheritMode = string.IsNullOrEmpty(inheritMode) ? "Both" : inheritMode
+                inheritMode = Enum.TryParse(inheritMode, out TraitInheritability parsedInherit) ? parsedInherit : TraitInheritability.Both
             };
         }
     }
