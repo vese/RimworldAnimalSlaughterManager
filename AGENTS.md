@@ -9,11 +9,16 @@ Languages/                     — переводы
 Defs/                          — PawnColumnDef (колонка защиты)
 Textures/                      — иконки (щит, шестерёнка)
 Source/AnimalSlaughterManager/                  — главный проект: движок, окна, патчи, пресеты-браузеры
-Source/AnimalSlaughterManager.Core/            — ядро (по фичам): Integrations/ (реестр + контракты),
-                                                 Settings/ (Global/Kind/Priorities/Models/Tabs),
-                                                 Presets/ (IO + Models), Ui/ (общие контролы)
+Source/AnimalSlaughterManager.Core/            — ядро (фичи): Integrations/ (реестр), Settings/
+                                                 (Global/Kind/Priorities), Presets/ (IO + Models),
+                                                 Ui/ (общие контролы)
 Source/AnimalSlaughterManager.Integrations.AnimalTraitsSystem/ — ATS-интеграция (ссылается на Core)
 ```
+
+Core: верхний уровень — фичи, внутри — по типам. Интерфейсы фичи, используемые снаружи
+(другими фичами или проектами), — в `<feature>.Shared/`: `Integrations.Shared/` (9 контрактов),
+`Settings.Shared/` (хост настроек, вкладка окна, общие типы значений), `Presets.Shared/`
+(открытие браузеров пресетов).
 
 ## Сборка
 
