@@ -9,16 +9,19 @@ Languages/                     — переводы
 Defs/                          — PawnColumnDef (колонка защиты)
 Textures/                      — иконки (щит, шестерёнка)
 Source/AnimalSlaughterManager/                  — главный проект: движок, окна, патчи, пресеты-браузеры
-Source/AnimalSlaughterManager.Core/            — ядро (фичи): Integrations/ (реестр), Settings/
-                                                 (Global/Kind/Priorities), Presets/ (IO + Models),
-                                                 Ui/ (общие контролы)
+Source/AnimalSlaughterManager.Core/            — ядро (фичи): Integrations/ (DI-реестр),
+                                                 Slaughter/ (.Shared контракты движка забоя),
+                                                 Settings/ (Global/Kind/Priorities), Presets/ (IO),
+                                                 Legacy/ (устаревшее по фичам), Ui/ (общие контролы)
 Source/AnimalSlaughterManager.Integrations.AnimalTraitsSystem/ — ATS-интеграция (ссылается на Core)
 ```
 
-Core: верхний уровень — фичи, внутри — по типам. Интерфейсы фичи, используемые снаружи
-(другими фичами или проектами), — в `<feature>.Shared/`: `Integrations.Shared/` (9 контрактов),
-`Settings.Shared/` (хост настроек, вкладка окна, общие типы значений), `Presets.Shared/`
-(открытие браузеров пресетов).
+Core: верхний уровень — фичи, внутри — по типам. Общее модуля/фичи и их внешние интерфейсы —
+в `.Shared/` соответствующего уровня; контракт лежит в `.Shared/` фичи-потребителя
+(`Slaughter/.Shared/` — движок, `Settings/Kind/.Shared/` — окно вида и данные интеграций,
+`Settings/Priorities/.Shared/` — меню правил, `Legacy/.Shared/` — легаси-конвертер).
+Устаревшее — в `Legacy/` по фичам. Дефолтные глобы `**/*.cs` не заходят в точечные папки —
+в Core.csproj добавлен явный `Compile Include="**/.Shared/**/*.cs"`.
 
 ## Сборка
 
