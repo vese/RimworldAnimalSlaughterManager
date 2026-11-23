@@ -4,7 +4,7 @@ using Verse;
 
 namespace ASM;
 
-public class KindSlaughterSettingsDialogGeneralTab : BaseKindSlaughterSettingsTab
+public class KindSlaughterSettingsDialogGeneralTab : BaseSettingsTab
 {
     public override TaggedString Name => ASMKeys.TabGeneral.Translate();
 

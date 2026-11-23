@@ -7,7 +7,7 @@ using Verse;
 
 namespace ASM;
 
-public abstract class BaseKindSlaughterSettingsTab : IKindSlaughterSettingsDialogTab
+public abstract class BaseSettingsTab : IKindSlaughterSettingsDialogTab
 {
     public static float HeaderHeight => Text.LineHeightOf(GameFont.Medium);
     protected const float HeaderIconSize = 28f;

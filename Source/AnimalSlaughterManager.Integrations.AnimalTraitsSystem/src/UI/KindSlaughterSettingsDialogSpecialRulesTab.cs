@@ -7,15 +7,15 @@ using Verse;
 
 namespace ASM;
 
-public class KindSlaughterSettingsDialogSpecialRulesTab(KindTraitsSettings traitsSettings) : BaseKindSlaughterSettingsTab
+public class KindSlaughterSettingsDialogSpecialRulesTab(KindTraitsSettings traitsSettings) : BaseSettingsTab
 {
     private const int RuleSetsCount = 2;
     private const float RuleSetsGapYSum = (RuleSetsCount - 1) * 2 * UIConstants.GapY;
 
     private readonly ITraitRulesListSection<TraitProtectRule> protectEditor = traitsSettings.protectRuleSet.GetEditor();
     private readonly ITraitRulesListSection<TraitRule> forceCullEditor = traitsSettings.forceCullRuleSet.GetEditor();
-    private ListSectionState protectEditorState = new();
-    private ListSectionState forceCullEditorState = new();
+    private ReorderableListState protectEditorState = new();
+    private ReorderableListState forceCullEditorState = new();
 
     public override TaggedString Name => ASMKeys.TabExceptions.Translate();
 

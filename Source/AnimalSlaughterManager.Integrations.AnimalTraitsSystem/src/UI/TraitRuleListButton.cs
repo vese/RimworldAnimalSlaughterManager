@@ -21,9 +21,9 @@ public static class TraitRuleListButton
         Text.WordWrap = false;
 
         var labelRect = new Rect(
-            rect.x + KindSlaughterSettingsTabListHelper.ListRowPaddingX,
+            rect.x + ReorderableList.RowPaddingX,
             rect.y,
-            rect.width - KindSlaughterSettingsTabListHelper.ListRowPaddingX,
+            rect.width - ReorderableList.RowPaddingX,
             rect.height);
         Widgets.Label(labelRect, label);
 

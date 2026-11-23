@@ -89,7 +89,7 @@ public class Dialog_KindSlaughterSettings : Window
     {
         var width = inRect.xMax - inRect.x;
         var height = inRect.yMax + inRect.y;
-        GUI.DragWindow(new Rect(inRect.x, inRect.y, width, BaseKindSlaughterSettingsTab.HeaderHeight + BaseKindSlaughterSettingsTab.TabBarHeight + UIConstants.GapY + UIConstants.GapY)); // top frame
+        GUI.DragWindow(new Rect(inRect.x, inRect.y, width, BaseSettingsTab.HeaderHeight + BaseSettingsTab.TabBarHeight + UIConstants.GapY + UIConstants.GapY)); // top frame
         // TODO
         //GUI.DragWindow(new Rect(0, winH - m, winW, m));                             // bottom frame
         //GUI.DragWindow(new Rect(0, 0, m, winH));                                    // left frame

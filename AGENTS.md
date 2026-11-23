@@ -18,7 +18,7 @@ Source/AnimalSlaughterManager.Core/            — ядро, фичи: Slaughter
                                                  KindPreferenceSettings/; .Shared/), Dialog/ (окно
                                                  вида, каркас вкладок, GeneralTab/, PrioritiesTab/)),
                                                  Presets/ (IO + браузеры), Integrations/ (DI-реестр),
-                                                 Legacy/, Ui/, Translations/ (ASMKeys)
+                                                 Legacy/, Ui/ (Dropdown, ReorderableList), Translations/ (ASMKeys)
 Source/AnimalSlaughterManager.Integrations.AnimalTraitsSystem/ — ATS-интеграция (ссылается на Core)
 ```
 

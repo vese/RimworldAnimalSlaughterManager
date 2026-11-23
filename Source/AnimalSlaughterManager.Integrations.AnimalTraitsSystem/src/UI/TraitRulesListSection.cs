@@ -47,21 +47,21 @@ public class TraitRulesListSection(IEditableTraitsRuleSet<TraitRule> rules) : Ba
         return labelHeight;
     }
 
-    protected override float DrawRow(Rect row, int index)
+    protected override void DrawRow(Rect row, int index)
     {
         var rule = RuleSet.Get(index);
 
         // TODO: filter nulls in settings
         if (rule.trait is null)
         {
-            return 0;
+            return;
         }
 
         var anchor = Text.Anchor;
         var left = row.x;
         var top = row.y;
 
-        left += KindSlaughterSettingsTabListHelper.DrawGrip(left, top, row.height);
+        left += ReorderableList.DrawGrip(left, top, row.height);
 
         var right = row.xMax - (UIConstants.ButtonMinWidth + UIConstants.GapX +
             UIConstants.ButtonMinWidth + UIConstants.GapX +
@@ -84,7 +84,7 @@ public class TraitRulesListSection(IEditableTraitsRuleSet<TraitRule> rules) : Ba
         top = row.y + (row.height - UIConstants.IconSize) / 2f;
         var copyButtonRect = new Rect(left, top, UIConstants.IconSize, UIConstants.IconSize);
 
-        if (KindSlaughterSettingsTabListHelper.CopyButton(copyButtonRect, ASMKeys.Copy))
+        if (ReorderableList.CopyButton(copyButtonRect, ASMKeys.Copy))
         {
             RuleSet.CopyAt(index);
         }
@@ -92,13 +92,12 @@ public class TraitRulesListSection(IEditableTraitsRuleSet<TraitRule> rules) : Ba
         left += UIConstants.IconSize + UIConstants.GapX;
         var removeButtonRect = new Rect(left, top, UIConstants.IconSize, UIConstants.IconSize);
 
-        if (KindSlaughterSettingsTabListHelper.RemoveButton(removeButtonRect, ASMKeys.RemoveTrait))
+        if (ReorderableList.RemoveButton(removeButtonRect, ASMKeys.RemoveTrait))
         {
             RuleSet.RemoveAt(index);
         }
 
         Text.Anchor = anchor;
 
-        return row.height;
     }
 }

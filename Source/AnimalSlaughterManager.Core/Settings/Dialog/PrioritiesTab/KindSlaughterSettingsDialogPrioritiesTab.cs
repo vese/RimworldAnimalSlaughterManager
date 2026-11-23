@@ -8,7 +8,7 @@ using Verse;
 
 namespace ASM;
 
-public class KindSlaughterSettingsDialogPrioritiesTab(IKindSettingsHost comp, ThingDef animalDef, KindSettings settings) : BaseKindSlaughterSettingsTab
+public class KindSlaughterSettingsDialogPrioritiesTab(IKindSettingsHost comp, ThingDef animalDef, KindSettings settings) : BaseSettingsTab
 {
     private const int ListsCountInRow = 2;
 
@@ -30,7 +30,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(IKindSettingsHost comp, Th
 
     private readonly PreferenceSettingsPanel preferenceSettingsPanel = new(settings.preferenceSettings, settings.preferenceSettings.Set, ASMKeys.PriorityHelp);
 
-    private readonly List<ListSectionState> listsStates = [.. KindPrioritySettings.keys.Select(x => new ListSectionState())];
+    private readonly List<ReorderableListState> listsStates = [.. KindPrioritySettings.keys.Select(x => new ReorderableListState())];
 
     protected override void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings _settings, IKindSettingsHost _comp, ThingDef _animalDef)
     {
@@ -89,7 +89,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(IKindSettingsHost comp, Th
     }
 
     private void DrawConditionSection(float x, float y, float listWidth, float listHeight, TaggedString title,
-        List<BasePriorityRule> list, ref ListSectionState listState, bool male, bool adult, List<List<string>> validation)
+        List<BasePriorityRule> list, ref ReorderableListState listState, bool male, bool adult, List<List<string>> validation)
     {
         var left = x;
         var top = y;
@@ -223,38 +223,11 @@ public class KindSlaughterSettingsDialogPrioritiesTab(IKindSettingsHost comp, Th
     }
 
     private void DrawConditionList(float x, float y, float listWidth, float listHeight,
-        List<BasePriorityRule> list, ref ListSectionState listState, bool male, bool adult, List<List<string>> validation)
+        List<BasePriorityRule> list, ref ReorderableListState listState, bool male, bool adult, List<List<string>> validation)
     {
-        var top = y;
-        var rowHeight = Text.LineHeight + UIConstants.TextPaddingY;
-        var contentHeight = list.Count * (rowHeight + KindSlaughterSettingsTabListHelper.ListGapY);
-        var outRect = new Rect(x, top, listWidth, listHeight);
-        var view = new Rect(x, top, listWidth - UIConstants.ScrollbarWidth, Mathf.Max(contentHeight, outRect.height));
-
-        Widgets.BeginScrollView(outRect, ref listState.scroll, view);
-
-        if (Event.current.type == EventType.Repaint)
-        {
-            listState.group = ReorderableWidget.NewGroup((a, b) => settings.prioritySettings.Move(male, adult, a, b), ReorderableDirection.Vertical, outRect);
-        }
-
-        for (int i = 0; i < list.Count; i++)
-        {
-            var row = new Rect(view.x, top, view.width, rowHeight);
-
-            if (i % 2 == 1)
-            {
-                Widgets.DrawAltRect(row);
-            }
-
-            ReorderableWidget.Reorderable(listState.group, new Rect(row.x, row.y, UIConstants.IconSize, row.height));
-
-            DrawConditionRow(row, list, i, validation, male, adult);
-
-            top += row.height + KindSlaughterSettingsTabListHelper.ListGapY;
-        }
-
-        Widgets.EndScrollView();
+        ReorderableList.Draw(x, y, listWidth, listHeight, list.Count, listState,
+            (from, to) => settings.prioritySettings.Move(male, adult, from, to),
+            (row, i) => DrawConditionRow(row, list, i, validation, male, adult));
     }
 
     private void DrawConditionRow(Rect row, List<BasePriorityRule> list, int index, List<List<string>> validation, bool male, bool adult)
@@ -273,7 +246,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(IKindSettingsHost comp, Th
         var left = row.x;
         var top = row.y;
 
-        left += KindSlaughterSettingsTabListHelper.DrawGrip(left, top, row.height);
+        left += ReorderableList.DrawGrip(left, top, row.height);
         left += UIConstants.GapX;
 
         var condition = list[index];
@@ -302,9 +275,9 @@ public class KindSlaughterSettingsDialogPrioritiesTab(IKindSettingsHost comp, Th
         Text.WordWrap = false;
 
         var labelRect = new Rect(
-            labelButtonRect.x + KindSlaughterSettingsTabListHelper.ListRowPaddingX,
+            labelButtonRect.x + ReorderableList.RowPaddingX,
             labelButtonRect.y,
-            labelButtonRect.width - KindSlaughterSettingsTabListHelper.ListRowPaddingX,
+            labelButtonRect.width - ReorderableList.RowPaddingX,
             labelButtonRect.height);
         Widgets.Label(labelRect, condition.Label);
 
@@ -356,7 +329,7 @@ public class KindSlaughterSettingsDialogPrioritiesTab(IKindSettingsHost comp, Th
         left = row.xMax - UIConstants.IconSize;
         var removeButtonRect = new Rect(left, top, UIConstants.IconSize, UIConstants.IconSize);
 
-        if (KindSlaughterSettingsTabListHelper.RemoveButton(removeButtonRect, ASMKeys.RemoveTrait))
+        if (ReorderableList.RemoveButton(removeButtonRect, ASMKeys.RemoveTrait))
         {
             settings.prioritySettings.RemoveAt(male, adult, index);
         }

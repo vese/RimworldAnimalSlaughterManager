@@ -16,7 +16,7 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
 
     protected abstract string PresetsTitleKey { get; }
 
-    public float Draw(float x, float y, float listWidth, float listHeight, ref ListSectionState listState, IKindSettingsHost comp, ThingDef animalDef)
+    public float Draw(float x, float y, float listWidth, float listHeight, ref ReorderableListState listState, IKindSettingsHost comp, ThingDef animalDef)
     {
         // Row 1: title.
         var left = x;
@@ -43,7 +43,7 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
         left = x;
         top += UIConstants.GapY;
 
-        DrawList(left, top, listWidth, listHeight, ref listState, comp);
+        DrawList(left, top, listWidth, listHeight, ref listState);
 
         return listHeight;
     }
@@ -142,41 +142,12 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
 
     protected abstract float DrawHeader(float x, float y, float width);
 
-    private void DrawList(float x, float y, float listWidth, float listHeight, ref ListSectionState listState, IKindSettingsHost comp)
+    private void DrawList(float x, float y, float listWidth, float listHeight, ref ReorderableListState listState)
     {
-        var top = y;
-        var rowHeight = Text.LineHeight + UIConstants.TextPaddingY;
-        var contentHeight = ruleSet.Count * (rowHeight + KindSlaughterSettingsTabListHelper.ListGapY);
-        var outRect = new Rect(x, top, listWidth, listHeight);
-        var view = new Rect(x, top, listWidth - UIConstants.ScrollbarWidth, Mathf.Max(contentHeight, outRect.height));
-
-        Widgets.BeginScrollView(outRect, ref listState.scroll, view);
-
-        if (Event.current.type == EventType.Repaint)
-        {
-            listState.group = ReorderableWidget.NewGroup(ruleSet.Swap, ReorderableDirection.Vertical, outRect);
-        }
-
-        for (int i = 0; i < ruleSet.Count; i++)
-        {
-            var row = new Rect(view.x, top, view.width, rowHeight);
-
-            if (i % 2 == 1)
-            {
-                Widgets.DrawAltRect(row);
-            }
-
-            ReorderableWidget.Reorderable(listState.group, new Rect(row.x, row.y, UIConstants.IconSize, row.height));
-
-            DrawRow(row, i);
-
-            top += row.height + KindSlaughterSettingsTabListHelper.ListGapY;
-        }
-
-        Widgets.EndScrollView();
+        ReorderableList.Draw(x, y, listWidth, listHeight, ruleSet.Count, listState, ruleSet.Swap, DrawRow);
     }
 
-    protected abstract float DrawRow(Rect row, int index);
+    protected abstract void DrawRow(Rect row, int index);
 
     protected void ReplaceTraits(int i, List<HediffDef> picked)
     {
