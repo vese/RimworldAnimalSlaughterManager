@@ -13,29 +13,30 @@ namespace ASM;
 /// </summary>
 public static class IntegrationServices
 {
-    private static readonly Dictionary<Type, List<object>> services = new();
+    private static readonly Dictionary<Type, List<object>> services = [];
 
     /// <summary>Registers the implementation under the contract; several implementations of
     /// one contract coexist and are resolved together.</summary>
-    public static void Add<TContract>(TContract implementation)
-        where TContract : class
+    public static void Add<TContract>(TContract implementation) where TContract : class
     {
-        if (!services.TryGetValue(typeof(TContract), out var list))
-        {
-            list = [];
-            services[typeof(TContract)] = list;
-        }
+        var type = typeof(TContract);
 
-        if (!list.Contains(implementation))
+        if (services.TryGetValue(type, out var list))
         {
-            list.Add(implementation);
+            if (!list.Contains(implementation))
+            {
+                list.Add(implementation);
+            }
+        }
+        else
+        {
+            services.Add(type, [implementation]);
         }
     }
 
     /// <summary>Every registered implementation of the contract, in registration order.</summary>
-    public static IReadOnlyList<TContract> GetServices<TContract>()
-        where TContract : class
+    public static IReadOnlyList<TContract> GetServices<TContract>() where TContract : class
     {
-        return services.TryGetValue(typeof(TContract), out var list) ? list.Cast<TContract>().ToList() : [];
+        return services.TryGetValue(typeof(TContract), out var list) ? [.. list.Cast<TContract>()] : [];
     }
 }

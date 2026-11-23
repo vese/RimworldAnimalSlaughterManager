@@ -5,15 +5,9 @@ using Verse;
 namespace ASM;
 
 // FloatMenuOption with a custom GUI.color tint (for gray unavailable trainables).
-public class GrayFloatMenuOption : FloatMenuOption
+public class GrayFloatMenuOption(string label, Action action, Texture2D? icon, Color iconColor, Color tint) :
+    FloatMenuOption(label, action, icon, iconColor)
 {
-    private readonly Color tint;
-
-    public GrayFloatMenuOption(string label, Action action, Texture2D? icon, Color iconColor, Color tint) : base(label, action, icon, iconColor)
-    {
-        this.tint = tint;
-    }
-
     public override bool DoGUI(Rect rect, bool colonistOrdering, FloatMenu floatMenu)
     {
         var prev = GUI.color;

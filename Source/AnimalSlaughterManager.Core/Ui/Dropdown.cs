@@ -30,12 +30,11 @@ public static class Dropdown
     /// <summary>Menu options for values: labelOf renders each value, setValue applies the choice.</summary>
     public static List<FloatMenuOption> Options<T>(IEnumerable<T> values, Func<T, TaggedString> labelOf, Action<T> setValue)
     {
-        return values.Select(value => new FloatMenuOption(labelOf(value), () => setValue(value))).ToList();
+        return [.. values.Select(value => new FloatMenuOption(labelOf(value), () => setValue(value)))];
     }
 
     /// <summary>Dropdown over an enum's values: labelOf renders each value, setValue applies it.</summary>
-    public static float DrawEnum<T>(float x, float y, float width, T current, Func<T, TaggedString> labelOf, Action<T> setValue)
-        where T : struct, Enum
+    public static float DrawEnum<T>(float x, float y, float width, T current, Func<T, TaggedString> labelOf, Action<T> setValue) where T : struct, Enum
     {
         return Draw(x, y, width, labelOf(current), Options(Enum.GetValues(typeof(T)).Cast<T>(), labelOf, setValue));
     }

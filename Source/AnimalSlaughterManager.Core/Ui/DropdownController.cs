@@ -21,7 +21,7 @@ public sealed class DropdownController<T> : IDropdownController where T : notnul
     public float Width { get; set; } = UIConstants.ButtonMinWidth;
     public T Current { get; set; } = default!;
     public IEnumerable<T> Values { get; set; } = [];
-    public Func<T, TaggedString> LabelOf { get; set; } = _ => "";
+    public Func<T, TaggedString> LabelOf { get; set; } = _ => string.Empty;
     public Action<T> SetValue { get; set; } = _ => { };
 
     void IDropdownController.Draw(float x, float y) =>

@@ -4,6 +4,7 @@ using System;
 using System.Security.Policy;
 using Verse;
 
+
 namespace ASM;
 
 public class TrainingGeneralPriorityRule : BasePriorityRule, ICoversRule<TrainingGeneralPriorityRule>, ICoversRule<TrainingPriorityRule>

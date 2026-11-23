@@ -4,6 +4,7 @@ using System;
 using Verse;
 using Verse.Sound;
 
+
 namespace ASM;
 
 public class TraitGeneralPriorityRule : BasePriorityRule, ICoversRule<TraitGeneralPriorityRule>, ICoversRule<TraitPriorityRule>
