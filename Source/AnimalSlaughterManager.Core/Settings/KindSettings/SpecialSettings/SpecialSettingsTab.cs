@@ -10,8 +10,8 @@ namespace ASM;
 /// vertically; sources with nothing to edit sink to the bottom as their notices.</summary>
 public class SpecialSettingsTab(KindSettings settings) : BaseSettingsTab
 {
-    private readonly List<(IKindSettingsSectionSource Source, IKindSettingsSection? Section)> sources =
-        [.. IntegrationServices.GetServices<IKindSettingsSectionSource>()
+    private readonly List<(ISpecialSettingsSectionSource Source, ISpecialSettingsSection? Section)> sources =
+        [.. IntegrationServices.GetServices<ISpecialSettingsSectionSource>()
             .OrderByDescending(source => source.Available)
             .Select(source => (source, source.Available ? source.CreateSection(settings) : null))];
 

@@ -22,7 +22,7 @@ public static class AnimalTraitsSystemRegistration
         IntegrationServices.Add<ILegacyConditionConverter>(new LegacyTraitConditions());
         // The section source too: with the mod disabled the shared special-rules tab shows
         // its notice instead of the section.
-        IntegrationServices.Add<IKindSettingsSectionSource>(new TraitSettingsSections());
+        IntegrationServices.Add<ISpecialSettingsSectionSource>(new TraitSettingsSections());
 
         if (!ModsConfig.IsActive(PackageId))
         {

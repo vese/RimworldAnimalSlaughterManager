@@ -5,7 +5,7 @@ using Verse;
 namespace ASM;
 
 /// <summary>The ATS section of the shared "Special rules" tab: the keep and force-cull lists.</summary>
-public sealed class TraitSettingsSection(KindTraitsSettings traitsSettings) : IKindSettingsSection
+public sealed class TraitSettingsSection(KindTraitsSettings traitsSettings) : ISpecialSettingsSection
 {
     private const int RuleSetsCount = 2;
     private const float RuleSetsGapYSum = (RuleSetsCount - 1) * 2 * UIConstants.GapY;
