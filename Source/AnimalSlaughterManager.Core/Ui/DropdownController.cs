@@ -24,5 +24,6 @@ public sealed class DropdownController<T> : IDropdownController where T : notnul
     public Func<T, TaggedString> LabelOf { get; set; } = _ => "";
     public Action<T> SetValue { get; set; } = _ => { };
 
-    void IDropdownController.Draw(float x, float y) => Dropdown.Draw(x, y, this);
+    void IDropdownController.Draw(float x, float y) =>
+        Dropdown.Draw(x, y, Width, LabelOf(Current), Dropdown.Options(Values, LabelOf, SetValue));
 }
