@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
@@ -59,6 +60,20 @@ public class KindPrioritySettings : IPresettable
     public List<List<string>> Validate(bool male, bool adult) => ruleSets[(male, adult)].Validate();
 
     public void Add(bool male, bool adult, BasePriorityRule rule) => ruleSets[(male, adult)].Add(rule);
+
+    /// <summary>Opens the add-rule menu of one bucket: the options come from every registered
+    /// IRuleOptionsSource, each applying its rule through Add.</summary>
+    public void OpenAddRuleMenu(bool male, bool adult, ThingDef animalDef)
+    {
+        var options = new List<FloatMenuOption>();
+
+        foreach (var source in IntegrationServices.GetServices<IRuleOptionsSource>())
+        {
+            source.AddRuleOptions(options, male, adult, animalDef, rule => Add(male, adult, rule));
+        }
+
+        Find.WindowStack.Add(new FloatMenu(options));
+    }
 
     public void RemoveAt(bool male, bool adult, int index) => ruleSets[(male, adult)].RemoveAt(index);
 

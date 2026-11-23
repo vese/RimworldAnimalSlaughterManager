@@ -1,5 +1,4 @@
 
-using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -189,7 +188,7 @@ public class KindSlaughterPrioritiesTab(IKindSettingsHost comp, ThingDef animalD
 
         if (Widgets.ButtonText(addBtn, addButtonText))
         {
-            OpenAddConditionMenu(male, adult, animalDef);
+            settings.prioritySettings.OpenAddRuleMenu(male, adult, animalDef);
         }
 
         var presetButtonText = ASMKeys.CondPresets.Translate();
@@ -333,112 +332,6 @@ public class KindSlaughterPrioritiesTab(IKindSettingsHost comp, ThingDef animalD
         {
             settings.prioritySettings.RemoveAt(male, adult, index);
         }
-    }
-
-    private void AddRuleOption(List<FloatMenuOption> options, TaggedString label, bool male, bool adult, Func<BasePriorityRule> factory)
-    {
-        options.Add(new FloatMenuOption(label, () => settings.prioritySettings.Add(male, adult, factory())));
-    }
-
-    private void OpenAddConditionMenu(bool male, bool adult, ThingDef animalDef)
-    {
-        // TODO: заполнение списка перенести в KindPrioritySettings. IRuleOptionsSource тоже перенести. Заполнение списка должно тоже быть через IRuleOptionsSource
-        var options = new List<FloatMenuOption>();
-
-        if (!male && adult)
-        {
-            // TODO: 1 option
-            AddRuleOption(options, ASMKeys.CondPregnantHas.Translate(), male, adult, () => new PregnancyPriorityRule { has = true });
-            AddRuleOption(options, ASMKeys.CondPregnantMissing.Translate(), male, adult, () => new PregnancyPriorityRule { has = false });
-        }
-
-        // TODO: 1 option
-        AddRuleOption(options, ASMKeys.CondBondHas.Translate(), male, adult, () => new BondPriorityRule { has = true });
-        AddRuleOption(options, ASMKeys.CondBondMissing.Translate(), male, adult, () => new BondPriorityRule { has = false });
-
-        // TODO: cache
-        var diseaseList = DefDatabase<HediffDef>.AllDefs.Where(d => d.makesSickThought).OrderBy(d => d.LabelCap.ToString()).ToList();
-        options.Add(new FloatMenuOption(ASMKeys.CondAddDisease.Translate(),
-            () => OpenDiseaseSubmenu(male, adult, diseaseList)));
-        // TODO: 1 option
-        AddRuleOption(options, ASMKeys.CondDiseaseAnyHas.Translate(), male, adult, () => new DiseaseAnyPriorityRule { has = true });
-        AddRuleOption(options, ASMKeys.CondDiseaseAnyMissing.Translate(), male, adult, () => new DiseaseAnyPriorityRule { has = false });
-
-        options.Add(new FloatMenuOption(ASMKeys.CondAddTraining.Translate(),
-            () => OpenTrainingSubmenu(male, adult, animalDef)));
-        AddRuleOption(options, ASMKeys.CondTrainingNone.Translate(), male, adult, () => new TrainingGeneralPriorityRule { type = TrainingGeneralType.None });
-        AddRuleOption(options, ASMKeys.CondTrainingPartial.Translate(), male, adult, () => new TrainingGeneralPriorityRule { type = TrainingGeneralType.Partial });
-        AddRuleOption(options, ASMKeys.CondTrainingFull.Translate(), male, adult, () => new TrainingGeneralPriorityRule { type = TrainingGeneralType.Full });
-
-        // The trait options come from the traits integration (none registered = no options).
-        {
-            foreach (var source in IntegrationServices.GetServices<IRuleOptionsSource>())
-            {
-                source.AddRuleOptions(options, rule => settings.prioritySettings.Add(male, adult, rule));
-            }
-        }
-
-        Find.WindowStack.Add(new FloatMenu(options));
-    }
-
-    private void OpenDiseaseSubmenu(bool male, bool adult, List<HediffDef> defs)
-    {
-        // TODO: cache
-        var dupLabels = defs
-            .GroupBy(d => d.LabelCap.ToString())
-            .Where(g => g.Count() > 1)
-            .Select(g => g.Key)
-            .ToHashSet();
-
-        var options = new List<FloatMenuOption>();
-
-        foreach (var def in defs)
-        {
-            var label = def.LabelCap.ToString();
-
-            if (dupLabels.Contains(label))
-            {
-                label = $"{label} ({def.defName})";
-            }
-
-            AddRuleOption(options, ASMKeys.CondHasSub.Translate(label), male, adult, () => new DiseasePriorityRule { has = true, disease = def });
-
-            // TODO: 1 option
-            AddRuleOption(options, ASMKeys.CondMissingSub.Translate(label), male, adult, () => new DiseasePriorityRule { has = false, disease = def });
-        }
-
-        Find.WindowStack.Add(new FloatMenu(options));
-    }
-
-    // Training submenu: available trainables for this kind first (white), unavailable below (gray).
-    private void OpenTrainingSubmenu(bool male, bool adult, ThingDef animalDef)
-    {
-        var trainability = animalDef.race?.trainability;
-
-        var options = new List<FloatMenuOption>();
-
-        bool Avail(TrainableDef td) => trainability != null && td.requiredTrainability != null &&
-            td.requiredTrainability.intelligenceOrder <= trainability.intelligenceOrder;
-
-        // TODO: cache list
-        foreach (var def in DefDatabase<TrainableDef>.AllDefs.OrderBy(t => t.LabelCap.ToString()).OrderByDescending(Avail))
-        {
-            var avail = Avail(def);
-            var icon = string.IsNullOrEmpty(def.icon) ? null : def.Icon;
-            var col = avail ? Color.white : Color.gray;
-
-            void Add(string key, bool has) =>
-                options.Add(avail ?
-                    new FloatMenuOption(key.Translate(def.LabelCap),
-                    () => settings.prioritySettings.Add(male, adult, new TrainingPriorityRule() { has = has, trainable = def }), icon, col) :
-                    new GrayFloatMenuOption(key.Translate(def.LabelCap),
-                    () => settings.prioritySettings.Add(male, adult, new TrainingPriorityRule() { has = has, trainable = def }), icon, col, col));
-
-            Add(ASMKeys.CondTrainingLearnedSub, true);
-            // TODO: 1 option
-            Add(ASMKeys.CondTrainingNotSub, false);
-        }
-        Find.WindowStack.Add(new FloatMenu(options));
     }
 
     private static void OpenKindPresetsWindow(IKindSettingsHost comp, ThingDef animalDef, KindSettings _)

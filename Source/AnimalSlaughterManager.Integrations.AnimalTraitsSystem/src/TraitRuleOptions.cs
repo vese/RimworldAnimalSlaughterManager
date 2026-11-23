@@ -9,7 +9,7 @@ namespace ASM;
 /// flag picker, positive/negative general rules).</summary>
 public sealed class TraitRuleOptions : IRuleOptionsSource
 {
-    public void AddRuleOptions(List<FloatMenuOption> options, Action<BasePriorityRule> addRule)
+    public void AddRuleOptions(List<FloatMenuOption> options, bool male, bool adult, ThingDef animalDef, Action<BasePriorityRule> addRule)
     {
         // Trait options only when ATS trait content is actually loaded.
         if (!AnimalTraitsAccess.HasAvailableTraits)
