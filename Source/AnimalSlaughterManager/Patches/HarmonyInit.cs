@@ -1,18 +1,14 @@
 using HarmonyLib;
 using Verse;
 
-namespace ASM
+namespace ASM;
+
+[StaticConstructorOnStartup]
+public static class ASM_HarmonyInit
 {
-    [StaticConstructorOnStartup]
-    public static class ASM_HarmonyInit
+    static ASM_HarmonyInit()
     {
-        static ASM_HarmonyInit()
-        {
-            var harmony = new Harmony("vesilya.animalslaughtermanager");
-            // PatchAll() without arguments only patches the calling assembly; the patches
-            // themselves live in Core.
-            harmony.PatchAll();
-            harmony.PatchAll(typeof(ASM_MapComp).Assembly);
-        }
+        var harmony = new Harmony("vesilya.animalslaughtermanager");
+        harmony.PatchAll(typeof(ASM_MapComp).Assembly);
     }
 }

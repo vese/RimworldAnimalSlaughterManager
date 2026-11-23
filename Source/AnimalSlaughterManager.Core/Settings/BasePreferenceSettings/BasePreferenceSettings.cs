@@ -4,11 +4,11 @@ using Verse;
 namespace ASM;
 
 /// <summary>Age-direction preferences for the four sex×age buckets; descendants provide the save keys.</summary>
-public abstract class PreferenceSettings : IPresettable
+public abstract class BasePreferenceSettings : IPresettable
 {
-    public PreferenceSettings() { }
+    public BasePreferenceSettings() { }
 
-    public PreferenceSettings(PreferenceSettings source)
+    public BasePreferenceSettings(BasePreferenceSettings source)
     {
         malePref = source.malePref;
         femalePref = source.femalePref;
@@ -37,7 +37,7 @@ public abstract class PreferenceSettings : IPresettable
         malePref = femalePref = maleYoungPref = femaleYoungPref = SlaughterPreference.OldestFirst;
     }
 
-    public void Reset(PreferenceSettings source)
+    public void Reset(BasePreferenceSettings source)
     {
         malePref = source.malePref;
         femalePref = source.femalePref;
@@ -45,7 +45,7 @@ public abstract class PreferenceSettings : IPresettable
         femaleYoungPref = source.femaleYoungPref;
     }
 
-    public bool Matches(PreferenceSettings other) =>
+    public bool Matches(BasePreferenceSettings other) =>
         malePref == other.malePref &&
         femalePref == other.femalePref &&
         maleYoungPref == other.maleYoungPref &&

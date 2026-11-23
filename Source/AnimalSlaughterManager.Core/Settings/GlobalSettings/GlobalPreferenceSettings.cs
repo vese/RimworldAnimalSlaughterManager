@@ -1,6 +1,6 @@
 namespace ASM;
 
-public class GlobalPreferenceSettings : PreferenceSettings
+public class GlobalPreferenceSettings : BasePreferenceSettings
 {
     protected override string MalePrefKey => "globalMalePref";
     protected override string FemalePrefKey => "globalFemalePref";

@@ -1,10 +1,10 @@
 namespace ASM;
 
-public class KindPreferenceSettings : PreferenceSettings
+public class KindPreferenceSettings : BasePreferenceSettings
 {
     public KindPreferenceSettings() { }
 
-    public KindPreferenceSettings(PreferenceSettings source) : base(source) { }
+    public KindPreferenceSettings(BasePreferenceSettings source) : base(source) { }
 
     protected override string MalePrefKey => "malePref";
     protected override string FemalePrefKey => "femalePref";

@@ -22,7 +22,7 @@ public class KindSettings : IExposable, IPresettable
     public KindPrioritySettings prioritySettings = new();
 
     /// <summary>Integration-owned settings by provider key; the core never names their types.</summary>
-    public Dictionary<string, IKindIntegrationSettings> integrationData = new();
+    public Dictionary<string, IKindIntegrationSettings> integrationsSettings = [];
 
     public KindSettings()
     {
@@ -35,16 +35,16 @@ public class KindSettings : IExposable, IPresettable
     }
 
     /// <summary>True when this kind deviates from vanilla behaviour and must be recomputed.</summary>
-    public bool Customized => preferenceSettings.Customized || prioritySettings.HasRules || integrationData.Values.Any(s => s.Customized);
+    public bool Customized => preferenceSettings.Customized || prioritySettings.HasRules || integrationsSettings.Values.Any(s => s.Customized);
 
     /// <summary>The integration's settings under the provider's key, created on first use.</summary>
     public T GetOrCreateIntegration<T>(IKindIntegrationSettingsProvider provider)
         where T : class, IKindIntegrationSettings
     {
-        if (!integrationData.TryGetValue(provider.KindSettingsKey, out var settings))
+        if (!integrationsSettings.TryGetValue(provider.KindSettingsKey, out var settings))
         {
             settings = provider.CreateKindSettings();
-            integrationData[provider.KindSettingsKey] = settings;
+            integrationsSettings[provider.KindSettingsKey] = settings;
         }
 
         return (T)settings;
@@ -55,7 +55,7 @@ public class KindSettings : IExposable, IPresettable
         preferenceSettings.Reset();
         prioritySettings.Reset();
 
-        foreach (var settings in integrationData.Values)
+        foreach (var settings in integrationsSettings.Values)
         {
             settings.Reset();
         }
@@ -66,7 +66,7 @@ public class KindSettings : IExposable, IPresettable
         preferenceSettings.Reset(globals.preferenceSettings);
         prioritySettings.Reset();
 
-        foreach (var settings in integrationData.Values)
+        foreach (var settings in integrationsSettings.Values)
         {
             settings.Reset();
         }
@@ -90,15 +90,15 @@ public class KindSettings : IExposable, IPresettable
             }
             else if (Scribe.mode == LoadSaveMode.PostLoadInit && pendingLegacy != null && providers.Count > 0)
             {
-                integrationData[providers[0].KindSettingsKey] = pendingLegacy;
+                integrationsSettings[providers[0].KindSettingsKey] = pendingLegacy;
                 pendingLegacy = null;
                 dataVersion = currentDataVersion;
             }
         }
         else
         {
-            Scribe_Collections.Look(ref integrationData, "integrationData", LookMode.Value, LookMode.Deep);
-            integrationData ??= [];
+            Scribe_Collections.Look(ref integrationsSettings, "integrationData", LookMode.Value, LookMode.Deep);
+            integrationsSettings ??= [];
         }
 
         preferenceSettings.ExposeData();
@@ -112,7 +112,7 @@ public class KindSettings : IExposable, IPresettable
 
         var holder = PresetSectionSerialization.Holder();
 
-        foreach (var settings in integrationData.Values)
+        foreach (var settings in integrationsSettings.Values)
         {
             settings.WriteXml(holder);
         }
@@ -130,7 +130,7 @@ public class KindSettings : IExposable, IPresettable
 
         var kind = PresetSectionSerialization.Wrap(dto.IntegrationSections);
 
-        foreach (var settings in integrationData.Values)
+        foreach (var settings in integrationsSettings.Values)
         {
             settings.ReadXml(kind);
         }
