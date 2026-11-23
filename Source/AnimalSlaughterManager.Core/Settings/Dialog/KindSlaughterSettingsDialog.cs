@@ -31,8 +31,8 @@ public class KindSlaughterSettingsDialog : Window
     private readonly ASM_MapComp comp;
     private readonly ThingDef animalDef;
     private readonly KindSettings settings;
-    private readonly List<IKindSlaughterSettingsDialogTab> tabs;
-    private IKindSlaughterSettingsDialogTab currentTab;
+    private readonly List<ISettingsTab> tabs;
+    private ISettingsTab currentTab;
 
     public override Vector2 InitialSize => new(WindowWidth, Screen.height * 0.85f);
 

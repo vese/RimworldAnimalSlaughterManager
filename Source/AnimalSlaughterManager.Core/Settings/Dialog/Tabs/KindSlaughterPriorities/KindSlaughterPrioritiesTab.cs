@@ -342,6 +342,7 @@ public class KindSlaughterPrioritiesTab(IKindSettingsHost comp, ThingDef animalD
 
     private void OpenAddConditionMenu(bool male, bool adult, ThingDef animalDef)
     {
+        // TODO: заполнение списка перенести в KindPrioritySettings. IRuleOptionsSource тоже перенести. Заполнение списка должно тоже быть через IRuleOptionsSource
         var options = new List<FloatMenuOption>();
 
         if (!male && adult)
