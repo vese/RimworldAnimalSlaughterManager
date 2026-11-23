@@ -10,13 +10,13 @@
 
 | Контракт | Где лежит (в Core) | Точка потребления | Что даёт |
 |---|---|---|---|
-| `IRuleOptionsSource` | `KindSettings/KindPrioritySettings/.Shared/` | меню добавления правил приоритетов | свои опции, свои правила |
-| `IKindSettingsSectionSource` | `KindSettings/.Shared/` | вкладка «Особые правила» окна вида | своя секция; без мода — уведомление, ниже секций |
+| `IRuleOptionsSource` | `KindSettings/KindPrioritySettings/Interfaces/` | меню добавления правил приоритетов | свои опции, свои правила |
+| `IKindSettingsSectionSource` | `KindSettings/Interfaces/` | вкладка «Особые правила» окна вида | своя секция; без мода — уведомление, ниже секций |
 | `IPawnSlaughterSignals` | `Slaughter/.Shared/` | сортировка корзин забоя | тай-брейкер сигналы (good/bad) животного |
 | `IKeepReserveSource` | `Slaughter/.Shared/` | резервация племенного ядра | кого держать от забоя (в пороге), подсчёт, наличие правил |
 | `IKindForceCullSource` | `Slaughter/.Shared/` | принудительный забой по правилам | кого забивать вопреки лимитам |
 | `IExternalForceCullSource` | `Slaughter/.Shared/` | принудительный забой чужим модом | решения чужого мода (его UI), гейт прохода |
-| `IKindIntegrationSettingsProvider` | `KindSettings/.Shared/` | настройки вида | свои данные в сейве/пресетах — своим ключом и XML-секцией |
+| `IKindIntegrationSettingsProvider` | `KindSettings/Interfaces/` | настройки вида | свои данные в сейве/пресетах — своим ключом и XML-секцией |
 | `ILegacyConditionConverter` | `Legacy/.Shared/` | чтение легаси-сейвов/пресетов | условия чужой концепции — в правила интеграции |
 
 Ядро суммирует/объединяет ответы всех реализаций (сигналы складываются, опции меню и выборки

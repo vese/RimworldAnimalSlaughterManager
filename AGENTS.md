@@ -15,7 +15,7 @@ Source/AnimalSlaughterManager.Core/            — ядро, фичи: Slaughter
                                                  Settings/ (BasePreferenceSettings/ (+Common-энумы),
                                                  GlobalSettings/, KindSettings/ (KindPrioritySettings/
                                                  — Rules/, Validation/, Presets/, Alerts/;
-                                                 KindPreferenceSettings/; .Shared/), Dialog/ (окно
+                                                 KindPreferenceSettings/; Interfaces/, Presets/), Dialog/ (окно
                                                  вида, каркас вкладок, GeneralTab/, PrioritiesTab/)),
                                                  Presets/ (IO + браузеры), Integrations/ (DI-реестр),
                                                  Legacy/, Ui/ (Dropdown, ReorderableList), Translations/ (ASMKeys)
@@ -24,8 +24,8 @@ Source/AnimalSlaughterManager.Integrations.AnimalTraitsSystem/ — ATS-инте�
 
 Core: верхний уровень — фичи, внутри фичи — по функциональности (настройки, пресеты, окна,
 UI-элементы фичи). Общее фичи и её внешние интерфейсы — в `.Shared/`; контракт лежит в `.Shared/`
-фичи-потребителя (`Slaughter/.Shared/` — движок, `KindSettings/.Shared/` — окно вида и данные
-интеграций, `KindSettings/KindPrioritySettings/.Shared/` — меню правил, `Presets/.Shared/`,
+фичи-потребителя (`Slaughter/.Shared/` — движок, `KindSettings/Interfaces/` — окно вида и данные
+интеграций, `KindSettings/KindPrioritySettings/Interfaces/` — меню правил, `Presets/.Shared/`,
 `Legacy/.Shared/`). Устаревшее — в `Legacy/` по фичам. Дефолтные глобы `**/*.cs` не заходят в
 точечные папки — в Core.csproj добавлен явный `Compile Include="**/.Shared/**/*.cs"`. Патчи лежат
 в Core, применяет их HarmonyInit главного проекта (`PatchAll()` без аргументов патчит только свою
