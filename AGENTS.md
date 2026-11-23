@@ -12,8 +12,11 @@ Source/AnimalSlaughterManager/                  — точки входа: ASMMo
                                                  HarmonyInit (применяет патчи Core), GlobalSuppressions
 Source/AnimalSlaughterManager.Core/            — ядро, фичи: Slaughter/ (движок забоя: MapComp,
                                                  ListBuilder, Patches/, Windows/, Columns/),
-                                                 KindSettings/ (правила, валидация, окно+вкладки,
-                                                 Presets/-DTO, Alerts/), GlobalSettings/,
+                                                 Settings/ (BasePreferenceSettings/ (+Common-энумы),
+                                                 GlobalSettings/, KindSettings/ (KindPrioritySettings/
+                                                 — Rules/, Validation/, Presets/, Alerts/;
+                                                 KindPreferenceSettings/; .Shared/), Dialog/ (окно
+                                                 вида, каркас вкладок, GeneralTab/, PrioritiesTab/)),
                                                  Presets/ (IO + браузеры), Integrations/ (DI-реестр),
                                                  Legacy/, Ui/, Translations/ (ASMKeys)
 Source/AnimalSlaughterManager.Integrations.AnimalTraitsSystem/ — ATS-интеграция (ссылается на Core)
@@ -21,11 +24,12 @@ Source/AnimalSlaughterManager.Integrations.AnimalTraitsSystem/ — ATS-инте�
 
 Core: верхний уровень — фичи, внутри фичи — по функциональности (настройки, пресеты, окна,
 UI-элементы фичи). Общее фичи и её внешние интерфейсы — в `.Shared/`; контракт лежит в `.Shared/`
-фичи-потребителя (`Slaughter/.Shared/` — движок, `KindSettings/.Shared/` — окно вида, данные
-интеграций и меню правил, `Presets/.Shared/`, `Legacy/.Shared/`). Устаревшее — в `Legacy/` по
-фичам. Дефолтные глобы `**/*.cs` не заходят в точечные папки — в Core.csproj добавлен явный
-`Compile Include="**/.Shared/**/*.cs"`. Патчи лежат в Core, применяет их HarmonyInit главного
-проекта (`PatchAll()` без аргументов патчит только свою сборку).
+фичи-потребителя (`Slaughter/.Shared/` — движок, `KindSettings/.Shared/` — окно вида и данные
+интеграций, `KindSettings/KindPrioritySettings/.Shared/` — меню правил, `Presets/.Shared/`,
+`Legacy/.Shared/`). Устаревшее — в `Legacy/` по фичам. Дефолтные глобы `**/*.cs` не заходят в
+точечные папки — в Core.csproj добавлен явный `Compile Include="**/.Shared/**/*.cs"`. Патчи лежат
+в Core, применяет их HarmonyInit главного проекта (`PatchAll()` без аргументов патчит только свою
+сборку).
 
 ## Сборка
 

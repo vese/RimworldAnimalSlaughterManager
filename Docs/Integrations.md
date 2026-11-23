@@ -10,7 +10,7 @@
 
 | Контракт | Где лежит (в Core) | Точка потребления | Что даёт |
 |---|---|---|---|
-| `IRuleOptionsSource` | `KindSettings/.Shared/` | меню добавления правил приоритетов | свои опции, свои правила |
+| `IRuleOptionsSource` | `KindSettings/KindPrioritySettings/.Shared/` | меню добавления правил приоритетов | свои опции, свои правила |
 | `ISettingsTabSource` | `KindSettings/.Shared/` | окно настроек вида | своя вкладка |
 | `IPawnSlaughterSignals` | `Slaughter/.Shared/` | сортировка корзин забоя | тай-брейкер сигналы (good/bad) животного |
 | `IKeepReserveSource` | `Slaughter/.Shared/` | резервация племенного ядра | кого держать от забоя (в пороге), подсчёт, наличие правил |
