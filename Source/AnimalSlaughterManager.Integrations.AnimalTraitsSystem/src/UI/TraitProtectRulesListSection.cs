@@ -91,15 +91,9 @@ public class TraitProtectRulesListSection(IEditableTraitsRuleSet<TraitProtectRul
 
         left += UIConstants.ButtonMinWidth + UIConstants.GapX;
 
-        // TODO: button width
-        left += Dropdown.DrawEnum(left, top, UIConstants.ButtonMinWidth, rule.ageScope, val => val.Translate(), val => rule.SetAgeScope(val));
-        left += UIConstants.GapX;
-        // TODO: button width
-        left += Dropdown.DrawEnum(left, top, UIConstants.ButtonMinWidth, rule.genderScope, val => val.Translate(), val => rule.SetGenderScope(val));
-        left += UIConstants.GapX;
-        // TODO: button width
-        left += Dropdown.DrawEnum(left, top, UIConstants.ButtonMinWidth, rule.inheritMode, val => val.Translate(), val => rule.SetInheritability(val));
-        left += UIConstants.GapX;
+        left += Dropdown.DrawEnum(left, top, UIConstants.ButtonMinWidth, rule.ageScope, val => val.Translate(), val => rule.SetAgeScope(val)) + UIConstants.GapX;
+        left += Dropdown.DrawEnum(left, top, UIConstants.ButtonMinWidth, rule.genderScope, val => val.Translate(), val => rule.SetGenderScope(val)) + UIConstants.GapX;
+        left += Dropdown.DrawEnum(left, top, UIConstants.ButtonMinWidth, rule.inheritMode, val => val.Translate(), val => rule.SetInheritability(val)) + UIConstants.GapX;
 
         top = row.y + (row.height - UIConstants.IconSize) / 2f;
         var copyButtonRect = new Rect(left, top, UIConstants.IconSize, UIConstants.IconSize);

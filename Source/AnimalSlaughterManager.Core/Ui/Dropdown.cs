@@ -10,6 +10,7 @@ namespace ASM;
 /// ready-made options in a float menu. Owns the rendering (button, FloatMenu).</summary>
 public static class Dropdown
 {
+    /// <summary>Draws the button; returns the horizontal space it occupies.</summary>
     public static float Draw(float x, float y, float width, TaggedString label, List<FloatMenuOption> options)
     {
         var anchor = Text.Anchor;
@@ -23,7 +24,7 @@ public static class Dropdown
 
         Text.Anchor = anchor;
 
-        return height;
+        return width;
     }
 
     /// <summary>Menu options for values: labelOf renders each value, setValue applies the choice.</summary>
