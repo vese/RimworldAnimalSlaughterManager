@@ -4,13 +4,13 @@ using Verse;
 
 namespace ASM;
 
-public class KindSlaughterSettingsDialogGeneralTab : BaseSettingsTab
+public class GeneralSettingsTab : BaseSettingsTab
 {
     public override TaggedString Name => ASMKeys.TabGeneral.Translate();
 
     private readonly PreferenceSettingsPanel preferenceSettingsPanel;
 
-    public KindSlaughterSettingsDialogGeneralTab(Dictionary<ThingDef, KindSettings> kindSettings, GlobalSettings settings)
+    public GeneralSettingsTab(Dictionary<ThingDef, KindSettings> kindSettings, GlobalSettings settings)
     {
         void SetPreference(bool male, bool adult, SlaughterPreference value)
         {

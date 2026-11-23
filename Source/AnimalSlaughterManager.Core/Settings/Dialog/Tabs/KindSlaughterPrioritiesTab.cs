@@ -8,7 +8,7 @@ using Verse;
 
 namespace ASM;
 
-public class KindSlaughterSettingsDialogPrioritiesTab(IKindSettingsHost comp, ThingDef animalDef, KindSettings settings) : BaseSettingsTab
+public class KindSlaughterPrioritiesTab(IKindSettingsHost comp, ThingDef animalDef, KindSettings settings) : BaseSettingsTab
 {
     private const int ListsCountInRow = 2;
 

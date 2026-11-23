@@ -51,8 +51,8 @@ public class Dialog_KindSlaughterSettings : Window
         resizeable = true;
         tabs =
         [
-            new KindSlaughterSettingsDialogPrioritiesTab(comp, animalDef, settings),
-            new KindSlaughterSettingsDialogGeneralTab(((ASM_MapComp)comp).kindSettings, comp.GlobalSettings)
+            new KindSlaughterPrioritiesTab(comp, animalDef, settings),
+            new GeneralSettingsTab(((ASM_MapComp)comp).kindSettings, comp.GlobalSettings)
         ];
 
         var specialRulesTab = IntegrationServices.GetServices<ISettingsTabSource>()            .Select(source => source.CreateTab(settings))            .FirstOrDefault(tab => tab != null);
