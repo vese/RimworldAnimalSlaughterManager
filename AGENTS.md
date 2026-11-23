@@ -12,7 +12,8 @@ Source/AnimalSlaughterManager/                  — точки входа: ASMMo
                                                  HarmonyInit (применяет патчи Core), GlobalSuppressions
 Source/AnimalSlaughterManager.Core/            — ядро, фичи: Slaughter/ (движок забоя: MapComp,
                                                  ListBuilder, Patches/, Windows/, Columns/),
-                                                 Settings/ (BasePreferenceSettings/ (+Common-энумы),
+                                                 Settings/ (BasePreferenceSettings/ (база+панель
+                                                 предпочтений, Common-энумы),
                                                  GlobalSettings/, KindSettings/ (KindPrioritySettings/
                                                  — Rules/, Validation/, Presets/, Alerts/;
                                                  KindPreferenceSettings/; Interfaces/, Presets/), Dialog/ (окно
@@ -23,11 +24,10 @@ Source/AnimalSlaughterManager.Integrations.AnimalTraitsSystem/ — ATS-инте�
 ```
 
 Core: верхний уровень — фичи, внутри фичи — по функциональности (настройки, пресеты, окна,
-UI-элементы фичи). Общее фичи и её внешние интерфейсы — в `.Shared/`; контракт лежит в `.Shared/`
-фичи-потребителя (`Slaughter/.Shared/` — движок, `KindSettings/Interfaces/` — окно вида и данные
-интеграций, `KindSettings/KindPrioritySettings/Interfaces/` — меню правил, `Presets/.Shared/`,
-`Legacy/.Shared/`). Устаревшее — в `Legacy/` по фичам. Дефолтные глобы `**/*.cs` не заходят в
-точечные папки — в Core.csproj добавлен явный `Compile Include="**/.Shared/**/*.cs"`. Патчи лежат
+UI-элементы фичи). Интерфейсы фичи — в `Interfaces/` соответствующего уровня; контракт лежит
+в `Interfaces/` фичи-потребителя (`Slaughter/Interfaces/` — движок, `KindSettings/Interfaces/` —
+окно вида и данные интеграций, `KindSettings/KindPrioritySettings/Interfaces/` — меню правил,
+`Presets/Interfaces/`, `Legacy/Interfaces/`). Устаревшее — в `Legacy/` по фичам. Патчи лежат
 в Core, применяет их HarmonyInit главного проекта (`PatchAll()` без аргументов патчит только свою
 сборку).
 

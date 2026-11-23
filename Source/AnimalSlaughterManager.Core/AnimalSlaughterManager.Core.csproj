@@ -21,9 +21,4 @@
     <PackageReference Include="Lib.Harmony" Version="2.*" PrivateAssets="all" />
   </ItemGroup>
 
-  <!-- Default **/*.cs globs skip dot-folders; .Shared folders need an explicit include. -->
-  <ItemGroup>
-    <Compile Include="**/.Shared/**/*.cs" />
-  </ItemGroup>
-
 </Project>
