@@ -84,7 +84,7 @@ public class Alert_ConditionProblems : Alert
 
             if (kv.Value.prioritySettings.CountProblems() > 0)
             {
-                Find.WindowStack.Add(new Dialog_KindSlaughterSettings(comp, kv.Key));
+                Find.WindowStack.Add(new KindSlaughterSettingsDialog(comp, kv.Key));
                 return;
             }
         }

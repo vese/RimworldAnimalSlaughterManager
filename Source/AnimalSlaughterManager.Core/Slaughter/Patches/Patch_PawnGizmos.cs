@@ -60,7 +60,7 @@ namespace ASM
                     defaultLabel = ASMKeys.Settings.Translate(),
                     defaultDesc = ASMKeys.SettingsDesc.Translate(),
                     icon = SettingsIcon,
-                    action = () => Find.WindowStack.Add(new Dialog_KindSlaughterSettings(comp, def)),
+                    action = () => Find.WindowStack.Add(new KindSlaughterSettingsDialog(comp, def)),
                 }
             });
         }

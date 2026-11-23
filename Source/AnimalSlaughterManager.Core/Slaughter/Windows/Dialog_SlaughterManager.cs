@@ -211,7 +211,7 @@ namespace ASM
             CountCol(row, XProtI, SlaughterListBuilder.CountIndividuallyProtected(comp, def), absent);
 
             if (Widgets.ButtonText(new Rect(row.x + XConfig, row.y + 2f, WConfig, row.height - 4f), ASMKeys.ConfigureKind.Translate()))
-                Find.WindowStack.Add(new Dialog_KindSlaughterSettings(comp, def));
+                Find.WindowStack.Add(new KindSlaughterSettingsDialog(comp, def));
 
             // Name is drawn last so the full text (shown only on hover) can sit on top of the
             // count cells. Otherwise it's truncated with an ellipsis inside the Name column.

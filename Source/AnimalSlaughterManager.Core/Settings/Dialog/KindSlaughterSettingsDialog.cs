@@ -24,7 +24,7 @@ namespace ASM;
 /// trait section) are separated by divider lines. The window is not draggable as a whole (that
 /// made row reorder move the window); it drags from its frame and the header/tab band instead.
 /// </summary>
-public class Dialog_KindSlaughterSettings : Window
+public class KindSlaughterSettingsDialog : Window
 {
     private const float WindowWidth = 1000f;
 
@@ -36,7 +36,7 @@ public class Dialog_KindSlaughterSettings : Window
 
     public override Vector2 InitialSize => new(WindowWidth, Screen.height * 0.85f);
 
-    public Dialog_KindSlaughterSettings(IKindSettingsHost comp, ThingDef animalDef)
+    public KindSlaughterSettingsDialog(IKindSettingsHost comp, ThingDef animalDef)
     {
         this.comp = (ASM_MapComp)comp;
         this.animalDef = animalDef;
