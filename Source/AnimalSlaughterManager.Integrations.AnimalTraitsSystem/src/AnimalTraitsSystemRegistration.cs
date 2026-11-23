@@ -20,6 +20,9 @@ public static class AnimalTraitsSystemRegistration
         // survives ATS being disabled (the types live in this assembly).
         IntegrationServices.Add<IKindIntegrationSettingsProvider>(new KindTraitsSettings.Provider());
         IntegrationServices.Add<ILegacyConditionConverter>(new LegacyTraitConditions());
+        // The section source too: with the mod disabled the shared special-rules tab shows
+        // its notice instead of the section.
+        IntegrationServices.Add<IKindSettingsSectionSource>(new TraitSettingsSections());
 
         if (!ModsConfig.IsActive(PackageId))
         {
@@ -27,7 +30,6 @@ public static class AnimalTraitsSystemRegistration
         }
 
         IntegrationServices.Add<IRuleOptionsSource>(new TraitRuleOptions());
-        IntegrationServices.Add<ISettingsTabSource>(new TraitSettingsTab());
         IntegrationServices.Add<IPawnSlaughterSignals>(new TraitSlaughterSignals());
         IntegrationServices.Add<IKeepReserveSource>(new TraitKeepReserve());
         IntegrationServices.Add<IKindForceCullSource>(new TraitKindForceCull());

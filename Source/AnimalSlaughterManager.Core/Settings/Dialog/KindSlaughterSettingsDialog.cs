@@ -55,11 +55,9 @@ public class KindSlaughterSettingsDialog : Window
             new GeneralSettingsTab(((ASM_MapComp)comp).kindSettings, comp.GlobalSettings)
         ];
 
-        var specialRulesTab = IntegrationServices.GetServices<ISettingsTabSource>()            .Select(source => source.CreateTab(settings))            .FirstOrDefault(tab => tab != null);
-
-        if (specialRulesTab != null)
+        if (IntegrationServices.GetServices<IKindSettingsSectionSource>().Count > 0)
         {
-            tabs.Insert(1, specialRulesTab);
+            tabs.Insert(1, new SpecialSettingsTab(settings));
         }
         currentTab = tabs.First();
     }

@@ -11,7 +11,7 @@
 | Контракт | Где лежит (в Core) | Точка потребления | Что даёт |
 |---|---|---|---|
 | `IRuleOptionsSource` | `KindSettings/KindPrioritySettings/.Shared/` | меню добавления правил приоритетов | свои опции, свои правила |
-| `ISettingsTabSource` | `KindSettings/.Shared/` | окно настроек вида | своя вкладка |
+| `IKindSettingsSectionSource` | `KindSettings/.Shared/` | вкладка «Особые правила» окна вида | своя секция; без мода — уведомление, ниже секций |
 | `IPawnSlaughterSignals` | `Slaughter/.Shared/` | сортировка корзин забоя | тай-брейкер сигналы (good/bad) животного |
 | `IKeepReserveSource` | `Slaughter/.Shared/` | резервация племенного ядра | кого держать от забоя (в пороге), подсчёт, наличие правил |
 | `IKindForceCullSource` | `Slaughter/.Shared/` | принудительный забой по правилам | кого забивать вопреки лимитам |
