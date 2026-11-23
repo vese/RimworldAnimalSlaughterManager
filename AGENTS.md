@@ -8,20 +8,24 @@ About/                         — метаданные мода
 Languages/                     — переводы
 Defs/                          — PawnColumnDef (колонка защиты)
 Textures/                      — иконки (щит, шестерёнка)
-Source/AnimalSlaughterManager/                  — главный проект: движок, окна, патчи, пресеты-браузеры
-Source/AnimalSlaughterManager.Core/            — ядро (фичи): Integrations/ (DI-реестр),
-                                                 Slaughter/ (.Shared контракты движка забоя),
-                                                 Settings/ (Global/Kind/Priorities), Presets/ (IO),
-                                                 Legacy/ (устаревшее по фичам), Ui/ (общие контролы)
+Source/AnimalSlaughterManager/                  — точки входа: ASMMod, ASMSettings,
+                                                 HarmonyInit (применяет патчи Core), GlobalSuppressions
+Source/AnimalSlaughterManager.Core/            — ядро, фичи: Slaughter/ (движок забоя: MapComp,
+                                                 ListBuilder, Patches/, Windows/, Columns/),
+                                                 KindSettings/ (правила, валидация, окно+вкладки,
+                                                 Presets/-DTO, Alerts/), GlobalSettings/,
+                                                 Presets/ (IO + браузеры), Integrations/ (DI-реестр),
+                                                 Legacy/, Ui/, Translations/ (ASMKeys)
 Source/AnimalSlaughterManager.Integrations.AnimalTraitsSystem/ — ATS-интеграция (ссылается на Core)
 ```
 
-Core: верхний уровень — фичи, внутри — по типам. Общее модуля/фичи и их внешние интерфейсы —
-в `.Shared/` соответствующего уровня; контракт лежит в `.Shared/` фичи-потребителя
-(`Slaughter/.Shared/` — движок, `Settings/Kind/.Shared/` — окно вида и данные интеграций,
-`Settings/Priorities/.Shared/` — меню правил, `Legacy/.Shared/` — легаси-конвертер).
-Устаревшее — в `Legacy/` по фичам. Дефолтные глобы `**/*.cs` не заходят в точечные папки —
-в Core.csproj добавлен явный `Compile Include="**/.Shared/**/*.cs"`.
+Core: верхний уровень — фичи, внутри фичи — по функциональности (настройки, пресеты, окна,
+UI-элементы фичи). Общее фичи и её внешние интерфейсы — в `.Shared/`; контракт лежит в `.Shared/`
+фичи-потребителя (`Slaughter/.Shared/` — движок, `KindSettings/.Shared/` — окно вида, данные
+интеграций и меню правил, `Presets/.Shared/`, `Legacy/.Shared/`). Устаревшее — в `Legacy/` по
+фичам. Дефолтные глобы `**/*.cs` не заходят в точечные папки — в Core.csproj добавлен явный
+`Compile Include="**/.Shared/**/*.cs"`. Патчи лежат в Core, применяет их HarmonyInit главного
+проекта (`PatchAll()` без аргументов патчит только свою сборку).
 
 ## Сборка
 
@@ -59,7 +63,7 @@ ATS (`packageId = luved.animaltraits`), Steam-Workshop ID 3652630316. Исход
 
 ## Animal Slaughter Manager (`namespace ASM`)
 
-Структура `Source/AnimalSlaughterManager/`: `Comps/` (`ASM_MapComp`, `SlaughterListBuilder`), `Patches/` (Harmony), `Windows/` (диалоги, вкладки, `PresetWindows`), `Columns/` (колонки вкладки Питомцы), `Alerts/` (Alert для конфликтов); в корне — `ASMMod`, `ASMSettings`.
+Главный проект `Source/AnimalSlaughterManager/` — только точки входа: `ASMMod` (Mod: регистрация настроек, окно мода), `ASMSettings` (ModSettings: флаг логирования), `Patches/HarmonyInit` (применяет Harmony-патчи главного проекта и Core), `GlobalSuppressions`. Весь движок, окна и колонки — в Core.
 
 Ключевое:
 - **`ASM_MapComp.Recompute`** порядок: (1) vanilla per-config cull по лимитам с приоритетами по корзинам; (2) ATS force-cull; (3) forceCull-черты; (4) keep-trait защита (резервируется до забоя, входит в порог). Защита перевешивает forceCull.

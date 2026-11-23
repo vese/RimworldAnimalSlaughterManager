@@ -49,9 +49,10 @@ About/About.xml               — метаданные мода (описани�
 Defs/                         — PawnColumnDef (колонка защиты)
 Languages/{English,Russian}/  — переводы
 Textures/UI/Icons/ASM/        — иконки (щит, шестерёнка)
-Source/AnimalSlaughterManager/                  — главный проект: движок, окна, патчи
-Source/AnimalSlaughterManager.Core/            — ядро: настройки, правила, пресеты,
-                                                 контракты интеграций, общий UI
+Source/AnimalSlaughterManager/                  — точки входа: ASMMod, ASMSettings, HarmonyInit
+Source/AnimalSlaughterManager.Core/            — ядро по фичам: Slaughter (движок забоя),
+                                                 KindSettings, GlobalSettings, Presets,
+                                                 Integrations, Legacy, Ui, Translations
 Source/AnimalSlaughterManager.Integrations.AnimalTraitsSystem/ — интеграция с ATS
 AnimalSlaughterManager.sln    — solution для IDE
 AGENTS.md / Docs/ / Specs/    — справка для агента, доки, спеки

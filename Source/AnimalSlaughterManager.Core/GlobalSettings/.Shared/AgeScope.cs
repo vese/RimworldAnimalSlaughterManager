@@ -1,4 +1,3 @@
-using ASM.Translations;
 using Verse;
 
 namespace ASM;

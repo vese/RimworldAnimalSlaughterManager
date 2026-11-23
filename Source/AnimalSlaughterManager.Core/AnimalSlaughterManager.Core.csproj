@@ -17,6 +17,8 @@
   <!-- Compile-time RimWorld API only; the merged mod DLL is produced by the main project. -->
   <ItemGroup>
     <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" PrivateAssets="all" />
+    <!-- Patches live in Core; Harmony ships inside RimWorld, compile-time only. -->
+    <PackageReference Include="Lib.Harmony" Version="2.*" PrivateAssets="all" />
   </ItemGroup>
 
   <!-- Default **/*.cs globs skip dot-folders; .Shared folders need an explicit include. -->
