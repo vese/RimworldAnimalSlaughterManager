@@ -1,9 +1,11 @@
+#pragma warning disable CS0612, CS0618
 using System;
 using System.Xml.Serialization;
 using Verse;
 
 namespace ASM;
 
+[Obsolete]
 public class TraitDto
 {
     [XmlAttribute]

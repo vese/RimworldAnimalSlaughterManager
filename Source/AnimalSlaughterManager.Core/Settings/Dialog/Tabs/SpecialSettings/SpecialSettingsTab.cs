@@ -6,10 +6,17 @@ using Verse;
 
 namespace ASM;
 
-/// <summary>The shared "Special rules" tab: sections from every integration source, stacked
-/// vertically; sources with nothing to edit sink to the bottom as their notices.</summary>
+/// <summary>The "Special rules" tab: the core's own keep and force-cull lists (always shown,
+/// targets picked through the integrations' options), then the sections of every integration
+/// source; sources with nothing to edit sink to the bottom as their notices.</summary>
 public class SpecialSettingsTab(KindSettings settings) : BaseSettingsTab
 {
+    private readonly SpecialRulesListSection<KeepRule> keepSection =
+        new(settings.specialRules.Keep, ASMKeys.KeepTraits, ASMKeys.KeepTraitsHelp, ASMKeys.PresetTitleKeep);
+
+    private readonly SpecialRulesListSection<ForceCullRule> cullSection =
+        new(settings.specialRules.ForceCull, ASMKeys.ForceCullTraits, ASMKeys.ForceCullTraitsHelp, ASMKeys.PresetTitleForceCull);
+
     private readonly List<(ISpecialSettingsSectionSource Source, ISpecialSettingsSection? Section)> sources =
         [.. IntegrationServices.GetServices<ISpecialSettingsSectionSource>()
             .OrderByDescending(source => source.Available)
@@ -31,6 +38,8 @@ public class SpecialSettingsTab(KindSettings settings) : BaseSettingsTab
 
     private void ResetTabSettings(ISettingsProvider comp, ThingDef animalDef, KindSettings settings)
     {
+        settings.specialRules.Reset();
+
         foreach (var (_, section) in sources)
         {
             section?.Reset();
@@ -45,28 +54,30 @@ public class SpecialSettingsTab(KindSettings settings) : BaseSettingsTab
     protected override void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings _settings, ISettingsProvider comp, ThingDef animalDef)
     {
         var top = y;
-        var sections = sources.Where(entry => entry.Section != null).ToList();
+        var sourceSections = sources.Where(entry => entry.Section != null).ToList();
+        var sectionCount = 2 + sourceSections.Count;
 
-        if (sections.Count > 0)
+        // Even split of the tab height between the core lists and the integration sections.
+        var gapSum = (sectionCount - 1) * 2 * UIConstants.GapY;
+        var sectionHeight = MathF.Max(UIConstants.ListMinHeight, (contentHeight - gapSum) / sectionCount);
+
+        top += keepSection.Draw(x, top, width, sectionHeight, comp, animalDef);
+
+        top += sectionHeight + UIConstants.GapY;
+        DrawDivider(x, top, width);
+        top += UIConstants.GapY;
+
+        top += cullSection.Draw(x, top, width, sectionHeight, comp, animalDef);
+
+        foreach (var (_, section) in sourceSections)
         {
-            // Even split of the tab height between the sections, as the trait lists did before
-            // the tab became shared.
-            var gapSum = (sections.Count - 1) * 2 * UIConstants.GapY;
-            var sectionHeight = MathF.Max(UIConstants.ListMinHeight, (contentHeight - gapSum) / sections.Count);
+            top += sectionHeight + UIConstants.GapY;
 
-            for (var i = 0; i < sections.Count; i++)
-            {
-                if (i > 0)
-                {
-                    top += sectionHeight + UIConstants.GapY;
+            DrawDivider(x, top, width);
 
-                    DrawDivider(x, top, width);
+            top += UIConstants.GapY;
 
-                    top += UIConstants.GapY;
-                }
-
-                top += sections[i].Section!.Draw(x, top, width, sectionHeight, comp, animalDef);
-            }
+            top += section!.Draw(x, top, width, sectionHeight, comp, animalDef);
         }
 
         foreach (var (source, _) in sources.Where(entry => entry.Section == null && !entry.Source.Available))

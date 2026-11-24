@@ -10,23 +10,21 @@ namespace ASM;
 /// breeding pair for inheritable traits, then fills up to keepCount youngest-first.</summary>
 public sealed class TraitKeepReserve : IKeepReserveSource
 {
-    public bool HasKeepRules(KindSettings ks) => KindTraitsSettings.Of(ks).protectRuleSet.HasRules;
+    public bool HasKeepRules(KindSettings ks) => ks.specialRules.Keep.HasRules;
 
     public IReadOnlyCollection<Pawn> SelectKeepReserved(Map map, ThingDef kind, KindSettings ks)
     {
         var reserved = new List<Pawn>();
-        var settings = KindTraitsSettings.Of(ks);
-
-        if (!settings.protectRuleSet.HasRules)
+        if (!ks.specialRules.Keep.HasRules)
         {
             return reserved;
         }
 
         var kindPawns = map.mapPawns.SpawnedColonyAnimals.Where(p => p.def == kind).ToList();
 
-        foreach (var tt in settings.protectRuleSet.rules)
+        foreach (var tt in ks.specialRules.Keep.rules)
         {
-            if (tt?.trait == null || tt.keepCount <= 0)
+            if (tt?.target == null || tt.keepCount <= 0)
             {
                 continue;
             }
@@ -39,7 +37,6 @@ public sealed class TraitKeepReserve : IKeepReserveSource
 
     public int CountKept(Map map, ThingDef kind, KindSettings ks)
     {
-        var settings = KindTraitsSettings.Of(ks);
         int n = 0;
 
         foreach (var pa in map.mapPawns.SpawnedColonyAnimals)
@@ -49,7 +46,7 @@ public sealed class TraitKeepReserve : IKeepReserveSource
                 continue;
             }
 
-            foreach (var tt in settings.protectRuleSet.rules)
+            foreach (var tt in ks.specialRules.Keep.rules)
             {
                 if (TraitRuleMatch.Matches(pa, tt))
                 {
@@ -62,23 +59,25 @@ public sealed class TraitKeepReserve : IKeepReserveSource
         return n;
     }
 
-    private static List<Pawn> SelectToKeep(List<Pawn> kindPawns, TraitProtectRule tt)
+    private static List<Pawn> SelectToKeep(List<Pawn> kindPawns, KeepRule tt)
     {
         var keep = new List<Pawn>();
 
-        if (!TraitRuleMatch.InheritableMatches(tt.trait, tt.inheritMode))
+                var trait = tt.target as HediffDef;
+
+        if (trait == null || !TraitRuleMatch.InheritableMatches(trait, TraitRuleMatch.ParseInherit(tt.inheritMode)))
         {
             return keep;
         }
 
         var bearers = kindPawns
-            .Where(p => AnimalTraitsAccess.HasTrait(p, tt.trait)
+            .Where(p => AnimalTraitsAccess.HasTrait(p, trait)
                 && TraitRuleMatch.AgeMatches(p, tt.ageScope)
                 && TraitRuleMatch.GenderMatches(p, tt.genderScope))
             .OrderBy(p => p.ageTracker.AgeBiologicalTicks)
             .ToList();
 
-        bool biasPair = tt.inheritMode != TraitInheritability.NonInheritable && AnimalTraitsAccess.IsInheritable(tt.trait);
+        bool biasPair = TraitRuleMatch.ParseInherit(tt.inheritMode) != TraitInheritability.NonInheritable && AnimalTraitsAccess.IsInheritable(trait);
 
         if (biasPair)
         {

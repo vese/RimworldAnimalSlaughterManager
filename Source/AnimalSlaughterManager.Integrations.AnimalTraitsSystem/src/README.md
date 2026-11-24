@@ -13,16 +13,17 @@
   пешки, цвет/тултип, наследуемость, ATS-собственный force-cull. Единственное место, трогающее
   чужие внутренности (рефлексия там, где API нет).
 - **Адаптеры контрактов** (по классу на контракт): `TraitRuleOptionsSource` (опции меню правил),
-  `TraitSettingsSections` (секции вкладки «Особые правила»: keep/force-cull списки, или
-  уведомление, если черт нет), `TraitSlaughterSignals` (тай-брейкеры сортировки),
+  `TraitSpecialRuleOptions` (цели общих списков ядра: пикер черт, цвета, тултипы,
+  наследуемость), `TraitSlaughterSignals` (тай-брейкеры сортировки),
   `TraitKeepReserve` (keep-резервация племенного ядра с приоритетом пары, подсчёт),
   `TraitKindForceCull` (принудительный забой по правилам), `AtsExternalForceCull`
   (гейт решений самого ATS).
 - **`AnimalTraitsSystemRegistration`** — саморегистрация: сервисы при активном ATS; провайдер
-  настроек вида и `LegacyTraitConditions` (конвертер легаси-условий с чертами) — безусловно,
-  чтобы настройки и сейвы пережили выключение ATS.
-- **`Settings/KindTraitsSettings`** (`atsTraits`) — keep/force-cull списки вида: хранение
-  (`keepTraits`/`forceCullTraits`), пресет-секция `atsTraits` (легаси-плоские узлы читаются);
+  настроек вида, `TraitSpecialRuleOptions` и `LegacyTraitConditions` (конвертер легаси-условий
+  с чертами) — безусловно, чтобы настройки и сейвы пережили выключение ATS.
+- **`Settings/KindTraitsSettings`** (`atsTraits`) — легаси-хранилище keep/force-cull списков
+  (сейв-узлы `keepTraits`/`forceCullTraits`, пресет-секция `atsTraits` + легаси-плоские узлы):
+  загружает старые данные и мигрирует их в `KindSpecialRules` ядра;
   `IEditableTraitsRuleSet` — редактируемые списки для UI.
 - **`Rules/`** — правила приоритетов: `TraitPriorityRule` (конкретная черта, с дропдауном
   наследуемости), `TraitGeneralPriorityRule` (положительная/отрицательная), keep/cull списки.

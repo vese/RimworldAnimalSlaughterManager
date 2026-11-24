@@ -1,3 +1,4 @@
+using System;
 using RimWorld;
 using Verse;
 
@@ -46,6 +47,17 @@ internal static class TraitRuleMatch
                 return true;
         }
     }
+
+    /// <summary>Matches a core special rule whose target is an ATS trait.</summary>
+    public static bool Matches(Pawn pawn, SpecialRule rule) =>
+        rule.target is HediffDef trait
+        && AnimalTraitsAccess.HasTrait(pawn, trait)
+        && AgeMatches(pawn, rule.ageScope)
+        && GenderMatches(pawn, rule.genderScope)
+        && InheritableMatches(trait, ParseInherit(rule.inheritMode));
+
+    public static TraitInheritability ParseInherit(string mode) =>
+        Enum.TryParse(mode, out TraitInheritability parsed) ? parsed : TraitInheritability.Both;
 
     public static bool Matches(Pawn pawn, TraitProtectRule rule) =>
         rule.trait != null        && AnimalTraitsAccess.HasTrait(pawn, rule.trait)        && AgeMatches(pawn, rule.ageScope)        && GenderMatches(pawn, rule.genderScope)        && InheritableMatches(rule.trait, rule.inheritMode);

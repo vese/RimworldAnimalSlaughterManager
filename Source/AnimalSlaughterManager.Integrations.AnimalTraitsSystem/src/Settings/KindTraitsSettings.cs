@@ -1,5 +1,5 @@
-using System;
-using System.Collections;
+#pragma warning disable CS0612, CS0618
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
@@ -7,186 +7,67 @@ using Verse;
 
 namespace ASM;
 
-public interface IEditableTraitsRuleSet<T> : IPresettableRuleSet where T : ITraitRule
-{
-    int Count { get; }
-    bool HasRules { get; }
-    System.Collections.IList Rules { get; }
-    void Clear();
-    void Swap(int from, int to);
-    T Get(int i);
-    void Add(List<HediffDef> traits);
-    void CopyAt(int i);
-    void RemoveAt(int i);
-    void ReplaceAt(int i, List<HediffDef> items);
-}
-
-public abstract class KindTraitsRuleSet<T> : IEditableTraitsRuleSet<T> where T : ITraitRule
-{
-    public List<T> rules = [];
-
-    public int Count => rules.Count;
-
-    public bool HasRules => rules.Count > 0;
-
-    public System.Collections.IList Rules => rules;
-
-    public abstract ITraitRulesListSection<T> GetEditor();
-
-    public abstract string PresetsFolder { get; }
-
-    public abstract string ListElementName { get; }
-
-    public abstract void WriteXml(XmlElement parent);
-
-    public abstract bool ReadXml(XmlElement kind);
-
-    public void Clear()
-    {
-        rules.Clear();
-        SettingsChangeTracker.Raise();
-    }
-
-    public void Swap(int from, int to)
-    {
-        if (from < 0 || from >= rules.Count || to < 0 || to > rules.Count || from == to)
-        {
-            return;
-        }
-
-        var item = rules[from];
-
-        rules.RemoveAt(from);
-
-        if (from < to)
-        {
-            rules.Insert(to - 1, item);
-        }
-        else
-        {
-            rules.Insert(to, item);
-        }
-
-        SettingsChangeTracker.Raise();
-    }
-
-    public T Get(int i) => rules[i];
-
-    public void Add(List<HediffDef> traits)
-    {
-        rules.AddRange(traits.Select(t => (T)Activator.CreateInstance(typeof(T), t)));
-        SettingsChangeTracker.Raise();
-    }
-
-    public void CopyAt(int i)
-    {
-        rules.Insert(i + 1, (T)rules[i].Copy());
-        SettingsChangeTracker.Raise();
-    }
-
-    public void RemoveAt(int i)
-    {
-        rules.RemoveAt(i);
-        SettingsChangeTracker.Raise();
-    }
-
-    public void ReplaceAt(int i, List<HediffDef> traits)
-    {
-        if (traits.Count == 1)
-        {
-            rules[i].SetTrait(traits.First());
-            SettingsChangeTracker.Raise();
-
-            return;
-        }
-
-        var oldRules = rules[i];
-        var newRules = traits.Select(t =>
-        {
-            var newRule = oldRules.Copy();
-            newRule.SetTrait(t);
-            return (T)newRule;
-        });
-
-        rules.RemoveAt(i);
-        rules.InsertRange(i, newRules);
-        SettingsChangeTracker.Raise();
-    }
-
-    public void ExposeData(string label)
-    {
-        Scribe_Collections.Look(ref rules, label, LookMode.Deep);
-
-        if (Scribe.mode == LoadSaveMode.PostLoadInit)
-        {
-            rules ??= [];
-            rules.RemoveAll(t => t is null || t.HasNullDef);
-        }
-    }
-}
-
 /// <summary>
-/// The ATS-owned per-kind settings: the keep (breeding protection) and force-cull trait lists.
-/// Stored opaquely by the core under <see cref="SettingsKey"/>; in kind presets they ride as the
-/// integration's own section (the legacy flat children of earlier versions also read).
+/// The legacy ATS storage of the keep/force-cull lists: loads the old "atsTraits" data — the
+/// save entries and the preset sections (including the pre-section flat children) — and
+/// migrates the rules into the core's KindSpecialRules, which owns the lists now. Delete
+/// together with the rest of the legacy data when the save-compatibility horizon allows.
 /// </summary>
-public class KindTraitsSettings : IKindSettings
+public class KindTraitsSettings : IKindSettings, IOwnedKindSettings
 {
     public const string SettingsKey = "atsTraits";
 
-    /// <summary>The storage provider: registered unconditionally, so the settings survive ATS
-    /// being disabled.</summary>
+    /// <summary>The storage provider: registered unconditionally, so the old data survives ATS
+    /// being disabled and still migrates.</summary>
     public sealed class Provider : IKindSettingsProvider
     {
         public static readonly Provider Instance = new();
 
         public string Key => SettingsKey;
 
-        public IKindSettings Create() => new KindTraitsSettings();
+        public IKindSettings Create(KindSettings owner) => new KindTraitsSettings(owner);
     }
 
-    /// <summary>The kind's ATS settings, created on first use.</summary>
-    public static KindTraitsSettings Of(KindSettings ks) => ks.GetOrCreateIntegration<KindTraitsSettings>(Provider.Instance);
+    private KindSettings? owner;
 
-    // Breeding: protect these animals from slaughter.
-    public ProtectRuleSet protectRuleSet = new();
+    // The old save containers, loaded by Scribe and migrated on PostLoadInit.
+    private List<TraitProtectRule> keepTraits = [];
+    private List<TraitRule> forceCullTraits = [];
 
-    // Force slaughter: cull these animals regardless of count/limits and other settings
-    // (protection still wins at intersections).
-    public ForceCullRuleSet forceCullRuleSet = new();
+    public KindTraitsSettings() { }
 
-    /// <summary>True when this kind deviates from vanilla behaviour and must be recomputed.</summary>
-    public bool Customized =>
-        protectRuleSet.HasRules ||
-        forceCullRuleSet.HasRules;
-
-    public void Reset()
+    public KindTraitsSettings(KindSettings owner)
     {
-        protectRuleSet.Clear();
-        forceCullRuleSet.Clear();
+        this.owner = owner;
     }
+
+    public void Attach(KindSettings owner) => this.owner = owner;
+
+    // The core storage carries the state now.
+    public bool Customized => false;
+
+    public void Reset() { }
 
     public void ExposeData()
     {
-        protectRuleSet.ExposeData("keepTraits");
-        forceCullRuleSet.ExposeData("forceCullTraits");
-    }
+        Scribe_Collections.Look(ref keepTraits, "keepTraits", LookMode.Deep);
+        Scribe_Collections.Look(ref forceCullTraits, "forceCullTraits", LookMode.Deep);
 
-    public void WriteXml(XmlElement parent)
-    {
-        var section = new TraitsSectionDto
+        if (Scribe.mode == LoadSaveMode.PostLoadInit && (keepTraits?.Count > 0 || forceCullTraits?.Count > 0))
         {
-            KeepTraits = protectRuleSet.rules.Select(TraitDto.From).ToList(),
-            ForceCullTraits = forceCullRuleSet.rules.Select(TraitDto.From).ToList(),
-        };
-
-        PresetSectionSerialization.Serialize(parent, section);
+            MigrateRules();
+        }
     }
+
+    // New presets carry the core's own section.
+    public void WriteXml(XmlElement parent) { }
 
     public void ReadXml(XmlElement kind)
     {
-        protectRuleSet.rules.Clear();
-        forceCullRuleSet.rules.Clear();
+        if (owner == null)
+        {
+            return;
+        }
 
         var section = kind[SettingsKey];
 
@@ -196,7 +77,7 @@ public class KindTraitsSettings : IKindSettings
 
             if (dto != null)
             {
-                FillRules(dto.KeepTraits, dto.ForceCullTraits);
+                FillCore(dto.KeepTraits, dto.ForceCullTraits);
             }
 
             return;
@@ -207,111 +88,47 @@ public class KindTraitsSettings : IKindSettings
 
         if (legacyKeep != null)
         {
-            FillRules(PresetSectionSerialization.Deserialize<KeepTraitsListDto>(legacyKeep)?.Trait, null);
+            FillCore(PresetSectionSerialization.Deserialize<KeepTraitsListDto>(legacyKeep)?.Trait, null);
         }
 
         var legacyCull = kind[nameof(TraitsSectionDto.ForceCullTraits)];
 
         if (legacyCull != null)
         {
-            FillRules(null, PresetSectionSerialization.Deserialize<ForceCullTraitsListDto>(legacyCull)?.Trait);
+            FillCore(null, PresetSectionSerialization.Deserialize<ForceCullTraitsListDto>(legacyCull)?.Trait);
         }
     }
 
-    private void FillRules(List<TraitDto>? keep, List<TraitDto>? cull)
+    private void MigrateRules()
+    {
+        if (owner == null)
+        {
+            return;
+        }
+
+        owner.specialRules.FillKeep(Convert([.. keepTraits.Where(r => r?.trait != null).Select(TraitDto.From)]));
+        owner.specialRules.FillCull(Convert([.. forceCullTraits.Where(r => r?.trait != null).Select(TraitDto.From)]));
+
+        keepTraits.Clear();
+        forceCullTraits.Clear();
+
+        // The legacy entry has nothing left to hold.
+        owner.integrationsSettings.Remove(SettingsKey);
+    }
+
+    private static List<SpecialRuleDto> Convert(List<TraitDto> list) =>
+        [.. list.Select(t => new SpecialRuleDto { target = t.trait, keepCount = t.keepCount, ageScope = t.ageScope, genderScope = t.genderScope, inheritMode = t.inheritMode })];
+
+    private void FillCore(List<TraitDto>? keep, List<TraitDto>? cull)
     {
         if (keep != null)
         {
-            foreach (var t in keep.Select(t => t.ToTarget()))
-            {
-                if (t != null)
-                {
-                    protectRuleSet.rules.Add(t);
-                }
-            }
+            owner!.specialRules.FillKeep(Convert(keep));
         }
 
         if (cull != null)
         {
-            foreach (var c in cull.Select(t => t.ToCull()))
-            {
-                if (c != null)
-                {
-                    forceCullRuleSet.rules.Add(c);
-                }
-            }
+            owner!.specialRules.FillCull(Convert(cull));
         }
-    }
-}
-
-public class ProtectRuleSet() : KindTraitsRuleSet<TraitProtectRule>
-{
-    public override ITraitRulesListSection<TraitProtectRule> GetEditor() => new TraitProtectRulesListSection(this);
-
-    public override string PresetsFolder => "Keep";
-
-    public override string ListElementName => nameof(TraitsSectionDto.KeepTraits);
-
-    public override void WriteXml(XmlElement parent)
-    {
-        PresetSectionSerialization.Serialize(parent, new KeepTraitsListDto { Trait = rules.Select(TraitDto.From).ToList() });
-    }
-
-    public override bool ReadXml(XmlElement kind)
-    {
-        var list = kind[ListElementName];
-
-        if (list == null)
-        {
-            return false;
-        }
-
-        rules.Clear();
-
-        foreach (var t in (PresetSectionSerialization.Deserialize<KeepTraitsListDto>(list)?.Trait ?? []).Select(t => t.ToTarget()))
-        {
-            if (t != null)
-            {
-                rules.Add(t);
-            }
-        }
-
-        return true;
-    }
-}
-
-public class ForceCullRuleSet() : KindTraitsRuleSet<TraitRule>
-{
-    public override ITraitRulesListSection<TraitRule> GetEditor() => new TraitRulesListSection(this);
-
-    public override string PresetsFolder => "ForceCull";
-
-    public override string ListElementName => nameof(TraitsSectionDto.ForceCullTraits);
-
-    public override void WriteXml(XmlElement parent)
-    {
-        PresetSectionSerialization.Serialize(parent, new ForceCullTraitsListDto { Trait = rules.Select(TraitDto.From).ToList() });
-    }
-
-    public override bool ReadXml(XmlElement kind)
-    {
-        var list = kind[ListElementName];
-
-        if (list == null)
-        {
-            return false;
-        }
-
-        rules.Clear();
-
-        foreach (var c in (PresetSectionSerialization.Deserialize<ForceCullTraitsListDto>(list)?.Trait ?? []).Select(t => t.ToCull()))
-        {
-            if (c != null)
-            {
-                rules.Add(c);
-            }
-        }
-
-        return true;
     }
 }

@@ -6,11 +6,11 @@ namespace ASM;
 /// regardless of count/limits (keep-reservation still wins).</summary>
 public sealed class TraitKindForceCull : IKindForceCullSource
 {
-    public bool HasForceCullRules(KindSettings ks) => KindTraitsSettings.Of(ks).forceCullRuleSet.HasRules;
+    public bool HasForceCullRules(KindSettings ks) => ks.specialRules.ForceCull.HasRules;
 
     public bool ShouldForceCull(Pawn pawn, KindSettings ks)
     {
-        foreach (var rule in KindTraitsSettings.Of(ks).forceCullRuleSet.rules)
+        foreach (var rule in ks.specialRules.ForceCull.rules)
         {
             if (TraitRuleMatch.Matches(pawn, rule))
             {

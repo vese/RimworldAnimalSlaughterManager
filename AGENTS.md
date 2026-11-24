@@ -16,7 +16,8 @@ Source/AnimalSlaughterManager.Core/            — ядро, фичи: Slaughter
                                                  предпочтений, Common-энумы),
                                                  GlobalSettings/, KindSettings/ (KindPrioritySettings/
                                                  — Rules/, Validation/, Presets/, Alerts/;
-                                                 KindPreferenceSettings/; SpecialSettings/ — вкладка
+                                                 KindPreferenceSettings/; SpecialSettings/ — общие списки
+                                                 защиты/забоя + вкладка
                                                  «Особые правила» + контракты секций; Interfaces/,
                                                  Presets/), Dialog/ (окно вида + Interfaces/ контракта
                                                  таба, каркас вкладок, GeneralTab/, PrioritiesTab/)),

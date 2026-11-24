@@ -1,3 +1,5 @@
+using System;
+#pragma warning disable CS0612, CS0618
 using System.Collections;
 using System.Linq;
 using Verse;
@@ -8,6 +10,7 @@ namespace ASM;
 /// A "cull" target: animals of a kind carrying this trait are prioritized for slaughter,
 /// optionally scoped by age, sex, and the trait's inheritability.
 /// </summary>
+[Obsolete]
 public class TraitRule : ITraitRule, IExposable
 {
     public HediffDef? trait;

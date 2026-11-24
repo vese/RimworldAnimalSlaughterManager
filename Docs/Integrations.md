@@ -12,6 +12,7 @@
 |---|---|---|---|
 | `IRuleOptionsSource` | `KindSettings/KindPrioritySettings/Interfaces/` | меню добавления правил приоритетов | свои опции, свои правила |
 | `ISpecialSettingsSectionSource` | `KindSettings/SpecialSettings/Interfaces/` | вкладка «Особые правила» окна вида | своя секция; без мода — уведомление, ниже секций |
+| `ISpecialRuleOptionsSource` | `KindSettings/SpecialSettings/Interfaces/` | списки защиты/принудительного забоя ядра | цели (пикер, цвет, тултип), значения наследуемости |
 | `IPawnSlaughterSignals` | `Slaughter/Interfaces/` | сортировка корзин забоя | тай-брейкер сигналы (good/bad) животного |
 | `IKeepReserveSource` | `Slaughter/Interfaces/` | резервация племенного ядра | кого держать от забоя (в пороге), подсчёт, наличие правил |
 | `IKindForceCullSource` | `Slaughter/Interfaces/` | принудительный забой по правилам | кого забивать вопреки лимитам |
