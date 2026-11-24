@@ -14,6 +14,20 @@ public class BondPriorityRule : BasePriorityRule
 
     public override BasePriorityRule Clone() => new BondPriorityRule() { has = has };
 
+    public override string DtoName => "Bond";
+
+    public override void WriteXml(System.Xml.XmlElement parent) => PresetSectionSerialization.Serialize(parent, new BondRuleDto { has = has });
+
+    public override void ReadXml(System.Xml.XmlElement element)
+    {
+        var dto = PresetSectionSerialization.Deserialize<BondRuleDto>(element);
+
+        if (dto != null)
+        {
+            has = dto.has;
+        }
+    }
+
     public override bool Matches(Pawn? p) => (p?.relations?.GetDirectRelationsCount(PawnRelationDefOf.Bond) ?? 0) > 0 == has;
 
     public override void ExposeData()

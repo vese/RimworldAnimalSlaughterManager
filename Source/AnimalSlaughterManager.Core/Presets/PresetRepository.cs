@@ -137,7 +137,7 @@ public static class PresetRepository
     {
 
         var kd = new KindDto { animal = "" };
-        kd.GetBucketRules(bucket).AddRange(rules.Select(PriorityRuleDto.From));
+        kd.SetBucket(bucket, rules);
 
         var dto = new PresetDto();
         dto.Kinds.Add(kd);
@@ -155,7 +155,7 @@ public static class PresetRepository
         {
             case PresetSerializer.PresetRoot:
                 var kd = PresetSerializer.ReadPreset(text)?.Kinds?.FirstOrDefault();
-                return kd == null ? null : RulesOf(kd.GetConditionRules());
+                return kd?.GetConditionRules();
             case PresetSerializer.RulePresetRoot:
                 return RulesOf(PresetSerializer.ReadRulePreset(text));
             default:
@@ -165,8 +165,11 @@ public static class PresetRepository
         }
     }
 
+#pragma warning disable CS0618
+    // The pre-unification RulePresetDto format still yields attribute-form rules.
     private static List<BasePriorityRule>? RulesOf(List<PriorityRuleDto>? dtos) =>
         dtos?.Select(r => r.ToRule()).Where(r => r != null).ToList();
+#pragma warning restore CS0618
 
     /// <summary>Rules of one bucket taken from a Kind/All preset (the source kind's defName
     /// is ignored — the slice applies to any target kind). Null when there is no such slice.</summary>
@@ -179,7 +182,7 @@ public static class PresetRepository
             return null;
         }
 
-        return RulesOf(kd.GetBucketRules(bucket));
+        return PriorityRuleXml.ReadRules(kd.BucketOf(bucket));
     }
 
     public static List<PresetEntry> ListConditionPresets()

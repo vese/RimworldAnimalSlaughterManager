@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Xml;
 using Verse;
 
 namespace ASM;
@@ -17,6 +18,15 @@ public abstract class BasePriorityRule : IExposable
     /// version invalidates every settings cache); the rule only supplies the data — rendering is
     /// the widget's business.</summary>
     public virtual IDropdownController? GetExtraDropdown() => null;
+
+    /// <summary>The rule's DTO element name — the type discriminator in preset files.</summary>
+    public abstract string DtoName { get; }
+
+    /// <summary>Appends the rule's own DTO element under the parent.</summary>
+    public abstract void WriteXml(XmlElement parent);
+
+    /// <summary>Reads the rule from its DTO element.</summary>
+    public abstract void ReadXml(XmlElement element);
 
     public abstract string Label { get; }
     public abstract BasePriorityRule Clone();

@@ -33,10 +33,10 @@ public class LegacyPresetDto
                 femalePref = k.femalePref,
                 maleYoungPref = k.maleYoungPref,
                 femaleYoungPref = k.femaleYoungPref,
-                PrioRulesAdultMale = ToRules(k.PrioAdultMale),
-                PrioRulesYoungMale = ToRules(k.PrioYoungMale),
-                PrioRulesAdultFemale = ToRules(k.PrioAdultFemale),
-                PrioRulesYoungFemale = ToRules(k.PrioYoungFemale)
+                PrioRulesAdultMale = ToBucket(nameof(KindDto.PrioRulesAdultMale), k.PrioAdultMale),
+                PrioRulesYoungMale = ToBucket(nameof(KindDto.PrioRulesYoungMale), k.PrioYoungMale),
+                PrioRulesAdultFemale = ToBucket(nameof(KindDto.PrioRulesAdultFemale), k.PrioAdultFemale),
+                PrioRulesYoungFemale = ToBucket(nameof(KindDto.PrioRulesYoungFemale), k.PrioYoungFemale)
             };
             kd.IntegrationSections.AddRange(k.IntegrationSections);
             dto.Kinds.Add(kd);
@@ -50,9 +50,9 @@ public class LegacyPresetDto
         Kinds.Any(k => k.PrioAdultMale?.Count > 0 || k.PrioYoungMale?.Count > 0
             || k.PrioAdultFemale?.Count > 0 || k.PrioYoungFemale?.Count > 0);
 
-    private static List<PriorityRuleDto> ToRules(List<ConditionDto>? conditions)
+    private static XmlElement[]? ToBucket(string name, List<ConditionDto>? conditions)
     {
-        var rules = new List<PriorityRuleDto>();
+        var rules = new List<BasePriorityRule>();
 
         if (conditions != null)
         {
@@ -62,12 +62,12 @@ public class LegacyPresetDto
 
                 if (rule != null)
                 {
-                    rules.Add(PriorityRuleDto.From(rule));
+                    rules.Add(rule);
                 }
             }
         }
 
-        return rules;
+        return rules.Count > 0 ? [PriorityRuleXml.Bucket(name, rules)] : null;
     }
 }
 

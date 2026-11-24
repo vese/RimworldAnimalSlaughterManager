@@ -17,6 +17,21 @@ public class TrainingPriorityRule : BasePriorityRule, ICoversRule<TrainingGenera
 
     public override BasePriorityRule Clone() => new TrainingPriorityRule() { has = has, trainable = trainable };
 
+    public override string DtoName => "Training";
+
+    public override void WriteXml(System.Xml.XmlElement parent) => PresetSectionSerialization.Serialize(parent, new TrainingRuleDto { has = has, trainable = trainable?.defName });
+
+    public override void ReadXml(System.Xml.XmlElement element)
+    {
+        var dto = PresetSectionSerialization.Deserialize<TrainingRuleDto>(element);
+
+        if (dto != null)
+        {
+            has = dto.has;
+            trainable = (TrainableDef?)RuleDtoDefs.ByName(typeof(TrainableDef), dto.trainable);
+        }
+    }
+
     public override bool Matches(Pawn? p) => trainable != null && (p?.training?.HasLearned(trainable) ?? false) == has;
 
     public override void ExposeData()

@@ -14,6 +14,20 @@ public class DiseaseAnyPriorityRule : BasePriorityRule, ICoversRule<DiseasePrior
 
     public override BasePriorityRule Clone() => new DiseaseAnyPriorityRule() { has = has };
 
+    public override string DtoName => "DiseaseAny";
+
+    public override void WriteXml(System.Xml.XmlElement parent) => PresetSectionSerialization.Serialize(parent, new DiseaseAnyRuleDto { has = has });
+
+    public override void ReadXml(System.Xml.XmlElement element)
+    {
+        var dto = PresetSectionSerialization.Deserialize<DiseaseAnyRuleDto>(element);
+
+        if (dto != null)
+        {
+            has = dto.has;
+        }
+    }
+
     public override bool Matches(Pawn? p) => IsSick(p) == has;
 
     public override void ExposeData()

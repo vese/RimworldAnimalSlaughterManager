@@ -59,8 +59,8 @@ public static class PresetSerializer
             return null;
         }
 
-        if (dto?.Kinds.Any(k => k.PrioRulesAdultMale?.Count > 0 || k.PrioRulesYoungMale?.Count > 0
-            || k.PrioRulesAdultFemale?.Count > 0 || k.PrioRulesYoungFemale?.Count > 0) == true)
+        if (dto?.Kinds.Any(k => k.PrioRulesAdultMale?.Length > 0 || k.PrioRulesYoungMale?.Length > 0
+            || k.PrioRulesAdultFemale?.Length > 0 || k.PrioRulesYoungFemale?.Length > 0) == true)
         {
             return Migrate(dto);
         }
@@ -87,10 +87,12 @@ public static class PresetSerializer
         return dto;
     }
 
+#pragma warning disable CS0618
     public static List<PriorityRuleDto>? ReadRulePreset(string? text)
     {
         var dto = Deserialize<RulePresetDto>(text);
         return dto?.rules?.ToList();
+#pragma warning restore CS0618
     }
 
     private static T? Deserialize<T>(string? text) where T : class

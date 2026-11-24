@@ -11,6 +11,7 @@
 | Контракт | Где лежит (в Core) | Точка потребления | Что даёт |
 |---|---|---|---|
 | `IRuleOptionsSource` | `KindSettings/KindPrioritySettings/Interfaces/` | меню добавления правил приоритетов | свои опции, свои правила |
+| `IPriorityRuleTypes` | `KindSettings/KindPrioritySettings/Interfaces/` | сериализация правил в пресетах | DTO-дискриминаторы + фабрики своих правил |
 | `ISpecialSettingsSectionSource` | `KindSettings/SpecialSettings/Interfaces/` | вкладка «Особые правила» окна вида | своя секция; без мода — уведомление, ниже секций |
 | `IPawnSlaughterSignals` | `Slaughter/Interfaces/` | сортировка корзин забоя | тай-брейкер сигналы (good/bad) животного |
 | `IKeepReserveSource` | `Slaughter/Interfaces/` | резервация племенного ядра | кого держать от забоя (в пороге), подсчёт, наличие правил |

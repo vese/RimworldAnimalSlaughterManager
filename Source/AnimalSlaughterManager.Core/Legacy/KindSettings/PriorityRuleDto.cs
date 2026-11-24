@@ -1,4 +1,4 @@
-using System.Linq;
+#pragma warning disable CS0612, CS0618
 using System;
 using System.Linq;
 using System.Reflection;
@@ -9,12 +9,11 @@ using Verse;
 namespace ASM;
 
 /// <summary>
-/// XML form of one priority rule: the rule type name plus its parameters. Deliberately
-/// type-agnostic — the parameters copy by field name through reflection, so rules from any
-/// assembly (integration rules included) round-trip without this DTO referencing their types.
-/// Field conventions: defs as defName strings (trait → HediffDef, trainable → TrainableDef,
-/// disease → HediffDef), enums as names.
+/// The pre-discriminator XML form of one priority rule (a single attribute-driven DTO for
+/// every rule type, read back through reflection). Delete together with the rest of the
+/// Legacy folder when the save-compatibility horizon allows.
 /// </summary>
+[Obsolete]
 public class PriorityRuleDto
 {
     [XmlAttribute]
@@ -31,38 +30,6 @@ public class PriorityRuleDto
     public string generalType;
     [XmlAttribute]
     public string inheritability;
-
-    public static PriorityRuleDto From(BasePriorityRule r)
-    {
-        var dto = new PriorityRuleDto { rule = r.GetType().Name };
-
-        foreach (var field in typeof(PriorityRuleDto).GetFields())
-        {
-            if (field.Name == nameof(rule))
-            {
-                continue;
-            }
-
-            var source = r.GetType().GetField(field.Name, BindingFlags.Public | BindingFlags.Instance);
-
-            if (source == null)
-            {
-                continue;
-            }
-
-            var value = source.GetValue(r);
-            field.SetValue(dto, value switch
-            {
-                null => null,
-                Def def => def.defName,
-                Enum e => e.ToString(),
-                bool b => b,
-                _ => null,
-            });
-        }
-
-        return dto;
-    }
 
     public BasePriorityRule? ToRule()
     {

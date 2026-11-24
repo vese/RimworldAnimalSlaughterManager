@@ -14,6 +14,20 @@ public class PregnancyPriorityRule : BasePriorityRule
 
     public override BasePriorityRule Clone() => new PregnancyPriorityRule() { has = has };
 
+    public override string DtoName => "Pregnancy";
+
+    public override void WriteXml(System.Xml.XmlElement parent) => PresetSectionSerialization.Serialize(parent, new PregnancyRuleDto { has = has });
+
+    public override void ReadXml(System.Xml.XmlElement element)
+    {
+        var dto = PresetSectionSerialization.Deserialize<PregnancyRuleDto>(element);
+
+        if (dto != null)
+        {
+            has = dto.has;
+        }
+    }
+
     public override bool Matches(Pawn? p) => PregnancyUtility.IsPregnantOrCarryingEgg(p) == has;
 
     public override void ExposeData()

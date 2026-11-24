@@ -27,6 +27,34 @@ public class TraitPriorityRule : BasePriorityRule, ICoversRule<TraitPriorityRule
 
     public override BasePriorityRule Clone() => new TraitPriorityRule() { has = has, trait = trait, inheritability = inheritability };
 
+    public override string DtoName => "Trait";
+
+    public override void WriteXml(System.Xml.XmlElement parent) => PresetSectionSerialization.Serialize(parent, new PriorityTraitRuleDto
+    {
+        has = has,
+        trait = trait?.defName,
+        inheritability = inheritability.ToString()
+    });
+
+    public override void ReadXml(System.Xml.XmlElement element)
+    {
+        var dto = PresetSectionSerialization.Deserialize<PriorityTraitRuleDto>(element);
+
+        if (dto == null)
+        {
+            return;
+        }
+
+        has = dto.has;
+        trait = (HediffDef?)RuleDtoDefs.ByName(typeof(HediffDef), dto.trait);
+
+        if (System.Enum.TryParse(dto.inheritability, out TraitInheritability parsed))
+        {
+            inheritability = parsed;
+        }
+ }
+
+
     public override bool Matches(Pawn? p) => trait != null && AnimalTraitsAccess.HasTrait(p, trait) == has && InheritMatch(trait, inheritability);
 
     public override void ExposeData()

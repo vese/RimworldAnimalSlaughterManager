@@ -21,6 +21,7 @@ public static class AnimalTraitsSystemRegistration
         IntegrationServices.Add<IKindSettingsProvider>(new KindTraitsSettings.Provider());
 #pragma warning disable CS0618
         // Legacy save/preset conversion — goes away together with the Legacy folder.
+        IntegrationServices.Add<IPriorityRuleTypes>(new TraitPriorityRuleTypes());
         IntegrationServices.Add<ILegacyConditionConverter>(new LegacyTraitConditions());
 #pragma warning restore CS0618
         // The section source too: with the mod disabled the shared special-rules tab shows

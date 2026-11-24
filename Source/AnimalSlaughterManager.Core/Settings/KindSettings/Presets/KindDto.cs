@@ -23,21 +23,19 @@ public class KindDto
     public string maleYoungPref;
     public string femaleYoungPref;
 
-    [XmlArray("PrioRulesAdultMale")]
-    [XmlArrayItem("Rule")]
-    public List<PriorityRuleDto> PrioRulesAdultMale = new List<PriorityRuleDto>();
+    // The rule buckets as raw elements: the rules own their DTOs, the element names of the
+    // children are the type discriminators (see PriorityRuleXml).
+    [XmlAnyElement("PrioRulesAdultMale")]
+    public XmlElement[]? PrioRulesAdultMale;
 
-    [XmlArray("PrioRulesYoungMale")]
-    [XmlArrayItem("Rule")]
-    public List<PriorityRuleDto> PrioRulesYoungMale = new List<PriorityRuleDto>();
+    [XmlAnyElement("PrioRulesYoungMale")]
+    public XmlElement[]? PrioRulesYoungMale;
 
-    [XmlArray("PrioRulesAdultFemale")]
-    [XmlArrayItem("Rule")]
-    public List<PriorityRuleDto> PrioRulesAdultFemale = new List<PriorityRuleDto>();
+    [XmlAnyElement("PrioRulesAdultFemale")]
+    public XmlElement[]? PrioRulesAdultFemale;
 
-    [XmlArray("PrioRulesYoungFemale")]
-    [XmlArrayItem("Rule")]
-    public List<PriorityRuleDto> PrioRulesYoungFemale = new List<PriorityRuleDto>();
+    [XmlAnyElement("PrioRulesYoungFemale")]
+    public XmlElement[]? PrioRulesYoungFemale;
 
     /// <summary>Raw integration sections (any unknown children); owned by their integrations.</summary>
     [XmlAnyElement]
@@ -56,23 +54,49 @@ public class KindDto
         ks.Load(this);
     }
 
-    /// <summary>The rule list a condition preset's bucket is stored in.</summary>
-    public List<PriorityRuleDto> GetBucketRules((bool Male, bool Adult) bucket) => bucket switch
+    /// <summary>The bucket's element with the rules' DTO children; null when absent.</summary>
+    public XmlElement? BucketOf((bool Male, bool Adult) bucket) => bucket switch
     {
-        (true, true) => PrioRulesAdultMale,
-        (true, false) => PrioRulesYoungMale,
-        (false, true) => PrioRulesAdultFemale,
-        _ => PrioRulesYoungFemale,
+        (true, true) => PrioRulesAdultMale?.FirstOrDefault(),
+        (true, false) => PrioRulesYoungMale?.FirstOrDefault(),
+        (false, true) => PrioRulesAdultFemale?.FirstOrDefault(),
+        _ => PrioRulesYoungFemale?.FirstOrDefault(),
     };
+
+    public void SetBucket((bool Male, bool Adult) bucket, List<BasePriorityRule> rules)
+    {
+        var element = PriorityRuleXml.Bucket(bucket switch
+        {
+            (true, true) => nameof(PrioRulesAdultMale),
+            (true, false) => nameof(PrioRulesYoungMale),
+            (false, true) => nameof(PrioRulesAdultFemale),
+            _ => nameof(PrioRulesYoungFemale),
+        }, rules);
+
+        switch (bucket)
+        {
+            case (true, true):
+                PrioRulesAdultMale = [element];
+                break;
+            case (true, false):
+                PrioRulesYoungMale = [element];
+                break;
+            case (false, true):
+                PrioRulesAdultFemale = [element];
+                break;
+            default:
+                PrioRulesYoungFemale = [element];
+                break;
+        }
+    }
 
     /// <summary>Reading side of a condition preset: the export writes exactly ONE bucket list,
     /// so the single non-empty one is it — nothing is discarded. The saved bucket is the preset's
     /// origin; on apply the rules go to whatever bucket is targeted (cross-bucket import).</summary>
-    public List<PriorityRuleDto>? GetConditionRules()
+    public List<BasePriorityRule>? GetConditionRules()
     {
-        var rules = new[] { PrioRulesAdultMale, PrioRulesYoungMale, PrioRulesAdultFemale, PrioRulesYoungFemale }
-            .FirstOrDefault(l => l != null && l.Count > 0);
-
-        return rules?.ToList();
+        return new[] { (male: true, adult: true), (true, false), (false, true), (false, false) }
+            .Select(b => PriorityRuleXml.ReadRules(BucketOf(b)))
+            .FirstOrDefault(rules => rules.Count > 0);
     }
 }

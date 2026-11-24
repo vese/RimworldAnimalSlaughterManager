@@ -41,6 +41,38 @@ public class TraitGeneralPriorityRule : BasePriorityRule, ICoversRule<TraitGener
 
     public override BasePriorityRule Clone() => new TraitGeneralPriorityRule() { has = has, type = type, inheritability = inheritability };
 
+    public override string DtoName => "TraitGeneral";
+
+    public override void WriteXml(System.Xml.XmlElement parent) => PresetSectionSerialization.Serialize(parent, new PriorityTraitGeneralRuleDto
+    {
+        has = has,
+        type = type.ToString(),
+        inheritability = inheritability.ToString()
+    });
+
+    public override void ReadXml(System.Xml.XmlElement element)
+    {
+        var dto = PresetSectionSerialization.Deserialize<PriorityTraitGeneralRuleDto>(element);
+
+        if (dto == null)
+        {
+            return;
+        }
+
+        has = dto.has;
+
+        if (System.Enum.TryParse(dto.type, out TraitType parsedType))
+        {
+            type = parsedType;
+        }
+
+        if (System.Enum.TryParse(dto.inheritability, out TraitInheritability parsedInherit))
+        {
+            inheritability = parsedInherit;
+        }
+ }
+
+
     public override bool Matches(Pawn? p) => type switch
     {
         TraitType.Both => HasTrait(p) == has,

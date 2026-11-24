@@ -96,38 +96,18 @@ public class KindPrioritySettings : IPresettable
 
     public void Save(KindDto dto)
     {
-        dto.PrioRulesAdultMale = Get(true, true).Select(PriorityRuleDto.From).ToList();
-        dto.PrioRulesYoungMale = Get(true, false).Select(PriorityRuleDto.From).ToList();
-        dto.PrioRulesAdultFemale = Get(false, true).Select(PriorityRuleDto.From).ToList();
-        dto.PrioRulesYoungFemale = Get(false, false).Select(PriorityRuleDto.From).ToList();
+        dto.SetBucket((true, true), Get(true, true));
+        dto.SetBucket((true, false), Get(true, false));
+        dto.SetBucket((false, true), Get(false, true));
+        dto.SetBucket((false, false), Get(false, false));
     }
 
     public void Load(KindDto dto)
     {
-        LoadRuleSet(dto.PrioRulesAdultMale, ruleSets[(true, true)]);
-        LoadRuleSet(dto.PrioRulesYoungMale, ruleSets[(true, false)]);
-        LoadRuleSet(dto.PrioRulesAdultFemale, ruleSets[(false, true)]);
-        LoadRuleSet(dto.PrioRulesYoungFemale, ruleSets[(false, false)]);
-    }
-
-    private static void LoadRuleSet(List<PriorityRuleDto> rules, PriorityRuleSet target)
-    {
-        var loaded = new List<BasePriorityRule>();
-
-        if (rules != null)
-        {
-            foreach (var r in rules)
-            {
-                var rule = r.ToRule();
-
-                if (rule != null)
-                {
-                    loaded.Add(rule);
-                }
-            }
-        }
-
-        target.ReplaceAll(loaded);
+        ruleSets[(true, true)].ReplaceAll(PriorityRuleXml.ReadRules(dto.BucketOf((true, true))));
+        ruleSets[(true, false)].ReplaceAll(PriorityRuleXml.ReadRules(dto.BucketOf((true, false))));
+        ruleSets[(false, true)].ReplaceAll(PriorityRuleXml.ReadRules(dto.BucketOf((false, true))));
+        ruleSets[(false, false)].ReplaceAll(PriorityRuleXml.ReadRules(dto.BucketOf((false, false))));
     }
 
     public void ExposeData()
