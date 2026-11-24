@@ -20,7 +20,6 @@ public static class PresetSerializer
     /// dispatcher matches them against a file root.</summary>
     public const string CarrierRoot = "SlaughterPreset";
     public const string RulePresetRoot = "RulePresetDto";
-    public const string ConditionPresetRoot = "ConditionPreset";
 
     private static readonly Dictionary<Type, XmlSerializer> serializers = new();
 
@@ -48,19 +47,25 @@ public static class PresetSerializer
 
     public static SlaughterPresetDto? ReadCarrier(string? text)
     {
-        return Deserialize<SlaughterPresetDto>(text);
+        var dto = Deserialize<SlaughterPresetDto>(text);
+
+        if (dto?.Kinds.Any(k => k.PrioRulesAdultMale?.Count > 0 || k.PrioRulesYoungMale?.Count > 0
+            || k.PrioRulesAdultFemale?.Count > 0 || k.PrioRulesYoungFemale?.Count > 0) == true)
+        {
+            return dto;
+        }
+
+#pragma warning disable CS0618
+        // An old carrier has no rule lists — convert it; a current prefs-only preset stays
+        // as parsed.
+        return LegacyPresets.TryReadCarrier(text) ?? dto;
+#pragma warning restore CS0618
     }
 
     public static List<PriorityRuleDto>? ReadRulePreset(string? text)
     {
         var dto = Deserialize<RulePresetDto>(text);
         return dto?.rules?.ToList();
-    }
-
-    public static List<ConditionDto>? ReadConditionPreset(string? text)
-    {
-        var dto = Deserialize<ConditionPresetDto>(text);
-        return dto?.conditions?.ToList();
     }
 
     private static T? Deserialize<T>(string? text) where T : class

@@ -31,7 +31,7 @@ UI-элементы фичи). Интерфейсы фичи — в `Interfaces/
 данные интеграций в настройках вида, `KindSettings/SpecialSettings/Interfaces/` — секции вкладки
 «Особые правила», `Settings/Dialog/Interfaces/` — табы окна вида,
 `KindSettings/KindPrioritySettings/Interfaces/` — меню правил,
-`Presets/Interfaces/`, `Legacy/Interfaces/`). Устаревшее — в `Legacy/` по фичам. Патчи лежат
+`Presets/Interfaces/`, `Legacy/Interfaces/`). Устаревшее — в `Legacy/` по фичам, всё внутри помечено `[Obsolete]` и изолировано за фасадами `LegacyPresets`/`LegacyKindPriority`: снаружи — три вызова в Core (`PresetSerializer.ReadCarrier`, `PresetRepository.ListPresets`/`ApplyConditions`, `KindPrioritySettings.ExposeData`) и реализация `ILegacyConditionConverter` в ATS; удаление папки = убрать эти точки (+ ATS-`LegacyTraitConditions`). Патчи лежат
 в Core, применяет их HarmonyInit главного проекта (`PatchAll()` без аргументов патчит только свою
 сборку).
 

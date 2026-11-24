@@ -5,8 +5,11 @@ using System.Xml.Serialization;
 using RimWorld;
 using Verse;
 
+#pragma warning disable CS0612, CS0618
+
 namespace ASM;
 
+    [Obsolete]
     [XmlRoot("ConditionPreset")]
     public class ConditionPresetDto
     {

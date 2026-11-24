@@ -13,7 +13,6 @@ public class KindPrioritySettings : IPresettable
     // New instances start at the current version so they serialize in the current format;
     // loading an old save overwrites this with the saved version and migrates in PostLoadInit.
     private int dataVersion = currentDataVersion;
-    private KindPrioritySettingsLegacy? settingsLegacy;
 
     // Per-bucket ordered slaughter-priority condition lists (top = keep, bottom = cull).
     public Dictionary<(bool Male, bool Adult), PriorityRuleSet> ruleSets = new()
@@ -105,15 +104,13 @@ public class KindPrioritySettings : IPresettable
 
     public void Load(KindDto dto)
     {
-        LoadRuleSet(dto.PrioRulesAdultMale, dto.PrioAdultMale, ruleSets[(true, true)]);
-        LoadRuleSet(dto.PrioRulesYoungMale, dto.PrioYoungMale, ruleSets[(true, false)]);
-        LoadRuleSet(dto.PrioRulesAdultFemale, dto.PrioAdultFemale, ruleSets[(false, true)]);
-        LoadRuleSet(dto.PrioRulesYoungFemale, dto.PrioYoungFemale, ruleSets[(false, false)]);
+        LoadRuleSet(dto.PrioRulesAdultMale, ruleSets[(true, true)]);
+        LoadRuleSet(dto.PrioRulesYoungMale, ruleSets[(true, false)]);
+        LoadRuleSet(dto.PrioRulesAdultFemale, ruleSets[(false, true)]);
+        LoadRuleSet(dto.PrioRulesYoungFemale, ruleSets[(false, false)]);
     }
 
-    // PrioRules* — current format; the legacy ConditionDto lists cover presets saved before
-    // the priority-rule refactor.
-    private static void LoadRuleSet(List<PriorityRuleDto> rules, List<ConditionDto> legacy, PriorityRuleSet target)
+    private static void LoadRuleSet(List<PriorityRuleDto> rules, PriorityRuleSet target)
     {
         var loaded = new List<BasePriorityRule>();
 
@@ -129,20 +126,6 @@ public class KindPrioritySettings : IPresettable
                 }
             }
         }
-        else if (legacy != null)
-        {
-#pragma warning disable CS0618
-            foreach (var c in legacy)
-            {
-                var rule = KindPrioritySettingsLegacy.Convert(c.ToCondition());
-
-                if (rule != null)
-                {
-                    loaded.Add(rule);
-                }
-            }
-#pragma warning restore CS0618
-        }
 
         target.ReplaceAll(loaded);
     }
@@ -153,8 +136,13 @@ public class KindPrioritySettings : IPresettable
 
         if (dataVersion == 0)
         {
-            settingsLegacy = new KindPrioritySettingsLegacy();
-            settingsLegacy.ExposeData();
+#pragma warning disable CS0618
+            // The v0 save format: one seam into Legacy, converting the flat condition lists.
+            foreach (var (key, rules) in LegacyKindPriority.ReadRuleSets())
+            {
+                ruleSets[key].rules = rules;
+            }
+#pragma warning restore CS0618
         }
         else if (dataVersion == 1)
         {
@@ -166,16 +154,6 @@ public class KindPrioritySettings : IPresettable
 
         if (Scribe.mode == LoadSaveMode.PostLoadInit)
         {
-            if (dataVersion == 0)
-            {
-                ruleSets[(true, true)].rules = settingsLegacy!.PriorityAdultMale;
-                ruleSets[(true, false)].rules = settingsLegacy!.PriorityYoungMale;
-                ruleSets[(false, true)].rules = settingsLegacy!.PriorityAdultFemale;
-                ruleSets[(false, false)].rules = settingsLegacy!.PriorityYoungFemale;
-                
-                settingsLegacy.Reset();
-            }
-
             foreach (var ruleSet in ruleSets.Values)
             {
                 ruleSet.PostLoadInit();

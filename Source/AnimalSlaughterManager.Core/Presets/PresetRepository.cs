@@ -89,10 +89,12 @@ namespace ASM;
                 AddFolder(ScopeFolder(scope));
             }
 
-            // Presets saved before scopes existed live in the root folder.
             if (scope == PresetScope.All)
             {
-                PresetLegacyReader.AddRootPresets(result);
+                // Presets saved before scopes existed live in the root folder.
+#pragma warning disable CS0618
+                LegacyPresets.AddRootPresets(result);
+#pragma warning restore CS0618
             }
 
             return result.OrderByDescending(e => e.date).ThenBy(e => e.name).ToList();
@@ -170,7 +172,9 @@ namespace ASM;
                 case PresetSerializer.RulePresetRoot:
                     return RulesOf(PresetSerializer.ReadRulePreset(text));
                 default:
-                    return PresetLegacyReader.TryReadConditions(entry);
+#pragma warning disable CS0618
+                    return LegacyPresets.TryReadConditions(entry);
+#pragma warning restore CS0618
             }
         }
 

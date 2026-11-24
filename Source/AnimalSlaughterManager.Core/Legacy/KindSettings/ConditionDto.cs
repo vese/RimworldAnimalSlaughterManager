@@ -8,6 +8,7 @@ using Verse;
 namespace ASM;
 
     /// <summary>XML-serializable form of SlaughterCondition for preset files (stores defNames).</summary>
+    [Obsolete]
     public class ConditionDto
     {
         [XmlAttribute]

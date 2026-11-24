@@ -23,22 +23,6 @@ public class KindDto
     public string maleYoungPref;
     public string femaleYoungPref;
 
-    [XmlArray("PrioAdultMale")]
-    [XmlArrayItem("Cond")]
-    public List<ConditionDto> PrioAdultMale;
-
-    [XmlArray("PrioYoungMale")]
-    [XmlArrayItem("Cond")]
-    public List<ConditionDto> PrioYoungMale;
-
-    [XmlArray("PrioAdultFemale")]
-    [XmlArrayItem("Cond")]
-    public List<ConditionDto> PrioAdultFemale;
-
-    [XmlArray("PrioYoungFemale")]
-    [XmlArrayItem("Cond")]
-    public List<ConditionDto> PrioYoungFemale;
-
     [XmlArray("PrioRulesAdultMale")]
     [XmlArrayItem("Rule")]
     public List<PriorityRuleDto> PrioRulesAdultMale = new List<PriorityRuleDto>();

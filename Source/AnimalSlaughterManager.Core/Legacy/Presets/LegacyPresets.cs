@@ -1,0 +1,102 @@
+#pragma warning disable CS0612, CS0618
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
+namespace ASM;
+
+/// <summary>
+/// Everything the current preset code needs from the old formats, behind one seam: root-folder
+/// presets (saved before scopes existed), condition-list presets (before the priority-rule
+/// refactor) and old carriers. Delete this class together with the rest of the Legacy folder
+/// when the save-compatibility horizon allows — the callers are PresetSerializer and
+/// PresetRepository only.
+/// </summary>
+[Obsolete]
+public static class LegacyPresets
+{
+    /// <summary>Adds root-folder presets to an All-scope listing (they have no scope folder).</summary>
+    public static void AddRootPresets(List<PresetEntry> result)
+    {
+        foreach (var p in PresetRepository.Store.GetFiles(PresetRepository.RootFolder))
+        {
+            result.Add(new PresetEntry
+            {
+                name = Path.GetFileNameWithoutExtension(p),
+                path = p,
+                date = PresetRepository.Store.GetLastWriteTime(p),
+                scope = PresetScope.All
+            });
+        }
+    }
+
+    /// <summary>Condition rules of a legacy condition-preset file; null when the file is not
+    /// one (the current-format reader falls back here).</summary>
+    public static List<BasePriorityRule>? TryReadConditions(PresetEntry entry)
+    {
+        var conditions = ReadConditionPreset(PresetRepository.Store.ReadText(entry.path));
+
+        if (conditions == null)
+        {
+            return null;
+        }
+
+        var rules = new List<BasePriorityRule>();
+
+        foreach (var c in conditions)
+        {
+            var rule = KindPrioritySettingsLegacy.Convert(c.ToCondition());
+
+            if (rule != null)
+            {
+                rules.Add(rule);
+            }
+        }
+
+        return rules;
+    }
+
+    /// <summary>An old-format carrier converted into the current one; null when the text is not
+    /// an old carrier (no legacy condition lists anywhere).</summary>
+    public static SlaughterPresetDto? TryReadCarrier(string? text)
+    {
+        if (text == null)
+        {
+            return null;
+        }
+
+        try
+        {
+            using var reader = new StringReader(text);
+            var legacy = (LegacySlaughterPresetDto)PresetSerializer.Serializer<LegacySlaughterPresetDto>().Deserialize(reader);
+
+            return legacy != null && legacy.HasConditions ? legacy.ToCurrent() : null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static List<ConditionDto>? ReadConditionPreset(string? text)
+    {
+        if (text == null)
+        {
+            return null;
+        }
+
+        try
+        {
+            using var reader = new StringReader(text);
+            var dto = (ConditionPresetDto)PresetSerializer.Serializer<ConditionPresetDto>().Deserialize(reader);
+
+            return dto?.conditions?.ToList();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+}

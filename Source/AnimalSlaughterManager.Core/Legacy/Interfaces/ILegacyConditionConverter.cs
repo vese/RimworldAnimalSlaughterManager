@@ -1,3 +1,5 @@
+using System;
+
 namespace ASM;
 
 /// <summary>
@@ -5,6 +7,7 @@ namespace ASM;
 /// integration that owns the concept turns it into its own rule. Registered
 /// unconditionally, so a legacy save survives its mod being disabled.
 /// </summary>
+[Obsolete]
 public interface ILegacyConditionConverter
 {
     /// <summary>The rule for the condition, or null when it is not this integration's.</summary>

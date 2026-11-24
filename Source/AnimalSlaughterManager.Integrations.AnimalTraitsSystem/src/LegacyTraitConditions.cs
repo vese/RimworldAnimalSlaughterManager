@@ -1,3 +1,4 @@
+#pragma warning disable CS0612, CS0618
 using System;
 namespace ASM;
 
