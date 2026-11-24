@@ -30,8 +30,6 @@ public static class PresetRepository
 {
     // Preset tree layout under the game persistentDataPath.
     private const string RootFolderName = "AnimalSlaughterManagerPresets";
-    private const string FolderKeep = "Keep";
-    private const string FolderForceCull = "ForceCull";
     private const string FolderConditions = "Conditions";
 
     /// <summary>File access of the preset subsystem; tests may substitute their own store.</summary>
@@ -65,8 +63,15 @@ public static class PresetRepository
 
         if (scope is PresetScope.List)
         {
-            AddFolder(Path.Combine(scopeFolder, FolderKeep));
-            AddFolder(Path.Combine(scopeFolder, FolderForceCull));
+            // Every rule-list kind writes into its own PresetsFolder subfolder — list them as
+            // they are on disk, except the core's own conditions tree (it has its own browser).
+            foreach (var sub in Store.GetFolders(scopeFolder).OrderBy(Path.GetFileName))
+            {
+                if (Path.GetFileName(sub) != FolderConditions)
+                {
+                    AddFolder(sub);
+                }
+            }
         }
         else
         {
