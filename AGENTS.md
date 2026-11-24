@@ -29,7 +29,7 @@ Source/AnimalSlaughterManager.Integrations.AnimalTraitsSystem/ — ATS-инте�
 Core: верхний уровень — фичи, внутри фичи — по функциональности (настройки, пресеты, окна,
 UI-элементы фичи). Интерфейсы фичи — в `Interfaces/` соответствующего уровня; контракт лежит
 в `Interfaces/` фичи-потребителя (`Slaughter/Interfaces/` — движок, `KindSettings/Interfaces/` —
-данные интеграций в настройках вида, `KindSettings/SpecialSettings/Interfaces/` — секции вкладки
+данные интеграций в настройках вида, `KindSettings/SpecialSettings/Interfaces/` — опции списков
 «Особые правила», `Settings/Dialog/Interfaces/` — табы окна вида,
 `KindSettings/KindPrioritySettings/Interfaces/` — меню правил,
 `Presets/Interfaces/`, `Legacy/Interfaces/`). Устаревшее — в `Legacy/` по фичам, всё внутри помечено `[Obsolete]` и изолировано за фасадами `LegacyPresets`/`LegacyKindPriority`: снаружи — три вызова в Core (`PresetSerializer.ReadCarrier`, `PresetRepository.ListPresets`/`ApplyConditions`, `KindPrioritySettings.ExposeData`) и реализация `ILegacyConditionConverter` в ATS; удаление папки = убрать эти точки (+ ATS-`LegacyTraitConditions`). Патчи лежат
