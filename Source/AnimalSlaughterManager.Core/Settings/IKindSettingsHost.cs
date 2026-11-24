@@ -14,8 +14,6 @@ public interface IKindSettingsHost
 
     GlobalSettings GlobalSettings { get; }
 
-    void MarkDirty();
-
     /// <summary>Every configured kind with its settings.</summary>
     IEnumerable<KeyValuePair<ThingDef, KindSettings>> AllKindSettings { get; }
 }

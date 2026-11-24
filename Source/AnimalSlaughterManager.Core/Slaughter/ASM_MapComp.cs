@@ -58,7 +58,6 @@ public class ASM_MapComp : MapComponent, IKindSettingsHost
     }
 
     GlobalSettings IKindSettingsHost.GlobalSettings => globalSettings;
-    void IKindSettingsHost.MarkDirty() => MarkDirty();
 
     IEnumerable<KeyValuePair<ThingDef, KindSettings>> IKindSettingsHost.AllKindSettings => kindSettings;
 
