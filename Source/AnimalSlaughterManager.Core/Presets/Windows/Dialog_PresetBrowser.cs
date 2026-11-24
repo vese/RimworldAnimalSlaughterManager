@@ -26,7 +26,7 @@ public class Dialog_PresetBrowser : Dialog_PresetBrowserBase
     private readonly Func<PresetEntry, bool>? applyList;
     private readonly Func<bool>? hasListData;
 
-    private int ContextRank => scope == PresetScope.All ? 3 : scope == PresetScope.Kind ? 2 : 1;
+
     private KindSettings Settings => comp.GetSettings(kind);
 
     public Dialog_PresetBrowser(ASM_MapComp comp, PresetScope scope, ThingDef kind)
@@ -72,11 +72,11 @@ public class Dialog_PresetBrowser : Dialog_PresetBrowserBase
 
     // A scope is relevant in this context if it is the context's own scope or any broader one;
     // the browser's own List scope shows the trait lists of this flavor (Keep/ForceCull).
-    protected override bool ScopeVisible(PresetScope s) => ScopeRank(s) >= ContextRank;
+    protected override bool ScopeVisible(PresetScope s) => s <= scope;
 
     protected override IEnumerable<PresetEntry> ListEntries() => PresetRepository.ListPresets(PresetScope.List);
 
-    private static int ScopeRank(PresetScope s) => s == PresetScope.All ? 3 : s == PresetScope.Kind ? 2 : 1;
+
 
     protected override bool HasData()
     {
@@ -155,7 +155,7 @@ public class Dialog_PresetBrowser : Dialog_PresetBrowserBase
 
     protected override bool CanOverwrite(PresetEntry entry) => entry.scope == scope && HasData();
 
-    protected override bool CanDelete(PresetEntry entry) => entry.DeletableFrom(ContextRank);
+    protected override bool CanDelete(PresetEntry entry) => entry.DeletableFrom(scope);
 
     protected override string ConfirmDelete(PresetEntry entry) => scope == PresetScope.List
         ? ASMKeys.ConfirmDeleteList.Translate(entry.name)

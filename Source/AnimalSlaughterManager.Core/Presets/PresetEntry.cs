@@ -15,9 +15,7 @@ namespace ASM;
         public PresetScope scope;
         public (bool Male, bool Adult)? condBucket;
 
-        /// <summary>Rank for delete-gating: a context may only delete presets at or below its own rank.</summary>
-        public int Rank => scope == PresetScope.All ? 3 : scope == PresetScope.Kind ? 2 : 1;
-
-        /// <summary>True if a management context of <paramref name="contextRank"/> may delete this preset.</summary>
-        public bool DeletableFrom(int contextRank) => Rank <= contextRank;
+        /// <summary>True if a management context of <paramref name="context"/> may delete this
+        /// preset: only presets at least as narrow as the context itself.</summary>
+        public bool DeletableFrom(PresetScope context) => scope >= context;
     }
