@@ -30,9 +30,6 @@ public static class PresetRepository
 {
     // Preset tree layout under the game persistentDataPath.
     private const string RootFolderName = "AnimalSlaughterManagerPresets";
-    private const string FolderAll = "All";
-    private const string FolderKind = "Kind";
-    private const string FolderList = "List";
     private const string FolderKeep = "Keep";
     private const string FolderForceCull = "ForceCull";
     private const string FolderConditions = "Conditions";
@@ -41,14 +38,10 @@ public static class PresetRepository
 
     internal static string RootFolder => Path.Combine(Application.persistentDataPath, RootFolderName);
 
+    // The scope folder is the enum value's own name (All/Kind/List).
     private static string ScopeFolder(PresetScope scope)
     {
-        switch (scope)
-        {
-            case PresetScope.All: return Path.Combine(RootFolder, FolderAll);
-            case PresetScope.Kind: return Path.Combine(RootFolder, FolderKind);
-            default: return Path.Combine(RootFolder, FolderList);
-        }
+        return Path.Combine(RootFolder, scope.ToString());
     }
 
     /// <summary>Presets of one scope (List covers every rule-set subfolder), newest-first by file write time.</summary>
@@ -122,7 +115,7 @@ public static class PresetRepository
 
     // ---- Condition list presets ----------------------------------------------------------
 
-    private static string CondFolder((bool Male, bool Adult) bucket) => Path.Combine(RootFolder, FolderList, FolderConditions, BucketFolderName(bucket));
+    private static string CondFolder((bool Male, bool Adult) bucket) => Path.Combine(RootFolder, PresetScope.List.ToString(), FolderConditions, BucketFolderName(bucket));
 
     // Folder names predate the tuple keys — same age×sex buckets as the settings themselves.
     private static string BucketFolderName((bool Male, bool Adult) bucket) => bucket switch
