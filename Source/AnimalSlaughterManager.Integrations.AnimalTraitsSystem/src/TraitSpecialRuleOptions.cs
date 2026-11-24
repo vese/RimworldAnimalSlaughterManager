@@ -11,7 +11,11 @@ namespace ASM;
 /// their colors and tooltips, the inheritability values, and the trait picker.</summary>
 public sealed class TraitSpecialRuleOptions : ISpecialRuleOptionsSource
 {
+    public TaggedString Name => "Animal Traits System";
+
     public bool Available => AnimalTraitsAccess.HasAvailableTraits;
+
+    public bool Owns(Def? target) => target is HediffDef def && AnimalTraitsAccess.IsAnimalTraitDef(def);
 
     public TaggedString MissingModNotice => ASMKeys.ATSNotDetected.Translate();
 

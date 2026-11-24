@@ -32,7 +32,10 @@ public class SpecialRulesListSection<T>(SpecialRuleSet<T> ruleSet, string titleK
         return height;
     }
 
-    private static ISpecialRuleOptionsSource? Options() => IntegrationServices.GetServices<ISpecialRuleOptionsSource>().FirstOrDefault();
+    private static IReadOnlyList<ISpecialRuleOptionsSource> AllOptions() => IntegrationServices.GetServices<ISpecialRuleOptionsSource>();
+
+    // The source the rule's target belongs to: it paints the row and owns the extra option.
+    private static ISpecialRuleOptionsSource? OwnerOf(SpecialRule rule) => AllOptions().FirstOrDefault(o => o.Owns(rule.target));
 
     private float DrawTitle(float x, float y, float width)
     {
@@ -64,25 +67,35 @@ public class SpecialRulesListSection<T>(SpecialRuleSet<T> ruleSet, string titleK
 
         var left = x;
         var height = UIConstants.ButtonHeight;
-        var options = Options();
+        var sources = AllOptions();
+        var available = sources.Where(o => o.Available).ToList();
 
         var addButtonText = ASMKeys.AddTrait.Translate();
         var addButtonWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(addButtonText).x + UIConstants.ButtonPaddingX);
         var addBtn = new Rect(left, y, addButtonWidth, height);
         left += addButtonWidth + UIConstants.GapX;
 
-        GUI.enabled = options is { Available: true };
+        GUI.enabled = available.Count > 0;
 
         if (Widgets.ButtonText(addBtn, addButtonText))
         {
-            options!.OpenPicker(picked => ruleSet.Add(picked));
+            // One source opens its picker right away; several first ask which one to add from.
+            if (available.Count == 1)
+            {
+                available[0].OpenPicker(picked => ruleSet.Add(picked));
+            }
+            else
+            {
+                Find.WindowStack.Add(new FloatMenu([.. available.Select(o =>
+                    new FloatMenuOption(o.Name, () => o.OpenPicker(picked => ruleSet.Add(picked))))]));
+            }
         }
 
         GUI.enabled = true;
 
-        if (options is { Available: false })
+        if (available.Count == 0 && sources.Count > 0)
         {
-            TooltipHandler.TipRegion(addBtn, options.MissingModNotice);
+            TooltipHandler.TipRegion(addBtn, string.Join("\n", sources.Select(o => o.MissingModNotice)));
         }
 
         var presetButtonText = ASMKeys.TraitListPresets.Translate();
@@ -150,7 +163,8 @@ public class SpecialRulesListSection<T>(SpecialRuleSet<T> ruleSet, string titleK
         var labelHeight = Text.LineHeight;
         var gripOffset = UIConstants.IconSize;
         var hasKeepCount = typeof(T) == typeof(KeepRule);
-        var hasExtra = Options() is { HasExtraOption: true };
+        var extraSources = AllOptions().Where(o => o.HasExtraOption).ToList();
+        var hasExtra = extraSources.Count > 0;
         var rightSideWidth = UIConstants.ButtonMinWidth + UIConstants.GapX + // keep
             UIConstants.ButtonMinWidth + UIConstants.GapX + // age
             UIConstants.ButtonMinWidth + UIConstants.GapX + // gender
@@ -176,7 +190,12 @@ public class SpecialRulesListSection<T>(SpecialRuleSet<T> ruleSet, string titleK
         if (hasExtra)
         {
             left += UIConstants.ButtonMinWidth + UIConstants.GapX;
-            Widgets.Label(new Rect(left, y, UIConstants.ButtonMinWidth, labelHeight), Options()!.ExtraOptionLabel);
+
+            // The caption names the option; with several different ones the column stays anonymous.
+            if (extraSources.Count == 1)
+            {
+                Widgets.Label(new Rect(left, y, UIConstants.ButtonMinWidth, labelHeight), extraSources[0].ExtraOptionLabel);
+            }
         }
 
         Text.WordWrap = wrap;
@@ -196,14 +215,14 @@ public class SpecialRulesListSection<T>(SpecialRuleSet<T> ruleSet, string titleK
             return;
         }
 
-        var options = Options();
+        var owner = OwnerOf(rule);
         var anchor = Text.Anchor;
         var left = row.x;
         var top = row.y;
 
         left += ReorderableList.DrawGrip(left, top, row.height);
 
-        var hasExtra = options is { HasExtraOption: true };
+        var hasExtra = AllOptions().Any(o => o.HasExtraOption);
         var right = row.xMax - (UIConstants.ButtonMinWidth + UIConstants.GapX +
             UIConstants.ButtonMinWidth + UIConstants.GapX +
             UIConstants.ButtonMinWidth + UIConstants.GapX +
@@ -214,8 +233,8 @@ public class SpecialRulesListSection<T>(SpecialRuleSet<T> ruleSet, string titleK
         var buttonHeight = UIConstants.ButtonHeight;
         top = row.y + (row.height - buttonHeight) / 2f;
 
-        left += SpecialRuleListButton.Draw(new Rect(left, top, targetButtonWidth, buttonHeight), rule, options,
-            () => options?.OpenPicker(picked => ruleSet.ReplaceAt(index, picked)));
+        left += SpecialRuleListButton.Draw(new Rect(left, top, targetButtonWidth, buttonHeight), rule, owner,
+            () => owner?.OpenPicker(picked => ruleSet.ReplaceAt(index, picked)));
 
         Text.Anchor = TextAnchor.MiddleCenter;
 
@@ -238,7 +257,11 @@ public class SpecialRulesListSection<T>(SpecialRuleSet<T> ruleSet, string titleK
 
         if (hasExtra)
         {
-            options!.GetExtraDropdown(rule).Draw(left, top);
+            if (owner is { HasExtraOption: true })
+            {
+                owner.GetExtraDropdown(rule).Draw(left, top);
+            }
+
             left += UIConstants.ButtonMinWidth + UIConstants.GapX;
         }
 
