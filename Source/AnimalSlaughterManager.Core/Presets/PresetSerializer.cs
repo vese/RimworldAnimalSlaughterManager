@@ -5,13 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
+using Verse;
 
 namespace ASM;
 
 /// <summary>
-/// The preset format layer, pure BCL: (de)serialization of the DTO carriers, root-element
-/// dispatch between the current and historical formats, and the condition-bucket mapping.
-/// No RimWorld types here — this is the unit-testable core under <see cref="PresetRepository"/>.
+/// The preset format layer: (de)serialization of the DTO carriers, root-element dispatch
+/// between the current and historical formats, and the versioning — the carrier is stamped
+/// with PresetFormat.CurrentVersion on save, versions above the current are refused, older
+/// ones migrate in ReadCarrier. RimWorld is touched only by the refusal warning.
 /// </summary>
 public static class PresetSerializer
 {
@@ -36,6 +38,8 @@ public static class PresetSerializer
 
     public static string SerializeToText(SlaughterPresetDto dto)
     {
+        dto.version = PresetFormat.CurrentVersion;
+
         var sb = new StringBuilder();
         using (var w = new StringWriter(sb))
         {
@@ -49,17 +53,38 @@ public static class PresetSerializer
     {
         var dto = Deserialize<SlaughterPresetDto>(text);
 
+        if (dto != null && dto.version > PresetFormat.CurrentVersion)
+        {
+            Log.Warning("ASM: skipped a preset saved by a newer mod version.");
+            return null;
+        }
+
         if (dto?.Kinds.Any(k => k.PrioRulesAdultMale?.Count > 0 || k.PrioRulesYoungMale?.Count > 0
             || k.PrioRulesAdultFemale?.Count > 0 || k.PrioRulesYoungFemale?.Count > 0) == true)
         {
-            return dto;
+            return Migrate(dto);
         }
 
 #pragma warning disable CS0618
         // An old carrier has no rule lists — convert it; a current prefs-only preset stays
         // as parsed.
-        return LegacyPresets.TryReadCarrier(text) ?? dto;
+        return LegacyPresets.TryReadCarrier(text) ?? (dto == null ? null : Migrate(dto));
 #pragma warning restore CS0618
+    }
+
+    /// <summary>Brings a carrier of an older version up to the current model. Version 0 is
+    /// the shape at the introduction of versioning — nothing to migrate yet; add a step per
+    /// bump of PresetFormat.CurrentVersion.</summary>
+    private static SlaughterPresetDto Migrate(SlaughterPresetDto dto)
+    {
+        switch (dto.version)
+        {
+            case 0:
+                break;
+        }
+
+        dto.version = PresetFormat.CurrentVersion;
+        return dto;
     }
 
     public static List<PriorityRuleDto>? ReadRulePreset(string? text)

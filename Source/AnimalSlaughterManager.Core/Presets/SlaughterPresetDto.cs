@@ -8,6 +8,11 @@ namespace ASM;
 [XmlRoot("SlaughterPreset")]
 public class SlaughterPresetDto
 {
+    /// <summary>The carrier format version (<c>PresetFormat.CurrentVersion</c>); 0 in files
+    /// saved before versioning. Stamped by PresetSerializer on save.</summary>
+    [XmlAttribute]
+    public int version;
+
     [XmlElement("Kind")]
     public List<KindDto> Kinds = new List<KindDto>();
 
