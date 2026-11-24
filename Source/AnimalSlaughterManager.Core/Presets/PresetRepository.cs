@@ -33,21 +33,20 @@ public static class PresetRepository
     private const string FolderKeep = "Keep";
     private const string FolderForceCull = "ForceCull";
     private const string FolderConditions = "Conditions";
-    /// <summary>File access of the preset subsystem; tests may substitute their own store.</summary>
-    internal static IPresetStore Store { get; set; } = new FilePresetStore();
 
-    internal static string RootFolder => Path.Combine(Application.persistentDataPath, RootFolderName);
+    /// <summary>File access of the preset subsystem; tests may substitute their own store.</summary>
+    private static readonly IPresetStore Store = new FilePresetStore();
+
+    private static string RootFolder => Path.Combine(Application.persistentDataPath, RootFolderName);
 
     // The scope folder is the enum value's own name (All/Kind/List).
-    private static string ScopeFolder(PresetScope scope)
-    {
-        return Path.Combine(RootFolder, scope.ToString());
-    }
+    private static string ScopeFolder(PresetScope scope) => Path.Combine(RootFolder, scope.ToString());
 
     /// <summary>Presets of one scope (List covers every rule-set subfolder), newest-first by file write time.</summary>
     public static List<PresetEntry> ListPresets(PresetScope scope)
     {
         var result = new List<PresetEntry>();
+
         void AddFolder(string dir)
         {
             foreach (var p in Store.GetFiles(dir))
@@ -61,26 +60,28 @@ public static class PresetRepository
                 });
             }
         }
+        
+        var scopeFolder = ScopeFolder(scope);
 
-        if (scope == PresetScope.List)
+        if (scope is PresetScope.List)
         {
-            AddFolder(Path.Combine(ScopeFolder(scope), FolderKeep));
-            AddFolder(Path.Combine(ScopeFolder(scope), FolderForceCull));
+            AddFolder(Path.Combine(scopeFolder, FolderKeep));
+            AddFolder(Path.Combine(scopeFolder, FolderForceCull));
         }
         else
         {
-            AddFolder(ScopeFolder(scope));
+            AddFolder(scopeFolder);
         }
 
-        if (scope == PresetScope.All)
+        if (scope is PresetScope.All)
         {
             // Presets saved before scopes existed live in the root folder.
 #pragma warning disable CS0618
-            LegacyPresets.AddRootPresets(result);
+            LegacyPresets.AddRootPresets(result, RootFolder);
 #pragma warning restore CS0618
         }
 
-        return result.OrderByDescending(e => e.date).ThenBy(e => e.name).ToList();
+        return [.. result.OrderByDescending(e => e.date).ThenBy(e => e.name)];
     }
 
     // ---- Export --------------------------------------------------------------------------

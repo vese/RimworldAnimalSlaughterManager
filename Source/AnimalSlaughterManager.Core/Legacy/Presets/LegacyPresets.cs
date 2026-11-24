@@ -17,16 +17,18 @@ namespace ASM;
 [Obsolete]
 public static class LegacyPresets
 {
+    private static readonly IPresetStore Store = new FilePresetStore();
+
     /// <summary>Adds root-folder presets to an All-scope listing (they have no scope folder).</summary>
-    public static void AddRootPresets(List<PresetEntry> result)
+    public static void AddRootPresets(List<PresetEntry> result, string rootFolder)
     {
-        foreach (var p in PresetRepository.Store.GetFiles(PresetRepository.RootFolder))
+        foreach (var p in Store.GetFiles(rootFolder))
         {
             result.Add(new PresetEntry
             {
                 name = Path.GetFileNameWithoutExtension(p),
                 path = p,
-                date = PresetRepository.Store.GetLastWriteTime(p),
+                date = Store.GetLastWriteTime(p),
                 scope = PresetScope.All
             });
         }
@@ -36,7 +38,7 @@ public static class LegacyPresets
     /// one (the current-format reader falls back here).</summary>
     public static List<BasePriorityRule>? TryReadConditions(PresetEntry entry)
     {
-        var conditions = ReadConditionPreset(PresetRepository.Store.ReadText(entry.path));
+        var conditions = ReadConditionPreset(Store.ReadText(entry.path));
 
         if (conditions == null)
         {

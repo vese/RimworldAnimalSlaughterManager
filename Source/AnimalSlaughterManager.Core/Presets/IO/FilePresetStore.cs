@@ -7,9 +7,8 @@ namespace ASM;
 /// <summary>The production store: the preset folders on disk.</summary>
 public sealed class FilePresetStore : IPresetStore
 {
-    public IEnumerable<string> GetFiles(string folder) =>
-        Directory.Exists(folder) ? Directory.GetFiles(folder, "*.xml", SearchOption.TopDirectoryOnly) : Array.Empty<string>();
-
+    public IEnumerable<string> GetFiles(string folder) => Directory.Exists(folder) ?
+        Directory.GetFiles(folder, "*.xml", SearchOption.TopDirectoryOnly) : [];
 
     public string? ReadText(string path) => File.Exists(path) ? File.ReadAllText(path) : null;
 
