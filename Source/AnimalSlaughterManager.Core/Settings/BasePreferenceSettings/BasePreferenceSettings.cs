@@ -84,7 +84,7 @@ public abstract class BasePreferenceSettings : IPresettable
             }
         }
 
-        SettingsChanges.Raise();
+        SettingsChangeTracker.Raise();
     }
 
     public void ExposeData()

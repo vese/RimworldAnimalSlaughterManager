@@ -20,7 +20,7 @@ public class TraitPriorityRule : BasePriorityRule, ICoversRule<TraitPriorityRule
         Current = inheritability,
         Values = Enum.GetValues(typeof(TraitInheritability)).Cast<TraitInheritability>(),
         LabelOf = value => value.Translate(),
-        SetValue = value => { inheritability = value; SettingsChanges.Raise(); }
+        SetValue = value => { inheritability = value; SettingsChangeTracker.Raise(); }
     };
 
     public override string Label => (has ? ASMKeys.CondHas : ASMKeys.CondMissing).Translate(DefName(trait));

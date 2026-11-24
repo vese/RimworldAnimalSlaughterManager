@@ -127,7 +127,7 @@ public class Dialog_PresetBrowser : Dialog_PresetBrowserBase
             case PresetScope.Kind:
             {
                 var kd = PresetRepository.ReadKindSlice(entry, kind);
-                SettingsChanges.Raise();
+                SettingsChangeTracker.Raise();
 
                 if (kd == null)
                 {
@@ -140,7 +140,7 @@ public class Dialog_PresetBrowser : Dialog_PresetBrowserBase
             default:
             {
                 bool ok = applyList!(entry);
-                SettingsChanges.Raise();
+                SettingsChangeTracker.Raise();
                 return ok;
             }
         }

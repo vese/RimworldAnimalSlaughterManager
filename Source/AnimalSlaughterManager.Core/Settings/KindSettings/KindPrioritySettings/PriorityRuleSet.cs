@@ -8,7 +8,7 @@ public class PriorityRuleSet
 {
     public List<BasePriorityRule> rules = [];
 
-    // The validation cache is tagged with the SettingsChanges version it was computed at: any
+    // The validation cache is tagged with the SettingsChangeTracker version it was computed at: any
     // Raise() (ours or any other settings') moves the version and the next read recomputes —
     // no per-owner subscriptions needed.
     private List<List<string>>? validationCache;
@@ -16,7 +16,7 @@ public class PriorityRuleSet
 
     public bool HasRules => rules != null && rules.Count > 0;
 
-    private bool CacheValid => validationCache != null && validationVersion == SettingsChanges.Version;
+    private bool CacheValid => validationCache != null && validationVersion == SettingsChangeTracker.Version;
 
     /// <summary>Number of rules with validation problems in this bucket.</summary>
     public int ProblemCount
@@ -46,13 +46,13 @@ public class PriorityRuleSet
     public void Add(BasePriorityRule rule)
     {
         rules.Add(rule);
-        SettingsChanges.Raise();
+        SettingsChangeTracker.Raise();
     }
 
     public void RemoveAt(int index)
     {
         rules.RemoveAt(index);
-        SettingsChanges.Raise();
+        SettingsChangeTracker.Raise();
     }
 
     public void ChangeVariant(int index)
@@ -63,7 +63,7 @@ public class PriorityRuleSet
     public void CopyAt(int index)
     {
         rules.Insert(index + 1, rules[index].Clone());
-        SettingsChanges.Raise();
+        SettingsChangeTracker.Raise();
     }
 
     public void Move(int from, int to)
@@ -85,20 +85,20 @@ public class PriorityRuleSet
             rules.Insert(to, rule);
         }
 
-        SettingsChanges.Raise();
+        SettingsChangeTracker.Raise();
     }
 
     public void ReplaceAll(List<BasePriorityRule> replacement)
     {
         rules.Clear();
         rules.AddRange(replacement);
-        SettingsChanges.Raise();
+        SettingsChangeTracker.Raise();
     }
 
     public void Clear()
     {
         rules.Clear();
-        SettingsChanges.Raise();
+        SettingsChangeTracker.Raise();
     }
 
     public void PostLoadInit()
@@ -125,7 +125,7 @@ public class PriorityRuleSet
     /// accumulate into trait sets (creating-or-updating its set, registering validators); then
     /// every registered validator runs once over the accumulated data. Rules are matched
     /// top-to-down, the first match wins — see SetClosureValidator and DuplicateValidator.
-    /// Cached against the SettingsChanges version — recomputed lazily after any settings change.
+    /// Cached against the SettingsChangeTracker version — recomputed lazily after any settings change.
     /// </summary>
     public List<List<string>> Validate()
     {
@@ -135,7 +135,7 @@ public class PriorityRuleSet
         }
 
         validationCache = ComputeValidation();
-        validationVersion = SettingsChanges.Version;
+        validationVersion = SettingsChangeTracker.Version;
         return validationCache;
     }
 

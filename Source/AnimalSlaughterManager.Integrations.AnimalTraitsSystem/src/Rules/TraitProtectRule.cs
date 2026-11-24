@@ -37,25 +37,25 @@ public class TraitProtectRule : ITraitRule, IExposable
     public void SetKeepCount(int value)
     {
         keepCount = value;
-        SettingsChanges.Raise();
+        SettingsChangeTracker.Raise();
     }
 
     public void SetAgeScope(AgeScope value)
     {
         ageScope = value;
-        SettingsChanges.Raise();
+        SettingsChangeTracker.Raise();
     }
 
     public void SetGenderScope(GenderScope value)
     {
         genderScope = value;
-        SettingsChanges.Raise();
+        SettingsChangeTracker.Raise();
     }
 
     public void SetInheritability(TraitInheritability value)
     {
         inheritMode = value;
-        SettingsChanges.Raise();
+        SettingsChangeTracker.Raise();
     }
 
     public string Label => trait is null ? Constants.MissingLabel : trait.LabelCap;

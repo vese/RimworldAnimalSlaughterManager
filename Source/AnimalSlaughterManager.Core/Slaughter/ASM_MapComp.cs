@@ -25,13 +25,13 @@ public class ASM_MapComp : MapComponent, ISettingsProvider
 
     public ASM_MapComp(Map map) : base(map)
     {
-        SettingsChanges.Changed += MarkDirty;
+        SettingsChangeTracker.Changed += MarkDirty;
     }
 
     public override void MapRemoved()
     {
         base.MapRemoved();
-        SettingsChanges.Changed -= MarkDirty;
+        SettingsChangeTracker.Changed -= MarkDirty;
     }
 
     public bool AnyCustomization => protectedPawnIDs.Count > 0 || kindSettings.Values.Any(k => k.Customized) || pregnantModes.Count > 0;

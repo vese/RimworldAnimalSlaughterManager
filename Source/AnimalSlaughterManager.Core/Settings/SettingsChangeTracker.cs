@@ -2,7 +2,7 @@ using System;
 
 namespace ASM;
 
-public static class SettingsChanges
+public static class SettingsChangeTracker
 {
     public static event Action? Changed;
 

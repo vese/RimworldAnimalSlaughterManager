@@ -13,7 +13,7 @@ public abstract class BasePriorityRule : IExposable
     public virtual bool HasNullDef { get; } = false;
 
     /// <summary>The rule's extra row dropdown: values, the current one and the setter. Null when
-    /// the rule has none. A setter must raise SettingsChanges after editing the rule (the global
+    /// the rule has none. A setter must raise SettingsChangeTracker after editing the rule (the global
     /// version invalidates every settings cache); the rule only supplies the data — rendering is
     /// the widget's business.</summary>
     public virtual IDropdownController? GetExtraDropdown() => null;
@@ -38,7 +38,7 @@ public abstract class BasePriorityRule : IExposable
     public void ChangeVariant()
     {
         ChangeVariantInternal();
-        SettingsChanges.Raise();
+        SettingsChangeTracker.Raise();
     }
 
     protected virtual void ChangeVariantInternal() { }
