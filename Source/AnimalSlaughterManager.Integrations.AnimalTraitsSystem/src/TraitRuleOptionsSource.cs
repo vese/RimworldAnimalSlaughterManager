@@ -7,7 +7,7 @@ namespace ASM;
 
 /// <summary>Adds the trait rule options to the add-priority-rule menu (concrete trait via the
 /// flag picker, positive/negative general rules).</summary>
-public sealed class TraitRuleOptions : IRuleOptionsSource
+public sealed class TraitRuleOptionsSource : IRuleOptionsSource
 {
     public void AddRuleOptions(List<FloatMenuOption> options, bool male, bool adult, ThingDef animalDef, Action<BasePriorityRule> addRule)
     {

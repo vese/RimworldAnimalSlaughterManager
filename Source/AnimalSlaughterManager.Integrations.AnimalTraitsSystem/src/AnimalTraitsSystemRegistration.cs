@@ -29,7 +29,7 @@ public static class AnimalTraitsSystemRegistration
             return;
         }
 
-        IntegrationServices.Add<IRuleOptionsSource>(new TraitRuleOptions());
+        IntegrationServices.Add<IRuleOptionsSource>(new TraitRuleOptionsSource());
         IntegrationServices.Add<IPawnSlaughterSignals>(new TraitSlaughterSignals());
         IntegrationServices.Add<IKeepReserveSource>(new TraitKeepReserve());
         IntegrationServices.Add<IKindForceCullSource>(new TraitKindForceCull());

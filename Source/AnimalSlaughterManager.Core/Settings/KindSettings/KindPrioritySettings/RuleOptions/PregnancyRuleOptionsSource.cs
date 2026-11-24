@@ -6,7 +6,7 @@ namespace ASM;
 
 /// <summary>Pregnancy rule options of the add-rule menu; only the adult-female bucket can
 /// hold them.</summary>
-public sealed class PregnancyRuleOptions : IRuleOptionsSource
+public sealed class PregnancyRuleOptionsSource : IRuleOptionsSource
 {
     public void AddRuleOptions(List<FloatMenuOption> options, bool male, bool adult, ThingDef animalDef, Action<BasePriorityRule> addRule)
     {

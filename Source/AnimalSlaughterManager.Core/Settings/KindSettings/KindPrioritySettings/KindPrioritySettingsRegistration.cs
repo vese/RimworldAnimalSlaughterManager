@@ -12,9 +12,9 @@ public static class KindPrioritySettingsRegistration
 {
     static KindPrioritySettingsRegistration()
     {
-        IntegrationServices.Add<IRuleOptionsSource>(new PregnancyRuleOptions());
-        IntegrationServices.Add<IRuleOptionsSource>(new BondRuleOptions());
-        IntegrationServices.Add<IRuleOptionsSource>(new DiseaseRuleOptions());
-        IntegrationServices.Add<IRuleOptionsSource>(new TrainingRuleOptions());
+        IntegrationServices.Add<IRuleOptionsSource>(new PregnancyRuleOptionsSource());
+        IntegrationServices.Add<IRuleOptionsSource>(new BondRuleOptionsSource());
+        IntegrationServices.Add<IRuleOptionsSource>(new DiseaseRuleOptionsSource());
+        IntegrationServices.Add<IRuleOptionsSource>(new TrainingRuleOptionsSource());
     }
 }

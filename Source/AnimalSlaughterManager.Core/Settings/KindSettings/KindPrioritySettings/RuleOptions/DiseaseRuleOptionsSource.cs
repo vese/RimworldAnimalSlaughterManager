@@ -8,7 +8,7 @@ namespace ASM;
 
 /// <summary>Disease rule options of the add-rule menu: a specific disease (submenu) and any
 /// disease at all.</summary>
-public sealed class DiseaseRuleOptions : IRuleOptionsSource
+public sealed class DiseaseRuleOptionsSource : IRuleOptionsSource
 {
     public void AddRuleOptions(List<FloatMenuOption> options, bool male, bool adult, ThingDef animalDef, Action<BasePriorityRule> addRule)
     {

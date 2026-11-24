@@ -5,7 +5,7 @@ using Verse;
 namespace ASM;
 
 /// <summary>Bond rule options of the add-rule menu.</summary>
-public sealed class BondRuleOptions : IRuleOptionsSource
+public sealed class BondRuleOptionsSource : IRuleOptionsSource
 {
     public void AddRuleOptions(List<FloatMenuOption> options, bool male, bool adult, ThingDef animalDef, Action<BasePriorityRule> addRule)
     {

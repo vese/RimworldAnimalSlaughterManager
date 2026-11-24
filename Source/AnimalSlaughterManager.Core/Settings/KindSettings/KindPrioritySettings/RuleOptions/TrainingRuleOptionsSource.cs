@@ -9,7 +9,7 @@ namespace ASM;
 
 /// <summary>Training rule options of the add-rule menu: a specific trainable (submenu,
 /// availability depends on the kind) and the general training-level rules.</summary>
-public sealed class TrainingRuleOptions : IRuleOptionsSource
+public sealed class TrainingRuleOptionsSource : IRuleOptionsSource
 {
     public void AddRuleOptions(List<FloatMenuOption> options, bool male, bool adult, ThingDef animalDef, Action<BasePriorityRule> addRule)
     {
