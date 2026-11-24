@@ -59,13 +59,11 @@ public static class PresetRepository
             }
         }
         
-        var scopeFolder = ScopeFolder(scope);
-
         if (scope is PresetScope.List)
         {
             // Every rule-list kind writes into its own PresetsFolder subfolder — list them as
             // they are on disk, except the core's own conditions tree (it has its own browser).
-            foreach (var sub in Store.GetFolders(scopeFolder).OrderBy(Path.GetFileName))
+            foreach (var sub in Store.GetFolders(ScopeFolder(scope)))
             {
                 if (Path.GetFileName(sub) != FolderConditions)
                 {
@@ -75,7 +73,7 @@ public static class PresetRepository
         }
         else
         {
-            AddFolder(scopeFolder);
+            AddFolder(ScopeFolder(scope));
         }
 
         if (scope is PresetScope.All)
