@@ -15,7 +15,8 @@ public class SpecialSettingsTab(KindSettings settings) : BaseSettingsTab
         [.. IntegrationServices.GetServices<ISpecialSettingsSectionSource>()
             .Where(source => source.Available)
             .Select(source => source.CreateSection(settings))
-            .Where(section => section != null)];
+            .Where(section => section != null)
+            .Select(x => x!)];
 
     // One notice per source whose mod is missing.
     private readonly List<TaggedString> missingModNotices =

@@ -11,5 +11,5 @@ public sealed class TraitSettingsSections : ISpecialSettingsSectionSource
     public TaggedString MissingModNotice => ASMKeys.ATSNotDetected.Translate();
 
     public ISpecialSettingsSection? CreateSection(KindSettings settings) =>
-        new TraitSettingsSection(KindTraitsSettings.Of(settings));
+        Available ? new TraitSettingsSection(KindTraitsSettings.Of(settings)) : null;
 }
