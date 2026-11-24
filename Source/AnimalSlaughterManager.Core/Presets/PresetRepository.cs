@@ -93,12 +93,12 @@ public static class PresetRepository
 
     public static void ExportAll(string name, ISettingsProvider comp)
     {
-        Serialize(name, ScopeFolder(PresetScope.All), SlaughterPresetDto.From(comp.AllKindSettings));
+        Serialize(name, ScopeFolder(PresetScope.All), PresetDto.From(comp.AllKindSettings));
     }
 
     public static void ExportKind(string name, ThingDef animalDef, KindSettings ks)
     {
-        var dto = new SlaughterPresetDto();
+        var dto = new PresetDto();
         dto.Kinds.Add(KindDto.Capture(animalDef, ks));
         Serialize(name, ScopeFolder(PresetScope.Kind), dto);
     }
@@ -114,7 +114,7 @@ public static class PresetRepository
         ruleSet.WriteXml(holder);
         full.IntegrationSections.AddRange(PresetSectionSerialization.Children(holder));
 
-        var dto = new SlaughterPresetDto();
+        var dto = new PresetDto();
         dto.Kinds.Add(full);
         Serialize(name, folder, dto);
     }
@@ -132,7 +132,7 @@ public static class PresetRepository
         _ => "YoungFemale",
     };
 
-    // A condition-list preset rides the common SlaughterPresetDto carrier: one KindDto with
+    // A condition-list preset rides the common PresetDto format: one KindDto with
     // the rules in the bucket's own list. The bucket is the preset's ORIGIN — on apply the
     // rules go to whatever bucket is targeted (cross-bucket import).
     public static void ExportConditions(string name, (bool Male, bool Adult) bucket, List<BasePriorityRule> rules)
@@ -141,13 +141,13 @@ public static class PresetRepository
         var kd = new KindDto { animal = "" };
         kd.GetBucketRules(bucket).AddRange(rules.Select(PriorityRuleDto.From));
 
-        var dto = new SlaughterPresetDto();
+        var dto = new PresetDto();
         dto.Kinds.Add(kd);
         Serialize(name, CondFolder(bucket), dto);
     }
 
     /// <summary>Condition rules of a List-scope preset, any of the three historical formats
-    /// (unified carrier / pre-unification RulePresetDto / legacy SlaughterCondition list).
+    /// (current format / pre-unification RulePresetDto / legacy SlaughterCondition list).
     /// Null when nothing readable.</summary>
     public static List<BasePriorityRule>? ApplyConditions(PresetEntry entry)
     {
@@ -155,8 +155,8 @@ public static class PresetRepository
 
         switch (PresetSerializer.RootElementOf(text))
         {
-            case PresetSerializer.CarrierRoot:
-                var kd = PresetSerializer.ReadCarrier(text)?.Kinds?.FirstOrDefault();
+            case PresetSerializer.PresetRoot:
+                var kd = PresetSerializer.ReadPreset(text)?.Kinds?.FirstOrDefault();
                 return kd == null ? null : RulesOf(kd.GetConditionRules());
             case PresetSerializer.RulePresetRoot:
                 return RulesOf(PresetSerializer.ReadRulePreset(text));
@@ -174,7 +174,7 @@ public static class PresetRepository
     /// is ignored — the slice applies to any target kind). Null when there is no such slice.</summary>
     public static List<BasePriorityRule>? ReadKindRules(PresetEntry entry, (bool Male, bool Adult) bucket)
     {
-        var kd = PresetSerializer.ReadCarrier(Store.ReadText(entry.path))?.Kinds?.FirstOrDefault();
+        var kd = PresetSerializer.ReadPreset(Store.ReadText(entry.path))?.Kinds?.FirstOrDefault();
 
         if (kd == null)
         {
@@ -207,10 +207,10 @@ public static class PresetRepository
 
     // ---- Reading for the callers to apply themselves -------------------------------------
 
-    /// <summary>The whole All-scope carrier; the caller applies it to the map itself.</summary>
-    public static SlaughterPresetDto? ReadCarrier(PresetEntry entry)
+    /// <summary>The whole All-scope preset; the caller applies it to the map itself.</summary>
+    public static PresetDto? ReadPreset(PresetEntry entry)
     {
-        return PresetSerializer.ReadCarrier(Store.ReadText(entry.path));
+        return PresetSerializer.ReadPreset(Store.ReadText(entry.path));
     }
 
     /// <summary>The preset's kind slice: Kind-scope presets carry the single kind, All-scope
@@ -233,7 +233,7 @@ public static class PresetRepository
 
     private static KindDto? RelevantKindDto(PresetEntry? entry, ThingDef targetDef)
     {
-        var dto = PresetSerializer.ReadCarrier(entry == null ? null : Store.ReadText(entry.path));
+        var dto = PresetSerializer.ReadPreset(entry == null ? null : Store.ReadText(entry.path));
         if (dto?.Kinds == null || dto.Kinds.Count == 0)
         {
             return null;
@@ -248,7 +248,7 @@ public static class PresetRepository
         return dto.Kinds[0];
     }
 
-    private static void Serialize(string name, string folder, SlaughterPresetDto dto)
+    private static void Serialize(string name, string folder, PresetDto dto)
     {
         Store.WriteText(Path.Combine(folder, Sanitize(name) + ".xml"), PresetSerializer.SerializeToText(dto));
     }

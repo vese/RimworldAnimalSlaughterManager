@@ -13,8 +13,8 @@ public enum PresetScope
 /// <summary>The preset format versions.</summary>
 public static class PresetFormat
 {
-    /// <summary>The carrier's version as saved today. Files written before versioning carry no
+    /// <summary>The preset format's version as saved today. Files written before versioning carry no
     /// attribute and read as 0 — the model shape at introduction. Bump this when the model
-    /// changes and add the matching migration step in PresetSerializer.ReadCarrier.</summary>
+    /// changes and add the matching migration step in PresetSerializer.ReadPreset.</summary>
     public const int CurrentVersion = 1;
 }

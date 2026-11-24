@@ -10,17 +10,17 @@ using Verse;
 namespace ASM;
 
 /// <summary>
-/// The preset format layer: (de)serialization of the DTO carriers, root-element dispatch
-/// between the current and historical formats, and the versioning — the carrier is stamped
+/// The preset format layer: (de)serialization of the preset DTOs, root-element dispatch
+/// between the current and historical formats, and the versioning — the preset is stamped
 /// with PresetFormat.CurrentVersion on save, versions above the current are refused, older
-/// ones migrate in ReadCarrier. RimWorld is touched only by the refusal warning.
+/// ones migrate in ReadPreset. RimWorld is touched only by the refusal warning.
 /// </summary>
 public static class PresetSerializer
 {
     // XmlSerializer generates a serialization assembly on first use — cache the instances.
-    /// <summary>Root element names pairing the [XmlRoot] values of the DTO carriers; the
+    /// <summary>Root element names pairing the [XmlRoot] values of the preset DTOs; the
     /// dispatcher matches them against a file root.</summary>
-    public const string CarrierRoot = "SlaughterPreset";
+    public const string PresetRoot = "SlaughterPreset";
     public const string RulePresetRoot = "RulePresetDto";
 
     private static readonly Dictionary<Type, XmlSerializer> serializers = new();
@@ -36,22 +36,22 @@ public static class PresetSerializer
         return ser;
     }
 
-    public static string SerializeToText(SlaughterPresetDto dto)
+    public static string SerializeToText(PresetDto dto)
     {
         dto.version = PresetFormat.CurrentVersion;
 
         var sb = new StringBuilder();
         using (var w = new StringWriter(sb))
         {
-            Serializer<SlaughterPresetDto>().Serialize(w, dto);
+            Serializer<PresetDto>().Serialize(w, dto);
         }
 
         return sb.ToString();
     }
 
-    public static SlaughterPresetDto? ReadCarrier(string? text)
+    public static PresetDto? ReadPreset(string? text)
     {
-        var dto = Deserialize<SlaughterPresetDto>(text);
+        var dto = Deserialize<PresetDto>(text);
 
         if (dto != null && dto.version > PresetFormat.CurrentVersion)
         {
@@ -66,16 +66,16 @@ public static class PresetSerializer
         }
 
 #pragma warning disable CS0618
-        // An old carrier has no rule lists — convert it; a current prefs-only preset stays
+        // An old format has no rule lists — convert it; a current prefs-only preset stays
         // as parsed.
-        return LegacyPresets.TryReadCarrier(text) ?? (dto == null ? null : Migrate(dto));
+        return LegacyPresets.TryReadPreset(text) ?? (dto == null ? null : Migrate(dto));
 #pragma warning restore CS0618
     }
 
-    /// <summary>Brings a carrier of an older version up to the current model. Version 0 is
+    /// <summary>Brings a preset of an older version up to the current model. Version 0 is
     /// the shape at the introduction of versioning — nothing to migrate yet; add a step per
     /// bump of PresetFormat.CurrentVersion.</summary>
-    private static SlaughterPresetDto Migrate(SlaughterPresetDto dto)
+    private static PresetDto Migrate(PresetDto dto)
     {
         switch (dto.version)
         {

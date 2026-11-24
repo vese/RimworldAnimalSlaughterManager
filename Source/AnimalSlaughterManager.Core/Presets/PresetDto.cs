@@ -6,9 +6,9 @@ using Verse;
 namespace ASM;
 
 [XmlRoot("SlaughterPreset")]
-public class SlaughterPresetDto
+public class PresetDto
 {
-    /// <summary>The carrier format version (<c>PresetFormat.CurrentVersion</c>); 0 in files
+    /// <summary>The preset format version (<c>PresetFormat.CurrentVersion</c>); 0 in files
     /// saved before versioning. Stamped by PresetSerializer on save.</summary>
     [XmlAttribute]
     public int version;
@@ -16,9 +16,9 @@ public class SlaughterPresetDto
     [XmlElement("Kind")]
     public List<KindDto> Kinds = new List<KindDto>();
 
-    public static SlaughterPresetDto From(IEnumerable<KeyValuePair<ThingDef, KindSettings>> kindSettings)
+    public static PresetDto From(IEnumerable<KeyValuePair<ThingDef, KindSettings>> kindSettings)
     {
-        var dto = new SlaughterPresetDto();
+        var dto = new PresetDto();
 
         foreach (var kv in kindSettings)
         {

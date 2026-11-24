@@ -113,7 +113,7 @@ public class Dialog_PresetBrowser : Dialog_PresetBrowserBase
         {
             case PresetScope.All:
             {
-                var dto = PresetRepository.ReadCarrier(entry);
+                var dto = PresetRepository.ReadPreset(entry);
 
                 if (dto == null)
                 {

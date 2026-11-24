@@ -10,7 +10,7 @@ namespace ASM;
 /// <summary>
 /// Everything the current preset code needs from the old formats, behind one seam: root-folder
 /// presets (saved before scopes existed), condition-list presets (before the priority-rule
-/// refactor) and old carriers. Delete this class together with the rest of the Legacy folder
+/// refactor) and old preset formats. Delete this class together with the rest of the Legacy folder
 /// when the save-compatibility horizon allows — the callers are PresetSerializer and
 /// PresetRepository only.
 /// </summary>
@@ -60,9 +60,9 @@ public static class LegacyPresets
         return rules;
     }
 
-    /// <summary>An old-format carrier converted into the current one; null when the text is not
-    /// an old carrier (no legacy condition lists anywhere).</summary>
-    public static SlaughterPresetDto? TryReadCarrier(string? text)
+    /// <summary>An old-format preset converted into the current one; null when the text is not
+    /// an old format (no legacy condition lists anywhere).</summary>
+    public static PresetDto? TryReadPreset(string? text)
     {
         if (text == null)
         {
@@ -72,7 +72,7 @@ public static class LegacyPresets
         try
         {
             using var reader = new StringReader(text);
-            var legacy = (LegacySlaughterPresetDto)PresetSerializer.Serializer<LegacySlaughterPresetDto>().Deserialize(reader);
+            var legacy = (LegacyPresetDto)PresetSerializer.Serializer<LegacyPresetDto>().Deserialize(reader);
 
             return legacy != null && legacy.HasConditions ? legacy.ToCurrent() : null;
         }

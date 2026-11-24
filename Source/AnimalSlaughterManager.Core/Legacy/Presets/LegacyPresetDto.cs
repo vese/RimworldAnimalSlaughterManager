@@ -8,21 +8,21 @@ using System.Xml.Serialization;
 
 namespace ASM;
 
-/// <summary>The carrier shape saved by older versions: condition lists instead of rule lists.
-/// Deserializes an old file and converts it into the current carrier; delete together with the
+/// <summary>The preset shape saved by older versions: condition lists instead of rule lists.
+/// Deserializes an old file and converts it into the current format; delete together with the
 /// rest of the Legacy folder when the save-compatibility horizon allows.</summary>
 [Obsolete]
 [XmlRoot("SlaughterPreset")]
-public class LegacySlaughterPresetDto
+public class LegacyPresetDto
 {
     [XmlElement("Kind")]
     public List<LegacyKindDto> Kinds = new List<LegacyKindDto>();
 
     /// <summary>The same preset in the current format: prefs and integration sections copied,
     /// condition lists converted into rule lists.</summary>
-    public SlaughterPresetDto ToCurrent()
+    public PresetDto ToCurrent()
     {
-        var dto = new SlaughterPresetDto();
+        var dto = new PresetDto();
 
         foreach (var k in Kinds)
         {
