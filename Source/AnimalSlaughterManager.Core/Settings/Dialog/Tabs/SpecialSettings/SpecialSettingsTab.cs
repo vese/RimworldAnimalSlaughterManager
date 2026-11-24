@@ -7,13 +7,21 @@ using Verse;
 namespace ASM;
 
 /// <summary>The shared "Special rules" tab: sections from every integration source, stacked
-/// vertically; sources with nothing to edit sink to the bottom as their notices.</summary>
+/// vertically; sources whose mod is missing contribute only their notices, drawn below.</summary>
 public class SpecialSettingsTab(KindSettings settings) : BaseSettingsTab
 {
-    private readonly List<(ISpecialSettingsSectionSource Source, ISpecialSettingsSection? Section)> sources =
+    // Ready sections in registration order; null results of CreateSection are dropped here.
+    private readonly List<ISpecialSettingsSection> sections =
         [.. IntegrationServices.GetServices<ISpecialSettingsSectionSource>()
-            .OrderByDescending(source => source.Available)
-            .Select(source => (source, source.Available ? source.CreateSection(settings) : null))];
+            .Where(source => source.Available)
+            .Select(source => source.CreateSection(settings))
+            .Where(section => section != null)];
+
+    // One notice per source whose mod is missing.
+    private readonly List<TaggedString> missingModNotices =
+        [.. IntegrationServices.GetServices<ISpecialSettingsSectionSource>()
+            .Where(source => !source.Available)
+            .Select(source => source.MissingModNotice)];
 
     public override TaggedString Name => ASMKeys.TabExceptions.Translate();
 
@@ -31,9 +39,9 @@ public class SpecialSettingsTab(KindSettings settings) : BaseSettingsTab
 
     private void ResetTabSettings(ISettingsProvider comp, ThingDef animalDef, KindSettings settings)
     {
-        foreach (var (_, section) in sources)
+        foreach (var section in sections)
         {
-            section?.Reset();
+            section.Reset();
         }
     }
 
@@ -45,7 +53,6 @@ public class SpecialSettingsTab(KindSettings settings) : BaseSettingsTab
     protected override void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings _settings, ISettingsProvider comp, ThingDef animalDef)
     {
         var top = y;
-        var sections = sources.Where(entry => entry.Section != null).ToList();
 
         if (sections.Count > 0)
         {
@@ -65,14 +72,14 @@ public class SpecialSettingsTab(KindSettings settings) : BaseSettingsTab
                     top += UIConstants.GapY;
                 }
 
-                top += sections[i].Section!.Draw(x, top, width, sectionHeight, comp, animalDef);
+                top += sections[i].Draw(x, top, width, sectionHeight, comp, animalDef);
             }
         }
 
-        foreach (var (source, _) in sources.Where(entry => entry.Section == null && !entry.Source.Available))
+        foreach (var notice in missingModNotices)
         {
             top += UIConstants.GapY;
-            top += DrawNotice(x, top, width, source.MissingModNotice);
+            top += DrawNotice(x, top, width, notice);
         }
     }
 
