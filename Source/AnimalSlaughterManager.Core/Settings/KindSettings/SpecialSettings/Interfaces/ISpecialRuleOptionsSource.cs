@@ -21,11 +21,16 @@ public interface ISpecialRuleOptionsSource
     /// the list the button belongs to.</summary>
     void OpenPicker(Action<List<Def>> picked);
 
-    /// <summary>Serialized names of the integration's inheritability values; empty when the
-    /// integration has no such option (the rules' dropdown is hidden... column kept).</summary>
-    IReadOnlyList<string> InheritModes { get; }
+    /// <summary>True when the rules carry the integration's own extra option, rendered as one
+    /// more dropdown column after age/gender (e.g. an inheritability filter).</summary>
+    bool HasExtraOption { get; }
 
-    TaggedString LabelOfInheritMode(string mode);
+    /// <summary>Column caption of the extra option for the header row.</summary>
+    TaggedString ExtraOptionLabel { get; }
+
+    /// <summary>The extra-option dropdown of a rule (reads/writes the rule's serialized
+    /// value); called only when HasExtraOption.</summary>
+    IDropdownController GetExtraDropdown(SpecialRule rule);
 
     Color ColorOf(Def target);
 

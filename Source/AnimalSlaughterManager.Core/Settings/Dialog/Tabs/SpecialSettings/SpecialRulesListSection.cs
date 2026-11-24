@@ -150,10 +150,11 @@ public class SpecialRulesListSection<T>(SpecialRuleSet<T> ruleSet, string titleK
         var labelHeight = Text.LineHeight;
         var gripOffset = UIConstants.IconSize;
         var hasKeepCount = typeof(T) == typeof(KeepRule);
+        var hasExtra = Options() is { HasExtraOption: true };
         var rightSideWidth = UIConstants.ButtonMinWidth + UIConstants.GapX + // keep
             UIConstants.ButtonMinWidth + UIConstants.GapX + // age
             UIConstants.ButtonMinWidth + UIConstants.GapX + // gender
-            UIConstants.ButtonMinWidth + UIConstants.GapX + // inheritability
+            (hasExtra ? UIConstants.ButtonMinWidth + UIConstants.GapX : 0f) + // the integration's own option
             UIConstants.IconSize + UIConstants.GapX + // copy
             UIConstants.IconSize; // remove
         var targetColumnWidth = width - gripOffset - rightSideWidth;
@@ -171,8 +172,12 @@ public class SpecialRulesListSection<T>(SpecialRuleSet<T> ruleSet, string titleK
         Widgets.Label(new Rect(left, y, UIConstants.ButtonMinWidth, labelHeight), ASMKeys.AgeScope.Translate());
         left += UIConstants.ButtonMinWidth + UIConstants.GapX;
         Widgets.Label(new Rect(left, y, UIConstants.ButtonMinWidth, labelHeight), ASMKeys.GenderScope.Translate());
-        left += UIConstants.ButtonMinWidth + UIConstants.GapX;
-        Widgets.Label(new Rect(left, y, UIConstants.ButtonMinWidth, labelHeight), ASMKeys.InheritMode.Translate());
+
+        if (hasExtra)
+        {
+            left += UIConstants.ButtonMinWidth + UIConstants.GapX;
+            Widgets.Label(new Rect(left, y, UIConstants.ButtonMinWidth, labelHeight), Options()!.ExtraOptionLabel);
+        }
 
         Text.WordWrap = wrap;
         Text.Anchor = anchor;
@@ -198,10 +203,11 @@ public class SpecialRulesListSection<T>(SpecialRuleSet<T> ruleSet, string titleK
 
         left += ReorderableList.DrawGrip(left, top, row.height);
 
+        var hasExtra = options is { HasExtraOption: true };
         var right = row.xMax - (UIConstants.ButtonMinWidth + UIConstants.GapX +
             UIConstants.ButtonMinWidth + UIConstants.GapX +
             UIConstants.ButtonMinWidth + UIConstants.GapX +
-            UIConstants.ButtonMinWidth + UIConstants.GapX +
+            (hasExtra ? UIConstants.ButtonMinWidth + UIConstants.GapX : 0f) +
             UIConstants.IconSize + UIConstants.GapX +
             UIConstants.IconSize);
         var targetButtonWidth = right - left;
@@ -229,7 +235,12 @@ public class SpecialRulesListSection<T>(SpecialRuleSet<T> ruleSet, string titleK
 
         left += Dropdown.DrawEnum(left, top, UIConstants.ButtonMinWidth, rule.ageScope, val => val.Translate(), val => rule.SetAgeScope(val)) + UIConstants.GapX;
         left += Dropdown.DrawEnum(left, top, UIConstants.ButtonMinWidth, rule.genderScope, val => val.Translate(), val => rule.SetGenderScope(val)) + UIConstants.GapX;
-        left += DrawInheritDropdown(left, top, rule, options) + UIConstants.GapX;
+
+        if (hasExtra)
+        {
+            options!.GetExtraDropdown(rule).Draw(left, top);
+            left += UIConstants.ButtonMinWidth + UIConstants.GapX;
+        }
 
         top = row.y + (row.height - UIConstants.IconSize) / 2f;
         var copyButtonRect = new Rect(left, top, UIConstants.IconSize, UIConstants.IconSize);
@@ -248,18 +259,5 @@ public class SpecialRulesListSection<T>(SpecialRuleSet<T> ruleSet, string titleK
         }
 
         Text.Anchor = anchor;
-    }
-
-    private static float DrawInheritDropdown(float x, float y, SpecialRule rule, ISpecialRuleOptionsSource? options)
-    {
-        if (options == null || options.InheritModes.Count == 0)
-        {
-            return UIConstants.ButtonMinWidth;
-        }
-
-        var current = options.InheritModes.Contains(rule.inheritMode) ? rule.inheritMode : options.InheritModes[0];
-
-        return Dropdown.Draw(x, y, UIConstants.ButtonMinWidth, options.LabelOfInheritMode(current),
-            Dropdown.Options(options.InheritModes.ToList(), options.LabelOfInheritMode, rule.SetInheritMode));
     }
 }
