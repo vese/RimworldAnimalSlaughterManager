@@ -4,11 +4,9 @@ using Verse;
 
 namespace ASM;
 
-/// <summary>The rule's target button: opens the picker, painted through the options source
-/// (label color and tooltip are the integration's).</summary>
-public static class SpecialRuleListButton
+public static class TraitRuleListButton
 {
-    public static float Draw(Rect rect, SpecialRule rule, ISpecialRuleOptionsSource? options, Action onClick)
+    public static float Draw(Rect rect, HediffDef trait, string label, Action onClick)
     {
         Widgets.DrawHighlightIfMouseover(rect);
 
@@ -17,7 +15,7 @@ public static class SpecialRuleListButton
             onClick();
         }
 
-        GUI.color = rule.target != null ? options?.ColorOf(rule.target) ?? Color.white : Color.white;
+        GUI.color = AnimalTraitsAccess.TraitColor(trait);
         Text.Anchor = TextAnchor.MiddleLeft;
         bool wrap = Text.WordWrap;
         Text.WordWrap = false;
@@ -27,16 +25,13 @@ public static class SpecialRuleListButton
             rect.y,
             rect.width - ReorderableList.RowPaddingX,
             rect.height);
-        Widgets.Label(labelRect, rule.Label);
+        Widgets.Label(labelRect, label);
 
         Text.WordWrap = wrap;
         GUI.color = Color.white;
         Text.Anchor = TextAnchor.UpperLeft;
 
-        if (rule.target != null)
-        {
-            TooltipHandler.TipRegion(rect, options?.TipOf(rule.target));
-        }
+        TooltipHandler.TipRegion(rect, AnimalTraitsAccess.TraitTip(trait));
 
         return rect.width;
     }

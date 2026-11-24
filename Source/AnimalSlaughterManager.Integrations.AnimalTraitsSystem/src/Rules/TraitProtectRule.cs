@@ -1,5 +1,3 @@
-using System;
-#pragma warning disable CS0612, CS0618
 using Verse;
 
 namespace ASM;
@@ -9,7 +7,6 @@ namespace ASM;
 /// optionally scoped by age, sex, and the trait's inheritability. When inheritable, the
 /// selection biases toward keeping a breeding pair.
 /// </summary>
-[Obsolete]
 public class TraitProtectRule : ITraitRule, IExposable
 {
     public HediffDef? trait;

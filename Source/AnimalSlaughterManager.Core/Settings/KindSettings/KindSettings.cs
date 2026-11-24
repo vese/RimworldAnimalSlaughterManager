@@ -21,9 +21,6 @@ public class KindSettings : IExposable, IPresettable
     public KindPreferenceSettings preferenceSettings;
     public KindPrioritySettings prioritySettings = new();
 
-    /// <summary>The kind's special rules (keep / force-cull), always shown on the special settings tab.</summary>
-    public KindSpecialRules specialRules = new();
-
     /// <summary>Integration-owned settings by provider key; the core never names their types.</summary>
     public Dictionary<string, IKindSettings> integrationsSettings = [];
 
@@ -38,7 +35,7 @@ public class KindSettings : IExposable, IPresettable
     }
 
     /// <summary>True when this kind deviates from vanilla behaviour and must be recomputed.</summary>
-    public bool Customized => preferenceSettings.Customized || prioritySettings.HasRules || specialRules.Customized || integrationsSettings.Values.Any(s => s.Customized);
+    public bool Customized => preferenceSettings.Customized || prioritySettings.HasRules || integrationsSettings.Values.Any(s => s.Customized);
 
     /// <summary>The integration's settings under the provider's key, created on first use.</summary>
     public T GetOrCreateIntegration<T>(IKindSettingsProvider provider)
@@ -46,8 +43,7 @@ public class KindSettings : IExposable, IPresettable
     {
         if (!integrationsSettings.TryGetValue(provider.Key, out var settings))
         {
-            settings = provider.Create(this);
-            (settings as IOwnedKindSettings)?.Attach(this);
+            settings = provider.Create();
             integrationsSettings[provider.Key] = settings;
         }
 
@@ -58,7 +54,6 @@ public class KindSettings : IExposable, IPresettable
     {
         preferenceSettings.Reset();
         prioritySettings.Reset();
-        specialRules.Reset();
 
         foreach (var settings in integrationsSettings.Values)
         {
@@ -70,7 +65,6 @@ public class KindSettings : IExposable, IPresettable
     {
         preferenceSettings.Reset(globals.preferenceSettings);
         prioritySettings.Reset();
-        specialRules.Reset();
 
         foreach (var settings in integrationsSettings.Values)
         {
@@ -91,8 +85,7 @@ public class KindSettings : IExposable, IPresettable
 
             if (Scribe.mode == LoadSaveMode.LoadingVars && pendingLegacy == null && providers.Count > 0)
             {
-                pendingLegacy = providers[0].Create(this);
-                (pendingLegacy as IOwnedKindSettings)?.Attach(this);
+                pendingLegacy = providers[0].Create();
                 pendingLegacy.ExposeData();
             }
             else if (Scribe.mode == LoadSaveMode.PostLoadInit && pendingLegacy != null && providers.Count > 0)
@@ -106,19 +99,10 @@ public class KindSettings : IExposable, IPresettable
         {
             Scribe_Collections.Look(ref integrationsSettings, "integrationData", LookMode.Value, LookMode.Deep);
             integrationsSettings ??= [];
-
-            if (Scribe.mode == LoadSaveMode.PostLoadInit)
-            {
-                foreach (var settings in integrationsSettings.Values)
-                {
-                    (settings as IOwnedKindSettings)?.Attach(this);
-                }
-            }
         }
 
         preferenceSettings.ExposeData();
         prioritySettings.ExposeData();
-        specialRules.ExposeData();
     }
 
     public void Save(KindDto dto)
@@ -127,8 +111,6 @@ public class KindSettings : IExposable, IPresettable
         prioritySettings.Save(dto);
 
         var holder = PresetSectionSerialization.Holder();
-
-        specialRules.WriteXml(holder);
 
         foreach (var settings in integrationsSettings.Values)
         {
@@ -147,19 +129,6 @@ public class KindSettings : IExposable, IPresettable
         prioritySettings.Load(dto);
 
         var kind = PresetSectionSerialization.Wrap(dto.IntegrationSections);
-        specialRules.ReadXml(kind);
-
-        // Sections of presets saved by integrations that have no entry yet (e.g. the legacy
-        // traits section applied to a kind that never had one) still find their reader.
-        foreach (var provider in IntegrationServices.GetServices<IKindSettingsProvider>())
-        {
-            if (kind[provider.Key] != null && !integrationsSettings.ContainsKey(provider.Key))
-            {
-                var created = provider.Create(this);
-                (created as IOwnedKindSettings)?.Attach(this);
-                integrationsSettings[provider.Key] = created;
-            }
-        }
 
         foreach (var settings in integrationsSettings.Values)
         {

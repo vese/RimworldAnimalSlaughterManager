@@ -25,10 +25,7 @@ public static class AnimalTraitsSystemRegistration
 #pragma warning restore CS0618
         // The section source too: with the mod disabled the shared special-rules tab shows
         // its notice instead of the section.
-#pragma warning disable CS0618
-        // The special-rules lists live in the core; ATS only supplies their targets.
-        IntegrationServices.Add<ISpecialRuleOptionsSource>(new TraitSpecialRuleOptions());
-#pragma warning restore CS0618
+        IntegrationServices.Add<ISpecialSettingsSectionSource>(new TraitSettingsSections());
 
         if (!ModsConfig.IsActive(PackageId))
         {
