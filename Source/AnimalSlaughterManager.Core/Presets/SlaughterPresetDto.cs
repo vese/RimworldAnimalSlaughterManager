@@ -28,7 +28,7 @@ public class SlaughterPresetDto
         return dto;
     }
 
-    public void ApplyTo(IKindSettingsHost host)
+    public void ApplyTo(ISettingsProvider host)
     {
         foreach (var kd in Kinds)
         {

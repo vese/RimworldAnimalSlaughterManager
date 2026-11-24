@@ -16,7 +16,7 @@
 | `IKeepReserveSource` | `Slaughter/Interfaces/` | резервация племенного ядра | кого держать от забоя (в пороге), подсчёт, наличие правил |
 | `IKindForceCullSource` | `Slaughter/Interfaces/` | принудительный забой по правилам | кого забивать вопреки лимитам |
 | `IExternalForceCullSource` | `Slaughter/Interfaces/` | принудительный забой чужим модом | решения чужого мода (его UI), гейт прохода |
-| `IKindIntegrationSettingsProvider` | `KindSettings/Interfaces/` | настройки вида | свои данные в сейве/пресетах — своим ключом и XML-секцией |
+| `IKindSettingsProvider` | `KindSettings/Interfaces/` | настройки вида | свои данные в сейве/пресетах — своим ключом и XML-секцией |
 | `ILegacyConditionConverter` | `Legacy/Interfaces/` | чтение легаси-сейвов/пресетов | условия чужой концепции — в правила интеграции |
 
 Ядро суммирует/объединяет ответы всех реализаций (сигналы складываются, опции меню и выборки
@@ -34,7 +34,7 @@
 3. Класс регистрации `[StaticConstructorOnStartup]`: при активном чужом моде —
    `IntegrationServices.Add<Контракт>(adapter)` для каждого контракта; провайдер настроек
    вида — безусловно (данные переживают выключение чужого мода).
-4. Свои настройки вида: `IKindIntegrationSettings` (`WriteXml/ReadXml` — своя секция пресета)
+4. Свои настройки вида: `IKindSettings` (`WriteXml/ReadXml` — своя секция пресета)
    + `PresetSectionSerialization` (сериализация секций).
 
 ## Правила расположения

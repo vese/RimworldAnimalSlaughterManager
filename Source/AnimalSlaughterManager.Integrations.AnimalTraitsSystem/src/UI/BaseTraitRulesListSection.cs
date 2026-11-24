@@ -16,7 +16,7 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
 
     protected abstract string PresetsTitleKey { get; }
 
-    public float Draw(float x, float y, float listWidth, float listHeight, ref ReorderableListState listState, IKindSettingsHost comp, ThingDef animalDef)
+    public float Draw(float x, float y, float listWidth, float listHeight, ref ReorderableListState listState, ISettingsProvider comp, ThingDef animalDef)
     {
         // Row 1: title.
         var left = x;
@@ -67,7 +67,7 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
         return height;
     }
 
-    private float DrawButtons(float x, float y, IKindSettingsHost comp, ThingDef animalDef)
+    private float DrawButtons(float x, float y, ISettingsProvider comp, ThingDef animalDef)
     {
         var color = GUI.color;
         var font = Text.Font;

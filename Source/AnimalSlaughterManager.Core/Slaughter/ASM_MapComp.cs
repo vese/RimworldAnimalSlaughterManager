@@ -11,7 +11,7 @@ namespace ASM;
 /// by <see cref="SlaughterListBuilder"/> and cached here, replacing the vanilla
 /// <see cref="AutoSlaughterManager.AnimalsToSlaughter"/> result when any customization is active.
 /// </summary>
-public class ASM_MapComp : MapComponent, IKindSettingsHost
+public class ASM_MapComp : MapComponent, ISettingsProvider
 {
     public Dictionary<ThingDef, KindSettings> kindSettings = new Dictionary<ThingDef, KindSettings>();
     public HashSet<int> protectedPawnIDs = new HashSet<int>();
@@ -57,9 +57,9 @@ public class ASM_MapComp : MapComponent, IKindSettingsHost
         return s;
     }
 
-    GlobalSettings IKindSettingsHost.GlobalSettings => globalSettings;
+    GlobalSettings ISettingsProvider.GlobalSettings => globalSettings;
 
-    IEnumerable<KeyValuePair<ThingDef, KindSettings>> IKindSettingsHost.AllKindSettings => kindSettings;
+    IEnumerable<KeyValuePair<ThingDef, KindSettings>> ISettingsProvider.AllKindSettings => kindSettings;
 
     public bool IsProtected(Pawn p) => p != null && protectedPawnIDs.Contains(p.thingIDNumber);
 

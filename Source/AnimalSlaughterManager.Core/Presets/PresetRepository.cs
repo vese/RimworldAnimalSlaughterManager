@@ -100,7 +100,7 @@ namespace ASM;
 
         // ---- Export --------------------------------------------------------------------------
 
-        public static void ExportAll(string name, IKindSettingsHost comp)
+        public static void ExportAll(string name, ISettingsProvider comp)
         {
             Serialize(name, ScopeFolder(PresetScope.All), SlaughterPresetDto.From(comp.AllKindSettings));
         }

@@ -11,7 +11,7 @@ namespace ASM;
 /// core stores them opaquely under the integration's key — in the save (inside the KindSettings
 /// node) and in kind presets (as the integration's own XML section) — and never names their type.
 /// </summary>
-public interface IKindIntegrationSettings : IExposable
+public interface IKindSettings : IExposable
 {
     /// <summary>True when the integration's settings deviate from the default and the kind
     /// must be treated as customized.</summary>

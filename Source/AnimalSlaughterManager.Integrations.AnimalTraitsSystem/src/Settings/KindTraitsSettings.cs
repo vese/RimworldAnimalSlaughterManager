@@ -130,19 +130,19 @@ public abstract class KindTraitsRuleSet<T> : IEditableTraitsRuleSet<T> where T :
 /// Stored opaquely by the core under <see cref="SettingsKey"/>; in kind presets they ride as the
 /// integration's own section (the legacy flat children of earlier versions also read).
 /// </summary>
-public class KindTraitsSettings : IKindIntegrationSettings
+public class KindTraitsSettings : IKindSettings
 {
     public const string SettingsKey = "atsTraits";
 
     /// <summary>The storage provider: registered unconditionally, so the settings survive ATS
     /// being disabled.</summary>
-    public sealed class Provider : IKindIntegrationSettingsProvider
+    public sealed class Provider : IKindSettingsProvider
     {
         public static readonly Provider Instance = new();
 
-        public string KindSettingsKey => SettingsKey;
+        public string Key => SettingsKey;
 
-        public IKindIntegrationSettings CreateKindSettings() => new KindTraitsSettings();
+        public IKindSettings Create() => new KindTraitsSettings();
     }
 
     /// <summary>The kind's ATS settings, created on first use.</summary>

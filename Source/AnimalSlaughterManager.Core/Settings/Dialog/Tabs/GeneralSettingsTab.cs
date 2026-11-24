@@ -25,7 +25,7 @@ public class GeneralSettingsTab : BaseSettingsTab
         preferenceSettingsPanel = new(settings.preferenceSettings, SetPreference, ASMKeys.GeneralTabHelp);
     }
 
-    protected override void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings _settings, IKindSettingsHost _comp, ThingDef _animalDef)
+    protected override void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings _settings, ISettingsProvider _comp, ThingDef _animalDef)
     {
         preferenceSettingsPanel.Draw(x, y, width);
     }

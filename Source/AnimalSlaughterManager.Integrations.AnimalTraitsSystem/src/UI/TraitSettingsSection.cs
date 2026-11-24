@@ -17,7 +17,7 @@ public sealed class TraitSettingsSection(KindTraitsSettings traitsSettings) : IS
 
     public void Reset() => traitsSettings.Reset();
 
-    public float Draw(float x, float y, float width, float height, IKindSettingsHost comp, ThingDef animalDef)
+    public float Draw(float x, float y, float width, float height, ISettingsProvider comp, ThingDef animalDef)
     {
         var listHeight = MathF.Max(UIConstants.ListMinHeight, (height - RuleSetsGapYSum) / RuleSetsCount);
         var top = y;

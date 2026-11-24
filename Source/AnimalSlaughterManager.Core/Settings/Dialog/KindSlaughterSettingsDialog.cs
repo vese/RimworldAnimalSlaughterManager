@@ -36,7 +36,7 @@ public class KindSlaughterSettingsDialog : Window
 
     public override Vector2 InitialSize => new(WindowWidth, Screen.height * 0.85f);
 
-    public KindSlaughterSettingsDialog(IKindSettingsHost comp, ThingDef animalDef)
+    public KindSlaughterSettingsDialog(ISettingsProvider comp, ThingDef animalDef)
     {
         this.comp = (ASM_MapComp)comp;
         this.animalDef = animalDef;

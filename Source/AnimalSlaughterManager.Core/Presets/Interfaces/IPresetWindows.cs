@@ -11,13 +11,13 @@ namespace ASM;
 public interface IPresetWindows
 {
     /// <summary>Opens the All-scope browser.</summary>
-    void OpenAllBrowser(IKindSettingsHost comp);
+    void OpenAllBrowser(ISettingsProvider comp);
 
     /// <summary>Opens the Kind-scope browser for one kind.</summary>
-    void OpenKindBrowser(IKindSettingsHost comp, ThingDef animalDef);
+    void OpenKindBrowser(ISettingsProvider comp, ThingDef animalDef);
 
     /// <summary>Opens the List-scope browser for a rule list (title, save/apply/hasData
     /// wired to that list).</summary>
-    void OpenListBrowser(IKindSettingsHost comp, ThingDef animalDef, string? title,
+    void OpenListBrowser(ISettingsProvider comp, ThingDef animalDef, string? title,
         Action<string> export, Func<PresetEntry, bool> apply, Func<bool> hasData);
 }

@@ -8,7 +8,7 @@ namespace ASM;
 /// map-wide settings, and the recompute request. Implemented by the main assembly's map
 /// component — the shared tab code stays free of main-assembly types.
 /// </summary>
-public interface IKindSettingsHost
+public interface ISettingsProvider
 {
     KindSettings GetSettings(ThingDef def);
 

@@ -17,19 +17,19 @@ public class SpecialSettingsTab(KindSettings settings) : BaseSettingsTab
 
     public override TaggedString Name => ASMKeys.TabExceptions.Translate();
 
-    protected override List<(string Text, Action<IKindSettingsHost, ThingDef, KindSettings> Action)> HeaderButtons =>
+    protected override List<(string Text, Action<ISettingsProvider, ThingDef, KindSettings> Action)> HeaderButtons =>
     [
         (ASMKeys.KindPresets, OpenKindPresetsWindow),
         (ASMKeys.ResetSpecialRules, ResetTabSettings),
         (ASMKeys.ResetKind, ResetAllSettings),
     ];
 
-    private static void OpenKindPresetsWindow(IKindSettingsHost comp, ThingDef animalDef, KindSettings _)
+    private static void OpenKindPresetsWindow(ISettingsProvider comp, ThingDef animalDef, KindSettings _)
     {
         IntegrationServices.GetServices<IPresetWindows>()[0].OpenKindBrowser(comp, animalDef);
     }
 
-    private void ResetTabSettings(IKindSettingsHost comp, ThingDef animalDef, KindSettings settings)
+    private void ResetTabSettings(ISettingsProvider comp, ThingDef animalDef, KindSettings settings)
     {
         foreach (var (_, section) in sources)
         {
@@ -37,12 +37,12 @@ public class SpecialSettingsTab(KindSettings settings) : BaseSettingsTab
         }
     }
 
-    private static void ResetAllSettings(IKindSettingsHost comp, ThingDef animalDef, KindSettings settings)
+    private static void ResetAllSettings(ISettingsProvider comp, ThingDef animalDef, KindSettings settings)
     {
         settings.Reset(comp.GlobalSettings);
     }
 
-    protected override void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings _settings, IKindSettingsHost comp, ThingDef animalDef)
+    protected override void DrawTabContent(float x, float y, float width, float contentHeight, KindSettings _settings, ISettingsProvider comp, ThingDef animalDef)
     {
         var top = y;
         var sections = sources.Where(entry => entry.Section != null).ToList();

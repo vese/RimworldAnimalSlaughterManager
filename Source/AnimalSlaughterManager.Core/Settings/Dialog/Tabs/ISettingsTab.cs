@@ -7,5 +7,5 @@ namespace ASM;
 public interface ISettingsTab
 {
     TaggedString Name { get; }
-    void DoWindowContents(Rect inRect, IKindSettingsHost comp, ThingDef animalDef, KindSettings settings, Action<float, float, float, float> drawTabBar);
+    void DoWindowContents(Rect inRect, ISettingsProvider comp, ThingDef animalDef, KindSettings settings, Action<float, float, float, float> drawTabBar);
 }

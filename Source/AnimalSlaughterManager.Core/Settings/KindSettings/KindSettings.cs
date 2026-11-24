@@ -16,13 +16,13 @@ public class KindSettings : IExposable, IPresettable
     private int dataVersion = currentDataVersion;
 
     // v1 bridge: the traits settings read from their legacy flat keys await their PostLoadInit move.
-    private IKindIntegrationSettings? pendingLegacy;
+    private IKindSettings? pendingLegacy;
 
     public KindPreferenceSettings preferenceSettings;
     public KindPrioritySettings prioritySettings = new();
 
     /// <summary>Integration-owned settings by provider key; the core never names their types.</summary>
-    public Dictionary<string, IKindIntegrationSettings> integrationsSettings = [];
+    public Dictionary<string, IKindSettings> integrationsSettings = [];
 
     public KindSettings()
     {
@@ -38,13 +38,13 @@ public class KindSettings : IExposable, IPresettable
     public bool Customized => preferenceSettings.Customized || prioritySettings.HasRules || integrationsSettings.Values.Any(s => s.Customized);
 
     /// <summary>The integration's settings under the provider's key, created on first use.</summary>
-    public T GetOrCreateIntegration<T>(IKindIntegrationSettingsProvider provider)
-        where T : class, IKindIntegrationSettings
+    public T GetOrCreateIntegration<T>(IKindSettingsProvider provider)
+        where T : class, IKindSettings
     {
-        if (!integrationsSettings.TryGetValue(provider.KindSettingsKey, out var settings))
+        if (!integrationsSettings.TryGetValue(provider.Key, out var settings))
         {
-            settings = provider.CreateKindSettings();
-            integrationsSettings[provider.KindSettingsKey] = settings;
+            settings = provider.Create();
+            integrationsSettings[provider.Key] = settings;
         }
 
         return (T)settings;
@@ -81,16 +81,16 @@ public class KindSettings : IExposable, IPresettable
             // v1: the integration settings were a flat field of this node. The (single, the
             // traits) provider's settings read the same keys right here, then move under their
             // own key at PostLoadInit; the save is rewritten in the current format.
-            var providers = IntegrationServices.GetServices<IKindIntegrationSettingsProvider>();
+            var providers = IntegrationServices.GetServices<IKindSettingsProvider>();
 
             if (Scribe.mode == LoadSaveMode.LoadingVars && pendingLegacy == null && providers.Count > 0)
             {
-                pendingLegacy = providers[0].CreateKindSettings();
+                pendingLegacy = providers[0].Create();
                 pendingLegacy.ExposeData();
             }
             else if (Scribe.mode == LoadSaveMode.PostLoadInit && pendingLegacy != null && providers.Count > 0)
             {
-                integrationsSettings[providers[0].KindSettingsKey] = pendingLegacy;
+                integrationsSettings[providers[0].Key] = pendingLegacy;
                 pendingLegacy = null;
                 dataVersion = currentDataVersion;
             }
