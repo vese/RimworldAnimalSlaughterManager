@@ -43,8 +43,6 @@ public class KindSettings : IExposable
     private static IKindSettingsProvider? ProviderOf(string key) =>
         IntegrationServices.GetServices<IKindSettingsProvider>().FirstOrDefault(p => p.Key == key);
 
-    private static IKindSettingsProvider? ProviderOf(KeyValuePair<string, ISpecialSettings> kv) => ProviderOf(kv.Key);
-
     public T GetOrCreateIntegration<T>(IKindSettingsProvider provider)
         where T : class, ISpecialSettings
     {
@@ -85,6 +83,7 @@ public class KindSettings : IExposable
 
         if (dataVersion == 1)
         {
+            // TODO: используется только первый провайдер, legacy стоит вынести в отдельный класс
             // v1: the integration settings were a flat field of this node. The (single, the
             // traits) provider's settings read the same keys right here, then move under their
             // own key at PostLoadInit; the save is rewritten in the current format.
