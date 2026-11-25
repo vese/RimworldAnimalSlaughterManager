@@ -9,9 +9,9 @@ namespace ASM;
 
 /// <summary>The rule-list (de)serialization of preset files: a rule becomes a RulePreset —
 /// the rule class name plus its own DTO serialized as the payload (XmlSerializer of the
-/// concrete type; no shared DTO base). Reading routes the payload by the name through
-/// IPriorityRuleTypes. The pre-discriminator attribute-form Rule elements are read as
-/// legacy.</summary>
+/// concrete type; no shared DTO base). Reading resolves the rule class by its name through
+/// reflection (a parameterless ctor) — vanilla and integration rules alike. The
+/// pre-discriminator attribute-form Rule elements are read as legacy.</summary>
 public static class PriorityRuleXml
 {
     // rule class name -> (factory, preset type), probed once through the rule factories.
@@ -167,18 +167,14 @@ public static class PriorityRuleXml
 
     private static Func<BasePriorityRule>? FactoryOf(string ruleName)
     {
-        foreach (var source in IntegrationServices.GetServices<IPriorityRuleTypes>())
+        var type = Type.GetType("ASM." + ruleName, false);
+
+        if (type == null || !typeof(BasePriorityRule).IsAssignableFrom(type) || type.GetConstructor(Type.EmptyTypes) == null)
         {
-            foreach (var (name, factory) in source.Types)
-            {
-                if (name == ruleName)
-                {
-                    return factory;
-                }
-            }
+            return null;
         }
 
-        return null;
+        return () => (BasePriorityRule)Activator.CreateInstance(type)!;
     }
 }
 

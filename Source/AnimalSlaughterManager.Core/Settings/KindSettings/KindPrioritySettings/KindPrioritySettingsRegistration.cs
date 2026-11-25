@@ -12,8 +12,6 @@ public static class KindPrioritySettingsRegistration
 {
     static KindPrioritySettingsRegistration()
     {
-        IntegrationServices.Add<IPriorityRuleTypes>(new VanillaPriorityRuleTypes());
-
         IntegrationServices.Add<IRuleOptionsSource>(new PregnancyRuleOptionsSource());
         IntegrationServices.Add<IRuleOptionsSource>(new BondRuleOptionsSource());
         IntegrationServices.Add<IRuleOptionsSource>(new DiseaseRuleOptionsSource());
