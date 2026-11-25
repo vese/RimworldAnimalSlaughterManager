@@ -14,7 +14,7 @@ namespace ASM;
 [XmlRoot("KindPreset")]
 public class KindPresetDto : IVersionedPresetDto
 {
-    [XmlAttribute("version")]
+    [XmlAttribute]
     public int Version { get; set; }
 
     [XmlAttribute]

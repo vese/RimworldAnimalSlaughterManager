@@ -13,7 +13,6 @@ public class ListPresetFile : IVersionedPresetDto, IXmlSerializable
 {
     private const string RulesElement = "Rules";
 
-    [XmlAttribute("version")]
     public int Version { get; set; }
 
     /// <summary>The priority rule presets; empty for a section-based list.</summary>
@@ -32,7 +31,7 @@ public class ListPresetFile : IVersionedPresetDto, IXmlSerializable
 
     public void WriteXml(XmlWriter writer)
     {
-        writer.WriteAttributeString("version", Version.ToString());
+        writer.WriteAttributeString(nameof(Version), Version.ToString());
 
         if (Rules.Count > 0)
         {
@@ -51,7 +50,7 @@ public class ListPresetFile : IVersionedPresetDto, IXmlSerializable
     public void ReadXml(XmlReader reader)
     {
         reader.MoveToContent();
-        Version = int.TryParse(reader.GetAttribute("version"), out var v) ? v : 0;
+        Version = int.TryParse(reader.GetAttribute(nameof(Version)), out var v) ? v : 0;
 
         var doc = new XmlDocument();
         var root = (XmlElement)doc.ReadNode(reader.ReadSubtree())!;

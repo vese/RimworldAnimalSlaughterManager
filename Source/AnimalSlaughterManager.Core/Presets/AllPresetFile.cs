@@ -8,7 +8,7 @@ namespace ASM;
 [XmlRoot("AllPreset")]
 public class AllPresetFile : IVersionedPresetDto
 {
-    [XmlAttribute("version")]
+    [XmlAttribute]
     public int Version { get; set; }
 
     [XmlElement("Kind")]

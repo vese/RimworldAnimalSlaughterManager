@@ -12,7 +12,6 @@ namespace ASM;
 [XmlRoot("KindPreset")]
 public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
 {
-    [XmlAttribute("version")]
     public int Version { get; set; }
 
     public KindPreset Kind = new();
@@ -21,7 +20,7 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
 
     public void WriteXml(XmlWriter writer)
     {
-        writer.WriteAttributeString("version", Version.ToString());
+        writer.WriteAttributeString(nameof(Version), Version.ToString());
         writer.WriteAttributeString(nameof(Kind.animal), Kind.animal);
         writer.WriteAttributeString(nameof(Kind.malePref), Kind.malePref);
         writer.WriteAttributeString(nameof(Kind.femalePref), Kind.femalePref);
@@ -42,7 +41,7 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
     public void ReadXml(XmlReader reader)
     {
         reader.MoveToContent();
-        Version = int.TryParse(reader.GetAttribute("version"), out var v) ? v : 0;
+        Version = int.TryParse(reader.GetAttribute(nameof(Version)), out var v) ? v : 0;
         Kind.animal = reader.GetAttribute(nameof(Kind.animal)) ?? "";
         Kind.malePref = reader.GetAttribute(nameof(Kind.malePref)) ?? "";
         Kind.femalePref = reader.GetAttribute(nameof(Kind.femalePref)) ?? "";
