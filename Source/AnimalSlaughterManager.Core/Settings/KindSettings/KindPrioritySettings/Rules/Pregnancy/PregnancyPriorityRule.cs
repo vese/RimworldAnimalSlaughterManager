@@ -16,11 +16,11 @@ public class PregnancyPriorityRule : BasePriorityRule
 
     public override string DtoName => "Pregnancy";
 
-    public override void WriteXml(System.Xml.XmlElement parent) => PresetSectionSerialization.Serialize(parent, new PregnancyRuleDto { has = has });
+    public override void WriteXml(System.Xml.XmlElement parent) => PresetSectionSerialization.Serialize(parent, new PregnancyRulePreset { has = has });
 
     public override void ReadXml(System.Xml.XmlElement element)
     {
-        var dto = PresetSectionSerialization.Deserialize<PregnancyRuleDto>(element);
+        var dto = PresetSectionSerialization.Deserialize<PregnancyRulePreset>(element);
 
         if (dto != null)
         {

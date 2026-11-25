@@ -16,11 +16,11 @@ public class BondPriorityRule : BasePriorityRule
 
     public override string DtoName => "Bond";
 
-    public override void WriteXml(System.Xml.XmlElement parent) => PresetSectionSerialization.Serialize(parent, new BondRuleDto { has = has });
+    public override void WriteXml(System.Xml.XmlElement parent) => PresetSectionSerialization.Serialize(parent, new BondRulePreset { has = has });
 
     public override void ReadXml(System.Xml.XmlElement element)
     {
-        var dto = PresetSectionSerialization.Deserialize<BondRuleDto>(element);
+        var dto = PresetSectionSerialization.Deserialize<BondRulePreset>(element);
 
         if (dto != null)
         {

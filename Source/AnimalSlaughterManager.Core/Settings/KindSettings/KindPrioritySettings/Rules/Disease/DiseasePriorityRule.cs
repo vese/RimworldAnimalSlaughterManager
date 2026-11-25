@@ -19,11 +19,11 @@ public class DiseasePriorityRule : BasePriorityRule, ICoversRule<DiseaseAnyPrior
 
     public override string DtoName => "Disease";
 
-    public override void WriteXml(System.Xml.XmlElement parent) => PresetSectionSerialization.Serialize(parent, new DiseaseRuleDto { has = has, disease = disease?.defName });
+    public override void WriteXml(System.Xml.XmlElement parent) => PresetSectionSerialization.Serialize(parent, new DiseaseRulePreset { has = has, disease = disease?.defName });
 
     public override void ReadXml(System.Xml.XmlElement element)
     {
-        var dto = PresetSectionSerialization.Deserialize<DiseaseRuleDto>(element);
+        var dto = PresetSectionSerialization.Deserialize<DiseaseRulePreset>(element);
 
         if (dto != null)
         {

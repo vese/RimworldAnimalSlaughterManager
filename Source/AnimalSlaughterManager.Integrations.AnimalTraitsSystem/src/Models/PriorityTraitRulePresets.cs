@@ -2,12 +2,13 @@ using System.Xml.Serialization;
 
 namespace ASM;
 
-// The DTOs of the ATS priority rules: the element name is the discriminator, the fields are
+// The preset models of the ATS priority rules: the element name is the discriminator, the fields are
 // the rule's own (defs as defName strings, enums as names).
 
 [XmlRoot("Trait")]
-public class PriorityTraitRuleDto
+public class PriorityTraitRulePreset : PriorityRulePreset
 {
+    public override string DtoName => "Trait";
     [XmlAttribute]
     public bool has = true;
     [XmlAttribute]
@@ -17,8 +18,9 @@ public class PriorityTraitRuleDto
 }
 
 [XmlRoot("TraitGeneral")]
-public class PriorityTraitGeneralRuleDto
+public class PriorityTraitGeneralRulePreset : PriorityRulePreset
 {
+    public override string DtoName => "TraitGeneral";
     [XmlAttribute]
     public bool has = true;
     [XmlAttribute]

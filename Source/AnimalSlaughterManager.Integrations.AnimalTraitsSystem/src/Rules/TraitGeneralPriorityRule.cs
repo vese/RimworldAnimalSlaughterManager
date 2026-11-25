@@ -43,7 +43,7 @@ public class TraitGeneralPriorityRule : BasePriorityRule, ICoversRule<TraitGener
 
     public override string DtoName => "TraitGeneral";
 
-    public override void WriteXml(System.Xml.XmlElement parent) => PresetSectionSerialization.Serialize(parent, new PriorityTraitGeneralRuleDto
+    public override void WriteXml(System.Xml.XmlElement parent) => PresetSectionSerialization.Serialize(parent, new PriorityTraitGeneralRulePreset
     {
         has = has,
         type = type.ToString(),
@@ -52,7 +52,7 @@ public class TraitGeneralPriorityRule : BasePriorityRule, ICoversRule<TraitGener
 
     public override void ReadXml(System.Xml.XmlElement element)
     {
-        var dto = PresetSectionSerialization.Deserialize<PriorityTraitGeneralRuleDto>(element);
+        var dto = PresetSectionSerialization.Deserialize<PriorityTraitGeneralRulePreset>(element);
 
         if (dto == null)
         {
