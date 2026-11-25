@@ -152,7 +152,7 @@ public static class PresetRepository
         if (entry.scope == PresetScope.All)
         {
             // Find the slice for the target kind; if absent, nothing applies.
-            return new KindPresetFile { Kind = kinds.FirstOrDefault(k => k.Animal == targetDef.defName) };
+            return new KindPresetFile { Kind = kinds.FirstOrDefault(k => k.AnimalDefName == targetDef.defName) };
         }
 
         // Kind- and List-scope presets store a single kind whose defName is the SOURCE kind —

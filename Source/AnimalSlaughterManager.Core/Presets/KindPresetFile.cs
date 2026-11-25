@@ -28,7 +28,7 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
     public void WriteXml(XmlWriter writer)
     {
         writer.WriteAttributeString(nameof(Version), Version.ToString());
-        writer.WriteAttributeString(nameof(KindPreset.Animal), Kind.Animal);
+        writer.WriteAttributeString(nameof(KindPreset.AnimalDefName), Kind.AnimalDefName);
         writer.WriteAttributeString(nameof(PreferenceSettingsPreset.MalePref), Kind.Preferences.MalePref.ToString());
         writer.WriteAttributeString(nameof(PreferenceSettingsPreset.FemalePref), Kind.Preferences.FemalePref.ToString());
         writer.WriteAttributeString(nameof(PreferenceSettingsPreset.MaleYoungPref), Kind.Preferences.MaleYoungPref.ToString());
@@ -56,7 +56,7 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
     {
         reader.MoveToContent();
         Version = int.TryParse(reader.GetAttribute(nameof(Version)), out var v) ? v : 0;
-        Kind.Animal = reader.GetAttribute(nameof(KindPreset.Animal)) ?? "";
+        Kind.AnimalDefName = reader.GetAttribute(nameof(KindPreset.AnimalDefName)) ?? null!;
         Kind.Preferences = new PreferenceSettingsPreset
         {
             MalePref = KindPresetFileParsing.ParsePref(reader.GetAttribute(nameof(PreferenceSettingsPreset.MalePref))),
@@ -91,7 +91,7 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
         {
             Kind = new KindPreset
             {
-                Animal = v1.animal,
+                AnimalDefName = v1.animal,
                 Preferences = new PreferenceSettingsPreset
                 {
                     MalePref = KindPresetFileParsing.ParsePref(v1.malePref),

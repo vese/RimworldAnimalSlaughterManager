@@ -9,7 +9,7 @@ namespace ASM;
 public class KindPreset
 {
     /// <summary>The kind's defName.</summary>
-    public string Animal { get; set; } = "";
+    public string AnimalDefName { get; set; } = null!;
 
     public PreferenceSettingsPreset Preferences { get; set; } = new();
     public PrioritySettingsPreset Priorities { get; set; } = new();

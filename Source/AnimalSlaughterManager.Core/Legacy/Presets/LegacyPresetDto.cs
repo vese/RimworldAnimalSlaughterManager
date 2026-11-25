@@ -29,7 +29,7 @@ public class LegacyPresetDto
         {
             var kd = new KindPreset
             {
-                Animal = k.animal,
+                AnimalDefName = k.animal,
                 Preferences = new PreferenceSettingsPreset
                 {
                     MalePref = KindPresetFileParsing.ParsePref(k.malePref),

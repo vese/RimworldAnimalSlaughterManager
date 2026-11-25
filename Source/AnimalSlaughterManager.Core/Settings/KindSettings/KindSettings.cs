@@ -108,7 +108,7 @@ public class KindSettings : IExposable
     /// <summary>The kind's slice of a preset.</summary>
     public KindPreset ToPreset(ThingDef def) => new()
     {
-        Animal = def.defName,
+        AnimalDefName = def.defName,
         Preferences = preferenceSettings.ToPreset(),
         Priorities = prioritySettings.ToPreset(),
         Integrations = new Dictionary<string, IKindSettings>(integrationsSettings)
