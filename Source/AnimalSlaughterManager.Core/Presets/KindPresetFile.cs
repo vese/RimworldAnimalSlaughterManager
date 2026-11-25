@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Schema;
@@ -27,11 +28,11 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
     public void WriteXml(XmlWriter writer)
     {
         writer.WriteAttributeString(nameof(Version), Version.ToString());
-        writer.WriteAttributeString(nameof(Kind.animal), Kind.animal);
-        writer.WriteAttributeString(nameof(Kind.malePref), Kind.malePref);
-        writer.WriteAttributeString(nameof(Kind.femalePref), Kind.femalePref);
-        writer.WriteAttributeString(nameof(Kind.maleYoungPref), Kind.maleYoungPref);
-        writer.WriteAttributeString(nameof(Kind.femaleYoungPref), Kind.femaleYoungPref);
+        writer.WriteAttributeString(nameof(KindPreset.Animal), Kind.Animal);
+        writer.WriteAttributeString(nameof(KindPreset.MalePref), Kind.MalePref.ToString());
+        writer.WriteAttributeString(nameof(KindPreset.FemalePref), Kind.FemalePref.ToString());
+        writer.WriteAttributeString(nameof(KindPreset.MaleYoungPref), Kind.MaleYoungPref.ToString());
+        writer.WriteAttributeString(nameof(KindPreset.FemaleYoungPref), Kind.FemaleYoungPref.ToString());
 
         KindPresetFileSerialization.SerializeBucket(writer, BucketAdultMale, Kind.PrioRulesAdultMale);
         KindPresetFileSerialization.SerializeBucket(writer, BucketYoungMale, Kind.PrioRulesYoungMale);
@@ -55,11 +56,11 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
     {
         reader.MoveToContent();
         Version = int.TryParse(reader.GetAttribute(nameof(Version)), out var v) ? v : 0;
-        Kind.animal = reader.GetAttribute(nameof(Kind.animal)) ?? "";
-        Kind.malePref = reader.GetAttribute(nameof(Kind.malePref)) ?? "";
-        Kind.femalePref = reader.GetAttribute(nameof(Kind.femalePref)) ?? "";
-        Kind.maleYoungPref = reader.GetAttribute(nameof(Kind.maleYoungPref)) ?? "";
-        Kind.femaleYoungPref = reader.GetAttribute(nameof(Kind.femaleYoungPref)) ?? "";
+        Kind.Animal = reader.GetAttribute(nameof(KindPreset.Animal)) ?? "";
+        Enum.TryParse(reader.GetAttribute(nameof(KindPreset.MalePref)), out SlaughterPreference malePref); Kind.MalePref = malePref;
+        Enum.TryParse(reader.GetAttribute(nameof(KindPreset.FemalePref)), out SlaughterPreference femalePref); Kind.FemalePref = femalePref;
+        Enum.TryParse(reader.GetAttribute(nameof(KindPreset.MaleYoungPref)), out SlaughterPreference maleYoungPref); Kind.MaleYoungPref = maleYoungPref;
+        Enum.TryParse(reader.GetAttribute(nameof(KindPreset.FemaleYoungPref)), out SlaughterPreference femaleYoungPref); Kind.FemaleYoungPref = femaleYoungPref;
 
         var doc = new XmlDocument();
         var root = (XmlElement)doc.ReadNode(reader.ReadSubtree())!;
@@ -84,11 +85,11 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
         {
             Kind = new KindPreset
             {
-                animal = v1.animal,
-                malePref = v1.malePref,
-                femalePref = v1.femalePref,
-                maleYoungPref = v1.maleYoungPref,
-                femaleYoungPref = v1.femaleYoungPref
+                Animal = v1.animal,
+                MalePref = KindPresetFileParsing.ParsePref(v1.malePref),
+                FemalePref = KindPresetFileParsing.ParsePref(v1.femalePref),
+                MaleYoungPref = KindPresetFileParsing.ParsePref(v1.maleYoungPref),
+                FemaleYoungPref = KindPresetFileParsing.ParsePref(v1.femaleYoungPref)
             }
         };
 
@@ -162,4 +163,11 @@ public static class KindPresetFileSections
 
         return [.. PresetSectionSerialization.Children(holder)];
     }
+}
+
+public static class KindPresetFileParsing
+{
+    /// <summary>A pref attribute of the v1 unified slice; the default when missing.</summary>
+    public static SlaughterPreference ParsePref(string? value) =>
+        Enum.TryParse(value, out SlaughterPreference parsed) ? parsed : SlaughterPreference.OldestFirst;
 }

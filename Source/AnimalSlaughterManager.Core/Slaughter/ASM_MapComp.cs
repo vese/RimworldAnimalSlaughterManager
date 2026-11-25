@@ -82,7 +82,7 @@ public class ASM_MapComp : MapComponent, ISettingsProvider
     {
         foreach (var file in dto.Kinds)
         {
-            var def = DefDatabase<ThingDef>.GetNamed(file.Kind.animal, false);
+            var def = DefDatabase<ThingDef>.GetNamed(file.Kind.Animal, false);
 
             if (def == null)
             {

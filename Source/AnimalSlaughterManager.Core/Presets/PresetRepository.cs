@@ -126,9 +126,9 @@ public static class PresetRepository
             return PresetSerializer.DeserializePreset<AllPresetFile>(text);
         }
 
-        var v1 = PresetSerializer.ReadPreset(text);
+        var v1 = PresetSerializer.ReadV1Kinds(text);
 
-        return v1 == null ? null : new AllPresetFile { Kinds = [.. v1.Kinds.Select(KindPresetFile.FromV1)] };
+        return v1 == null ? null : new AllPresetFile { Kinds = [.. v1.Select(k => new KindPresetFile { Kind = k })] };
     }
 
     /// <summary>The preset's kind slice: Kind-scope presets carry the single kind, All-scope
@@ -142,9 +142,9 @@ public static class PresetRepository
             return PresetSerializer.DeserializePreset<KindPresetFile>(text);
         }
 
-        var dto = PresetSerializer.ReadPreset(text);
+        var kinds = PresetSerializer.ReadV1Kinds(text);
 
-        if (dto?.Kinds == null || dto.Kinds.Count == 0)
+        if (kinds == null || kinds.Count == 0)
         {
             return null;
         }
@@ -152,12 +152,12 @@ public static class PresetRepository
         if (entry.scope == PresetScope.All)
         {
             // Find the slice for the target kind; if absent, nothing applies.
-            return KindPresetFile.FromV1(dto.Kinds.FirstOrDefault(k => k.animal == targetDef.defName));
+            return new KindPresetFile { Kind = kinds.FirstOrDefault(k => k.Animal == targetDef.defName) };
         }
 
         // Kind- and List-scope presets store a single kind whose defName is the SOURCE kind —
         // on apply we ignore it and use the list/settings for the TARGET kind.
-        return KindPresetFile.FromV1(dto.Kinds[0]);
+        return new KindPresetFile { Kind = kinds[0] };
     }
 
     /// <summary>A rule list of a List-scope preset, or the list slice of a Kind/All preset
@@ -206,22 +206,18 @@ public static class PresetRepository
                 : ListPresetFile.OfSections(KindPresetFileSections.SectionsOf(file));
         }
 
-        var kd = PresetSerializer.ReadPreset(text)?.Kinds?.FirstOrDefault();
+        var kd = PresetSerializer.ReadV1Kinds(text)?.FirstOrDefault();
 
         if (kd == null)
         {
             return null;
         }
 
-        var bucket = new[] { kd.PrioRulesAdultMale?.FirstOrDefault(), kd.PrioRulesYoungMale?.FirstOrDefault(), kd.PrioRulesAdultFemale?.FirstOrDefault(), kd.PrioRulesYoungFemale?.FirstOrDefault() }
-            .FirstOrDefault(el => el?.HasChildNodes == true);
+        var kdTyped = new[] { kd.PrioRulesAdultMale, kd.PrioRulesYoungMale, kd.PrioRulesAdultFemale, kd.PrioRulesYoungFemale }
+            .FirstOrDefault(rules => rules.Count > 0);
 
-        if (bucket != null)
-        {
-            return new ListPresetFile { Rules = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(bucket)) };
-        }
-
-        return kd.IntegrationSections.Count > 0 ? ListPresetFile.OfSections(kd.IntegrationSections) : null;
+        return kdTyped != null ? new ListPresetFile { Rules = kdTyped }
+            : kd.Integrations.Count > 0 ? ListPresetFile.OfSections(KindPresetFileSections.SectionsOf(new KindPresetFile { Kind = kd })) : null;
     }
 
 #pragma warning disable CS0618

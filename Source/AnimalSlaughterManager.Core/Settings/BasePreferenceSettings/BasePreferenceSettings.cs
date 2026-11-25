@@ -97,17 +97,17 @@ public abstract class BasePreferenceSettings : IPresettable
 
     public void Save(KindPreset dto)
     {
-        dto.malePref = malePref.ToString();
-        dto.femalePref = femalePref.ToString();
-        dto.maleYoungPref = maleYoungPref.ToString();
-        dto.femaleYoungPref = femaleYoungPref.ToString();
+        dto.MalePref = malePref;
+        dto.FemalePref = femalePref;
+        dto.MaleYoungPref = maleYoungPref;
+        dto.FemaleYoungPref = femaleYoungPref;
     }
 
     public void Load(KindPreset dto)
     {
-        Enum.TryParse(dto.malePref, out malePref);
-        Enum.TryParse(dto.femalePref, out femalePref);
-        Enum.TryParse(dto.maleYoungPref, out maleYoungPref);
-        Enum.TryParse(dto.femaleYoungPref, out femaleYoungPref);
+        malePref = dto.MalePref;
+        femalePref = dto.FemalePref;
+        maleYoungPref = dto.MaleYoungPref;
+        femaleYoungPref = dto.FemaleYoungPref;
     }
 }

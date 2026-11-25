@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
@@ -59,6 +61,8 @@ public static class PresetSerializer
         return dto?.rules?.ToList();
 #pragma warning restore CS0618
     }
+
+    private static KindPreset? V1ToCurrent(KindPresetDto v1) => KindPresetFile.FromV1(v1)?.Kind;
 
     private static T? Deserialize<T>(string? text) where T : class
     {
@@ -138,22 +142,22 @@ public static class PresetSerializer
         return dto;
     }
 
-    /// <summary>Reads the version-1 preset (the unified format of main); null when the text is
-    /// not one. An old format without rule lists falls through to the legacy reader.</summary>
-    public static PresetDto? ReadPreset(string? text)
+    /// <summary>The kind slices of a version-1 or older preset: the v1 carrier's own, or the
+    /// old format's converted; null when the text is not a preset.</summary>
+    public static List<KindPreset>? ReadV1Kinds(string? text)
     {
         var dto = Deserialize<PresetDto>(text);
 
         if (dto?.Kinds.Any(k => k.PrioRulesAdultMale?.Length > 0 || k.PrioRulesYoungMale?.Length > 0
             || k.PrioRulesAdultFemale?.Length > 0 || k.PrioRulesYoungFemale?.Length > 0) == true)
         {
-            return dto;
+            return [.. dto.Kinds.Select(V1ToCurrent).Where(k => k != null)];
         }
 
 #pragma warning disable CS0618
-        // An old format has no rule lists — convert it; a current prefs-only preset stays
-        // as parsed.
-        return LegacyPresets.TryReadPreset(text) ?? dto;
+        // An old format has no rule lists — its kinds come converted; a current prefs-only
+        // v1 preset stays as parsed.
+        return LegacyPresets.TryReadPreset(text) ?? (dto == null ? null : [.. dto.Kinds.Select(V1ToCurrent).Where(k => k != null)]);
 #pragma warning restore CS0618
     }
 }

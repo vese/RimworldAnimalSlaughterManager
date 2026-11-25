@@ -62,7 +62,7 @@ public static class LegacyPresets
 
     /// <summary>An old-format preset converted into the current one; null when the text is not
     /// an old format (no legacy condition lists anywhere).</summary>
-    public static PresetDto? TryReadPreset(string? text)
+    public static List<KindPreset>? TryReadPreset(string? text)
     {
         if (text == null)
         {

@@ -7,20 +7,22 @@ namespace ASM;
 /// by KindSettings.ToPreset/FromPreset; the file form is Presets' business.</summary>
 public class KindPreset
 {
-    public string animal = "";
-    public string malePref = "";
-    public string femalePref = "";
-    public string maleYoungPref = "";
-    public string femaleYoungPref = "";
+    /// <summary>The kind's defName.</summary>
+    public string Animal { get; set; } = "";
 
-    public List<BasePriorityRulePreset> PrioRulesAdultMale = [];
-    public List<BasePriorityRulePreset> PrioRulesYoungMale = [];
-    public List<BasePriorityRulePreset> PrioRulesAdultFemale = [];
-    public List<BasePriorityRulePreset> PrioRulesYoungFemale = [];
+    public SlaughterPreference MalePref { get; set; }
+    public SlaughterPreference FemalePref { get; set; }
+    public SlaughterPreference MaleYoungPref { get; set; }
+    public SlaughterPreference FemaleYoungPref { get; set; }
+
+    public List<BasePriorityRulePreset> PrioRulesAdultMale { get; set; } = [];
+    public List<BasePriorityRulePreset> PrioRulesYoungMale { get; set; } = [];
+    public List<BasePriorityRulePreset> PrioRulesAdultFemale { get; set; } = [];
+    public List<BasePriorityRulePreset> PrioRulesYoungFemale { get; set; } = [];
 
     /// <summary>The integration settings of the slice by their provider key; the file layer
     /// (de)serializes their sections.</summary>
-    public Dictionary<string, IKindSettings> Integrations = [];
+    public Dictionary<string, IKindSettings> Integrations { get; set; } = [];
 
     public List<BasePriorityRulePreset> GetBucket((bool Male, bool Adult) bucket) => bucket switch
     {

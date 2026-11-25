@@ -108,7 +108,7 @@ public class KindSettings : IExposable, IPresettable
     /// <summary>The kind's slice of a preset.</summary>
     public KindPreset ToPreset(ThingDef def)
     {
-        var dto = new KindPreset { animal = def.defName };
+        var dto = new KindPreset { Animal = def.defName };
         Save(dto);
         return dto;
     }

@@ -1,9 +1,10 @@
+using System.Xml;
 #pragma warning disable CS0612, CS0618
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml;
+
 using System.Xml.Serialization;
 
 namespace ASM;
@@ -20,29 +21,29 @@ public class LegacyPresetDto
 
     /// <summary>The same preset in the current format: prefs and integration sections copied,
     /// condition lists converted into rule lists.</summary>
-    public PresetDto ToCurrent()
+    public List<KindPreset> ToCurrent()
     {
-        var dto = new PresetDto();
+        var kinds = new List<KindPreset>();
 
         foreach (var k in Kinds)
         {
-            var kd = new KindPresetDto
+            var kd = new KindPreset
             {
-                animal = k.animal,
-                malePref = k.malePref,
-                femalePref = k.femalePref,
-                maleYoungPref = k.maleYoungPref,
-                femaleYoungPref = k.femaleYoungPref,
-                PrioRulesAdultMale = ToBucket(nameof(KindPresetDto.PrioRulesAdultMale), k.PrioAdultMale),
-                PrioRulesYoungMale = ToBucket(nameof(KindPresetDto.PrioRulesYoungMale), k.PrioYoungMale),
-                PrioRulesAdultFemale = ToBucket(nameof(KindPresetDto.PrioRulesAdultFemale), k.PrioAdultFemale),
-                PrioRulesYoungFemale = ToBucket(nameof(KindPresetDto.PrioRulesYoungFemale), k.PrioYoungFemale)
+                Animal = k.animal,
+                MalePref = KindPresetFileParsing.ParsePref(k.malePref),
+                FemalePref = KindPresetFileParsing.ParsePref(k.femalePref),
+                MaleYoungPref = KindPresetFileParsing.ParsePref(k.maleYoungPref),
+                FemaleYoungPref = KindPresetFileParsing.ParsePref(k.femaleYoungPref),
+                PrioRulesAdultMale = ToPresets(k.PrioAdultMale),
+                PrioRulesYoungMale = ToPresets(k.PrioYoungMale),
+                PrioRulesAdultFemale = ToPresets(k.PrioAdultFemale),
+                PrioRulesYoungFemale = ToPresets(k.PrioYoungFemale)
             };
-            kd.IntegrationSections.AddRange(k.IntegrationSections);
-            dto.Kinds.Add(kd);
+            kd.Integrations = KindPresetFileSerialization.ReadIntegrations([.. k.IntegrationSections]);
+            kinds.Add(kd);
         }
 
-        return dto;
+        return kinds;
     }
 
     /// <summary>True when any kind carries legacy condition lists (identifies an old file).</summary>
@@ -50,7 +51,7 @@ public class LegacyPresetDto
         Kinds.Any(k => k.PrioAdultMale?.Count > 0 || k.PrioYoungMale?.Count > 0
             || k.PrioAdultFemale?.Count > 0 || k.PrioYoungFemale?.Count > 0);
 
-    private static XmlElement[]? ToBucket(string name, List<ConditionDto>? conditions)
+    private static List<BasePriorityRulePreset> ToPresets(List<ConditionDto>? conditions)
     {
         var rules = new List<BasePriorityRule>();
 
@@ -67,7 +68,7 @@ public class LegacyPresetDto
             }
         }
 
-        return rules.Count > 0 ? [RulePresetXml.Bucket(name, PriorityRuleXml.ToRulePresets(rules.Select(r => r.ToPreset())))] : null;
+        return rules.Select(r => r.ToPreset()).ToList();
     }
 }
 
@@ -102,4 +103,8 @@ public class LegacyKindDto
 
     [XmlAnyElement]
     public List<XmlElement> IntegrationSections = new List<XmlElement>();
+}
+
+public static class LegacyPresetDtoConversion
+{
 }
