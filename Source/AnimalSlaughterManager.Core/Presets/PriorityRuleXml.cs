@@ -163,8 +163,6 @@ public static class PriorityRuleXml
         return entry;
     }
 
-    private static Type? PresetTypeOf(string ruleName) => RuleOf(ruleName)?.PresetType;
-
     private static Func<BasePriorityRule>? FactoryOf(string ruleName)
     {
         var type = Type.GetType("ASM." + ruleName, false);
