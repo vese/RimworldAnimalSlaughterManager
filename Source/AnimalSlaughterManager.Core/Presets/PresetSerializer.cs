@@ -51,43 +51,6 @@ public static class PresetSerializer
         return ser;
     }
 
-    public static PresetDto? ReadPreset(string? text)
-    {
-        var dto = Deserialize<PresetDto>(text);
-
-        if (dto != null && dto.Version > PresetFormat.CurrentVersion)
-        {
-            Log.Warning("ASM: skipped a preset saved by a newer mod version.");
-            return null;
-        }
-
-        if (dto?.Kinds.Any(k => k.PrioRulesAdultMale?.Length > 0 || k.PrioRulesYoungMale?.Length > 0
-            || k.PrioRulesAdultFemale?.Length > 0 || k.PrioRulesYoungFemale?.Length > 0) == true)
-        {
-            return Migrate(dto);
-        }
-
-#pragma warning disable CS0618
-        // An old format has no rule lists — convert it; a current prefs-only preset stays
-        // as parsed.
-        return LegacyPresets.TryReadPreset(text) ?? (dto == null ? null : Migrate(dto));
-#pragma warning restore CS0618
-    }
-
-    /// <summary>Brings a preset of an older version up to the current model. Version 0 is
-    /// the shape at the introduction of versioning — nothing to migrate yet; add a step per
-    /// bump of PresetFormat.CurrentVersion.</summary>
-    private static PresetDto Migrate(PresetDto dto)
-    {
-        switch (dto.Version)
-        {
-            case 0:
-                break;
-        }
-
-        dto.Version = PresetFormat.CurrentVersion;
-        return dto;
-    }
 
 #pragma warning disable CS0618
     public static List<PriorityRuleDto>? ReadRulePreset(string? text)
@@ -160,6 +123,37 @@ public static class PresetSerializer
         return sb.ToString();
     }
 
-    /// <summary>Reads a preset DTO of the current format; null when the text is not one.</summary>
-    public static T? DeserializePreset<T>(string? text) where T : class, IVersionedPresetDto => Deserialize<T>(text);
+    /// <summary>Reads a preset DTO of the current format; refuses versions above the current
+    /// one (a preset saved by a newer mod), null when the text is not one.</summary>
+    public static T? DeserializePreset<T>(string? text) where T : class, IVersionedPresetDto
+    {
+        var dto = Deserialize<T>(text);
+
+        if (dto != null && dto.Version > PresetFormat.CurrentVersion)
+        {
+            Log.Warning("ASM: skipped a preset saved by a newer mod version.");
+            return null;
+        }
+
+        return dto;
+    }
+
+    /// <summary>Reads the version-1 preset (the unified format of main); null when the text is
+    /// not one. An old format without rule lists falls through to the legacy reader.</summary>
+    public static PresetDto? ReadPreset(string? text)
+    {
+        var dto = Deserialize<PresetDto>(text);
+
+        if (dto?.Kinds.Any(k => k.PrioRulesAdultMale?.Length > 0 || k.PrioRulesYoungMale?.Length > 0
+            || k.PrioRulesAdultFemale?.Length > 0 || k.PrioRulesYoungFemale?.Length > 0) == true)
+        {
+            return dto;
+        }
+
+#pragma warning disable CS0618
+        // An old format has no rule lists — convert it; a current prefs-only preset stays
+        // as parsed.
+        return LegacyPresets.TryReadPreset(text) ?? dto;
+#pragma warning restore CS0618
+    }
 }
