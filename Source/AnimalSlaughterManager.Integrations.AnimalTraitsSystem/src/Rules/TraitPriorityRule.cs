@@ -29,40 +29,27 @@ public class TraitPriorityRule : BasePriorityRule, ICoversRule<TraitPriorityRule
 
     public override string DtoName => "Trait";
 
-    public override void WriteXml(System.Xml.XmlElement parent) => PresetSectionSerialization.Serialize(parent, new PriorityTraitRulePreset
+    public override PriorityRulePreset ToPreset() => new PriorityTraitRulePreset
     {
         has = has,
         trait = trait?.defName,
         inheritability = inheritability.ToString()
-    });
+    };
 
-    public override void ReadXml(System.Xml.XmlElement element)
+    public override void FromPreset(PriorityRulePreset preset)
     {
-        var dto = PresetSectionSerialization.Deserialize<PriorityTraitRulePreset>(element);
-
-        if (dto == null)
+        if (preset is PriorityTraitRulePreset p)
         {
-            return;
+            has = p.has;
+            trait = (Verse.HediffDef?)RuleDtoDefs.ByName(typeof(Verse.HediffDef), p.trait);
+
+            if (System.Enum.TryParse(p.inheritability, out TraitInheritability parsed))
+            {
+                inheritability = parsed;
+            }
         }
-
-        has = dto.has;
-        trait = (HediffDef?)RuleDtoDefs.ByName(typeof(HediffDef), dto.trait);
-
-        if (System.Enum.TryParse(dto.inheritability, out TraitInheritability parsed))
-        {
-            inheritability = parsed;
-        }
- }
-
-
-    public override bool Matches(Pawn? p) => trait != null && AnimalTraitsAccess.HasTrait(p, trait) == has && InheritMatch(trait, inheritability);
-
-    public override void ExposeData()
-    {
-        Scribe_Values.Look(ref has, "has", true);
-        Scribe_Defs.Look(ref trait, "trait");
-        Scribe_Values.Look(ref inheritability, "inheritability", TraitInheritability.Both);
     }
+
 
     private static readonly Type[] traitSetTypes = [typeof(AnimalTraitSet)];
 
@@ -92,4 +79,13 @@ public class TraitPriorityRule : BasePriorityRule, ICoversRule<TraitPriorityRule
         TraitInheritability.NonInheritable => !AnimalTraitsAccess.IsInheritable(trait),
         _ => true,
     };
+
+    public override bool Matches(Pawn? p) => trait != null && AnimalTraitsAccess.HasTrait(p, trait) == has && InheritMatch(trait, inheritability);
+
+    public override void ExposeData()
+    {
+        Scribe_Values.Look(ref has, "has", true);
+        Scribe_Defs.Look(ref trait, "trait");
+        Scribe_Values.Look(ref inheritability, "inheritability", TraitInheritability.Both);
+    }
 }

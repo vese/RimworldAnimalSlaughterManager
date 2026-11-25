@@ -43,49 +43,31 @@ public class TraitGeneralPriorityRule : BasePriorityRule, ICoversRule<TraitGener
 
     public override string DtoName => "TraitGeneral";
 
-    public override void WriteXml(System.Xml.XmlElement parent) => PresetSectionSerialization.Serialize(parent, new PriorityTraitGeneralRulePreset
+    public override PriorityRulePreset ToPreset() => new PriorityTraitGeneralRulePreset
     {
         has = has,
         type = type.ToString(),
         inheritability = inheritability.ToString()
-    });
-
-    public override void ReadXml(System.Xml.XmlElement element)
-    {
-        var dto = PresetSectionSerialization.Deserialize<PriorityTraitGeneralRulePreset>(element);
-
-        if (dto == null)
-        {
-            return;
-        }
-
-        has = dto.has;
-
-        if (System.Enum.TryParse(dto.type, out TraitType parsedType))
-        {
-            type = parsedType;
-        }
-
-        if (System.Enum.TryParse(dto.inheritability, out TraitInheritability parsedInherit))
-        {
-            inheritability = parsedInherit;
-        }
- }
-
-
-    public override bool Matches(Pawn? p) => type switch
-    {
-        TraitType.Both => HasTrait(p) == has,
-        TraitType.Positive => HasTrait(p, false) == has,
-        TraitType.Negative => HasTrait(p, true) == has,
-        _ => throw new NotImplementedException(),
     };
 
-    public override void ExposeData()
+    public override void FromPreset(PriorityRulePreset preset)
     {
-        Scribe_Values.Look(ref type, "type", TraitType.Both);
-        Scribe_Values.Look(ref inheritability, "inheritability", TraitInheritability.Both);
+        if (preset is PriorityTraitGeneralRulePreset p)
+        {
+            has = p.has;
+
+            if (System.Enum.TryParse(p.type, out TraitType parsedType))
+            {
+                type = parsedType;
+            }
+
+            if (System.Enum.TryParse(p.inheritability, out TraitInheritability parsedInherit))
+            {
+                inheritability = parsedInherit;
+            }
+        }
     }
+
 
     private static readonly Type[] traitSetTypes = [typeof(AnimalTraitSet)];
 
@@ -146,5 +128,18 @@ public class TraitGeneralPriorityRule : BasePriorityRule, ICoversRule<TraitGener
         }
 
         return false;
+    }
+    public override bool Matches(Pawn? p) => type switch
+    {
+        TraitType.Both => HasTrait(p) == has,
+        TraitType.Positive => HasTrait(p, false) == has,
+        TraitType.Negative => HasTrait(p, true) == has,
+        _ => throw new NotImplementedException(),
+    };
+
+    public override void ExposeData()
+    {
+        Scribe_Values.Look(ref type, "type", TraitType.Both);
+        Scribe_Values.Look(ref inheritability, "inheritability", TraitInheritability.Both);
     }
 }

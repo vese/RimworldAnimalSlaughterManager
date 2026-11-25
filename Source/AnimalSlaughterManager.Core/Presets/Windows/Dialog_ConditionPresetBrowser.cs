@@ -48,7 +48,7 @@ public class Dialog_ConditionPresetBrowser : Dialog_PresetBrowserBase
     protected override bool HasData() => prioritySettings.Get(male, adult).Count > 0;
 
     protected override void Save(string name) =>
-        PresetRepository.SaveList(name, PresetRepository.ConditionsFolder((male, adult)), prioritySettings.ToPreset((male, adult)));
+        PresetRepository.SaveList(name, PresetRepository.ConditionsFolder((male, adult)), ListPresetFile.OfRules(prioritySettings.ToPreset((male, adult))));
 
     protected override bool Apply(PresetEntry entry)
     {
@@ -61,7 +61,7 @@ public class Dialog_ConditionPresetBrowser : Dialog_PresetBrowserBase
             return false;
         }
 
-        prioritySettings.FromPreset(dto, (male, adult));
+        prioritySettings.FromPreset(dto.ToRuleList(), (male, adult));
         return true;
     }
 

@@ -52,16 +52,8 @@ public class KindPresetDto : IVersionedPresetDto
         _ => PrioRulesYoungFemale?.FirstOrDefault(),
     };
 
-    public void SetBucket((bool Male, bool Adult) bucket, List<BasePriorityRule> rules)
+    public void SetBucket((bool Male, bool Adult) bucket, XmlElement element)
     {
-        var element = PriorityRuleXml.Bucket(bucket switch
-        {
-            (true, true) => nameof(PrioRulesAdultMale),
-            (true, false) => nameof(PrioRulesYoungMale),
-            (false, true) => nameof(PrioRulesAdultFemale),
-            _ => nameof(PrioRulesYoungFemale),
-        }, rules);
-
         switch (bucket)
         {
             case (true, true):
@@ -79,13 +71,4 @@ public class KindPresetDto : IVersionedPresetDto
         }
     }
 
-    /// <summary>Reading side of a condition preset: the export writes exactly ONE bucket list,
-    /// so the single non-empty one is it — nothing is discarded. The saved bucket is the preset's
-    /// origin; on apply the rules go to whatever bucket is targeted (cross-bucket import).</summary>
-    public List<BasePriorityRule>? GetConditionRules()
-    {
-        return new[] { (male: true, adult: true), (true, false), (false, true), (false, false) }
-            .Select(b => PriorityRuleXml.ReadRules(BucketOf(b)))
-            .FirstOrDefault(rules => rules.Count > 0);
-    }
 }

@@ -63,33 +63,33 @@ public class ASM_MapComp : MapComponent, ISettingsProvider
 
 
     /// <summary>The full preset: every customized kind's slice.</summary>
-    public AllPresetDto ToPreset()
+    public AllPresetFile ToPreset()
     {
-        var dto = new AllPresetDto();
+        var dto = new AllPresetFile();
 
         foreach (var kv in kindSettings)
         {
             if (kv.Value != null && kv.Value.Customized)
             {
-                dto.Kinds.Add(kv.Value.ToPreset(kv.Key));
+                dto.Kinds.Add(new KindPresetFile { Kind = kv.Value.ToPreset(kv.Key) });
             }
         }
 
         return dto;
     }
 
-    public void FromPreset(AllPresetDto dto)
+    public void FromPreset(AllPresetFile dto)
     {
-        foreach (var kd in dto.Kinds)
+        foreach (var file in dto.Kinds)
         {
-            var def = DefDatabase<ThingDef>.GetNamed(kd.animal, false);
+            var def = DefDatabase<ThingDef>.GetNamed(file.Kind.animal, false);
 
             if (def == null)
             {
                 continue;
             }
 
-            GetSettings(def).FromPreset(kd);
+            GetSettings(def).FromPreset(file.Kind);
         }
 
         MarkDirty();

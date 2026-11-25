@@ -95,7 +95,7 @@ public abstract class BasePreferenceSettings : IPresettable
         Scribe_Values.Look(ref femaleYoungPref, FemaleYoungPrefKey, SlaughterPreference.OldestFirst);
     }
 
-    public void Save(KindPresetDto dto)
+    public void Save(KindPreset dto)
     {
         dto.malePref = malePref.ToString();
         dto.femalePref = femalePref.ToString();
@@ -103,7 +103,7 @@ public abstract class BasePreferenceSettings : IPresettable
         dto.femaleYoungPref = femaleYoungPref.ToString();
     }
 
-    public void Load(KindPresetDto dto)
+    public void Load(KindPreset dto)
     {
         Enum.TryParse(dto.malePref, out malePref);
         Enum.TryParse(dto.femalePref, out femalePref);

@@ -7,49 +7,71 @@ using System.Xml.Serialization;
 
 namespace ASM;
 
-/// <summary>Reading and writing the rule lists of a preset bucket: every rule appends its own
-/// DTO element (the element name is the type discriminator), the reader maps the name to a
-/// factory — the core's own rules and the integrations' (IPriorityRuleTypes). Children of the
-/// pre-discriminator format (the attribute-driven Rule element) are read as legacy.</summary>
+/// <summary>The rule-list (de)serialization of preset files: every rule preset writes its own
+/// element (the element name is the type discriminator), the reader maps the name back to the
+/// preset type through IPriorityRuleTypes. The pre-discriminator attribute-form Rule elements
+/// are read as legacy.</summary>
 public static class PriorityRuleXml
 {
-    /// <summary>A bucket element with the rules' DTO children.</summary>
-    public static XmlElement Bucket(string name, IEnumerable<BasePriorityRule> rules)
+    // name -> preset type, probed once per discriminator through the rule factories.
+    private static readonly Dictionary<string, Type> presetTypes = [];
+
+    /// <summary>A bucket element with the rule presets' elements inside.</summary>
+    public static XmlElement Bucket(string name, IEnumerable<PriorityRulePreset> presets)
     {
         var doc = new XmlDocument();
         var bucket = doc.CreateElement(name);
         doc.AppendChild(bucket);
 
-        WriteRules(bucket, rules);
+        WritePresets(bucket, presets);
 
         return bucket;
     }
 
-    public static void WriteRules(XmlElement parent, IEnumerable<BasePriorityRule> rules)
+    public static void WritePresets(XmlElement parent, IEnumerable<PriorityRulePreset> presets)
     {
-        foreach (var rule in rules)
+        foreach (var preset in presets)
         {
-            rule.WriteXml(parent);
+            using var writer = parent.OwnerDocument!.CreateNavigator()!.AppendChild();
+            SerializerOf(preset.GetType()).Serialize(writer, preset);
         }
     }
 
-    /// <summary>Rules from a bucket element's children; unknown rules and rules whose defs did
-    /// not resolve are dropped.</summary>
-    public static List<BasePriorityRule> ReadRules(XmlElement? bucket)
+    /// <summary>Rule presets from a bucket element's children; unknown children are dropped.</summary>
+    public static List<PriorityRulePreset> ReadPresets(XmlElement? bucket)
     {
-        var rules = new List<BasePriorityRule>();
+        var presets = new List<PriorityRulePreset>();
 
         if (bucket == null)
         {
-            return rules;
+            return presets;
         }
 
         foreach (XmlElement child in bucket.ChildNodes)
         {
-            var rule = ReadRule(child);
+            var preset = ReadPreset(child);
 
-            if (rule != null && !rule.HasNullDef)
+            if (preset != null)
             {
+                presets.Add(preset);
+            }
+        }
+
+        return presets;
+    }
+
+    /// <summary>Rules from rule presets (each preset fills its rule through the registry).</summary>
+    public static List<BasePriorityRule> ToRules(IEnumerable<PriorityRulePreset> presets)
+    {
+        var rules = new List<BasePriorityRule>();
+
+        foreach (var preset in presets)
+        {
+            var rule = RuleOf(preset.DtoName);
+
+            if (rule != null)
+            {
+                rule.FromPreset(preset);
                 rules.Add(rule);
             }
         }
@@ -57,15 +79,29 @@ public static class PriorityRuleXml
         return rules;
     }
 
-    private static BasePriorityRule? ReadRule(XmlElement child)
-    {
-        var factory = FactoryOf(child.LocalName);
+    /// <summary>Rule presets of rules.</summary>
+    public static List<PriorityRulePreset> ToPresets(IEnumerable<BasePriorityRule> rules) =>
+        [.. rules.Select(r => r.ToPreset())];
 
-        if (factory != null)
+    /// <summary>Rules from a bucket element's children; unknown rules and rules whose defs did
+    /// not resolve are dropped.</summary>
+    public static List<BasePriorityRule> ReadRules(XmlElement? bucket) => ToRules(ReadPresets(bucket));
+
+    private static PriorityRulePreset? ReadPreset(XmlElement child)
+    {
+        var type = PresetTypeOf(child.LocalName);
+
+        if (type != null)
         {
-            var rule = factory();
-            rule.ReadXml(child);
-            return rule;
+            try
+            {
+                using var reader = new StringReader(child.OuterXml);
+                return (PriorityRulePreset?)SerializerOf(type).Deserialize(reader);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
 #pragma warning disable CS0618
@@ -77,7 +113,7 @@ public static class PriorityRuleXml
                 using var reader = new StringReader(child.OuterXml);
                 var dto = (PriorityRuleDto)new XmlSerializer(typeof(PriorityRuleDto), new XmlRootAttribute(child.LocalName)).Deserialize(reader);
 
-                return dto.ToRule();
+                return dto.ToRule()?.ToPreset();
             }
             catch
             {
@@ -86,10 +122,11 @@ public static class PriorityRuleXml
         }
 #pragma warning restore CS0618
 
+        // An integration section or an unknown element — not an error here.
         return null;
     }
 
-    private static Func<BasePriorityRule>? FactoryOf(string dtoName)
+    private static BasePriorityRule? RuleOf(string dtoName)
     {
         foreach (var source in IntegrationServices.GetServices<IPriorityRuleTypes>())
         {
@@ -97,7 +134,7 @@ public static class PriorityRuleXml
             {
                 if (name == dtoName)
                 {
-                    return factory;
+                    return factory();
                 }
             }
         }
@@ -105,13 +142,24 @@ public static class PriorityRuleXml
         return null;
     }
 
-    /// <summary>Fills a list preset with the rules' DTO children.</summary>
-    public static void WriteRulesInto(ListPresetDto dto, IEnumerable<BasePriorityRule> rules)
-{
-    var doc = new XmlDocument();
-    var root = doc.CreateElement("Rules");
-    doc.AppendChild(root);
-    WriteRules(root, rules);
-    dto.Content = [root];
-}
+    private static Type? PresetTypeOf(string dtoName)
+    {
+        if (presetTypes.TryGetValue(dtoName, out var type))
+        {
+            return type;
+        }
+
+        var rule = RuleOf(dtoName);
+        type = rule?.ToPreset().GetType();
+
+        if (type != null)
+        {
+            presetTypes[dtoName] = type;
+        }
+
+        return type;
+    }
+
+
+    private static XmlSerializer SerializerOf(Type presetType) => PresetSerializer.SerializerOf(presetType);
 }

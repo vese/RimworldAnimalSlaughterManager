@@ -20,4 +20,31 @@ public class KindPreset
 
     /// <summary>Raw integration sections (any unknown children); owned by their integrations.</summary>
     public List<XmlElement> IntegrationSections = [];
+
+    public List<PriorityRulePreset> GetBucket((bool Male, bool Adult) bucket) => bucket switch
+    {
+        (true, true) => PrioRulesAdultMale,
+        (true, false) => PrioRulesYoungMale,
+        (false, true) => PrioRulesAdultFemale,
+        _ => PrioRulesYoungFemale,
+    };
+
+    public void SetBucket((bool Male, bool Adult) bucket, List<PriorityRulePreset> presets)
+    {
+        switch (bucket)
+        {
+            case (true, true):
+                PrioRulesAdultMale = presets;
+                break;
+            case (true, false):
+                PrioRulesYoungMale = presets;
+                break;
+            case (false, true):
+                PrioRulesAdultFemale = presets;
+                break;
+            default:
+                PrioRulesYoungFemale = presets;
+                break;
+        }
+    }
 }

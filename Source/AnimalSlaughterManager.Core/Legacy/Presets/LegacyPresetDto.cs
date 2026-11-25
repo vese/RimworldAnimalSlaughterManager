@@ -67,7 +67,7 @@ public class LegacyPresetDto
             }
         }
 
-        return rules.Count > 0 ? [PriorityRuleXml.Bucket(name, rules)] : null;
+        return rules.Count > 0 ? [PriorityRuleXml.Bucket(name, PriorityRuleXml.ToPresets(rules))] : null;
     }
 }
 

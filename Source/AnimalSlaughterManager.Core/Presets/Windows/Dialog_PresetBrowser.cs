@@ -99,7 +99,7 @@ public class Dialog_PresetBrowser : Dialog_PresetBrowserBase
                 PresetRepository.Save(name, PresetScope.All, comp.ToPreset());
                 break;
             case PresetScope.Kind:
-                PresetRepository.Save(name, PresetScope.Kind, Settings.ToPreset(kind));
+                PresetRepository.Save(name, PresetScope.Kind, new KindPresetFile { Kind = Settings.ToPreset(kind) });
                 break;
             default:
                 exportList!(name);
@@ -133,7 +133,7 @@ public class Dialog_PresetBrowser : Dialog_PresetBrowserBase
                     return false;
                 }
 
-                Settings.FromPreset(kd);
+                Settings.FromPreset(kd.Kind);
                 return true;
             }
             default:

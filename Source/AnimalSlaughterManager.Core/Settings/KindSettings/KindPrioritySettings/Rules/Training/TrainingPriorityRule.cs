@@ -19,18 +19,16 @@ public class TrainingPriorityRule : BasePriorityRule, ICoversRule<TrainingGenera
 
     public override string DtoName => "Training";
 
-    public override void WriteXml(System.Xml.XmlElement parent) => PresetSectionSerialization.Serialize(parent, new TrainingRulePreset { has = has, trainable = trainable?.defName });
+    public override PriorityRulePreset ToPreset() => new TrainingRulePreset { has = has, trainable = trainable?.defName };
 
-    public override void ReadXml(System.Xml.XmlElement element)
+    public override void FromPreset(PriorityRulePreset preset)
     {
-        var dto = PresetSectionSerialization.Deserialize<TrainingRulePreset>(element);
-
-        if (dto != null)
+        if (preset is TrainingRulePreset p)
         {
-            has = dto.has;
-            trainable = (TrainableDef?)RuleDtoDefs.ByName(typeof(TrainableDef), dto.trainable);
+            has = p.has; trainable = (RimWorld.TrainableDef?)RuleDtoDefs.ByName(typeof(RimWorld.TrainableDef), p.trainable);
         }
     }
+
 
     public override bool Matches(Pawn? p) => trainable != null && (p?.training?.HasLearned(trainable) ?? false) == has;
 

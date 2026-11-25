@@ -24,17 +24,16 @@ public class TrainingGeneralPriorityRule : BasePriorityRule, ICoversRule<Trainin
 
     public override string DtoName => "TrainingGeneral";
 
-    public override void WriteXml(System.Xml.XmlElement parent) => PresetSectionSerialization.Serialize(parent, new TrainingGeneralRulePreset { type = type.ToString() });
+    public override PriorityRulePreset ToPreset() => new TrainingGeneralRulePreset { type = type.ToString() };
 
-    public override void ReadXml(System.Xml.XmlElement element)
+    public override void FromPreset(PriorityRulePreset preset)
     {
-        var dto = PresetSectionSerialization.Deserialize<TrainingGeneralRulePreset>(element);
-
-        if (dto != null && System.Enum.TryParse(dto.type, out TrainingGeneralType parsed))
+        if (preset is TrainingGeneralRulePreset p)
         {
-            type = parsed;
+            if (System.Enum.TryParse(p.type, out TrainingGeneralType parsed)) { type = parsed; };
         }
     }
+
 
     public override bool Matches(Pawn? p) => type switch
     {

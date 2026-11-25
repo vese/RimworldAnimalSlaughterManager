@@ -1,3 +1,4 @@
+using System.Xml.Serialization;
 using System.Linq;
 namespace ASM;
 
@@ -11,18 +12,21 @@ public abstract class PriorityRulePreset
     public abstract string DtoName { get; }
 }
 
+[XmlRoot("Pregnancy")]
 public class PregnancyRulePreset : PriorityRulePreset
 {
     public override string DtoName => "Pregnancy";
     public bool has = true;
 }
 
+[XmlRoot("Bond")]
 public class BondRulePreset : PriorityRulePreset
 {
     public override string DtoName => "Bond";
     public bool has = true;
 }
 
+[XmlRoot("Disease")]
 public class DiseaseRulePreset : PriorityRulePreset
 {
     public override string DtoName => "Disease";
@@ -30,12 +34,14 @@ public class DiseaseRulePreset : PriorityRulePreset
     public string? disease;
 }
 
+[XmlRoot("DiseaseAny")]
 public class DiseaseAnyRulePreset : PriorityRulePreset
 {
     public override string DtoName => "DiseaseAny";
     public bool has = true;
 }
 
+[XmlRoot("Training")]
 public class TrainingRulePreset : PriorityRulePreset
 {
     public override string DtoName => "Training";
@@ -43,6 +49,7 @@ public class TrainingRulePreset : PriorityRulePreset
     public string? trainable;
 }
 
+[XmlRoot("TrainingGeneral")]
 public class TrainingGeneralRulePreset : PriorityRulePreset
 {
     public override string DtoName => "TrainingGeneral";

@@ -94,33 +94,29 @@ public class KindPrioritySettings : IPresettable
         }
     }
 
-    public void Save(KindPresetDto dto)
+    public void Save(KindPreset dto)
     {
-        dto.SetBucket((true, true), Get(true, true));
-        dto.SetBucket((true, false), Get(true, false));
-        dto.SetBucket((false, true), Get(false, true));
-        dto.SetBucket((false, false), Get(false, false));
+        dto.SetBucket((true, true), PriorityRuleXml.ToPresets(Get(true, true)));
+        dto.SetBucket((true, false), PriorityRuleXml.ToPresets(Get(true, false)));
+        dto.SetBucket((false, true), PriorityRuleXml.ToPresets(Get(false, true)));
+        dto.SetBucket((false, false), PriorityRuleXml.ToPresets(Get(false, false)));
     }
 
-    /// <summary>One bucket's rules as a list preset (the payload is the bucket element).</summary>
-    public ListPresetDto ToPreset((bool Male, bool Adult) bucket)
+    /// <summary>One bucket's rules as a list preset.</summary>
+    public RuleListPreset ToPreset((bool Male, bool Adult) bucket) =>
+        new() { Rules = PriorityRuleXml.ToPresets(Get(bucket.Male, bucket.Adult)) };
+
+    public void FromPreset(RuleListPreset dto, (bool Male, bool Adult) bucket)
     {
-        var dto = new ListPresetDto();
-        PriorityRuleXml.WriteRulesInto(dto, Get(bucket.Male, bucket.Adult));
-        return dto;
+        ruleSets[bucket].ReplaceAll(PriorityRuleXml.ToRules(dto.Rules));
     }
 
-    public void FromPreset(ListPresetDto dto, (bool Male, bool Adult) bucket)
+    public void Load(KindPreset dto)
     {
-        ruleSets[bucket].ReplaceAll(PriorityRuleXml.ReadRules(dto.Content?.FirstOrDefault()));
-    }
-
-    public void Load(KindPresetDto dto)
-    {
-        ruleSets[(true, true)].ReplaceAll(PriorityRuleXml.ReadRules(dto.BucketOf((true, true))));
-        ruleSets[(true, false)].ReplaceAll(PriorityRuleXml.ReadRules(dto.BucketOf((true, false))));
-        ruleSets[(false, true)].ReplaceAll(PriorityRuleXml.ReadRules(dto.BucketOf((false, true))));
-        ruleSets[(false, false)].ReplaceAll(PriorityRuleXml.ReadRules(dto.BucketOf((false, false))));
+        ruleSets[(true, true)].ReplaceAll(PriorityRuleXml.ToRules(dto.GetBucket((true, true))));
+        ruleSets[(true, false)].ReplaceAll(PriorityRuleXml.ToRules(dto.GetBucket((true, false))));
+        ruleSets[(false, true)].ReplaceAll(PriorityRuleXml.ToRules(dto.GetBucket((false, true))));
+        ruleSets[(false, false)].ReplaceAll(PriorityRuleXml.ToRules(dto.GetBucket((false, false))));
     }
 
     public void ExposeData()

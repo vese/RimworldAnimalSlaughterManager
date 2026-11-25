@@ -28,6 +28,18 @@ public static class PresetSerializer
 
     private static readonly Dictionary<Type, XmlSerializer> serializers = new();
 
+    /// <summary>Cached serializer of a preset model type (the DTO element name is its root).</summary>
+    public static XmlSerializer SerializerOf(Type type)
+    {
+        if (!serializers.TryGetValue(type, out var ser))
+        {
+            ser = new XmlSerializer(type);
+            serializers[type] = ser;
+        }
+
+        return ser;
+    }
+
     public static XmlSerializer Serializer<T>() where T : class
     {
         if (!serializers.TryGetValue(typeof(T), out var ser))
