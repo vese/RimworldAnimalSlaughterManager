@@ -4,7 +4,7 @@ namespace ASM;
 
 /// <summary>The preset model of the concrete-trait priority rule.</summary>
 [XmlRoot("Trait")]
-public class PriorityTraitRulePreset
+public class PriorityTraitRulePreset : PriorityRulePreset
 {
     public bool Has { get; set; }
     public string? Trait { get; set; }

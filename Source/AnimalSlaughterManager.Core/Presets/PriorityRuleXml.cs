@@ -18,7 +18,7 @@ public static class PriorityRuleXml
     private static readonly Dictionary<Type, (string RuleName, Func<BasePriorityRule> Factory)> dtoMap = [];
 
     /// <summary>The file form of the DTOs: the rule class name plus each serialized DTO.</summary>
-    public static List<RulePreset> ToRulePresets(IEnumerable<object> presets)
+    public static List<RulePreset> ToRulePresets(IEnumerable<PriorityRulePreset> presets)
     {
         var result = new List<RulePreset>();
 
@@ -38,7 +38,7 @@ public static class PriorityRuleXml
 
     /// <summary>Rules from the DTOs: each DTO fills its rule (found by the DTO's rule).
     /// Unknown DTOs are dropped.</summary>
-    public static List<BasePriorityRule> ToRules(IEnumerable<object> presets)
+    public static List<BasePriorityRule> ToRules(IEnumerable<PriorityRulePreset> presets)
     {
         var result = new List<BasePriorityRule>();
 
@@ -79,9 +79,9 @@ public static class PriorityRuleXml
     }
 
     /// <summary>DTOs from the file form: each payload deserializes into its rule's DTO.</summary>
-    public static List<object> ToDtos(IEnumerable<RulePreset> presets)
+    public static List<PriorityRulePreset> ToDtos(IEnumerable<RulePreset> presets)
     {
-        var result = new List<object>();
+        var result = new List<PriorityRulePreset>();
 
         foreach (var preset in presets)
         {
@@ -92,7 +92,7 @@ public static class PriorityRuleXml
                 continue;
             }
 
-            var dto = DeserializePayload(preset.Payload, entry.Value.Factory().ToPreset().GetType());
+            var dto = (PriorityRulePreset?)DeserializePayload(preset.Payload, entry.Value.Factory().ToPreset().GetType());
 
             if (dto != null)
             {

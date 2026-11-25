@@ -29,14 +29,14 @@ public class TraitPriorityRule : BasePriorityRule, ICoversRule<TraitPriorityRule
 
     public override string DtoName => "Trait";
 
-    public override object ToPreset() => new PriorityTraitRulePreset
+    public override PriorityRulePreset ToPreset() => new PriorityTraitRulePreset
     {
         Has = has,
         Trait = trait?.defName,
         Inheritability = inheritability.ToString()
     };
 
-    public override void FromPreset(object preset)
+    public override void FromPreset(PriorityRulePreset preset)
     {
         if (preset is PriorityTraitRulePreset p)
         {

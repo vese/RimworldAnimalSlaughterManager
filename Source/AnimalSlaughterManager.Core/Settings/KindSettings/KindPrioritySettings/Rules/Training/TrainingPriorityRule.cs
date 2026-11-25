@@ -19,9 +19,9 @@ public class TrainingPriorityRule : BasePriorityRule, ICoversRule<TrainingGenera
 
     public override string DtoName => "Training";
 
-    public override object ToPreset() => new TrainingRulePreset { Has = has, Trainable = trainable?.defName };
+    public override PriorityRulePreset ToPreset() => new TrainingRulePreset { Has = has, Trainable = trainable?.defName };
 
-    public override void FromPreset(object preset)
+    public override void FromPreset(PriorityRulePreset preset)
     {
         if (preset is TrainingRulePreset p)
         {

@@ -19,9 +19,9 @@ public class DiseasePriorityRule : BasePriorityRule, ICoversRule<DiseaseAnyPrior
 
     public override string DtoName => "Disease";
 
-    public override object ToPreset() => new DiseaseRulePreset { Has = has, Disease = disease?.defName };
+    public override PriorityRulePreset ToPreset() => new DiseaseRulePreset { Has = has, Disease = disease?.defName };
 
-    public override void FromPreset(object preset)
+    public override void FromPreset(PriorityRulePreset preset)
     {
         if (preset is DiseaseRulePreset p)
         {

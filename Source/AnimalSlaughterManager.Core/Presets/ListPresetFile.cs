@@ -16,7 +16,7 @@ public class ListPresetFile : IVersionedPresetDto, IXmlSerializable
     public int Version { get; set; }
 
     /// <summary>The priority rule presets; empty for a section-based list.</summary>
-    public List<object> Rules = [];
+    public List<PriorityRulePreset> Rules = [];
 
     /// <summary>The owning settings' own section elements; empty for a rule list.</summary>
     public List<XmlElement> Sections = [];

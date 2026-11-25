@@ -24,9 +24,9 @@ public class TrainingGeneralPriorityRule : BasePriorityRule, ICoversRule<Trainin
 
     public override string DtoName => "TrainingGeneral";
 
-    public override object ToPreset() => new TrainingGeneralRulePreset { Type = type.ToString() };
+    public override PriorityRulePreset ToPreset() => new TrainingGeneralRulePreset { Type = type.ToString() };
 
-    public override void FromPreset(object preset)
+    public override void FromPreset(PriorityRulePreset preset)
     {
         if (preset is TrainingGeneralRulePreset p)
         {

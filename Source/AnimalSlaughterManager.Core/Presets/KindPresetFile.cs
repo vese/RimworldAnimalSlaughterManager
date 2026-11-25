@@ -65,7 +65,7 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
         }
     }
 
-    private static IEnumerable<(string Bucket, List<object> Presets)> BucketsOf(KindPreset kind)
+    private static IEnumerable<(string Bucket, List<PriorityRulePreset> Presets)> BucketsOf(KindPreset kind)
     {
         yield return ("PrioRulesAdultMale", kind.PrioRulesAdultMale);
         yield return ("PrioRulesYoungMale", kind.PrioRulesYoungMale);

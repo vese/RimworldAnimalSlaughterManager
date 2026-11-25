@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 namespace ASM;
 
 [XmlRoot("Bond")]
-public class BondRulePreset
+public class BondRulePreset : PriorityRulePreset
 {
     public bool Has { get; set; }
 }

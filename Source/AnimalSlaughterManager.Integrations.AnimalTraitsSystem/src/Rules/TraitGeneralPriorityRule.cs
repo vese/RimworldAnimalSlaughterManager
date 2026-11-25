@@ -43,14 +43,14 @@ public class TraitGeneralPriorityRule : BasePriorityRule, ICoversRule<TraitGener
 
     public override string DtoName => "TraitGeneral";
 
-    public override object ToPreset() => new PriorityTraitGeneralRulePreset
+    public override PriorityRulePreset ToPreset() => new PriorityTraitGeneralRulePreset
     {
         Has = has,
         Type = type.ToString(),
         Inheritability = inheritability.ToString()
     };
 
-    public override void FromPreset(object preset)
+    public override void FromPreset(PriorityRulePreset preset)
     {
         if (preset is PriorityTraitGeneralRulePreset p)
         {
