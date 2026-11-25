@@ -130,9 +130,20 @@ public class KindSettings : IExposable
         FromSpecialPresets(preset);
     }
 
-    private Dictionary<string, BaseSpecialSettingsPreset> ToSpecialPresets() =>
-        new(integrationsSettings.Where(kv => kv.Value.ToPreset() != null)
-            .Select(kv => new KeyValuePair<string, BaseSpecialSettingsPreset>(kv.Key, kv.Value.ToPreset()!)));
+    private Dictionary<string, BaseSpecialSettingsPreset> ToSpecialPresets()
+    {
+        var presets = new Dictionary<string, BaseSpecialSettingsPreset>();
+
+        foreach (var (key, settings) in integrationsSettings)
+        {
+            if (settings.ToPreset() is { } preset)
+            {
+                presets[key] = preset;
+            }
+        }
+
+        return presets;
+    }
 
     private void FromSpecialPresets(KindPreset preset)
     {
