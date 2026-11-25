@@ -8,8 +8,8 @@ namespace ASM;
 [XmlRoot("AllPreset")]
 public class AllPresetFile : IVersionedPresetDto
 {
-    [XmlAttribute]
-    public int version { get; set; }
+    [XmlAttribute("version")]
+    public int Version { get; set; }
 
     [XmlElement("Kind")]
     public List<KindPresetFile> Kinds = [];

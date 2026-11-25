@@ -14,8 +14,8 @@ namespace ASM;
 [XmlRoot("KindPreset")]
 public class KindPresetDto : IVersionedPresetDto
 {
-    [XmlAttribute]
-    public int version { get; set; }
+    [XmlAttribute("version")]
+    public int Version { get; set; }
 
     [XmlAttribute]
     public string animal;

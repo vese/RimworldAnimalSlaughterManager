@@ -10,8 +10,8 @@ public class PresetDto
 {
     /// <summary>The preset format version (<c>PresetFormat.CurrentVersion</c>); 0 in files
     /// saved before versioning. Stamped by PresetSerializer on save.</summary>
-    [XmlAttribute]
-    public int version;
+    [XmlAttribute("version")]
+    public int Version;
 
     [XmlElement("Kind")]
     public List<KindPresetDto> Kinds = new List<KindPresetDto>();

@@ -4,5 +4,5 @@ namespace ASM;
 /// reader refuses versions above its own and migrates older ones.</summary>
 public interface IVersionedPresetDto
 {
-    int version { get; set; }
+    int Version { get; set; }
 }

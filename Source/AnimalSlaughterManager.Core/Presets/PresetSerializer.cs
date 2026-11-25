@@ -55,7 +55,7 @@ public static class PresetSerializer
     {
         var dto = Deserialize<PresetDto>(text);
 
-        if (dto != null && dto.version > PresetFormat.CurrentVersion)
+        if (dto != null && dto.Version > PresetFormat.CurrentVersion)
         {
             Log.Warning("ASM: skipped a preset saved by a newer mod version.");
             return null;
@@ -79,13 +79,13 @@ public static class PresetSerializer
     /// bump of PresetFormat.CurrentVersion.</summary>
     private static PresetDto Migrate(PresetDto dto)
     {
-        switch (dto.version)
+        switch (dto.Version)
         {
             case 0:
                 break;
         }
 
-        dto.version = PresetFormat.CurrentVersion;
+        dto.Version = PresetFormat.CurrentVersion;
         return dto;
     }
 
@@ -149,7 +149,7 @@ public static class PresetSerializer
     /// root element is the DTO's own).</summary>
     public static string SerializePreset<T>(T dto) where T : class, IVersionedPresetDto
     {
-        dto.version = PresetFormat.CurrentVersion;
+        dto.Version = PresetFormat.CurrentVersion;
 
         var sb = new StringBuilder();
         using (var w = new StringWriter(sb))
