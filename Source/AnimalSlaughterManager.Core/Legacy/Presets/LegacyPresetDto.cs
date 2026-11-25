@@ -30,14 +30,20 @@ public class LegacyPresetDto
             var kd = new KindPreset
             {
                 Animal = k.animal,
-                MalePref = KindPresetFileParsing.ParsePref(k.malePref),
-                FemalePref = KindPresetFileParsing.ParsePref(k.femalePref),
-                MaleYoungPref = KindPresetFileParsing.ParsePref(k.maleYoungPref),
-                FemaleYoungPref = KindPresetFileParsing.ParsePref(k.femaleYoungPref),
-                PrioRulesAdultMale = ToPresets(k.PrioAdultMale),
-                PrioRulesYoungMale = ToPresets(k.PrioYoungMale),
-                PrioRulesAdultFemale = ToPresets(k.PrioAdultFemale),
-                PrioRulesYoungFemale = ToPresets(k.PrioYoungFemale)
+                Preferences = new PreferenceSettingsPreset
+                {
+                    MalePref = KindPresetFileParsing.ParsePref(k.malePref),
+                    FemalePref = KindPresetFileParsing.ParsePref(k.femalePref),
+                    MaleYoungPref = KindPresetFileParsing.ParsePref(k.maleYoungPref),
+                    FemaleYoungPref = KindPresetFileParsing.ParsePref(k.femaleYoungPref)
+                },
+                Priorities = new PrioritySettingsPreset
+                {
+                    PrioRulesAdultMale = ToPresets(k.PrioAdultMale),
+                    PrioRulesYoungMale = ToPresets(k.PrioYoungMale),
+                    PrioRulesAdultFemale = ToPresets(k.PrioAdultFemale),
+                    PrioRulesYoungFemale = ToPresets(k.PrioYoungFemale)
+                }
             };
             kd.Integrations = KindPresetFileSerialization.ReadIntegrations([.. k.IntegrationSections]);
             kinds.Add(kd);

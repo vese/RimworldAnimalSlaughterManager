@@ -9,7 +9,7 @@ namespace ASM;
 /// Slaughter priority is split into four sex×age buckets (matching vanilla's buckets), plus
 /// the integration-owned settings stored opaquely under their providers' keys.
 /// </summary>
-public class KindSettings : IExposable, IPresettable
+public class KindSettings : IExposable
 {
     private const int currentDataVersion = 2;
 
@@ -106,32 +106,21 @@ public class KindSettings : IExposable, IPresettable
     }
 
     /// <summary>The kind's slice of a preset.</summary>
-    public KindPreset ToPreset(ThingDef def)
+    public KindPreset ToPreset(ThingDef def) => new()
     {
-        var dto = new KindPreset { Animal = def.defName };
-        Save(dto);
-        return dto;
-    }
+        Animal = def.defName,
+        Preferences = preferenceSettings.ToPreset(),
+        Priorities = prioritySettings.ToPreset(),
+        Integrations = new Dictionary<string, IKindSettings>(integrationsSettings)
+    };
 
-    public void FromPreset(KindPreset dto)
+    public void FromPreset(KindPreset preset)
     {
         Reset();
-        Load(dto);
-    }
 
-    public void Save(KindPreset dto)
-    {
-        preferenceSettings.Save(dto);
-        prioritySettings.Save(dto);
+        preferenceSettings.FromPreset(preset.Preferences);
+        prioritySettings.FromPreset(preset.Priorities);
 
-        dto.Integrations = new Dictionary<string, IKindSettings>(integrationsSettings);
-    }
-
-    public void Load(KindPreset dto)
-    {
-        preferenceSettings.Load(dto);
-        prioritySettings.Load(dto);
-
-        integrationsSettings = new Dictionary<string, IKindSettings>(dto.Integrations);
+        integrationsSettings = new Dictionary<string, IKindSettings>(preset.Integrations);
     }
 }

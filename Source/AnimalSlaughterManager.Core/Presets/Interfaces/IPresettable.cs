@@ -1,13 +1,12 @@
 namespace ASM;
 
 /// <summary>
-/// A settings object that knows which of its data takes part in kind presets and how.
-/// Implementations fill/read their own slice of the <see cref="KindPreset"/> — the model itself
-/// stays a plain data container.
+/// A settings object that knows its own preset model: it builds the model from its state and
+/// reads its state back from it — the model itself stays a plain data container.
 /// </summary>
-public interface IPresettable
+public interface IPresettable<TPreset>
 {
-    void Save(KindPreset preset);
+    TPreset ToPreset();
 
-    void Load(KindPreset preset);
+    void FromPreset(TPreset preset);
 }

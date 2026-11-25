@@ -4,7 +4,7 @@ using Verse;
 namespace ASM;
 
 /// <summary>Age-direction preferences for the four sex×age buckets; descendants provide the save keys.</summary>
-public abstract class BasePreferenceSettings : IPresettable
+public abstract class BasePreferenceSettings : IPresettable<PreferenceSettingsPreset>
 {
     public BasePreferenceSettings() { }
 
@@ -95,19 +95,19 @@ public abstract class BasePreferenceSettings : IPresettable
         Scribe_Values.Look(ref femaleYoungPref, FemaleYoungPrefKey, SlaughterPreference.OldestFirst);
     }
 
-    public void Save(KindPreset dto)
+    public PreferenceSettingsPreset ToPreset() => new()
     {
-        dto.MalePref = malePref;
-        dto.FemalePref = femalePref;
-        dto.MaleYoungPref = maleYoungPref;
-        dto.FemaleYoungPref = femaleYoungPref;
-    }
+        MalePref = malePref,
+        FemalePref = femalePref,
+        MaleYoungPref = maleYoungPref,
+        FemaleYoungPref = femaleYoungPref
+    };
 
-    public void Load(KindPreset dto)
+    public void FromPreset(PreferenceSettingsPreset preset)
     {
-        malePref = dto.MalePref;
-        femalePref = dto.FemalePref;
-        maleYoungPref = dto.MaleYoungPref;
-        femaleYoungPref = dto.FemaleYoungPref;
+        malePref = preset.MalePref;
+        femalePref = preset.FemalePref;
+        maleYoungPref = preset.MaleYoungPref;
+        femaleYoungPref = preset.FemaleYoungPref;
     }
 }

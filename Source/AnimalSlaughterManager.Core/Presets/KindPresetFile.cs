@@ -29,15 +29,15 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
     {
         writer.WriteAttributeString(nameof(Version), Version.ToString());
         writer.WriteAttributeString(nameof(KindPreset.Animal), Kind.Animal);
-        writer.WriteAttributeString(nameof(KindPreset.MalePref), Kind.MalePref.ToString());
-        writer.WriteAttributeString(nameof(KindPreset.FemalePref), Kind.FemalePref.ToString());
-        writer.WriteAttributeString(nameof(KindPreset.MaleYoungPref), Kind.MaleYoungPref.ToString());
-        writer.WriteAttributeString(nameof(KindPreset.FemaleYoungPref), Kind.FemaleYoungPref.ToString());
+        writer.WriteAttributeString(nameof(PreferenceSettingsPreset.MalePref), Kind.Preferences.MalePref.ToString());
+        writer.WriteAttributeString(nameof(PreferenceSettingsPreset.FemalePref), Kind.Preferences.FemalePref.ToString());
+        writer.WriteAttributeString(nameof(PreferenceSettingsPreset.MaleYoungPref), Kind.Preferences.MaleYoungPref.ToString());
+        writer.WriteAttributeString(nameof(PreferenceSettingsPreset.FemaleYoungPref), Kind.Preferences.FemaleYoungPref.ToString());
 
-        KindPresetFileSerialization.SerializeBucket(writer, BucketAdultMale, Kind.PrioRulesAdultMale);
-        KindPresetFileSerialization.SerializeBucket(writer, BucketYoungMale, Kind.PrioRulesYoungMale);
-        KindPresetFileSerialization.SerializeBucket(writer, BucketAdultFemale, Kind.PrioRulesAdultFemale);
-        KindPresetFileSerialization.SerializeBucket(writer, BucketYoungFemale, Kind.PrioRulesYoungFemale);
+        KindPresetFileSerialization.SerializeBucket(writer, BucketAdultMale, Kind.Priorities.PrioRulesAdultMale);
+        KindPresetFileSerialization.SerializeBucket(writer, BucketYoungMale, Kind.Priorities.PrioRulesYoungMale);
+        KindPresetFileSerialization.SerializeBucket(writer, BucketAdultFemale, Kind.Priorities.PrioRulesAdultFemale);
+        KindPresetFileSerialization.SerializeBucket(writer, BucketYoungFemale, Kind.Priorities.PrioRulesYoungFemale);
 
         var holder = PresetSectionSerialization.Holder();
 
@@ -57,18 +57,24 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
         reader.MoveToContent();
         Version = int.TryParse(reader.GetAttribute(nameof(Version)), out var v) ? v : 0;
         Kind.Animal = reader.GetAttribute(nameof(KindPreset.Animal)) ?? "";
-        Enum.TryParse(reader.GetAttribute(nameof(KindPreset.MalePref)), out SlaughterPreference malePref); Kind.MalePref = malePref;
-        Enum.TryParse(reader.GetAttribute(nameof(KindPreset.FemalePref)), out SlaughterPreference femalePref); Kind.FemalePref = femalePref;
-        Enum.TryParse(reader.GetAttribute(nameof(KindPreset.MaleYoungPref)), out SlaughterPreference maleYoungPref); Kind.MaleYoungPref = maleYoungPref;
-        Enum.TryParse(reader.GetAttribute(nameof(KindPreset.FemaleYoungPref)), out SlaughterPreference femaleYoungPref); Kind.FemaleYoungPref = femaleYoungPref;
+        Kind.Preferences = new PreferenceSettingsPreset
+        {
+            MalePref = KindPresetFileParsing.ParsePref(reader.GetAttribute(nameof(PreferenceSettingsPreset.MalePref))),
+            FemalePref = KindPresetFileParsing.ParsePref(reader.GetAttribute(nameof(PreferenceSettingsPreset.FemalePref))),
+            MaleYoungPref = KindPresetFileParsing.ParsePref(reader.GetAttribute(nameof(PreferenceSettingsPreset.MaleYoungPref))),
+            FemaleYoungPref = KindPresetFileParsing.ParsePref(reader.GetAttribute(nameof(PreferenceSettingsPreset.FemaleYoungPref)))
+        };
 
         var doc = new XmlDocument();
         var root = (XmlElement)doc.ReadNode(reader.ReadSubtree())!;
 
-        Kind.PrioRulesAdultMale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(root[BucketAdultMale]));
-        Kind.PrioRulesYoungMale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(root[BucketYoungMale]));
-        Kind.PrioRulesAdultFemale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(root[BucketAdultFemale]));
-        Kind.PrioRulesYoungFemale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(root[BucketYoungFemale]));
+        Kind.Priorities = new PrioritySettingsPreset
+        {
+            PrioRulesAdultMale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(root[BucketAdultMale])),
+            PrioRulesYoungMale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(root[BucketYoungMale])),
+            PrioRulesAdultFemale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(root[BucketAdultFemale])),
+            PrioRulesYoungFemale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(root[BucketYoungFemale]))
+        };
 
         Kind.Integrations = KindPresetFileSerialization.ReadIntegrations(KindPresetFileSerialization.SectionsOf(root));
     }
@@ -86,17 +92,22 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
             Kind = new KindPreset
             {
                 Animal = v1.animal,
-                MalePref = KindPresetFileParsing.ParsePref(v1.malePref),
-                FemalePref = KindPresetFileParsing.ParsePref(v1.femalePref),
-                MaleYoungPref = KindPresetFileParsing.ParsePref(v1.maleYoungPref),
-                FemaleYoungPref = KindPresetFileParsing.ParsePref(v1.femaleYoungPref)
+                Preferences = new PreferenceSettingsPreset
+                {
+                    MalePref = KindPresetFileParsing.ParsePref(v1.malePref),
+                    FemalePref = KindPresetFileParsing.ParsePref(v1.femalePref),
+                    MaleYoungPref = KindPresetFileParsing.ParsePref(v1.maleYoungPref),
+                    FemaleYoungPref = KindPresetFileParsing.ParsePref(v1.femaleYoungPref)
+                },
+                Priorities = new PrioritySettingsPreset
+                {
+                    PrioRulesAdultMale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(v1.PrioRulesAdultMale?.FirstOrDefault())),
+                    PrioRulesYoungMale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(v1.PrioRulesYoungMale?.FirstOrDefault())),
+                    PrioRulesAdultFemale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(v1.PrioRulesAdultFemale?.FirstOrDefault())),
+                    PrioRulesYoungFemale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(v1.PrioRulesYoungFemale?.FirstOrDefault()))
+                }
             }
         };
-
-        file.Kind.PrioRulesAdultMale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(v1.PrioRulesAdultMale?.FirstOrDefault()));
-        file.Kind.PrioRulesYoungMale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(v1.PrioRulesYoungMale?.FirstOrDefault()));
-        file.Kind.PrioRulesAdultFemale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(v1.PrioRulesAdultFemale?.FirstOrDefault()));
-        file.Kind.PrioRulesYoungFemale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(v1.PrioRulesYoungFemale?.FirstOrDefault()));
 
         file.Kind.Integrations = KindPresetFileSerialization.ReadIntegrations([.. v1.IntegrationSections]);
 

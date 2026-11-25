@@ -199,7 +199,7 @@ public static class PresetRepository
                 return null;
             }
 
-            var typed = new[] { file.Kind.PrioRulesAdultMale, file.Kind.PrioRulesYoungMale, file.Kind.PrioRulesAdultFemale, file.Kind.PrioRulesYoungFemale }
+            var typed = new[] { file.Kind.Priorities.PrioRulesAdultMale, file.Kind.Priorities.PrioRulesYoungMale, file.Kind.Priorities.PrioRulesAdultFemale, file.Kind.Priorities.PrioRulesYoungFemale }
                 .FirstOrDefault(rules => rules.Count > 0);
 
             return typed != null ? new ListPresetFile { Rules = typed }
@@ -213,7 +213,7 @@ public static class PresetRepository
             return null;
         }
 
-        var kdTyped = new[] { kd.PrioRulesAdultMale, kd.PrioRulesYoungMale, kd.PrioRulesAdultFemale, kd.PrioRulesYoungFemale }
+        var kdTyped = new[] { kd.Priorities.PrioRulesAdultMale, kd.Priorities.PrioRulesYoungMale, kd.Priorities.PrioRulesAdultFemale, kd.Priorities.PrioRulesYoungFemale }
             .FirstOrDefault(rules => rules.Count > 0);
 
         return kdTyped != null ? new ListPresetFile { Rules = kdTyped }

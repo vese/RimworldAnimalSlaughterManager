@@ -21,11 +21,11 @@ public class ListPresetFile : IVersionedPresetDto, IXmlSerializable
     /// <summary>The owning settings' own section elements; empty for a rule list.</summary>
     public List<XmlElement> Sections = [];
 
-    public static ListPresetFile OfRules(PrioritySettingsPreset preset) => new() { Rules = preset.Rules };
+    public static ListPresetFile OfRules(List<BasePriorityRulePreset> rules) => new() { Rules = rules };
 
     public static ListPresetFile OfSections(params IEnumerable<XmlElement>[] sections) => new() { Sections = [.. sections.SelectMany(s => s)] };
 
-    public PrioritySettingsPreset ToRuleList() => new() { Rules = Rules };
+    public List<BasePriorityRulePreset> ToRuleList() => Rules;
 
     public XmlSchema? GetSchema() => null;
 
