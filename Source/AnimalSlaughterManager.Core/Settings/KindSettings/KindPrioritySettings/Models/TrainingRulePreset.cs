@@ -5,6 +5,6 @@ namespace ASM;
 [XmlRoot("Training")]
 public class TrainingRulePreset
 {
-    public bool has = true;
-    public string? trainable;
+    public bool has { get; set; }
+    public string? trainable { get; set; }
 }

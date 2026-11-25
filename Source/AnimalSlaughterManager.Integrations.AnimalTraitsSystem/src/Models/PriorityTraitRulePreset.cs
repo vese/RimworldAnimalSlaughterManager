@@ -6,10 +6,7 @@ namespace ASM;
 [XmlRoot("Trait")]
 public class PriorityTraitRulePreset
 {
-    [XmlAttribute]
-    public bool has = true;
-    [XmlAttribute]
-    public string? trait;
-    [XmlAttribute]
-    public string inheritability = nameof(TraitInheritability.Both);
+    public bool has { get; set; }
+    public string? trait { get; set; }
+    public string inheritability { get; set; } = "";
 }

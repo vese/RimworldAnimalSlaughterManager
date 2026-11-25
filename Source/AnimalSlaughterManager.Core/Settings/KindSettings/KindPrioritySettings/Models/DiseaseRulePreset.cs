@@ -5,6 +5,6 @@ namespace ASM;
 [XmlRoot("Disease")]
 public class DiseaseRulePreset
 {
-    public bool has = true;
-    public string? disease;
+    public bool has { get; set; }
+    public string? disease { get; set; }
 }
