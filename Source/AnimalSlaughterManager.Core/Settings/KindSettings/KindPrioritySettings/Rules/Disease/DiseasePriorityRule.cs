@@ -25,7 +25,7 @@ public class DiseasePriorityRule : BasePriorityRule, ICoversRule<DiseaseAnyPrior
     {
         if (preset is DiseaseRulePreset p)
         {
-            has = p.has; disease = (Verse.HediffDef?)RuleDtoDefs.ByName(typeof(Verse.HediffDef), p.disease);
+            has = p.has; disease = (Verse.HediffDef?)Verse.GenDefDatabase.GetDef(typeof(Verse.HediffDef), p.disease, false);
         }
     }
 

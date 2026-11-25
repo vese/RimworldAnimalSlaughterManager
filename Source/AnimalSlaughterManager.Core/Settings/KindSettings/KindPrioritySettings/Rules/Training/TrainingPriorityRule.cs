@@ -25,7 +25,7 @@ public class TrainingPriorityRule : BasePriorityRule, ICoversRule<TrainingGenera
     {
         if (preset is TrainingRulePreset p)
         {
-            has = p.has; trainable = (RimWorld.TrainableDef?)RuleDtoDefs.ByName(typeof(RimWorld.TrainableDef), p.trainable);
+            has = p.has; trainable = (RimWorld.TrainableDef?)Verse.GenDefDatabase.GetDef(typeof(RimWorld.TrainableDef), p.trainable, false);
         }
     }
 

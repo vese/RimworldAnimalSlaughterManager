@@ -41,7 +41,7 @@ public class TraitPriorityRule : BasePriorityRule, ICoversRule<TraitPriorityRule
         if (preset is PriorityTraitRulePreset p)
         {
             has = p.has;
-            trait = (Verse.HediffDef?)RuleDtoDefs.ByName(typeof(Verse.HediffDef), p.trait);
+            trait = (Verse.HediffDef?)Verse.GenDefDatabase.GetDef(typeof(Verse.HediffDef), p.trait, false);
 
             if (System.Enum.TryParse(p.inheritability, out TraitInheritability parsed))
             {
