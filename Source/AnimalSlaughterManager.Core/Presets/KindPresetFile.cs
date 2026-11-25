@@ -141,9 +141,9 @@ public static class KindPresetFileSerialization
 
     /// <summary>Integration settings from their sections: every provider reads the wrapped
     /// children; the ones that find their section join the slice.</summary>
-    internal static Dictionary<string, IKindSettings> ReadIntegrations(List<XmlElement> sections)
+    internal static Dictionary<string, SpecialSettingsPreset> ReadIntegrations(List<XmlElement> sections)
     {
-        var integrations = new Dictionary<string, IKindSettings>();
+        var integrations = new Dictionary<string, SpecialSettingsPreset>();
         var kind = PresetSectionSerialization.Wrap(sections);
 
         foreach (var provider in IntegrationServices.GetServices<IKindSettingsProvider>())

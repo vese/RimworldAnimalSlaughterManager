@@ -16,13 +16,13 @@ public class KindSettings : IExposable
     private int dataVersion = currentDataVersion;
 
     // v1 bridge: the traits settings read from their legacy flat keys await their PostLoadInit move.
-    private IKindSettings? pendingLegacy;
+    private SpecialSettingsPreset? pendingLegacy;
 
     public KindPreferenceSettings preferenceSettings;
     public KindPrioritySettings prioritySettings = new();
 
     /// <summary>Integration-owned settings by provider key; the core never names their types.</summary>
-    public Dictionary<string, IKindSettings> integrationsSettings = [];
+    public Dictionary<string, SpecialSettingsPreset> integrationsSettings = [];
 
     public KindSettings()
     {
@@ -39,7 +39,7 @@ public class KindSettings : IExposable
 
     /// <summary>The integration's settings under the provider's key, created on first use.</summary>
     public T GetOrCreateIntegration<T>(IKindSettingsProvider provider)
-        where T : class, IKindSettings
+        where T : SpecialSettingsPreset
     {
         if (!integrationsSettings.TryGetValue(provider.Key, out var settings))
         {
@@ -111,7 +111,7 @@ public class KindSettings : IExposable
         AnimalDefName = def.defName,
         Preferences = preferenceSettings.ToPreset(),
         Priorities = prioritySettings.ToPreset(),
-        SpecialSettings = new Dictionary<string, IKindSettings>(integrationsSettings)
+        SpecialSettings = new Dictionary<string, SpecialSettingsPreset>(integrationsSettings)
     };
 
     public void FromPreset(KindPreset preset)
@@ -121,6 +121,6 @@ public class KindSettings : IExposable
         preferenceSettings.FromPreset(preset.Preferences);
         prioritySettings.FromPreset(preset.Priorities);
 
-        integrationsSettings = new Dictionary<string, IKindSettings>(preset.SpecialSettings);
+        integrationsSettings = new Dictionary<string, SpecialSettingsPreset>(preset.SpecialSettings);
     }
 }

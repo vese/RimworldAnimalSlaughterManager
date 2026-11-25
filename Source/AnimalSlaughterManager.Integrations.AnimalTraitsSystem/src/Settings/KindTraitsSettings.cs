@@ -149,7 +149,7 @@ public abstract class KindTraitsRuleSet<T> : IEditableTraitsRuleSet<T> where T :
 /// Stored opaquely by the core under <see cref="SettingsKey"/>; in kind presets they ride as the
 /// integration's own section (the legacy flat children of earlier versions also read).
 /// </summary>
-public class KindTraitsSettings : IKindSettings
+public class KindTraitsSettings : SpecialSettingsPreset
 {
     public const string SettingsKey = "atsTraits";
 
@@ -161,7 +161,7 @@ public class KindTraitsSettings : IKindSettings
 
         public string Key => SettingsKey;
 
-        public IKindSettings Create() => new KindTraitsSettings();
+        public SpecialSettingsPreset Create() => new KindTraitsSettings();
     }
 
     /// <summary>The kind's ATS settings, created on first use.</summary>
@@ -175,23 +175,23 @@ public class KindTraitsSettings : IKindSettings
     public ForceCullRuleSet forceCullRuleSet = new();
 
     /// <summary>True when this kind deviates from vanilla behaviour and must be recomputed.</summary>
-    public bool Customized =>
+    public override bool Customized =>
         protectRuleSet.HasRules ||
         forceCullRuleSet.HasRules;
 
-    public void Reset()
+    public override void Reset()
     {
         protectRuleSet.Clear();
         forceCullRuleSet.Clear();
     }
 
-    public void ExposeData()
+    public override void ExposeData()
     {
         protectRuleSet.ExposeData("keepTraits");
         forceCullRuleSet.ExposeData("forceCullTraits");
     }
 
-    public void WriteXml(XmlElement parent)
+    public override void WriteXml(XmlElement parent)
     {
         var section = new TraitsSectionDto
         {
@@ -202,7 +202,7 @@ public class KindTraitsSettings : IKindSettings
         PresetSectionSerialization.Serialize(parent, section);
     }
 
-    public bool ReadXml(XmlElement kind)
+    public override bool ReadXml(XmlElement kind)
     {
         protectRuleSet.rules.Clear();
         forceCullRuleSet.rules.Clear();

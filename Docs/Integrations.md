@@ -35,7 +35,7 @@
 3. Класс регистрации `[StaticConstructorOnStartup]`: при активном чужом моде —
    `IntegrationServices.Add<Контракт>(adapter)` для каждого контракта; провайдер настроек
    вида — безусловно (данные переживают выключение чужого мода).
-4. Свои настройки вида: `IKindSettings` (`WriteXml/ReadXml` — своя секция пресета)
+4. Свои настройки вида: наследование `SpecialSettingsPreset` (`WriteXml/ReadXml` — своя секция пресета)
    + `PresetSectionSerialization` (сериализация секций).
 
 ## Правила расположения

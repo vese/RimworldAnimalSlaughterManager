@@ -6,5 +6,5 @@ public interface IKindSettingsProvider
 {
     string Key { get; }
 
-    IKindSettings Create();
+    SpecialSettingsPreset Create();
 }
