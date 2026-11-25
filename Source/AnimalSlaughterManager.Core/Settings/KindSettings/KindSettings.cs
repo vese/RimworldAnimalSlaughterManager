@@ -21,6 +21,7 @@ public class KindSettings : IExposable
     public KindPreferenceSettings preferenceSettings;
     public KindPrioritySettings prioritySettings = new();
 
+    //TODO: rename to SpecialSettings
     /// <summary>Integration-owned settings by provider key; the core never names their types.</summary>
     public Dictionary<string, BaseSpecialSettingsPreset> integrationsSettings = [];
 
