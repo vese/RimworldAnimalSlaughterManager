@@ -35,7 +35,7 @@ public class SpecialSettingsTab(KindSettings settings) : BaseSettingsTab
 
     private static void OpenKindPresetsWindow(ISettingsProvider comp, ThingDef animalDef, KindSettings _)
     {
-        IntegrationServices.GetServices<IPresetWindows>()[0].OpenKindBrowser(comp, animalDef);
+        Find.WindowStack.Add(new Dialog_PresetBrowser((ASM_MapComp)comp, PresetScope.Kind, animalDef));
     }
 
     private void ResetTabSettings(ISettingsProvider comp, ThingDef animalDef, KindSettings settings)

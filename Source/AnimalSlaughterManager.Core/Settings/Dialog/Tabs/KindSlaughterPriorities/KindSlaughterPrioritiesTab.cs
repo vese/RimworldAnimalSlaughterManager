@@ -336,7 +336,7 @@ public class KindSlaughterPrioritiesTab(ISettingsProvider comp, ThingDef animalD
 
     private static void OpenKindPresetsWindow(ISettingsProvider comp, ThingDef animalDef, KindSettings _)
     {
-        IntegrationServices.GetServices<IPresetWindows>()[0].OpenKindBrowser(comp, animalDef);
+        Find.WindowStack.Add(new Dialog_PresetBrowser((ASM_MapComp)comp, PresetScope.Kind, animalDef));
     }
 
     private static void ResetTabSettings(ISettingsProvider comp, ThingDef animalDef, KindSettings settings)
