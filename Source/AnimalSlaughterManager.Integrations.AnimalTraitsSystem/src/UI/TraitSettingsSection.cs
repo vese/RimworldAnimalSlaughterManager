@@ -17,7 +17,7 @@ public sealed class TraitSettingsSection(KindTraitsSettings traitsSettings) : IS
 
     public void Reset()
     {
-        KindTraitsSettings.Provider.Instance.Reset(traitsSettings);
+        traitsSettings.Reset();
     }
 
     public float Draw(float x, float y, float width, float height, ISettingsProvider comp, ThingDef animalDef)

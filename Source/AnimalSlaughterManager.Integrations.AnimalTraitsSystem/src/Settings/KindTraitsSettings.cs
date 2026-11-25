@@ -149,7 +149,13 @@ public abstract class KindTraitsRuleSet<T> : IEditableTraitsRuleSet<T> where T :
 /// Stored opaquely by the core under <see cref="SettingsKey"/>; in kind presets they ride as the
 /// integration's own section (the legacy flat children of earlier versions also read).
 /// </summary>
-public class KindTraitsSettings : BaseSpecialSettingsPreset, IExposable
+public class TraitsPreset : BaseSpecialSettingsPreset
+{
+    public List<TraitDto> KeepTraits = [];
+    public List<TraitDto> ForceCullTraits = [];
+}
+
+public class KindTraitsSettings : ISpecialSettings
 {
     public const string SettingsKey = "atsTraits";
 
@@ -162,65 +168,33 @@ public class KindTraitsSettings : BaseSpecialSettingsPreset, IExposable
 
         public string Key => SettingsKey;
 
-        public BaseSpecialSettingsPreset Create() => new KindTraitsSettings();
-
-        public bool Customized(BaseSpecialSettingsPreset preset) =>
-            preset is KindTraitsSettings s && (s.protectRuleSet.HasRules || s.forceCullRuleSet.HasRules);
-
-        public void Reset(BaseSpecialSettingsPreset preset)
-        {
-            if (preset is not KindTraitsSettings s)
-            {
-                return;
-            }
-
-            s.protectRuleSet.Clear();
-            s.forceCullRuleSet.Clear();
-        }
-
-        public void ExposeData(BaseSpecialSettingsPreset preset)
-        {
-            if (preset is not KindTraitsSettings s)
-            {
-                return;
-            }
-
-            s.protectRuleSet.ExposeData("keepTraits");
-            s.forceCullRuleSet.ExposeData("forceCullTraits");
-        }
+        public ISpecialSettings Create() => new KindTraitsSettings();
 
         public void WriteSection(BaseSpecialSettingsPreset preset, XmlElement parent)
         {
-            if (preset is not KindTraitsSettings s)
+            if (preset is not TraitsPreset p)
             {
                 return;
             }
 
-            var section = new TraitsSectionDto
+            PresetSectionSerialization.Serialize(parent, new TraitsSectionDto
             {
-                KeepTraits = s.protectRuleSet.rules.Select(TraitDto.From).ToList(),
-                ForceCullTraits = s.forceCullRuleSet.rules.Select(TraitDto.From).ToList(),
-            };
-
-            PresetSectionSerialization.Serialize(parent, section);
+                KeepTraits = p.KeepTraits,
+                ForceCullTraits = p.ForceCullTraits
+            });
         }
 
         public BaseSpecialSettingsPreset? ReadSection(XmlElement kind)
         {
-            var s = new KindTraitsSettings();
-
             var section = kind[SettingsKey];
 
             if (section != null)
             {
-                var dto = PresetSectionSerialization.Deserialize<TraitsSectionDto>(section);
-
-                if (dto != null)
+                return new TraitsPreset
                 {
-                    s.FillRules(dto.KeepTraits, dto.ForceCullTraits);
-                }
-
-                return s;
+                    KeepTraits = PresetSectionSerialization.Deserialize<TraitsSectionDto>(section)?.KeepTraits ?? [],
+                    ForceCullTraits = PresetSectionSerialization.Deserialize<TraitsSectionDto>(section)?.ForceCullTraits ?? []
+                };
             }
 
             // Presets saved before the section format carried the lists as direct children.
@@ -232,11 +206,14 @@ public class KindTraitsSettings : BaseSpecialSettingsPreset, IExposable
                 return null;
             }
 
-            s.FillRules(PresetSectionSerialization.Deserialize<KeepTraitsListDto>(legacyKeep)?.Trait, null);
-            s.FillRules(null, PresetSectionSerialization.Deserialize<ForceCullTraitsListDto>(legacyCull)?.Trait);
-
-            return s;
+            return new TraitsPreset
+            {
+                KeepTraits = PresetSectionSerialization.Deserialize<KeepTraitsListDto>(legacyKeep)?.Trait ?? [],
+                ForceCullTraits = PresetSectionSerialization.Deserialize<ForceCullTraitsListDto>(legacyCull)?.Trait ?? []
+            };
         }
+
+
     }
 
     /// <summary>The kind's ATS settings, created on first use.</summary>
@@ -249,10 +226,37 @@ public class KindTraitsSettings : BaseSpecialSettingsPreset, IExposable
     // (protection still wins at intersections).
     public ForceCullRuleSet forceCullRuleSet = new();
 
+    public bool Customized =>
+        protectRuleSet.HasRules ||
+        forceCullRuleSet.HasRules;
+
+    public void Reset()
+    {
+        protectRuleSet.Clear();
+        forceCullRuleSet.Clear();
+    }
+
     public void ExposeData()
     {
         protectRuleSet.ExposeData("keepTraits");
         forceCullRuleSet.ExposeData("forceCullTraits");
+    }
+
+    public BaseSpecialSettingsPreset ToPreset() => new TraitsPreset()
+    {
+        KeepTraits = protectRuleSet.rules.Select(TraitDto.From).ToList(),
+        ForceCullTraits = forceCullRuleSet.rules.Select(TraitDto.From).ToList()
+    };
+
+    public void FromPreset(BaseSpecialSettingsPreset preset)
+    {
+        protectRuleSet.rules.Clear();
+        forceCullRuleSet.rules.Clear();
+
+        if (preset is TraitsPreset p)
+        {
+            FillRules(p.KeepTraits, p.ForceCullTraits);
+        }
     }
 
     private void FillRules(List<TraitDto>? keep, List<TraitDto>? cull)
