@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace ASM;
 
 /// <summary>One priority bucket as a list preset: the typed rule presets.</summary>
-public class RuleListPreset
+public class PrioritySettingsPreset
 {
-    public List<PriorityRulePreset> Rules = [];
+    public List<BasePriorityRulePreset> Rules { get; set; }
 }

@@ -16,9 +16,9 @@ public class BondPriorityRule : BasePriorityRule
 
     public override string DtoName => "Bond";
 
-    public override PriorityRulePreset ToPreset() => new BondRulePreset { Has = has };
+    public override BasePriorityRulePreset ToPreset() => new BondRulePreset { Has = has };
 
-    public override void FromPreset(PriorityRulePreset preset)
+    public override void FromPreset(BasePriorityRulePreset preset)
     {
         if (preset is BondRulePreset p)
         {

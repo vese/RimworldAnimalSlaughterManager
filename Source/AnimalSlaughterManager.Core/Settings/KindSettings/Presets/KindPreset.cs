@@ -13,16 +13,16 @@ public class KindPreset
     public string maleYoungPref = "";
     public string femaleYoungPref = "";
 
-    public List<PriorityRulePreset> PrioRulesAdultMale = [];
-    public List<PriorityRulePreset> PrioRulesYoungMale = [];
-    public List<PriorityRulePreset> PrioRulesAdultFemale = [];
-    public List<PriorityRulePreset> PrioRulesYoungFemale = [];
+    public List<BasePriorityRulePreset> PrioRulesAdultMale = [];
+    public List<BasePriorityRulePreset> PrioRulesYoungMale = [];
+    public List<BasePriorityRulePreset> PrioRulesAdultFemale = [];
+    public List<BasePriorityRulePreset> PrioRulesYoungFemale = [];
 
     /// <summary>The integration settings of the slice by their provider key; the file layer
     /// (de)serializes their sections.</summary>
     public Dictionary<string, IKindSettings> Integrations = [];
 
-    public List<PriorityRulePreset> GetBucket((bool Male, bool Adult) bucket) => bucket switch
+    public List<BasePriorityRulePreset> GetBucket((bool Male, bool Adult) bucket) => bucket switch
     {
         (true, true) => PrioRulesAdultMale,
         (true, false) => PrioRulesYoungMale,
@@ -30,7 +30,7 @@ public class KindPreset
         _ => PrioRulesYoungFemale,
     };
 
-    public void SetBucket((bool Male, bool Adult) bucket, List<PriorityRulePreset> presets)
+    public void SetBucket((bool Male, bool Adult) bucket, List<BasePriorityRulePreset> presets)
     {
         switch (bucket)
         {

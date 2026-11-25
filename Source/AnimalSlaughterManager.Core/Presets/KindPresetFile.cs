@@ -106,7 +106,7 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
 public static class KindPresetFileSerialization
 {
     /// <summary>Writes one bucket as an element with the rule presets inside.</summary>
-    internal static void SerializeBucket(XmlWriter writer, string name, List<PriorityRulePreset> presets)
+    internal static void SerializeBucket(XmlWriter writer, string name, List<BasePriorityRulePreset> presets)
     {
         RulePresetXml.Bucket(name, PriorityRuleXml.ToRulePresets(presets)).WriteTo(writer);
     }

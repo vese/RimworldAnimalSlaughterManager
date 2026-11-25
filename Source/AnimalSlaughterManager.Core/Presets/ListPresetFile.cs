@@ -16,16 +16,16 @@ public class ListPresetFile : IVersionedPresetDto, IXmlSerializable
     public int Version { get; set; }
 
     /// <summary>The priority rule presets; empty for a section-based list.</summary>
-    public List<PriorityRulePreset> Rules = [];
+    public List<BasePriorityRulePreset> Rules = [];
 
     /// <summary>The owning settings' own section elements; empty for a rule list.</summary>
     public List<XmlElement> Sections = [];
 
-    public static ListPresetFile OfRules(RuleListPreset preset) => new() { Rules = preset.Rules };
+    public static ListPresetFile OfRules(PrioritySettingsPreset preset) => new() { Rules = preset.Rules };
 
     public static ListPresetFile OfSections(params IEnumerable<XmlElement>[] sections) => new() { Sections = [.. sections.SelectMany(s => s)] };
 
-    public RuleListPreset ToRuleList() => new() { Rules = Rules };
+    public PrioritySettingsPreset ToRuleList() => new() { Rules = Rules };
 
     public XmlSchema? GetSchema() => null;
 

@@ -4,7 +4,7 @@ namespace ASM;
 
 /// <summary>The preset model of the positive/negative-trait priority rule.</summary>
 [XmlRoot("TraitGeneral")]
-public class PriorityTraitGeneralRulePreset : PriorityRulePreset
+public class PriorityTraitGeneralRulePreset : BasePriorityRulePreset
 {
     public bool Has { get; set; }
     public string Type { get; set; } = null!;

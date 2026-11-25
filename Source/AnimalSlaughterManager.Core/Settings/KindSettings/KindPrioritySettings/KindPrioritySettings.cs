@@ -103,10 +103,10 @@ public class KindPrioritySettings : IPresettable
     }
 
     /// <summary>One bucket's rules as a list preset.</summary>
-    public RuleListPreset ToPreset((bool Male, bool Adult) bucket) =>
+    public PrioritySettingsPreset ToPreset((bool Male, bool Adult) bucket) =>
         new() { Rules = Get(bucket.Male, bucket.Adult).Select(r => r.ToPreset()).ToList() };
 
-    public void FromPreset(RuleListPreset dto, (bool Male, bool Adult) bucket)
+    public void FromPreset(PrioritySettingsPreset dto, (bool Male, bool Adult) bucket)
     {
         ruleSets[bucket].ReplaceAll(PriorityRuleXml.ToRules(dto.Rules));
     }
