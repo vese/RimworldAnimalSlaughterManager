@@ -16,7 +16,7 @@ public class ListPresetFile : IVersionedPresetDto, IXmlSerializable
     public int Version { get; set; }
 
     /// <summary>The priority rule presets; empty for a section-based list.</summary>
-    public List<RulePreset> Rules = [];
+    public List<object> Rules = [];
 
     /// <summary>The owning settings' own section elements; empty for a rule list.</summary>
     public List<XmlElement> Sections = [];
@@ -35,7 +35,7 @@ public class ListPresetFile : IVersionedPresetDto, IXmlSerializable
 
         if (Rules.Count > 0)
         {
-            RulePresetXml.Bucket(RulesElement, Rules).WriteTo(writer);
+            RulePresetXml.Bucket(RulesElement, PriorityRuleXml.ToRulePresets(Rules)).WriteTo(writer);
         }
 
         foreach (var section in Sections)
@@ -52,7 +52,7 @@ public class ListPresetFile : IVersionedPresetDto, IXmlSerializable
         var doc = new XmlDocument();
         var root = (XmlElement)doc.ReadNode(reader.ReadSubtree())!;
 
-        Rules = RulePresetXml.ReadBucket(root[RulesElement]);
+        Rules = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(root[RulesElement]));
 
         foreach (XmlElement child in root.ChildNodes)
         {

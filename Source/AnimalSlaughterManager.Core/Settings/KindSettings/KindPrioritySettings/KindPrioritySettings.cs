@@ -96,15 +96,15 @@ public class KindPrioritySettings : IPresettable
 
     public void Save(KindPreset dto)
     {
-        dto.SetBucket((true, true), PriorityRuleXml.ToRulePresets(Get(true, true)));
-        dto.SetBucket((true, false), PriorityRuleXml.ToRulePresets(Get(true, false)));
-        dto.SetBucket((false, true), PriorityRuleXml.ToRulePresets(Get(false, true)));
-        dto.SetBucket((false, false), PriorityRuleXml.ToRulePresets(Get(false, false)));
+        dto.SetBucket((true, true), Get(true, true).Select(r => r.ToPreset()).ToList());
+        dto.SetBucket((true, false), Get(true, false).Select(r => r.ToPreset()).ToList());
+        dto.SetBucket((false, true), Get(false, true).Select(r => r.ToPreset()).ToList());
+        dto.SetBucket((false, false), Get(false, false).Select(r => r.ToPreset()).ToList());
     }
 
     /// <summary>One bucket's rules as a list preset.</summary>
     public RuleListPreset ToPreset((bool Male, bool Adult) bucket) =>
-        new() { Rules = PriorityRuleXml.ToRulePresets(Get(bucket.Male, bucket.Adult)) };
+        new() { Rules = Get(bucket.Male, bucket.Adult).Select(r => r.ToPreset()).ToList() };
 
     public void FromPreset(RuleListPreset dto, (bool Male, bool Adult) bucket)
     {

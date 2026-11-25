@@ -29,7 +29,7 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
 
         foreach (var (name, presets) in BucketsOf(Kind))
         {
-            KindPresetFileSerialization.SerializeBucket(writer, name, presets);
+            KindPresetFileSerialization.SerializeBucket(writer, name, PriorityRuleXml.ToRulePresets(presets));
         }
 
         foreach (var section in Kind.IntegrationSections)
@@ -53,7 +53,7 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
 
         foreach (var (bucket, name) in BucketNames())
         {
-            Kind.SetBucket(bucket, RulePresetXml.ReadBucket(root[name]));
+            Kind.SetBucket(bucket, PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(root[name])));
         }
 
         foreach (XmlElement child in root.ChildNodes)
@@ -65,7 +65,7 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
         }
     }
 
-    private static IEnumerable<(string Bucket, List<RulePreset> Presets)> BucketsOf(KindPreset kind)
+    private static IEnumerable<(string Bucket, List<object> Presets)> BucketsOf(KindPreset kind)
     {
         yield return ("PrioRulesAdultMale", kind.PrioRulesAdultMale);
         yield return ("PrioRulesYoungMale", kind.PrioRulesYoungMale);
@@ -112,7 +112,7 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
             ((false, false), v1.PrioRulesYoungFemale)
         })
         {
-            file.Kind.SetBucket(key, elements == null ? [] : RulePresetXml.ReadBucket(elements.FirstOrDefault()));
+            file.Kind.SetBucket(key, elements == null ? [] : PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(elements.FirstOrDefault())));
         }
 
         file.Kind.IntegrationSections.AddRange(v1.IntegrationSections);
