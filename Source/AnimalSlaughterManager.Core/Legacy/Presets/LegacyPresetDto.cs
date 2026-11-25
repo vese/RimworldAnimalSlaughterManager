@@ -45,7 +45,7 @@ public class LegacyPresetDto
                     PrioRulesYoungFemale = ToPresets(k.PrioYoungFemale)
                 }
             };
-            kd.Integrations = KindPresetFileSerialization.ReadIntegrations([.. k.IntegrationSections]);
+            kd.SpecialSettings = KindPresetFileSerialization.ReadIntegrations([.. k.IntegrationSections]);
             kinds.Add(kd);
         }
 

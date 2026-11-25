@@ -111,7 +111,7 @@ public class KindSettings : IExposable
         AnimalDefName = def.defName,
         Preferences = preferenceSettings.ToPreset(),
         Priorities = prioritySettings.ToPreset(),
-        Integrations = new Dictionary<string, IKindSettings>(integrationsSettings)
+        SpecialSettings = new Dictionary<string, IKindSettings>(integrationsSettings)
     };
 
     public void FromPreset(KindPreset preset)
@@ -121,6 +121,6 @@ public class KindSettings : IExposable
         preferenceSettings.FromPreset(preset.Preferences);
         prioritySettings.FromPreset(preset.Priorities);
 
-        integrationsSettings = new Dictionary<string, IKindSettings>(preset.Integrations);
+        integrationsSettings = new Dictionary<string, IKindSettings>(preset.SpecialSettings);
     }
 }

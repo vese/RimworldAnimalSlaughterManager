@@ -16,5 +16,5 @@ public class KindPreset
 
     /// <summary>The integration settings of the slice by their provider key; the file layer
     /// (de)serializes their sections.</summary>
-    public Dictionary<string, IKindSettings> Integrations { get; set; } = [];
+    public Dictionary<string, IKindSettings> SpecialSettings { get; set; } = [];
 }

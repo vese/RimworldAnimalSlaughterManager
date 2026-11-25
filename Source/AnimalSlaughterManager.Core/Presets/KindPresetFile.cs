@@ -41,7 +41,7 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
 
         var holder = PresetSectionSerialization.Holder();
 
-        foreach (var settings in Kind.Integrations.Values)
+        foreach (var settings in Kind.SpecialSettings.Values)
         {
             settings.WriteXml(holder);
         }
@@ -76,7 +76,7 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
             PrioRulesYoungFemale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(root[BucketYoungFemale]))
         };
 
-        Kind.Integrations = KindPresetFileSerialization.ReadIntegrations(KindPresetFileSerialization.SectionsOf(root));
+        Kind.SpecialSettings = KindPresetFileSerialization.ReadIntegrations(KindPresetFileSerialization.SectionsOf(root));
     }
 
     /// <summary>A current-format kind file from a version-1 unified slice; null for null.</summary>
@@ -109,7 +109,7 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
             }
         };
 
-        file.Kind.Integrations = KindPresetFileSerialization.ReadIntegrations([.. v1.IntegrationSections]);
+        file.Kind.SpecialSettings = KindPresetFileSerialization.ReadIntegrations([.. v1.IntegrationSections]);
 
         return file;
     }
@@ -167,7 +167,7 @@ public static class KindPresetFileSections
     {
         var holder = PresetSectionSerialization.Holder();
 
-        foreach (var settings in file.Kind.Integrations.Values)
+        foreach (var settings in file.Kind.SpecialSettings.Values)
         {
             settings.WriteXml(holder);
         }

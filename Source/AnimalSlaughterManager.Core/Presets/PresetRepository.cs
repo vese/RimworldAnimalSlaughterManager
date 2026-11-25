@@ -217,7 +217,7 @@ public static class PresetRepository
             .FirstOrDefault(rules => rules.Count > 0);
 
         return kdTyped != null ? new ListPresetFile { Rules = kdTyped }
-            : kd.Integrations.Count > 0 ? ListPresetFile.OfSections(KindPresetFileSections.SectionsOf(new KindPresetFile { Kind = kd })) : null;
+            : kd.SpecialSettings.Count > 0 ? ListPresetFile.OfSections(KindPresetFileSections.SectionsOf(new KindPresetFile { Kind = kd })) : null;
     }
 
 #pragma warning disable CS0618
