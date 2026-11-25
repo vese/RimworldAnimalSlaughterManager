@@ -124,17 +124,7 @@ public class KindSettings : IExposable, IPresettable
         preferenceSettings.Save(dto);
         prioritySettings.Save(dto);
 
-        var holder = PresetSectionSerialization.Holder();
-
-        foreach (var settings in integrationsSettings.Values)
-        {
-            settings.WriteXml(holder);
-        }
-
-        foreach (var el in PresetSectionSerialization.Children(holder))
-        {
-            dto.IntegrationSections.Add(el);
-        }
+        dto.Integrations = new Dictionary<string, IKindSettings>(integrationsSettings);
     }
 
     public void Load(KindPreset dto)
@@ -142,11 +132,6 @@ public class KindSettings : IExposable, IPresettable
         preferenceSettings.Load(dto);
         prioritySettings.Load(dto);
 
-        var kind = PresetSectionSerialization.Wrap(dto.IntegrationSections);
-
-        foreach (var settings in integrationsSettings.Values)
-        {
-            settings.ReadXml(kind);
-        }
+        integrationsSettings = new Dictionary<string, IKindSettings>(dto.Integrations);
     }
 }

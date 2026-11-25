@@ -25,6 +25,8 @@ public interface IKindSettings : IExposable
 
     /// <summary>Reads the preset slice from a Kind element: the integration's own section, or
     /// the legacy flat children saved by earlier versions.</summary>
-    void ReadXml(XmlElement kind);
+    /// <summary>Reads the settings from their own section (or its legacy flat children) among
+    /// the kind element's children; true when a section of this integration was there.</summary>
+    bool ReadXml(XmlElement kind);
 }
 

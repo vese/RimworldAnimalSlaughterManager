@@ -203,7 +203,7 @@ public static class PresetRepository
                 .FirstOrDefault(rules => rules.Count > 0);
 
             return typed != null ? new ListPresetFile { Rules = typed }
-                : file.Kind.IntegrationSections.Count > 0 ? ListPresetFile.OfSections(file.Kind.IntegrationSections) : null;
+                : ListPresetFile.OfSections(KindPresetFileSections.SectionsOf(file));
         }
 
         var kd = PresetSerializer.ReadPreset(text)?.Kinds?.FirstOrDefault();

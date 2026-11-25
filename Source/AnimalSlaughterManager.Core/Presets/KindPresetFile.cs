@@ -1,17 +1,23 @@
-using System.Linq;
 using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Schema;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace ASM;
 
-/// <summary>The file form of a kind preset: the version plus the typed model, serialized by
-/// hand (the rule buckets hold discriminated preset elements, the integration sections are
-/// the integrations' own XML).</summary>
+/// <summary>The file form of a kind preset: the version plus the typed model. The buckets and
+/// the integration sections serialize here (each integration owns its section's shape —
+/// WriteXml/ReadXml — while this wrapper owns the element layout).</summary>
 [XmlRoot("KindPreset")]
 public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
 {
+    private const string BucketAdultMale = "PrioRulesAdultMale";
+    private const string BucketYoungMale = "PrioRulesYoungMale";
+    private const string BucketAdultFemale = "PrioRulesAdultFemale";
+    private const string BucketYoungFemale = "PrioRulesYoungFemale";
+
+    [XmlAttribute]
     public int Version { get; set; }
 
     public KindPreset Kind = new();
@@ -27,12 +33,19 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
         writer.WriteAttributeString(nameof(Kind.maleYoungPref), Kind.maleYoungPref);
         writer.WriteAttributeString(nameof(Kind.femaleYoungPref), Kind.femaleYoungPref);
 
-        foreach (var (name, presets) in BucketsOf(Kind))
+        KindPresetFileSerialization.SerializeBucket(writer, BucketAdultMale, Kind.PrioRulesAdultMale);
+        KindPresetFileSerialization.SerializeBucket(writer, BucketYoungMale, Kind.PrioRulesYoungMale);
+        KindPresetFileSerialization.SerializeBucket(writer, BucketAdultFemale, Kind.PrioRulesAdultFemale);
+        KindPresetFileSerialization.SerializeBucket(writer, BucketYoungFemale, Kind.PrioRulesYoungFemale);
+
+        var holder = PresetSectionSerialization.Holder();
+
+        foreach (var settings in Kind.Integrations.Values)
         {
-            KindPresetFileSerialization.SerializeBucket(writer, name, PriorityRuleXml.ToRulePresets(presets));
+            settings.WriteXml(holder);
         }
 
-        foreach (var section in Kind.IntegrationSections)
+        foreach (var section in PresetSectionSerialization.Children(holder))
         {
             section.WriteTo(writer);
         }
@@ -51,38 +64,13 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
         var doc = new XmlDocument();
         var root = (XmlElement)doc.ReadNode(reader.ReadSubtree())!;
 
-        foreach (var (bucket, name) in BucketNames())
-        {
-            Kind.SetBucket(bucket, PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(root[name])));
-        }
+        Kind.PrioRulesAdultMale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(root[BucketAdultMale]));
+        Kind.PrioRulesYoungMale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(root[BucketYoungMale]));
+        Kind.PrioRulesAdultFemale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(root[BucketAdultFemale]));
+        Kind.PrioRulesYoungFemale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(root[BucketYoungFemale]));
 
-        foreach (XmlElement child in root.ChildNodes)
-        {
-            if (!IsBucketName(child.Name))
-            {
-                Kind.IntegrationSections.Add(child);
-            }
-        }
+        Kind.Integrations = KindPresetFileSerialization.ReadIntegrations(KindPresetFileSerialization.SectionsOf(root));
     }
-
-    private static IEnumerable<(string Bucket, List<PriorityRulePreset> Presets)> BucketsOf(KindPreset kind)
-    {
-        yield return ("PrioRulesAdultMale", kind.PrioRulesAdultMale);
-        yield return ("PrioRulesYoungMale", kind.PrioRulesYoungMale);
-        yield return ("PrioRulesAdultFemale", kind.PrioRulesAdultFemale);
-        yield return ("PrioRulesYoungFemale", kind.PrioRulesYoungFemale);
-    }
-
-    private static IEnumerable<((bool Male, bool Adult) Key, string Name)> BucketNames()
-    {
-        yield return ((true, true), "PrioRulesAdultMale");
-        yield return ((true, false), "PrioRulesYoungMale");
-        yield return ((false, true), "PrioRulesAdultFemale");
-        yield return ((false, false), "PrioRulesYoungFemale");
-    }
-
-    private static bool IsBucketName(string name) =>
-        name is "PrioRulesAdultMale" or "PrioRulesYoungMale" or "PrioRulesAdultFemale" or "PrioRulesYoungFemale";
 
     /// <summary>A current-format kind file from a version-1 unified slice; null for null.</summary>
     public static KindPresetFile? FromV1(KindPresetDto? v1)
@@ -104,18 +92,12 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
             }
         };
 
-        foreach (var (key, elements) in new[]
-        {
-            ((true, true), v1.PrioRulesAdultMale),
-            ((true, false), v1.PrioRulesYoungMale),
-            ((false, true), v1.PrioRulesAdultFemale),
-            ((false, false), v1.PrioRulesYoungFemale)
-        })
-        {
-            file.Kind.SetBucket(key, elements == null ? [] : PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(elements.FirstOrDefault())));
-        }
+        file.Kind.PrioRulesAdultMale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(v1.PrioRulesAdultMale?.FirstOrDefault()));
+        file.Kind.PrioRulesYoungMale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(v1.PrioRulesYoungMale?.FirstOrDefault()));
+        file.Kind.PrioRulesAdultFemale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(v1.PrioRulesAdultFemale?.FirstOrDefault()));
+        file.Kind.PrioRulesYoungFemale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(v1.PrioRulesYoungFemale?.FirstOrDefault()));
 
-        file.Kind.IntegrationSections.AddRange(v1.IntegrationSections);
+        file.Kind.Integrations = KindPresetFileSerialization.ReadIntegrations([.. v1.IntegrationSections]);
 
         return file;
     }
@@ -124,24 +106,60 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
 public static class KindPresetFileSerialization
 {
     /// <summary>Writes one bucket as an element with the rule presets inside.</summary>
-    internal static void SerializeBucket(System.Xml.XmlWriter writer, string name, System.Collections.Generic.List<RulePreset> presets)
+    internal static void SerializeBucket(XmlWriter writer, string name, List<PriorityRulePreset> presets)
     {
-        var doc = new System.Xml.XmlDocument();
-        var bucket = doc.CreateElement(name);
-        doc.AppendChild(bucket);
+        RulePresetXml.Bucket(name, PriorityRuleXml.ToRulePresets(presets)).WriteTo(writer);
+    }
 
-        foreach (var preset in presets)
+    /// <summary>The non-bucket children of a kind element (the integration sections).</summary>
+    internal static List<XmlElement> SectionsOf(XmlElement root)
+    {
+        var sections = new List<XmlElement>();
+
+        foreach (XmlElement child in root.ChildNodes)
         {
-            var rule = doc.CreateElement("Rule");
-            rule.SetAttribute(nameof(RulePreset.Type), preset.Type);
-            bucket.AppendChild(rule);
-
-            foreach (var payload in preset.Payload ?? [])
+            if (child.LocalName is not ("PrioRulesAdultMale" or "PrioRulesYoungMale" or "PrioRulesAdultFemale" or "PrioRulesYoungFemale"))
             {
-                rule.AppendChild(doc.ImportNode(payload, true));
+                sections.Add(child);
             }
         }
 
-        bucket.WriteTo(writer);
+        return sections;
+    }
+
+    /// <summary>Integration settings from their sections: every provider reads the wrapped
+    /// children; the ones that find their section join the slice.</summary>
+    internal static Dictionary<string, IKindSettings> ReadIntegrations(List<XmlElement> sections)
+    {
+        var integrations = new Dictionary<string, IKindSettings>();
+        var kind = PresetSectionSerialization.Wrap(sections);
+
+        foreach (var provider in IntegrationServices.GetServices<IKindSettingsProvider>())
+        {
+            var settings = provider.Create();
+
+            if (settings.ReadXml(kind))
+            {
+                integrations[provider.Key] = settings;
+            }
+        }
+
+        return integrations;
+    }
+}
+
+public static class KindPresetFileSections
+{
+    /// <summary>The integration sections of a kind file (serialized on demand).</summary>
+    public static List<XmlElement> SectionsOf(KindPresetFile file)
+    {
+        var holder = PresetSectionSerialization.Holder();
+
+        foreach (var settings in file.Kind.Integrations.Values)
+        {
+            settings.WriteXml(holder);
+        }
+
+        return [.. PresetSectionSerialization.Children(holder)];
     }
 }

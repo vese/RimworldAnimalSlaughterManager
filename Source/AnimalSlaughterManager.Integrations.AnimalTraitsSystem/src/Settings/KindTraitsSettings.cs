@@ -202,7 +202,7 @@ public class KindTraitsSettings : IKindSettings
         PresetSectionSerialization.Serialize(parent, section);
     }
 
-    public void ReadXml(XmlElement kind)
+    public bool ReadXml(XmlElement kind)
     {
         protectRuleSet.rules.Clear();
         forceCullRuleSet.rules.Clear();
@@ -218,7 +218,7 @@ public class KindTraitsSettings : IKindSettings
                 FillRules(dto.KeepTraits, dto.ForceCullTraits);
             }
 
-            return;
+            return true;
         }
 
         // Presets saved before the section format carried the lists as direct children.
@@ -235,6 +235,8 @@ public class KindTraitsSettings : IKindSettings
         {
             FillRules(null, PresetSectionSerialization.Deserialize<ForceCullTraitsListDto>(legacyCull)?.Trait);
         }
+
+        return legacyKeep != null || legacyCull != null;
     }
 
     private void FillRules(List<TraitDto>? keep, List<TraitDto>? cull)

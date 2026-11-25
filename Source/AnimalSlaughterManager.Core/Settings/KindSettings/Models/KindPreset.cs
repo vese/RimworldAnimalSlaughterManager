@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using System.Xml;
 
 namespace ASM;
 
-/// <summary>The per-kind slice of a preset: prefs, typed rule buckets and raw integration
-/// sections. Built and read by KindSettings.ToPreset/FromPreset.</summary>
+/// <summary>The per-kind slice of a preset: prefs, typed rule buckets and the integration
+/// settings as their own objects (each integration owns its section format). Built and read
+/// by KindSettings.ToPreset/FromPreset; the file form is Presets' business.</summary>
 public class KindPreset
 {
     public string animal = "";
@@ -18,8 +18,9 @@ public class KindPreset
     public List<PriorityRulePreset> PrioRulesAdultFemale = [];
     public List<PriorityRulePreset> PrioRulesYoungFemale = [];
 
-    /// <summary>Raw integration sections (any unknown children); owned by their integrations.</summary>
-    public List<XmlElement> IntegrationSections = [];
+    /// <summary>The integration settings of the slice by their provider key; the file layer
+    /// (de)serializes their sections.</summary>
+    public Dictionary<string, IKindSettings> Integrations = [];
 
     public List<PriorityRulePreset> GetBucket((bool Male, bool Adult) bucket) => bucket switch
     {
