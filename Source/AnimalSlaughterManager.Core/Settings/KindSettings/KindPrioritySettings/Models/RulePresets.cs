@@ -5,54 +5,41 @@ namespace ASM;
 // The preset models of the vanilla priority rules: one per rule type, plain fields
 // (defs as defName strings, enums as names), no format concerns.
 
-/// <summary>The base of the rule preset models: the derived type's element name is the type
-/// discriminator in preset files.</summary>
-public abstract class PriorityRulePreset
-{
-    public abstract string DtoName { get; }
-}
-
 [XmlRoot("Pregnancy")]
-public class PregnancyRulePreset : PriorityRulePreset
+public class PregnancyRulePreset
 {
-    public override string DtoName => "Pregnancy";
     public bool has = true;
 }
 
 [XmlRoot("Bond")]
-public class BondRulePreset : PriorityRulePreset
+public class BondRulePreset
 {
-    public override string DtoName => "Bond";
     public bool has = true;
 }
 
 [XmlRoot("Disease")]
-public class DiseaseRulePreset : PriorityRulePreset
+public class DiseaseRulePreset
 {
-    public override string DtoName => "Disease";
     public bool has = true;
     public string? disease;
 }
 
 [XmlRoot("DiseaseAny")]
-public class DiseaseAnyRulePreset : PriorityRulePreset
+public class DiseaseAnyRulePreset
 {
-    public override string DtoName => "DiseaseAny";
     public bool has = true;
 }
 
 [XmlRoot("Training")]
-public class TrainingRulePreset : PriorityRulePreset
+public class TrainingRulePreset
 {
-    public override string DtoName => "Training";
     public bool has = true;
     public string? trainable;
 }
 
 [XmlRoot("TrainingGeneral")]
-public class TrainingGeneralRulePreset : PriorityRulePreset
+public class TrainingGeneralRulePreset
 {
-    public override string DtoName => "TrainingGeneral";
     public string type = nameof(TrainingGeneralType.None);
 }
 

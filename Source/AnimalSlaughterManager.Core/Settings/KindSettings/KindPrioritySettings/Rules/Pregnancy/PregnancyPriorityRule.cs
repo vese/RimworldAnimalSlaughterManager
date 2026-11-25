@@ -16,9 +16,9 @@ public class PregnancyPriorityRule : BasePriorityRule
 
     public override string DtoName => "Pregnancy";
 
-    public override PriorityRulePreset ToPreset() => new PregnancyRulePreset { has = has };
+    public override object ToPreset() => new PregnancyRulePreset { has = has };
 
-    public override void FromPreset(PriorityRulePreset preset)
+    public override void FromPreset(object preset)
     {
         if (preset is PregnancyRulePreset p)
         {

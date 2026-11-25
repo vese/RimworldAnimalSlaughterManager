@@ -6,9 +6,8 @@ namespace ASM;
 // the rule's own (defs as defName strings, enums as names).
 
 [XmlRoot("Trait")]
-public class PriorityTraitRulePreset : PriorityRulePreset
+public class PriorityTraitRulePreset
 {
-    public override string DtoName => "Trait";
     [XmlAttribute]
     public bool has = true;
     [XmlAttribute]
@@ -18,9 +17,8 @@ public class PriorityTraitRulePreset : PriorityRulePreset
 }
 
 [XmlRoot("TraitGeneral")]
-public class PriorityTraitGeneralRulePreset : PriorityRulePreset
+public class PriorityTraitGeneralRulePreset
 {
-    public override string DtoName => "TraitGeneral";
     [XmlAttribute]
     public bool has = true;
     [XmlAttribute]

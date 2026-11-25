@@ -218,7 +218,7 @@ public static class PresetRepository
 
         if (bucket != null)
         {
-            return new ListPresetFile { Rules = PriorityRuleXml.ReadPresets(bucket) };
+            return new ListPresetFile { Rules = RulePresetXml.ReadBucket(bucket) };
         }
 
         return kd.IntegrationSections.Count > 0 ? ListPresetFile.OfSections(kd.IntegrationSections) : null;
@@ -227,7 +227,7 @@ public static class PresetRepository
 #pragma warning disable CS0618
     // The pre-unification RulePresetDto format still yields attribute-form rules.
     private static ListPresetFile? FromRules(List<BasePriorityRule>? rules) =>
-        rules == null ? null : new ListPresetFile { Rules = PriorityRuleXml.ToPresets(rules) };
+        rules == null ? null : new ListPresetFile { Rules = PriorityRuleXml.ToRulePresets(rules) };
 
     private static List<BasePriorityRule>? V1Rules(List<PriorityRuleDto>? dtos) =>
         dtos?.Select(r => r.ToRule()).Where(r => r != null).ToList();

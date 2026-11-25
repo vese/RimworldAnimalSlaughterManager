@@ -8,11 +8,11 @@ public sealed class VanillaPriorityRuleTypes : IPriorityRuleTypes
 {
     public IEnumerable<(string DtoName, Func<BasePriorityRule> Factory)> Types =>
     [
-        ("Pregnancy", static () => new PregnancyPriorityRule()),
-        ("Bond", static () => new BondPriorityRule()),
-        ("Disease", static () => new DiseasePriorityRule()),
-        ("DiseaseAny", static () => new DiseaseAnyPriorityRule()),
-        ("Training", static () => new TrainingPriorityRule()),
-        ("TrainingGeneral", static () => new TrainingGeneralPriorityRule()),
+        (nameof(PregnancyPriorityRule), static () => new PregnancyPriorityRule()),
+        (nameof(BondPriorityRule), static () => new BondPriorityRule()),
+        (nameof(DiseasePriorityRule), static () => new DiseasePriorityRule()),
+        (nameof(DiseaseAnyPriorityRule), static () => new DiseaseAnyPriorityRule()),
+        (nameof(TrainingPriorityRule), static () => new TrainingPriorityRule()),
+        (nameof(TrainingGeneralPriorityRule), static () => new TrainingGeneralPriorityRule()),
     ];
 }

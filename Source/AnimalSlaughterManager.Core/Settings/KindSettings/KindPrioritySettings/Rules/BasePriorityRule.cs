@@ -22,11 +22,11 @@ public abstract class BasePriorityRule : IExposable
     /// <summary>The rule's DTO element name — the type discriminator in preset files.</summary>
     public abstract string DtoName { get; }
 
-    /// <summary>The rule's own preset model.</summary>
-    public abstract PriorityRulePreset ToPreset();
+    /// <summary>The rule's own preset model (the concrete rule-preset type).</summary>
+    public abstract object ToPreset();
 
     /// <summary>Reads the rule from its preset model.</summary>
-    public abstract void FromPreset(PriorityRulePreset preset);
+    public abstract void FromPreset(object preset);
 
     public abstract string Label { get; }
     public abstract BasePriorityRule Clone();

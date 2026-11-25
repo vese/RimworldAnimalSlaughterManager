@@ -10,7 +10,7 @@ public sealed class TraitPriorityRuleTypes : IPriorityRuleTypes
 {
     public IEnumerable<(string DtoName, Func<BasePriorityRule> Factory)> Types =>
     [
-        ("Trait", static () => new TraitPriorityRule()),
-        ("TraitGeneral", static () => new TraitGeneralPriorityRule()),
+        (nameof(TraitPriorityRule), static () => new TraitPriorityRule()),
+        (nameof(TraitGeneralPriorityRule), static () => new TraitGeneralPriorityRule()),
     ];
 }

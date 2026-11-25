@@ -27,9 +27,9 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
         writer.WriteAttributeString(nameof(Kind.maleYoungPref), Kind.maleYoungPref);
         writer.WriteAttributeString(nameof(Kind.femaleYoungPref), Kind.femaleYoungPref);
 
-        foreach (var (bucket, presets) in BucketsOf(Kind))
+        foreach (var (name, presets) in BucketsOf(Kind))
         {
-            PriorityRuleXml.Bucket(bucket, presets).WriteTo(writer);
+            KindPresetFileSerialization.SerializeBucket(writer, name, presets);
         }
 
         foreach (var section in Kind.IntegrationSections)
@@ -53,7 +53,7 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
 
         foreach (var (bucket, name) in BucketNames())
         {
-            Kind.SetBucket(bucket, PriorityRuleXml.ReadPresets(root[name]));
+            Kind.SetBucket(bucket, RulePresetXml.ReadBucket(root[name]));
         }
 
         foreach (XmlElement child in root.ChildNodes)
@@ -65,7 +65,7 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
         }
     }
 
-    private static IEnumerable<(string Bucket, List<PriorityRulePreset> Presets)> BucketsOf(KindPreset kind)
+    private static IEnumerable<(string Bucket, List<RulePreset> Presets)> BucketsOf(KindPreset kind)
     {
         yield return ("PrioRulesAdultMale", kind.PrioRulesAdultMale);
         yield return ("PrioRulesYoungMale", kind.PrioRulesYoungMale);
@@ -112,11 +112,36 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
             ((false, false), v1.PrioRulesYoungFemale)
         })
         {
-            file.Kind.SetBucket(key, elements == null ? [] : PriorityRuleXml.ReadPresets(elements.FirstOrDefault()));
+            file.Kind.SetBucket(key, elements == null ? [] : RulePresetXml.ReadBucket(elements.FirstOrDefault()));
         }
 
         file.Kind.IntegrationSections.AddRange(v1.IntegrationSections);
 
         return file;
+    }
+}
+
+public static class KindPresetFileSerialization
+{
+    /// <summary>Writes one bucket as an element with the rule presets inside.</summary>
+    internal static void SerializeBucket(System.Xml.XmlWriter writer, string name, System.Collections.Generic.List<RulePreset> presets)
+    {
+        var doc = new System.Xml.XmlDocument();
+        var bucket = doc.CreateElement(name);
+        doc.AppendChild(bucket);
+
+        foreach (var preset in presets)
+        {
+            var rule = doc.CreateElement("Rule");
+            rule.SetAttribute(nameof(RulePreset.Type), preset.Type);
+            bucket.AppendChild(rule);
+
+            foreach (var payload in preset.Payload ?? [])
+            {
+                rule.AppendChild(doc.ImportNode(payload, true));
+            }
+        }
+
+        bucket.WriteTo(writer);
     }
 }
