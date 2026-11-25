@@ -16,13 +16,13 @@ public class BondPriorityRule : BasePriorityRule
 
     public override string DtoName => "Bond";
 
-    public override object ToPreset() => new BondRulePreset { has = has };
+    public override object ToPreset() => new BondRulePreset { Has = has };
 
     public override void FromPreset(object preset)
     {
         if (preset is BondRulePreset p)
         {
-            has = p.has;
+            has = p.Has;
         }
     }
 

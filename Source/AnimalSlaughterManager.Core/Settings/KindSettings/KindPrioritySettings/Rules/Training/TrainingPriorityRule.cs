@@ -19,13 +19,13 @@ public class TrainingPriorityRule : BasePriorityRule, ICoversRule<TrainingGenera
 
     public override string DtoName => "Training";
 
-    public override object ToPreset() => new TrainingRulePreset { has = has, trainable = trainable?.defName };
+    public override object ToPreset() => new TrainingRulePreset { Has = has, Trainable = trainable?.defName };
 
     public override void FromPreset(object preset)
     {
         if (preset is TrainingRulePreset p)
         {
-            has = p.has; trainable = (RimWorld.TrainableDef?)Verse.GenDefDatabase.GetDef(typeof(RimWorld.TrainableDef), p.trainable, false);
+            has = p.Has; trainable = (RimWorld.TrainableDef?)Verse.GenDefDatabase.GetDef(typeof(RimWorld.TrainableDef), p.Trainable, false);
         }
     }
 

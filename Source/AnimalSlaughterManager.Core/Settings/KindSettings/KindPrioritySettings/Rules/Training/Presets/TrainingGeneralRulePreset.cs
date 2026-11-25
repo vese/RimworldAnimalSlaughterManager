@@ -5,5 +5,5 @@ namespace ASM;
 [XmlRoot("TrainingGeneral")]
 public class TrainingGeneralRulePreset
 {
-    public string type { get; set; } = "";
+    public string Type { get; set; } = null!;
 }

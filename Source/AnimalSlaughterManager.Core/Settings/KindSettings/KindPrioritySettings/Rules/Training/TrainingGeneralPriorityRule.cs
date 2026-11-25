@@ -24,13 +24,13 @@ public class TrainingGeneralPriorityRule : BasePriorityRule, ICoversRule<Trainin
 
     public override string DtoName => "TrainingGeneral";
 
-    public override object ToPreset() => new TrainingGeneralRulePreset { type = type.ToString() };
+    public override object ToPreset() => new TrainingGeneralRulePreset { Type = type.ToString() };
 
     public override void FromPreset(object preset)
     {
         if (preset is TrainingGeneralRulePreset p)
         {
-            if (System.Enum.TryParse(p.type, out TrainingGeneralType parsed)) { type = parsed; };
+            if (System.Enum.TryParse(p.Type, out TrainingGeneralType parsed)) { type = parsed; };
         }
     }
 

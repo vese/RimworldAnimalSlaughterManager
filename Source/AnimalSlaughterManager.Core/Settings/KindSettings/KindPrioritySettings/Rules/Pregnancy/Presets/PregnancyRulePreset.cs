@@ -5,5 +5,5 @@ namespace ASM;
 [XmlRoot("Pregnancy")]
 public class PregnancyRulePreset
 {
-    public bool has { get; set; }
+    public bool Has { get; set; }
 }

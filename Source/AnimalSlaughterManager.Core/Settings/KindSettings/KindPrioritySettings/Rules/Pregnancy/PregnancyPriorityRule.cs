@@ -16,13 +16,13 @@ public class PregnancyPriorityRule : BasePriorityRule
 
     public override string DtoName => "Pregnancy";
 
-    public override object ToPreset() => new PregnancyRulePreset { has = has };
+    public override object ToPreset() => new PregnancyRulePreset { Has = has };
 
     public override void FromPreset(object preset)
     {
         if (preset is PregnancyRulePreset p)
         {
-            has = p.has;
+            has = p.Has;
         }
     }
 

@@ -5,5 +5,5 @@ namespace ASM;
 [XmlRoot("Bond")]
 public class BondRulePreset
 {
-    public bool has { get; set; }
+    public bool Has { get; set; }
 }

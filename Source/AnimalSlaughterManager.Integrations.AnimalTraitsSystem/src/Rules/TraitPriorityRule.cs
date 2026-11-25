@@ -31,19 +31,19 @@ public class TraitPriorityRule : BasePriorityRule, ICoversRule<TraitPriorityRule
 
     public override object ToPreset() => new PriorityTraitRulePreset
     {
-        has = has,
-        trait = trait?.defName,
-        inheritability = inheritability.ToString()
+        Has = has,
+        Trait = trait?.defName,
+        Inheritability = inheritability.ToString()
     };
 
     public override void FromPreset(object preset)
     {
         if (preset is PriorityTraitRulePreset p)
         {
-            has = p.has;
-            trait = (Verse.HediffDef?)Verse.GenDefDatabase.GetDef(typeof(Verse.HediffDef), p.trait, false);
+            has = p.Has;
+            trait = (Verse.HediffDef?)Verse.GenDefDatabase.GetDef(typeof(Verse.HediffDef), p.Trait, false);
 
-            if (System.Enum.TryParse(p.inheritability, out TraitInheritability parsed))
+            if (System.Enum.TryParse(p.Inheritability, out TraitInheritability parsed))
             {
                 inheritability = parsed;
             }
