@@ -16,13 +16,13 @@ public class KindSettings : IExposable
     private int dataVersion = currentDataVersion;
 
     // v1 bridge: the traits settings read from their legacy flat keys await their PostLoadInit move.
-    private SpecialSettingsPreset? pendingLegacy;
+    private BaseSpecialSettingsPreset? pendingLegacy;
 
     public KindPreferenceSettings preferenceSettings;
     public KindPrioritySettings prioritySettings = new();
 
     /// <summary>Integration-owned settings by provider key; the core never names their types.</summary>
-    public Dictionary<string, SpecialSettingsPreset> integrationsSettings = [];
+    public Dictionary<string, BaseSpecialSettingsPreset> integrationsSettings = [];
 
     public KindSettings()
     {
@@ -35,11 +35,17 @@ public class KindSettings : IExposable
     }
 
     /// <summary>True when this kind deviates from vanilla behaviour and must be recomputed.</summary>
-    public bool Customized => preferenceSettings.Customized || prioritySettings.HasRules || integrationsSettings.Values.Any(s => s.Customized);
+    public bool Customized => preferenceSettings.Customized || prioritySettings.HasRules || integrationsSettings.Any(kv => ProviderOf(kv)?.Customized(kv.Value) == true);
 
     /// <summary>The integration's settings under the provider's key, created on first use.</summary>
+
+    private static IKindSettingsProvider? ProviderOf(string key) =>
+        IntegrationServices.GetServices<IKindSettingsProvider>().FirstOrDefault(p => p.Key == key);
+
+    private static IKindSettingsProvider? ProviderOf(KeyValuePair<string, BaseSpecialSettingsPreset> kv) => ProviderOf(kv.Key);
+
     public T GetOrCreateIntegration<T>(IKindSettingsProvider provider)
-        where T : SpecialSettingsPreset
+        where T : BaseSpecialSettingsPreset
     {
         if (!integrationsSettings.TryGetValue(provider.Key, out var settings))
         {
@@ -55,9 +61,9 @@ public class KindSettings : IExposable
         preferenceSettings.Reset();
         prioritySettings.Reset();
 
-        foreach (var settings in integrationsSettings.Values)
+        foreach (var kv in integrationsSettings)
         {
-            settings.Reset();
+            ProviderOf(kv)?.Reset(kv.Value);
         }
     }
 
@@ -66,9 +72,9 @@ public class KindSettings : IExposable
         preferenceSettings.Reset(globals.preferenceSettings);
         prioritySettings.Reset();
 
-        foreach (var settings in integrationsSettings.Values)
+        foreach (var kv in integrationsSettings)
         {
-            settings.Reset();
+            ProviderOf(kv)?.Reset(kv.Value);
         }
     }
 
@@ -86,7 +92,7 @@ public class KindSettings : IExposable
             if (Scribe.mode == LoadSaveMode.LoadingVars && pendingLegacy == null && providers.Count > 0)
             {
                 pendingLegacy = providers[0].Create();
-                pendingLegacy.ExposeData();
+                providers[0].ExposeData(pendingLegacy);
             }
             else if (Scribe.mode == LoadSaveMode.PostLoadInit && pendingLegacy != null && providers.Count > 0)
             {
@@ -111,7 +117,7 @@ public class KindSettings : IExposable
         AnimalDefName = def.defName,
         Preferences = preferenceSettings.ToPreset(),
         Priorities = prioritySettings.ToPreset(),
-        SpecialSettings = new Dictionary<string, SpecialSettingsPreset>(integrationsSettings)
+        SpecialSettings = new Dictionary<string, BaseSpecialSettingsPreset>(integrationsSettings)
     };
 
     public void FromPreset(KindPreset preset)
@@ -121,6 +127,6 @@ public class KindSettings : IExposable
         preferenceSettings.FromPreset(preset.Preferences);
         prioritySettings.FromPreset(preset.Priorities);
 
-        integrationsSettings = new Dictionary<string, SpecialSettingsPreset>(preset.SpecialSettings);
+        integrationsSettings = new Dictionary<string, BaseSpecialSettingsPreset>(preset.SpecialSettings);
     }
 }

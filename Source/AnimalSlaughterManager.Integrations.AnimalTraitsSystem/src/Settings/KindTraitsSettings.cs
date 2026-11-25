@@ -149,19 +149,94 @@ public abstract class KindTraitsRuleSet<T> : IEditableTraitsRuleSet<T> where T :
 /// Stored opaquely by the core under <see cref="SettingsKey"/>; in kind presets they ride as the
 /// integration's own section (the legacy flat children of earlier versions also read).
 /// </summary>
-public class KindTraitsSettings : SpecialSettingsPreset
+public class KindTraitsSettings : BaseSpecialSettingsPreset, IExposable
 {
     public const string SettingsKey = "atsTraits";
 
     /// <summary>The storage provider: registered unconditionally, so the settings survive ATS
-    /// being disabled.</summary>
+    /// being disabled. Owns the model's behavior: queries, reset, save scribing, the preset
+    /// XML section.</summary>
     public sealed class Provider : IKindSettingsProvider
     {
         public static readonly Provider Instance = new();
 
         public string Key => SettingsKey;
 
-        public SpecialSettingsPreset Create() => new KindTraitsSettings();
+        public BaseSpecialSettingsPreset Create() => new KindTraitsSettings();
+
+        public bool Customized(BaseSpecialSettingsPreset preset) =>
+            preset is KindTraitsSettings s && (s.protectRuleSet.HasRules || s.forceCullRuleSet.HasRules);
+
+        public void Reset(BaseSpecialSettingsPreset preset)
+        {
+            if (preset is not KindTraitsSettings s)
+            {
+                return;
+            }
+
+            s.protectRuleSet.Clear();
+            s.forceCullRuleSet.Clear();
+        }
+
+        public void ExposeData(BaseSpecialSettingsPreset preset)
+        {
+            if (preset is not KindTraitsSettings s)
+            {
+                return;
+            }
+
+            s.protectRuleSet.ExposeData("keepTraits");
+            s.forceCullRuleSet.ExposeData("forceCullTraits");
+        }
+
+        public void WriteSection(BaseSpecialSettingsPreset preset, XmlElement parent)
+        {
+            if (preset is not KindTraitsSettings s)
+            {
+                return;
+            }
+
+            var section = new TraitsSectionDto
+            {
+                KeepTraits = s.protectRuleSet.rules.Select(TraitDto.From).ToList(),
+                ForceCullTraits = s.forceCullRuleSet.rules.Select(TraitDto.From).ToList(),
+            };
+
+            PresetSectionSerialization.Serialize(parent, section);
+        }
+
+        public BaseSpecialSettingsPreset? ReadSection(XmlElement kind)
+        {
+            var s = new KindTraitsSettings();
+
+            var section = kind[SettingsKey];
+
+            if (section != null)
+            {
+                var dto = PresetSectionSerialization.Deserialize<TraitsSectionDto>(section);
+
+                if (dto != null)
+                {
+                    s.FillRules(dto.KeepTraits, dto.ForceCullTraits);
+                }
+
+                return s;
+            }
+
+            // Presets saved before the section format carried the lists as direct children.
+            var legacyKeep = kind[nameof(TraitsSectionDto.KeepTraits)];
+            var legacyCull = kind[nameof(TraitsSectionDto.ForceCullTraits)];
+
+            if (legacyKeep == null && legacyCull == null)
+            {
+                return null;
+            }
+
+            s.FillRules(PresetSectionSerialization.Deserialize<KeepTraitsListDto>(legacyKeep)?.Trait, null);
+            s.FillRules(null, PresetSectionSerialization.Deserialize<ForceCullTraitsListDto>(legacyCull)?.Trait);
+
+            return s;
+        }
     }
 
     /// <summary>The kind's ATS settings, created on first use.</summary>
@@ -174,69 +249,10 @@ public class KindTraitsSettings : SpecialSettingsPreset
     // (protection still wins at intersections).
     public ForceCullRuleSet forceCullRuleSet = new();
 
-    /// <summary>True when this kind deviates from vanilla behaviour and must be recomputed.</summary>
-    public override bool Customized =>
-        protectRuleSet.HasRules ||
-        forceCullRuleSet.HasRules;
-
-    public override void Reset()
-    {
-        protectRuleSet.Clear();
-        forceCullRuleSet.Clear();
-    }
-
-    public override void ExposeData()
+    public void ExposeData()
     {
         protectRuleSet.ExposeData("keepTraits");
         forceCullRuleSet.ExposeData("forceCullTraits");
-    }
-
-    public override void WriteXml(XmlElement parent)
-    {
-        var section = new TraitsSectionDto
-        {
-            KeepTraits = protectRuleSet.rules.Select(TraitDto.From).ToList(),
-            ForceCullTraits = forceCullRuleSet.rules.Select(TraitDto.From).ToList(),
-        };
-
-        PresetSectionSerialization.Serialize(parent, section);
-    }
-
-    public override bool ReadXml(XmlElement kind)
-    {
-        protectRuleSet.rules.Clear();
-        forceCullRuleSet.rules.Clear();
-
-        var section = kind[SettingsKey];
-
-        if (section != null)
-        {
-            var dto = PresetSectionSerialization.Deserialize<TraitsSectionDto>(section);
-
-            if (dto != null)
-            {
-                FillRules(dto.KeepTraits, dto.ForceCullTraits);
-            }
-
-            return true;
-        }
-
-        // Presets saved before the section format carried the lists as direct children.
-        var legacyKeep = kind[nameof(TraitsSectionDto.KeepTraits)];
-
-        if (legacyKeep != null)
-        {
-            FillRules(PresetSectionSerialization.Deserialize<KeepTraitsListDto>(legacyKeep)?.Trait, null);
-        }
-
-        var legacyCull = kind[nameof(TraitsSectionDto.ForceCullTraits)];
-
-        if (legacyCull != null)
-        {
-            FillRules(null, PresetSectionSerialization.Deserialize<ForceCullTraitsListDto>(legacyCull)?.Trait);
-        }
-
-        return legacyKeep != null || legacyCull != null;
     }
 
     private void FillRules(List<TraitDto>? keep, List<TraitDto>? cull)
@@ -247,6 +263,7 @@ public class KindTraitsSettings : SpecialSettingsPreset
             {
                 if (t != null)
                 {
+                    protectRuleSet.rules.Add(t);
                     protectRuleSet.rules.Add(t);
                 }
             }

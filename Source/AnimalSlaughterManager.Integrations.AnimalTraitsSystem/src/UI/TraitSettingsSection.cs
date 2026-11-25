@@ -15,7 +15,10 @@ public sealed class TraitSettingsSection(KindTraitsSettings traitsSettings) : IS
     private ReorderableListState protectEditorState = new();
     private ReorderableListState forceCullEditorState = new();
 
-    public void Reset() => traitsSettings.Reset();
+    public void Reset()
+    {
+        KindTraitsSettings.Provider.Instance.Reset(traitsSettings);
+    }
 
     public float Draw(float x, float y, float width, float height, ISettingsProvider comp, ThingDef animalDef)
     {

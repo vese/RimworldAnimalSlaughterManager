@@ -41,9 +41,9 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
 
         var holder = PresetSectionSerialization.Holder();
 
-        foreach (var settings in Kind.SpecialSettings.Values)
+        foreach (var kv in Kind.SpecialSettings)
         {
-            settings.WriteXml(holder);
+            IntegrationServices.GetServices<IKindSettingsProvider>().FirstOrDefault(p => p.Key == kv.Key)?.WriteSection(kv.Value, holder);
         }
 
         foreach (var section in PresetSectionSerialization.Children(holder))
@@ -141,16 +141,16 @@ public static class KindPresetFileSerialization
 
     /// <summary>Integration settings from their sections: every provider reads the wrapped
     /// children; the ones that find their section join the slice.</summary>
-    internal static Dictionary<string, SpecialSettingsPreset> ReadIntegrations(List<XmlElement> sections)
+    internal static Dictionary<string, BaseSpecialSettingsPreset> ReadIntegrations(List<XmlElement> sections)
     {
-        var integrations = new Dictionary<string, SpecialSettingsPreset>();
+        var integrations = new Dictionary<string, BaseSpecialSettingsPreset>();
         var kind = PresetSectionSerialization.Wrap(sections);
 
         foreach (var provider in IntegrationServices.GetServices<IKindSettingsProvider>())
         {
-            var settings = provider.Create();
+            var settings = provider.ReadSection(kind);
 
-            if (settings.ReadXml(kind))
+            if (settings != null)
             {
                 integrations[provider.Key] = settings;
             }
@@ -167,9 +167,9 @@ public static class KindPresetFileSections
     {
         var holder = PresetSectionSerialization.Holder();
 
-        foreach (var settings in file.Kind.SpecialSettings.Values)
+        foreach (var kv in file.Kind.SpecialSettings)
         {
-            settings.WriteXml(holder);
+            IntegrationServices.GetServices<IKindSettingsProvider>().FirstOrDefault(p => p.Key == kv.Key)?.WriteSection(kv.Value, holder);
         }
 
         return [.. PresetSectionSerialization.Children(holder)];
