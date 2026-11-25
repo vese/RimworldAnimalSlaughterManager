@@ -14,37 +14,6 @@ public class PresetDto
     public int version;
 
     [XmlElement("Kind")]
-    public List<KindDto> Kinds = new List<KindDto>();
+    public List<KindPresetDto> Kinds = new List<KindPresetDto>();
 
-    public static PresetDto From(IEnumerable<KeyValuePair<ThingDef, KindSettings>> kindSettings)
-    {
-        var dto = new PresetDto();
-
-        foreach (var kv in kindSettings)
-        {
-            if (kv.Value == null || !kv.Value.Customized)
-            {
-                continue;
-            }
-
-            dto.Kinds.Add(KindDto.Capture(kv.Key, kv.Value));
-        }
-
-        return dto;
-    }
-
-    public void ApplyTo(ISettingsProvider host)
-    {
-        foreach (var kd in Kinds)
-        {
-            var def = DefDatabase<ThingDef>.GetNamed(kd.animal, false);
-
-            if (def == null)
-            {
-                continue;
-            }
-
-            kd.ApplyTo(host.GetSettings(def));
-        }
-    }
 }

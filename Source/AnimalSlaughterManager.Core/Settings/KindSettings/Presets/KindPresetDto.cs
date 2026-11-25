@@ -8,13 +8,15 @@ using Verse;
 namespace ASM;
 
 /// <summary>
-/// The per-kind slice of a preset: the core's own settings plus the integration sections.
-/// Integration data rides as raw XML (<see cref="IntegrationSections"/>) — the DTO stays free
-/// of integration types; each integration reads/writes its own section by name (and, for
-/// presets saved by earlier versions, its legacy flat children).
+/// The per-kind slice of a preset: prefs, rule buckets and raw integration sections.
+/// Built and read by KindSettings.ToPreset/FromPreset.
 /// </summary>
-public class KindDto
+[XmlRoot("KindPreset")]
+public class KindPresetDto : IVersionedPresetDto
 {
+    [XmlAttribute]
+    public int version { get; set; }
+
     [XmlAttribute]
     public string animal;
 
@@ -40,19 +42,6 @@ public class KindDto
     /// <summary>Raw integration sections (any unknown children); owned by their integrations.</summary>
     [XmlAnyElement]
     public List<XmlElement> IntegrationSections = new List<XmlElement>();
-
-    public static KindDto Capture(ThingDef def, KindSettings k)
-    {
-        var dto = new KindDto { animal = def.defName };
-        k.Save(dto);
-        return dto;
-    }
-
-    public void ApplyTo(KindSettings ks)
-    {
-        ks.Reset();
-        ks.Load(this);
-    }
 
     /// <summary>The bucket's element with the rules' DTO children; null when absent.</summary>
     public XmlElement? BucketOf((bool Male, bool Adult) bucket) => bucket switch

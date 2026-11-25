@@ -48,22 +48,20 @@ public class Dialog_ConditionPresetBrowser : Dialog_PresetBrowserBase
     protected override bool HasData() => prioritySettings.Get(male, adult).Count > 0;
 
     protected override void Save(string name) =>
-        PresetRepository.ExportConditions(name, (male, adult), prioritySettings.Get(male, adult));
+        PresetRepository.SaveList(name, PresetRepository.ConditionsFolder((male, adult)), prioritySettings.ToPreset((male, adult)));
 
     protected override bool Apply(PresetEntry entry)
     {
-        // A same-kind condition preset carries its rule list; a Kind/All preset — the slice
-        // of this bucket.
-        var rules = entry.scope == PresetScope.List && entry.condBucket != null
-            ? PresetRepository.ApplyConditions(entry)
-            : PresetRepository.ReadKindRules(entry, (male, adult));
+        // A condition preset carries its rule list; a Kind/All preset — the slice of this
+        // bucket (cross-bucket import included).
+        var dto = PresetRepository.ReadList(entry);
 
-        if (rules == null || rules.Count == 0)
+        if (dto == null)
         {
             return false;
         }
 
-        prioritySettings.ReplaceAll(male, adult, rules);
+        prioritySettings.FromPreset(dto, (male, adult));
         return true;
     }
 

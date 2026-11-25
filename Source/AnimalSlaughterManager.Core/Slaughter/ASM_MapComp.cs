@@ -61,6 +61,40 @@ public class ASM_MapComp : MapComponent, ISettingsProvider
 
     IEnumerable<KeyValuePair<ThingDef, KindSettings>> ISettingsProvider.AllKindSettings => kindSettings;
 
+
+    /// <summary>The full preset: every customized kind's slice.</summary>
+    public AllPresetDto ToPreset()
+    {
+        var dto = new AllPresetDto();
+
+        foreach (var kv in kindSettings)
+        {
+            if (kv.Value != null && kv.Value.Customized)
+            {
+                dto.Kinds.Add(kv.Value.ToPreset(kv.Key));
+            }
+        }
+
+        return dto;
+    }
+
+    public void FromPreset(AllPresetDto dto)
+    {
+        foreach (var kd in dto.Kinds)
+        {
+            var def = DefDatabase<ThingDef>.GetNamed(kd.animal, false);
+
+            if (def == null)
+            {
+                continue;
+            }
+
+            GetSettings(def).FromPreset(kd);
+        }
+
+        MarkDirty();
+    }
+
     public bool IsProtected(Pawn p) => p != null && protectedPawnIDs.Contains(p.thingIDNumber);
 
     // Resolve the pregnant mode for a kind: an explicit per-kind choice, otherwise fall back to

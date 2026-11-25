@@ -22,6 +22,9 @@ public static class PresetSerializer
     /// dispatcher matches them against a file root.</summary>
     public const string PresetRoot = "SlaughterPreset";
     public const string RulePresetRoot = "RulePresetDto";
+    public const string AllPresetRoot = "AllPreset";
+    public const string KindPresetRoot = "KindPreset";
+    public const string ListPresetRoot = "ListPreset";
 
     private static readonly Dictionary<Type, XmlSerializer> serializers = new();
 
@@ -34,19 +37,6 @@ public static class PresetSerializer
         }
 
         return ser;
-    }
-
-    public static string SerializeToText(PresetDto dto)
-    {
-        dto.version = PresetFormat.CurrentVersion;
-
-        var sb = new StringBuilder();
-        using (var w = new StringWriter(sb))
-        {
-            Serializer<PresetDto>().Serialize(w, dto);
-        }
-
-        return sb.ToString();
     }
 
     public static PresetDto? ReadPreset(string? text)
@@ -142,4 +132,22 @@ public static class PresetSerializer
 
         return null;
     }
+
+    /// <summary>Writes a preset DTO of the current version (the caller picks the folder; the
+    /// root element is the DTO's own).</summary>
+    public static string SerializePreset<T>(T dto) where T : class, IVersionedPresetDto
+    {
+        dto.version = PresetFormat.CurrentVersion;
+
+        var sb = new StringBuilder();
+        using (var w = new StringWriter(sb))
+        {
+            Serializer<T>().Serialize(w, dto);
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>Reads a preset DTO of the current format; null when the text is not one.</summary>
+    public static T? DeserializePreset<T>(string? text) where T : class, IVersionedPresetDto => Deserialize<T>(text);
 }

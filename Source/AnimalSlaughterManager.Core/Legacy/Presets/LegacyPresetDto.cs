@@ -26,17 +26,17 @@ public class LegacyPresetDto
 
         foreach (var k in Kinds)
         {
-            var kd = new KindDto
+            var kd = new KindPresetDto
             {
                 animal = k.animal,
                 malePref = k.malePref,
                 femalePref = k.femalePref,
                 maleYoungPref = k.maleYoungPref,
                 femaleYoungPref = k.femaleYoungPref,
-                PrioRulesAdultMale = ToBucket(nameof(KindDto.PrioRulesAdultMale), k.PrioAdultMale),
-                PrioRulesYoungMale = ToBucket(nameof(KindDto.PrioRulesYoungMale), k.PrioYoungMale),
-                PrioRulesAdultFemale = ToBucket(nameof(KindDto.PrioRulesAdultFemale), k.PrioAdultFemale),
-                PrioRulesYoungFemale = ToBucket(nameof(KindDto.PrioRulesYoungFemale), k.PrioYoungFemale)
+                PrioRulesAdultMale = ToBucket(nameof(KindPresetDto.PrioRulesAdultMale), k.PrioAdultMale),
+                PrioRulesYoungMale = ToBucket(nameof(KindPresetDto.PrioRulesYoungMale), k.PrioYoungMale),
+                PrioRulesAdultFemale = ToBucket(nameof(KindPresetDto.PrioRulesAdultFemale), k.PrioAdultFemale),
+                PrioRulesYoungFemale = ToBucket(nameof(KindPresetDto.PrioRulesYoungFemale), k.PrioYoungFemale)
             };
             kd.IntegrationSections.AddRange(k.IntegrationSections);
             dto.Kinds.Add(kd);

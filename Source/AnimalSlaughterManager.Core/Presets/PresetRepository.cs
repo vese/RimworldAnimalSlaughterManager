@@ -87,37 +87,20 @@ public static class PresetRepository
         return [.. result.OrderByDescending(e => e.date).ThenBy(e => e.name)];
     }
 
-    // ---- Export --------------------------------------------------------------------------
+    // ---- Save (the current-version serializer) -------------------------------------------
 
-    public static void ExportAll(string name, ISettingsProvider comp)
-    {
-        Serialize(name, ScopeFolder(PresetScope.All), PresetDto.From(comp.AllKindSettings));
-    }
+    /// <summary>Writes a preset DTO of the current format into its scope folder.</summary>
+    public static void Save(string name, PresetScope scope, IVersionedPresetDto dto) =>
+        Serialize(name, ScopeFolder(scope), dto);
 
-    public static void ExportKind(string name, ThingDef animalDef, KindSettings ks)
-    {
-        var dto = new PresetDto();
-        dto.Kinds.Add(KindDto.Capture(animalDef, ks));
-        Serialize(name, ScopeFolder(PresetScope.Kind), dto);
-    }
-
-    public static void ExportList(string name, ThingDef animalDef, IPresettableRuleSet ruleSet)
-    {
-        var folder = Path.Combine(ScopeFolder(PresetScope.List), ruleSet.PresetsFolder);
-
-        var full = new KindDto { animal = animalDef.defName };
-
-        // The rule set writes its element into a detached holder — move it into the slice.
-        var holder = PresetSectionSerialization.Holder();
-        ruleSet.WriteXml(holder);
-        full.IntegrationSections.AddRange(PresetSectionSerialization.Children(holder));
-
-        var dto = new PresetDto();
-        dto.Kinds.Add(full);
-        Serialize(name, folder, dto);
-    }
+    /// <summary>Writes a list preset into its subfolder of the List scope.</summary>
+    public static void SaveList(string name, string subfolder, ListPresetDto dto) =>
+        Serialize(name, Path.Combine(ScopeFolder(PresetScope.List), subfolder), dto);
 
     // ---- Condition list presets ----------------------------------------------------------
+
+    /// <summary>The conditions subfolder of the List scope (one folder per bucket).</summary>
+    public static string ConditionsFolder((bool Male, bool Adult) bucket) => Path.Combine(FolderConditions, BucketFolderName(bucket));
 
     private static string CondFolder((bool Male, bool Adult) bucket) => Path.Combine(RootFolder, PresetScope.List.ToString(), FolderConditions, BucketFolderName(bucket));
 
@@ -130,60 +113,113 @@ public static class PresetRepository
         _ => "YoungFemale",
     };
 
-    // A condition-list preset rides the common PresetDto format: one KindDto with
-    // the rules in the bucket's own list. The bucket is the preset's ORIGIN — on apply the
-    // rules go to whatever bucket is targeted (cross-bucket import).
-    public static void ExportConditions(string name, (bool Male, bool Adult) bucket, List<BasePriorityRule> rules)
+
+    // ---- Read (dispatch by root: the current formats, or the version-1 machinery) ---------
+
+    /// <summary>The full preset; the version-1 unified format migrates into the model.</summary>
+    public static AllPresetDto? ReadAll(PresetEntry entry)
     {
+        var text = Store.ReadText(entry.path);
 
-        var kd = new KindDto { animal = "" };
-        kd.SetBucket(bucket, rules);
-
-        var dto = new PresetDto();
-        dto.Kinds.Add(kd);
-        Serialize(name, CondFolder(bucket), dto);
+        return PresetSerializer.RootElementOf(text) switch
+        {
+            PresetSerializer.AllPresetRoot => PresetSerializer.DeserializePreset<AllPresetDto>(text),
+            _ => AllPresetDto.FromV1(PresetSerializer.ReadPreset(text)),
+        };
     }
 
-    /// <summary>Condition rules of a List-scope preset, any of the three historical formats
-    /// (current format / pre-unification RulePresetDto / legacy SlaughterCondition list).
-    /// Null when nothing readable.</summary>
-    public static List<BasePriorityRule>? ApplyConditions(PresetEntry entry)
+    /// <summary>The preset's kind slice: Kind-scope presets carry the single kind, All-scope
+    /// presets the slice matching the target def. The caller applies it to the settings itself.</summary>
+    public static KindPresetDto? ReadKind(PresetEntry entry, ThingDef targetDef)
+    {
+        var text = Store.ReadText(entry.path);
+
+        if (PresetSerializer.RootElementOf(text) == PresetSerializer.KindPresetRoot)
+        {
+            return PresetSerializer.DeserializePreset<KindPresetDto>(text);
+        }
+
+        var dto = PresetSerializer.ReadPreset(text);
+
+        if (dto?.Kinds == null || dto.Kinds.Count == 0)
+        {
+            return null;
+        }
+
+        if (entry.scope == PresetScope.All)
+        {
+            // Find the slice for the target kind; if absent, nothing applies.
+            return dto.Kinds.FirstOrDefault(k => k.animal == targetDef.defName);
+        }
+
+        // Kind- and List-scope presets store a single kind whose defName is the SOURCE kind —
+        // on apply we ignore it and use the list/settings for the TARGET kind.
+        return dto.Kinds[0];
+    }
+
+    /// <summary>A rule list of a List-scope preset, or the list slice of a Kind/All preset
+    /// (cross-scope import); the version-1 formats migrate into the model. The payload is
+    /// opaque — the owning settings class reads it. Null when nothing readable.</summary>
+    public static ListPresetDto? ReadList(PresetEntry entry)
     {
         var text = Store.ReadText(entry.path);
 
         switch (PresetSerializer.RootElementOf(text))
         {
+            case PresetSerializer.ListPresetRoot:
+                return PresetSerializer.DeserializePreset<ListPresetDto>(text);
+            case PresetSerializer.KindPresetRoot:
+                return FromSlice(PresetSerializer.DeserializePreset<KindPresetDto>(text));
+            case PresetSerializer.AllPresetRoot:
+                return FromSlice(PresetSerializer.DeserializePreset<AllPresetDto>(text)?.Kinds?.FirstOrDefault());
             case PresetSerializer.PresetRoot:
-                var kd = PresetSerializer.ReadPreset(text)?.Kinds?.FirstOrDefault();
-                return kd?.GetConditionRules();
+                return FromSlice(PresetSerializer.ReadPreset(text)?.Kinds?.FirstOrDefault());
             case PresetSerializer.RulePresetRoot:
-                return RulesOf(PresetSerializer.ReadRulePreset(text));
+                return FromRules(V1Rules(PresetSerializer.ReadRulePreset(text)));
             default:
 #pragma warning disable CS0618
-                return LegacyPresets.TryReadConditions(entry);
+                return FromRules(LegacyPresets.TryReadConditions(entry));
 #pragma warning restore CS0618
         }
     }
 
-#pragma warning disable CS0618
-    // The pre-unification RulePresetDto format still yields attribute-form rules.
-    private static List<BasePriorityRule>? RulesOf(List<PriorityRuleDto>? dtos) =>
-        dtos?.Select(r => r.ToRule()).Where(r => r != null).ToList();
-#pragma warning restore CS0618
-
-    /// <summary>Rules of one bucket taken from a Kind/All preset (the source kind's defName
-    /// is ignored — the slice applies to any target kind). Null when there is no such slice.</summary>
-    public static List<BasePriorityRule>? ReadKindRules(PresetEntry entry, (bool Male, bool Adult) bucket)
+    // The list payload of a v1 kind slice: the first non-empty rule bucket, or the raw
+    // integration sections (a special-settings list).
+    private static ListPresetDto? FromSlice(KindPresetDto? kd)
     {
-        var kd = PresetSerializer.ReadPreset(Store.ReadText(entry.path))?.Kinds?.FirstOrDefault();
-
         if (kd == null)
         {
             return null;
         }
 
-        return PriorityRuleXml.ReadRules(kd.BucketOf(bucket));
+        var bucket = new[] { (true, true), (true, false), (false, true), (false, false) }
+            .Select(kd.BucketOf).FirstOrDefault(el => el?.HasChildNodes == true);
+
+        if (bucket != null)
+        {
+            return new ListPresetDto { Content = [bucket] };
+        }
+
+        return kd.IntegrationSections.Count > 0 ? new ListPresetDto { Content = [.. kd.IntegrationSections] } : null;
     }
+
+#pragma warning disable CS0618
+    // The pre-unification RulePresetDto format still yields attribute-form rules.
+    private static ListPresetDto? FromRules(List<BasePriorityRule>? rules)
+    {
+        if (rules == null)
+        {
+            return null;
+        }
+
+        var dto = new ListPresetDto();
+        PriorityRuleXml.WriteRulesInto(dto, rules);
+        return dto;
+    }
+
+    private static List<BasePriorityRule>? V1Rules(List<PriorityRuleDto>? dtos) =>
+        dtos?.Select(r => r.ToRule()).Where(r => r != null).ToList();
+#pragma warning restore CS0618
 
     public static List<PresetEntry> ListConditionPresets()
     {
@@ -206,21 +242,6 @@ public static class PresetRepository
         return result.OrderByDescending(e => e.date).ThenBy(e => e.name).ToList();
     }
 
-    // ---- Reading for the callers to apply themselves -------------------------------------
-
-    /// <summary>The whole All-scope preset; the caller applies it to the map itself.</summary>
-    public static PresetDto? ReadPreset(PresetEntry entry)
-    {
-        return PresetSerializer.ReadPreset(Store.ReadText(entry.path));
-    }
-
-    /// <summary>The preset's kind slice: Kind-scope presets carry the single kind, All-scope
-    /// presets the slice matching the target def. The caller applies it to the settings itself.</summary>
-    public static KindDto? ReadKindSlice(PresetEntry entry, ThingDef targetDef)
-    {
-        return RelevantKindDto(entry, targetDef);
-    }
-
     public static void Delete(PresetEntry entry)
     {
         if (entry == null || string.IsNullOrEmpty(entry.path))
@@ -232,26 +253,9 @@ public static class PresetRepository
 
     // ---- Helpers -------------------------------------------------------------------------
 
-    private static KindDto? RelevantKindDto(PresetEntry? entry, ThingDef targetDef)
+    private static void Serialize(string name, string folder, IVersionedPresetDto dto)
     {
-        var dto = PresetSerializer.ReadPreset(entry == null ? null : Store.ReadText(entry.path));
-        if (dto?.Kinds == null || dto.Kinds.Count == 0)
-        {
-            return null;
-        }
-        if (entry!.scope == PresetScope.All)
-        {
-            // Find the slice for the target kind; if absent, nothing applies.
-            return dto.Kinds.FirstOrDefault(k => k.animal == targetDef.defName);
-        }
-        // Kind- and List-scope presets store a single kind whose defName is the SOURCE kind —
-        // on apply we ignore it and use the list/settings for the TARGET kind.
-        return dto.Kinds[0];
-    }
-
-    private static void Serialize(string name, string folder, PresetDto dto)
-    {
-        Store.WriteText(Path.Combine(folder, Sanitize(name) + ".xml"), PresetSerializer.SerializeToText(dto));
+        Store.WriteText(Path.Combine(folder, Sanitize(name) + ".xml"), PresetSerializer.SerializePreset(dto));
     }
 
     private static string Sanitize(string name)

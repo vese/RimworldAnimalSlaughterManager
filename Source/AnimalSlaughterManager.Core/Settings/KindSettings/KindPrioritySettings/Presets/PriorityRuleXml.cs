@@ -104,4 +104,14 @@ public static class PriorityRuleXml
 
         return null;
     }
+
+    /// <summary>Fills a list preset with the rules' DTO children.</summary>
+    public static void WriteRulesInto(ListPresetDto dto, IEnumerable<BasePriorityRule> rules)
+{
+    var doc = new XmlDocument();
+    var root = doc.CreateElement("Rules");
+    doc.AppendChild(root);
+    WriteRules(root, rules);
+    dto.Content = [root];
+}
 }

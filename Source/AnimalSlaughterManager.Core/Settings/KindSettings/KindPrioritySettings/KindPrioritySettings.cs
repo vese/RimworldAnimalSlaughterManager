@@ -94,7 +94,7 @@ public class KindPrioritySettings : IPresettable
         }
     }
 
-    public void Save(KindDto dto)
+    public void Save(KindPresetDto dto)
     {
         dto.SetBucket((true, true), Get(true, true));
         dto.SetBucket((true, false), Get(true, false));
@@ -102,7 +102,20 @@ public class KindPrioritySettings : IPresettable
         dto.SetBucket((false, false), Get(false, false));
     }
 
-    public void Load(KindDto dto)
+    /// <summary>One bucket's rules as a list preset (the payload is the bucket element).</summary>
+    public ListPresetDto ToPreset((bool Male, bool Adult) bucket)
+    {
+        var dto = new ListPresetDto();
+        PriorityRuleXml.WriteRulesInto(dto, Get(bucket.Male, bucket.Adult));
+        return dto;
+    }
+
+    public void FromPreset(ListPresetDto dto, (bool Male, bool Adult) bucket)
+    {
+        ruleSets[bucket].ReplaceAll(PriorityRuleXml.ReadRules(dto.Content?.FirstOrDefault()));
+    }
+
+    public void Load(KindPresetDto dto)
     {
         ruleSets[(true, true)].ReplaceAll(PriorityRuleXml.ReadRules(dto.BucketOf((true, true))));
         ruleSets[(true, false)].ReplaceAll(PriorityRuleXml.ReadRules(dto.BucketOf((true, false))));

@@ -97,8 +97,8 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
         if (Widgets.ButtonText(presetBtn, presetButtonText))
         {
             IntegrationServices.GetServices<IPresetWindows>()[0].OpenListBrowser(comp, animalDef, PresetsTitleKey.Translate(animalDef.LabelCap).ToString(),
-                name => PresetRepository.ExportList(name, animalDef, RuleSet),
-                e => PresetRepository.ReadKindSlice(e, animalDef) is { } kd && RuleSet.ReadXml(PresetSectionSerialization.Wrap(kd.IntegrationSections)),
+                name => PresetRepository.SaveList(name, RuleSet.PresetsFolder, RuleSet.ToPreset()),
+                e => PresetRepository.ReadList(e) is { } dto && RuleSet.FromPreset(dto),
                 () => RuleSet.HasRules);
         }
 

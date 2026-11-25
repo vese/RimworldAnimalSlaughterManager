@@ -105,7 +105,21 @@ public class KindSettings : IExposable, IPresettable
         prioritySettings.ExposeData();
     }
 
-    public void Save(KindDto dto)
+    /// <summary>The kind's slice of a preset.</summary>
+    public KindPresetDto ToPreset(ThingDef def)
+    {
+        var dto = new KindPresetDto { animal = def.defName };
+        Save(dto);
+        return dto;
+    }
+
+    public void FromPreset(KindPresetDto dto)
+    {
+        Reset();
+        Load(dto);
+    }
+
+    public void Save(KindPresetDto dto)
     {
         preferenceSettings.Save(dto);
         prioritySettings.Save(dto);
@@ -123,7 +137,7 @@ public class KindSettings : IExposable, IPresettable
         }
     }
 
-    public void Load(KindDto dto)
+    public void Load(KindPresetDto dto)
     {
         preferenceSettings.Load(dto);
         prioritySettings.Load(dto);

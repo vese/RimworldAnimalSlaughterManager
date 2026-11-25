@@ -96,10 +96,10 @@ public class Dialog_PresetBrowser : Dialog_PresetBrowserBase
         switch (scope)
         {
             case PresetScope.All:
-                PresetRepository.ExportAll(name, comp);
+                PresetRepository.Save(name, PresetScope.All, comp.ToPreset());
                 break;
             case PresetScope.Kind:
-                PresetRepository.ExportKind(name, kind, Settings);
+                PresetRepository.Save(name, PresetScope.Kind, Settings.ToPreset(kind));
                 break;
             default:
                 exportList!(name);
@@ -113,20 +113,19 @@ public class Dialog_PresetBrowser : Dialog_PresetBrowserBase
         {
             case PresetScope.All:
             {
-                var dto = PresetRepository.ReadPreset(entry);
+                var dto = PresetRepository.ReadAll(entry);
 
                 if (dto == null)
                 {
                     return false;
                 }
 
-                dto.ApplyTo(comp);
-                comp.MarkDirty();
+                comp.FromPreset(dto);
                 return true;
             }
             case PresetScope.Kind:
             {
-                var kd = PresetRepository.ReadKindSlice(entry, kind);
+                var kd = PresetRepository.ReadKind(entry, kind);
                 SettingsChangeTracker.Raise();
 
                 if (kd == null)
@@ -134,7 +133,7 @@ public class Dialog_PresetBrowser : Dialog_PresetBrowserBase
                     return false;
                 }
 
-                kd.ApplyTo(Settings);
+                Settings.FromPreset(kd);
                 return true;
             }
             default:
