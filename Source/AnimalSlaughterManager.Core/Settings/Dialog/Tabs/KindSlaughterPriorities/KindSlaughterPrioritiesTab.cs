@@ -198,7 +198,7 @@ public class KindSlaughterPrioritiesTab(ISettingsProvider comp, ThingDef animalD
 
         if (Widgets.ButtonText(presetBtn, presetButtonText))
         {
-            Find.WindowStack.Add(new Dialog_ConditionPresetBrowser((ASM_MapComp)comp, male, adult, settings.prioritySettings));
+            Find.WindowStack.Add(new KindPrioritiesListPresetBrowserDialog((ASM_MapComp)comp, male, adult, settings.prioritySettings));
         }
 
         var clearButtonText = ASMKeys.ClearList.Translate();
@@ -336,7 +336,7 @@ public class KindSlaughterPrioritiesTab(ISettingsProvider comp, ThingDef animalD
 
     private static void OpenKindPresetsWindow(ISettingsProvider comp, ThingDef animalDef, KindSettings _)
     {
-        Find.WindowStack.Add(new Dialog_KindPresetBrowser((ASM_MapComp)comp, animalDef));
+        Find.WindowStack.Add(new KindSettingsPresetBrowserDialog((ASM_MapComp)comp, animalDef));
     }
 
     private static void ResetTabSettings(ISettingsProvider comp, ThingDef animalDef, KindSettings settings)

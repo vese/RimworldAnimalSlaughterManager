@@ -17,7 +17,7 @@ namespace ASM;
 /// they stay aligned when a button or mark is absent. Entries sort newest-first and filter by
 /// name and by the scope toggles.
 /// </summary>
-public abstract class Dialog_PresetBrowser : Window
+public abstract class BasePresetBrowserDialog : Window
 {
     private Vector2 scroll;
     private float listHeight = 9999f;
@@ -33,7 +33,7 @@ public abstract class Dialog_PresetBrowser : Window
 
     public override Vector2 InitialSize => new Vector2(820f, 600f);
 
-    protected Dialog_PresetBrowser()
+    protected BasePresetBrowserDialog()
     {
         doCloseX = true;
         draggable = true;
@@ -44,7 +44,7 @@ public abstract class Dialog_PresetBrowser : Window
 
     /// <summary>The scopes this browser offers with their entry sources (its own scope plus
     /// any broader ones it imports from). One scope — no toggle strip.</summary>
-    protected abstract IEnumerable<(PresetScope Scope, IEnumerable<PresetEntry> Entries)> ScopeSources();
+    protected abstract (PresetScope Scope, IEnumerable<PresetEntry> Entries)[] ScopeSources { get; }
 
     /// <summary>True when the target actually has data worth saving (enables the save row).</summary>
     protected abstract bool HasData();

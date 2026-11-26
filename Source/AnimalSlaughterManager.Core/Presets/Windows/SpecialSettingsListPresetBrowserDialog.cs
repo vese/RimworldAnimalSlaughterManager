@@ -11,7 +11,7 @@ namespace ASM;
 /// this list. The list's own behavior (its folder, export, apply and has-data checks) comes
 /// from the opening section.
 /// </summary>
-public class Dialog_ListPresetBrowser : Dialog_PresetBrowser
+public class SpecialSettingsListPresetBrowserDialog : BasePresetBrowserDialog
 {
     private readonly ThingDef kind;
     private readonly string listTitle;
@@ -19,7 +19,7 @@ public class Dialog_ListPresetBrowser : Dialog_PresetBrowser
     private readonly Func<PresetEntry, bool> applyList;
     private readonly Func<bool>? hasListData;
 
-    public Dialog_ListPresetBrowser(ThingDef kind, string listTitle,
+    public SpecialSettingsListPresetBrowserDialog(ThingDef kind, string listTitle,
         Action<string> exportList, Func<PresetEntry, bool> applyList, Func<bool>? hasListData = null)
     {
         this.kind = kind;
@@ -30,12 +30,12 @@ public class Dialog_ListPresetBrowser : Dialog_PresetBrowser
         optionalTitle = listTitle;
     }
 
-    protected override IEnumerable<(PresetScope Scope, IEnumerable<PresetEntry> Entries)> ScopeSources()
-    {
-        yield return (PresetScope.List, PresetRepository.ListPresets(PresetScope.List));
-        yield return (PresetScope.Kind, PresetRepository.ListPresets(PresetScope.Kind));
-        yield return (PresetScope.All, PresetRepository.ListPresets(PresetScope.All));
-    }
+    protected override (PresetScope Scope, IEnumerable<PresetEntry> Entries)[] ScopeSources =>
+    [
+        (PresetScope.Kind, PresetRepository.ListPresets(PresetScope.List)),
+        (PresetScope.Kind, PresetRepository.ListPresets(PresetScope.Kind)),
+        (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
+    ];
 
     protected override bool HasData() => hasListData?.Invoke() ?? false;
 

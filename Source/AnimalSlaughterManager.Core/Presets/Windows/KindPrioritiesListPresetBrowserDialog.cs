@@ -8,15 +8,15 @@ namespace ASM;
 /// Preset browser for one condition-list bucket (age×sex). Lists the condition presets of all
 /// four buckets plus Kind/All presets (their bucket slice is taken on apply); cross-bucket rows
 /// carry the bucket's mark. Saving writes the current bucket's list. The frame lives in
-/// <see cref="Dialog_PresetBrowser"/>.
+/// <see cref="BasePresetBrowserDialog"/>.
 /// </summary>
-public class Dialog_ConditionPresetBrowser : Dialog_PresetBrowser
+public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
 {
     private readonly KindPrioritySettings prioritySettings;
     private readonly bool male;
     private readonly bool adult;
 
-    public Dialog_ConditionPresetBrowser(ASM_MapComp comp, bool male, bool adult, KindPrioritySettings prioritySettings)
+    public KindPrioritiesListPresetBrowserDialog(ASM_MapComp comp, bool male, bool adult, KindPrioritySettings prioritySettings)
     {
         this.prioritySettings = prioritySettings;
         this.male = male;
@@ -41,12 +41,12 @@ public class Dialog_ConditionPresetBrowser : Dialog_PresetBrowser
 
     // ---- Policy ---------------------------------------------------------------------------
 
-    protected override IEnumerable<(PresetScope Scope, IEnumerable<PresetEntry> Entries)> ScopeSources()
-    {
-        yield return (PresetScope.List, PresetRepository.ListConditionPresets());
-        yield return (PresetScope.Kind, PresetRepository.ListPresets(PresetScope.Kind));
-        yield return (PresetScope.All, PresetRepository.ListPresets(PresetScope.All));
-    }
+    protected override (PresetScope Scope, IEnumerable<PresetEntry> Entries)[] ScopeSources =>
+    [
+        (PresetScope.List, PresetRepository.ListConditionPresets()),
+        (PresetScope.Kind, PresetRepository.ListPresets(PresetScope.Kind)),
+        (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
+    ];
 
     protected override bool HasData() => prioritySettings.Get(male, adult).Count > 0;
 

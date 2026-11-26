@@ -57,9 +57,9 @@ public class ASM_MapComp : MapComponent, ISettingsProvider
         return s;
     }
 
-    GlobalSettings ISettingsProvider.GlobalSettings => globalSettings;
+    public GlobalSettings GlobalSettings => globalSettings;
 
-    IEnumerable<KeyValuePair<ThingDef, KindSettings>> ISettingsProvider.AllKindSettings => kindSettings;
+    public IEnumerable<KeyValuePair<ThingDef, KindSettings>> AllKindSettings => kindSettings;
 
 
     /// <summary>The full preset: every customized kind's slice.</summary>

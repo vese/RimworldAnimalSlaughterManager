@@ -9,12 +9,12 @@ namespace ASM;
 /// presets plus the All presets — an All row carries its scope mark, and applying takes only
 /// the slice of this kind.
 /// </summary>
-public class Dialog_KindPresetBrowser : Dialog_PresetBrowser
+public class KindSettingsPresetBrowserDialog : BasePresetBrowserDialog
 {
     private readonly ASM_MapComp comp;
     private readonly ThingDef kind;
 
-    public Dialog_KindPresetBrowser(ASM_MapComp comp, ThingDef kind)
+    public KindSettingsPresetBrowserDialog(ASM_MapComp comp, ThingDef kind)
     {
         this.comp = comp;
         this.kind = kind;
@@ -23,11 +23,11 @@ public class Dialog_KindPresetBrowser : Dialog_PresetBrowser
 
     private KindSettings Settings => comp.GetSettings(kind);
 
-    protected override IEnumerable<(PresetScope Scope, IEnumerable<PresetEntry> Entries)> ScopeSources()
-    {
-        yield return (PresetScope.Kind, PresetRepository.ListPresets(PresetScope.Kind));
-        yield return (PresetScope.All, PresetRepository.ListPresets(PresetScope.All));
-    }
+    protected override (PresetScope Scope, IEnumerable<PresetEntry> Entries)[] ScopeSources =>
+    [
+        (PresetScope.Kind, PresetRepository.ListPresets(PresetScope.Kind)),
+        (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
+    ];
 
     protected override bool HasData() => Settings.Customized;
 
