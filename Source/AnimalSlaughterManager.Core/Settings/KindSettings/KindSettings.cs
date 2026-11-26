@@ -109,6 +109,16 @@ public class KindSettings : IExposable
 
         preferenceSettings.ExposeData();
         prioritySettings.ExposeData();
+
+        if (Scribe.mode == LoadSaveMode.PostLoadInit)
+        {
+            // Scribe leaves a null value whose Class type did not resolve (a missing integration
+            // assembly); the provider re-creates the settings on demand.
+            foreach (var key in integrationsSettings.Where(kv => kv.Value == null).Select(kv => kv.Key).ToList())
+            {
+                integrationsSettings.Remove(key);
+            }
+        }
     }
 
     /// <summary>The kind's slice of a preset.</summary>

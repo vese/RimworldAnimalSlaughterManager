@@ -28,7 +28,7 @@ public class Alert_ConditionProblems : Alert
 
         var comp = Find.CurrentMap.GetComponent<ASM_MapComp>();
 
-        if (comp == null || comp.kindSettings == null || comp.kindSettings.Count == 0)
+        if (comp == null || comp.kindSettings.Count == 0)
         {
             return AlertReport.Inactive;
         }
@@ -37,11 +37,6 @@ public class Alert_ConditionProblems : Alert
 
         foreach (var kv in comp.kindSettings)
         {
-            if (kv.Value == null)
-            {
-                continue;
-            }
-
             var issues = kv.Value.prioritySettings.CountProblems();
 
             if (issues > 0)
@@ -77,11 +72,6 @@ public class Alert_ConditionProblems : Alert
 
         foreach (var kv in comp.kindSettings)
         {
-            if (kv.Value == null)
-            {
-                continue;
-            }
-
             if (kv.Value.prioritySettings.CountProblems() > 0)
             {
                 Find.WindowStack.Add(new KindSlaughterSettingsDialog(comp, kv.Key));

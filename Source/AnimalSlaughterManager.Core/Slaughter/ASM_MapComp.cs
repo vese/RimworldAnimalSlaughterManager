@@ -39,7 +39,7 @@ public class ASM_MapComp : MapComponent, ISettingsProvider
     // True if this kind has per-kind pref overrides or condition lists (differs from the global defaults).
     public bool KindHasCustomPrefs(ThingDef def)
     {
-        if (!kindSettings.TryGetValue(def, out var ks) || ks == null)
+        if (!kindSettings.TryGetValue(def, out var ks))
         {
             return false;
         }
@@ -69,7 +69,7 @@ public class ASM_MapComp : MapComponent, ISettingsProvider
 
         foreach (var kv in kindSettings)
         {
-            if (kv.Value != null && kv.Value.Customized)
+            if (kv.Value.Customized)
             {
                 dto.Kinds.Add(new KindPresetFile { Kind = kv.Value.ToPreset(kv.Key) });
             }
@@ -131,6 +131,14 @@ public class ASM_MapComp : MapComponent, ISettingsProvider
             {
                 kindSettings = new Dictionary<ThingDef, KindSettings>();
             }
+
+            // Scribe leaves a null value when a KindSettings fails to load (its ExposeData threw
+            // or its Class type did not resolve); the kind then gets fresh settings on demand.
+            foreach (var def in kindSettings.Where(kv => kv.Value == null).Select(kv => kv.Key).ToList())
+            {
+                kindSettings.Remove(def);
+            }
+
             if (protectedPawnIDs == null)
             {
                 protectedPawnIDs = new HashSet<int>();

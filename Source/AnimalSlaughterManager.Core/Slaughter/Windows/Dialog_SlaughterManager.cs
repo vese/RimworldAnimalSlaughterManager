@@ -163,7 +163,7 @@ namespace ASM
         private void DrawRow(Rect row, AutoSlaughterConfig config)
         {
             var def = config.animal;
-            bool hasKs = comp.kindSettings.TryGetValue(def, out var ks) && ks != null;
+            bool hasKs = comp.kindSettings.TryGetValue(def, out var ks);
             // Indicator categories. Individual protection is intentionally NOT indicated here
             // (it has its own column); only per-kind trait/priority settings are.
             bool hasProtection = hasKs && IntegrationServices.GetServices<IKeepReserveSource>().Any(s => s.HasKeepRules(ks));

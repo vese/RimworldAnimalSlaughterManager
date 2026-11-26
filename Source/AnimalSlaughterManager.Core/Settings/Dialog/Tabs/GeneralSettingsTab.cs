@@ -18,7 +18,7 @@ public class GeneralSettingsTab : BaseSettingsTab
 
             foreach (var ks in kindSettings.Values)
             {
-                ks?.preferenceSettings?.Set(male, adult, value);
+                ks.preferenceSettings.Set(male, adult, value);
             }
         }
 

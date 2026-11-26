@@ -81,7 +81,7 @@ public abstract class BasePresetBrowserDialog : Window
 
         float btnW = Mathf.Max(96f, Text.CalcSize(ASMKeys.SavePreset.Translate()).x + 18f);
 
-        var sources = ScopeSources().ToList();
+        var sources = ScopeSources.ToList();
         bool toggles = sources.Count > 1;
 
         // --- Top: search row, one Gap below the title. Magnifier + filter field on the left,

@@ -48,11 +48,6 @@ public static class SlaughterListBuilder
 
         foreach (var kv in comp.kindSettings)
         {
-            if (kv.Value == null)
-            {
-                continue;
-            }
-
             foreach (var source in IntegrationServices.GetServices<IKeepReserveSource>())
             {
                 foreach (var pawn in source.SelectKeepReserved(comp.map, kv.Key, kv.Value))
@@ -101,7 +96,7 @@ public static class SlaughterListBuilder
         {
             var ks = kv.Value;
 
-            if (ks == null || !IntegrationServices.GetServices<IKindForceCullSource>().Any(s => s.HasForceCullRules(ks)))
+            if (!IntegrationServices.GetServices<IKindForceCullSource>().Any(s => s.HasForceCullRules(ks)))
             {
                 continue;
             }
@@ -220,7 +215,7 @@ public static class SlaughterListBuilder
     /// <summary>Animals of this kind that match a breeding ("keep") trait target and are protected from slaughter.</summary>
     public static int CountKeptByTraits(ASM_MapComp comp, ThingDef def)
     {
-        if (!comp.kindSettings.TryGetValue(def, out var ks) || ks == null)
+        if (!comp.kindSettings.TryGetValue(def, out var ks))
         {
             return 0;
         }
@@ -244,6 +239,7 @@ public static class SlaughterListBuilder
 
     private static SlaughterPreference PrefOf(KindSettings ks, bool male, bool adult)
     {
+        // A kind untouched in ASM settings has no KindSettings — vanilla's default order.
         if (ks == null)
         {
             return SlaughterPreference.OldestFirst;
