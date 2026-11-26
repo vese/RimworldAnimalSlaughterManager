@@ -21,8 +21,8 @@ public abstract class BasePresetBrowserDialog : Window
 {
     private Vector2 scroll;
     private float listHeight = 9999f;
-    private string nameBuffer = "";
-    private string filterBuffer = "";
+    private string nameBuffer = string.Empty;
+    private string filterBuffer = string.Empty;
     private readonly Dictionary<PresetScope, bool> showScope = [];
 
     /// <summary>The target the presets apply to (a kind's or bucket's label): the argument the
@@ -51,7 +51,7 @@ public abstract class BasePresetBrowserDialog : Window
     protected abstract (PresetScope Scope, IEnumerable<PresetEntry> Entries)[] ScopeSources { get; }
 
     /// <summary>True when the target actually has data worth saving (enables the save row).</summary>
-    protected abstract bool HasData();
+    protected abstract bool HasData { get; }
 
     /// <summary>Saves the target under the name. The base clears the name field and reports.</summary>
     protected abstract void Save(string name);
@@ -66,7 +66,7 @@ public abstract class BasePresetBrowserDialog : Window
     protected virtual string? GetRowTip(PresetEntry entry) => null;
 
     /// <summary>Whether the row carries the Overwrite button.</summary>
-    protected virtual bool CanOverwrite(PresetEntry entry) => HasData();
+    protected virtual bool CanOverwrite(PresetEntry entry) => HasData;
 
     /// <summary>Whether the row carries the Delete button.</summary>
     protected virtual bool CanDelete(PresetEntry entry) => true;
@@ -113,7 +113,7 @@ public abstract class BasePresetBrowserDialog : Window
 
         if (Widgets.ButtonImage(clearBtn, TexButton.CloseXSmall))
         {
-            filterBuffer = "";
+            filterBuffer = string.Empty;
         }
 
         if (toggles)
@@ -172,7 +172,7 @@ public abstract class BasePresetBrowserDialog : Window
         Widgets.EndScrollView();
 
         // Save row: name field + Save. Disabled when nothing to save or no name.
-        bool hasData = HasData();
+        bool hasData = HasData;
         bool canSave = hasData && !nameBuffer.Trim().NullOrEmpty();
         float sy = inRect.yMax - saveRowH + 2f;
         GUI.enabled = hasData;
@@ -182,7 +182,7 @@ public abstract class BasePresetBrowserDialog : Window
         {
             string name = (nameBuffer ?? "").Trim();
             Save(name);
-            nameBuffer = "";
+            nameBuffer = string.Empty;
             Messages.Message(ASMKeys.PresetSaved.Translate(name), MessageTypeDefOf.TaskCompletion, false);
         }
 

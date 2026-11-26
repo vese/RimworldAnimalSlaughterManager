@@ -17,14 +17,14 @@ public class SettingsPresetBrowserDialog : BasePresetBrowserDialog
         (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
     ];
 
+    protected override bool HasData => comp.AllKindSettings.Any(k => k.Value.Customized);
+
     public SettingsPresetBrowserDialog(ASM_MapComp comp)
     {
         this.comp = comp;
         optionalTitle = ASMKeys.PresetTitleAll.Translate();
         targetLabel = optionalTitle;
     }
-
-    protected override bool HasData() => comp.AllKindSettings.Any(k => k.Value.Customized);
 
     protected override void Save(string name) => PresetRepository.Save(name, PresetScope.All, comp.ToPreset());
 

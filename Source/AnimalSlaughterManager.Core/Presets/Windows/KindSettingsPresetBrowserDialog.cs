@@ -20,6 +20,8 @@ public class KindSettingsPresetBrowserDialog : BasePresetBrowserDialog
         (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
     ];
 
+    protected override bool HasData => settings.Customized;
+
     public KindSettingsPresetBrowserDialog(ThingDef kind, KindSettings settings)
     {
         this.kind = kind;
@@ -27,8 +29,6 @@ public class KindSettingsPresetBrowserDialog : BasePresetBrowserDialog
         targetLabel = kind.LabelCap;
         optionalTitle = ASMKeys.PresetTitleKind.Translate(targetLabel);
     }
-
-    protected override bool HasData() => settings.Customized;
 
     protected override void Save(string name) =>
         PresetRepository.Save(name, PresetScope.Kind, new KindPresetFile { Kind = settings.ToPreset(kind) });
@@ -54,7 +54,7 @@ public class KindSettingsPresetBrowserDialog : BasePresetBrowserDialog
     protected override string? GetRowTip(PresetEntry entry) =>
         entry.scope == PresetScope.All ? ASMKeys.TipAllToKind.Translate(targetLabel) : null;
 
-    protected override bool CanOverwrite(PresetEntry entry) => entry.scope == PresetScope.Kind && HasData();
+    protected override bool CanOverwrite(PresetEntry entry) => entry.scope == PresetScope.Kind && HasData;
 
     protected override bool CanDelete(PresetEntry entry) => entry.DeletableFrom(PresetScope.Kind);
 

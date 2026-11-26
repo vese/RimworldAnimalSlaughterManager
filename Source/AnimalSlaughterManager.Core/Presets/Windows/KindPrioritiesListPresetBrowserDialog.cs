@@ -23,11 +23,13 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
         (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
     ];
 
+    protected override bool HasData => prioritySettings.Get(male, adult).Count > 0;
+
     public KindPrioritiesListPresetBrowserDialog(bool male, bool adult, KindPrioritySettings prioritySettings)
     {
-        this.prioritySettings = prioritySettings;
         this.male = male;
         this.adult = adult;
+        this.prioritySettings = prioritySettings;
         targetLabel = GetBucketLabel(male, adult);
         optionalTitle = ASMKeys.CondPresetTitle.Translate(targetLabel);
     }
@@ -39,8 +41,6 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
         (false, true) => ASMKeys.AdultFemales.Translate(),
         _ => ASMKeys.YoungFemales.Translate(),
     };
-
-    protected override bool HasData() => prioritySettings.Get(male, adult).Count > 0;
 
     protected override void Save(string name) =>
         PresetRepository.SaveList(name, PresetRepository.ConditionsFolder((male, adult)), ListPresetFile.OfRules(prioritySettings.ToPreset((male, adult))));
@@ -88,5 +88,5 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
             : null;
 
     protected override bool CanOverwrite(PresetEntry entry) =>
-        entry.scope == PresetScope.List && entry.condBucket == (male, adult) && HasData();
+        entry.scope == PresetScope.List && entry.condBucket == (male, adult) && HasData;
 }

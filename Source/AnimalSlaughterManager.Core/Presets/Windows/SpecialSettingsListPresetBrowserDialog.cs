@@ -26,6 +26,8 @@ public class SpecialSettingsListPresetBrowserDialog : BasePresetBrowserDialog
         (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
     ];
 
+    protected override bool HasData => hasListData?.Invoke() ?? false;
+
     public SpecialSettingsListPresetBrowserDialog(ThingDef kind, string titleKey,
         Action<string> exportList, Func<PresetEntry, bool> applyList, Func<bool>? hasListData = null)
     {
@@ -37,8 +39,6 @@ public class SpecialSettingsListPresetBrowserDialog : BasePresetBrowserDialog
         listTitle = titleKey.Translate(targetLabel);
         optionalTitle = listTitle;
     }
-
-    protected override bool HasData() => hasListData?.Invoke() ?? false;
 
     protected override void Save(string name) => exportList(name);
 
@@ -77,7 +77,7 @@ public class SpecialSettingsListPresetBrowserDialog : BasePresetBrowserDialog
         return null;
     }
 
-    protected override bool CanOverwrite(PresetEntry entry) => entry.scope == PresetScope.List && HasData();
+    protected override bool CanOverwrite(PresetEntry entry) => entry.scope == PresetScope.List && HasData;
 
     protected override bool CanDelete(PresetEntry entry) => entry.DeletableFrom(PresetScope.List);
 
