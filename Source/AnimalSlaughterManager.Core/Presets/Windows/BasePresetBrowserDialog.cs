@@ -43,16 +43,7 @@ public abstract class BasePresetBrowserDialog : Window
     /// subclass's title key translates with and the name the no-slice message quotes.</summary>
     protected TaggedString targetLabel;
 
-    public override Vector2 InitialSize => new Vector2(820f, 600f);
-
-    protected BasePresetBrowserDialog()
-    {
-        doCloseX = true;
-        draggable = true;
-        resizeable = true;
-    }
-
-    // ---- Policy hooks ---------------------------------------------------------------------
+    public override Vector2 InitialSize => new(820f, 600f);
 
     /// <summary>The scopes this browser offers with their entry sources (its own scope plus
     /// any broader ones it imports from). One scope — no toggle strip.</summary>
@@ -60,6 +51,13 @@ public abstract class BasePresetBrowserDialog : Window
 
     /// <summary>True when the target actually has data worth saving (enables the save row).</summary>
     protected abstract bool HasData { get; }
+
+    protected BasePresetBrowserDialog()
+    {
+        doCloseX = true;
+        draggable = true;
+        resizeable = true;
+    }
 
     /// <summary>Saves the target under the name. The base clears the name field and reports.</summary>
     protected abstract void Save(string name);
@@ -80,12 +78,13 @@ public abstract class BasePresetBrowserDialog : Window
     protected virtual bool CanDelete(PresetEntry entry) => true;
 
     /// <summary>The delete-confirmation message for the entry.</summary>
-    protected virtual string ConfirmDelete(PresetEntry entry) => ASMKeys.ConfirmDelete.Translate(entry.name);
+    protected virtual string GetConfirmDeleteText(PresetEntry entry) => ASMKeys.ConfirmDelete.Translate(entry.name);
 
     // ---- Frame ----------------------------------------------------------------------------
 
     public override void DoWindowContents(Rect inRect)
     {
+        var font = Text.Font;
         Text.Font = GameFont.Small;
 
         var top = inRect.y + UIConstants.GapX;
@@ -98,20 +97,22 @@ public abstract class BasePresetBrowserDialog : Window
         DrawPresetList(inRect.x, listTop, inRect.width, listBottom - listTop);
 
         DrawSaveRow(inRect.x, inRect.yMax - RowHeight, inRect.width);
+
+        Text.Font = font;
     }
 
     // Top row: magnifier + filter field on the left, clear ✕ after it; scope-type toggles
     // right-aligned to the window edge.
     private void DrawSearchRow(float x, float y, float width)
     {
-        bool toggles = ScopeSources.Length > 1;
-        float mid = x + width - (toggles ? GetScopeTogglesWidth() : UIConstants.IconSize + ClearIconGap);
-        float iconY = y + (TopRowHeight - UIConstants.IconSize) / 2f;
+        var hasScopeToggles = ScopeSources.Length > 1;
+        var mid = x + width - (hasScopeToggles ? GetScopeTogglesWidth() : UIConstants.IconSize + ClearIconGap);
+        var iconY = y + (TopRowHeight - UIConstants.IconSize) / 2f;
 
         GUI.DrawTexture(new Rect(x, iconY, UIConstants.IconSize, UIConstants.IconSize), TexButton.Search);
 
-        float fieldX = x + UIConstants.IconSize + UIConstants.GapX;
-        float fieldEnd = mid - UIConstants.IconSize - ClearIconGap;
+        var fieldX = x + UIConstants.IconSize + UIConstants.GapX;
+        var fieldEnd = mid - UIConstants.IconSize - ClearIconGap;
         filterBuffer = Widgets.TextField(new Rect(fieldX, y + (TopRowHeight - UIConstants.ButtonHeight) / 2f, fieldEnd - fieldX, UIConstants.ButtonHeight), filterBuffer);
 
         var clearBtn = new Rect(mid - UIConstants.IconSize, iconY, UIConstants.IconSize, UIConstants.IconSize);
@@ -122,7 +123,7 @@ public abstract class BasePresetBrowserDialog : Window
             filterBuffer = string.Empty;
         }
 
-        if (toggles)
+        if (hasScopeToggles)
         {
             DrawScopeToggles(x + width, y);
         }
@@ -322,7 +323,7 @@ public abstract class BasePresetBrowserDialog : Window
             if (Widgets.ButtonImage(deleteBtn, TexButton.Delete))
             {
                 var captured = e;
-                Find.WindowStack.Add(new Dialog_MessageBox(ConfirmDelete(captured),
+                Find.WindowStack.Add(new Dialog_MessageBox(GetConfirmDeleteText(captured),
                     ASMKeys.DeletePreset.Translate(), () => PresetRepository.Delete(captured),
                     "No".Translate()) { doCloseX = true });
             }

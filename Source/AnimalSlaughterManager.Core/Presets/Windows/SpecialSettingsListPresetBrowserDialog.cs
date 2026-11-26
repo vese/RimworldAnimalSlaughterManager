@@ -81,5 +81,5 @@ public class SpecialSettingsListPresetBrowserDialog : BasePresetBrowserDialog
 
     protected override bool CanDelete(PresetEntry entry) => entry.DeletableFrom(PresetScope.List);
 
-    protected override string ConfirmDelete(PresetEntry entry) => ASMKeys.ConfirmDeleteList.Translate(entry.name);
+    protected override string GetConfirmDeleteText(PresetEntry entry) => ASMKeys.ConfirmDeleteList.Translate(entry.name);
 }

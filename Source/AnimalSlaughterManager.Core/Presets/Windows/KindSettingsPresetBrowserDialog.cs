@@ -58,5 +58,5 @@ public class KindSettingsPresetBrowserDialog : BasePresetBrowserDialog
 
     protected override bool CanDelete(PresetEntry entry) => entry.DeletableFrom(PresetScope.Kind);
 
-    protected override string ConfirmDelete(PresetEntry entry) => ASMKeys.ConfirmDeleteKind.Translate(entry.name);
+    protected override string GetConfirmDeleteText(PresetEntry entry) => ASMKeys.ConfirmDeleteKind.Translate(entry.name);
 }
