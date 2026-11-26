@@ -19,20 +19,21 @@ public class SpecialSettingsListPresetBrowserDialog : BasePresetBrowserDialog
     private readonly Func<PresetEntry, bool> applyList;
     private readonly Func<bool>? hasListData;
 
-    public SpecialSettingsListPresetBrowserDialog(ThingDef kind, string listTitle,
+    public SpecialSettingsListPresetBrowserDialog(ThingDef kind, string titleKey,
         Action<string> exportList, Func<PresetEntry, bool> applyList, Func<bool>? hasListData = null)
     {
         this.kind = kind;
-        this.listTitle = listTitle;
         this.exportList = exportList;
         this.applyList = applyList;
         this.hasListData = hasListData;
+        targetLabel = kind.LabelCap;
+        listTitle = titleKey.Translate(targetLabel);
         optionalTitle = listTitle;
     }
 
     protected override (PresetScope Scope, IEnumerable<PresetEntry> Entries)[] ScopeSources =>
     [
-        (PresetScope.Kind, PresetRepository.ListPresets(PresetScope.List)),
+        (PresetScope.List, PresetRepository.ListPresets(PresetScope.List)),
         (PresetScope.Kind, PresetRepository.ListPresets(PresetScope.Kind)),
         (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
     ];
@@ -47,8 +48,6 @@ public class SpecialSettingsListPresetBrowserDialog : BasePresetBrowserDialog
         SettingsChangeTracker.Raise();
         return ok;
     }
-
-    protected override string NoSliceLabel() => kind.LabelCap;
 
     // Kind/All rows carry their scope mark; only the slice of this list is applied.
     protected override string? MarkOf(PresetEntry entry)

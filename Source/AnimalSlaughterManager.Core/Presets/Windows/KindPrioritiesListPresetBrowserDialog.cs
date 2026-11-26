@@ -21,7 +21,8 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
         this.prioritySettings = prioritySettings;
         this.male = male;
         this.adult = adult;
-        optionalTitle = ASMKeys.CondPresetTitle.Translate(BucketLabel(male, adult));
+        targetLabel = BucketLabel(male, adult);
+        optionalTitle = ASMKeys.CondPresetTitle.Translate(targetLabel);
     }
 
     private static string BucketLabel(bool male, bool adult)
@@ -67,8 +68,6 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
         prioritySettings.FromPreset(dto.ToRuleList(), (male, adult));
         return true;
     }
-
-    protected override string NoSliceLabel() => BucketLabel(male, adult);
 
     // Kind/All rows carry their scope mark; a condition preset saved in another bucket —
     // that bucket's label.

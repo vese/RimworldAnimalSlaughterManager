@@ -18,7 +18,8 @@ public class KindSettingsPresetBrowserDialog : BasePresetBrowserDialog
     {
         this.comp = comp;
         this.kind = kind;
-        optionalTitle = ASMKeys.PresetTitleKind.Translate(kind.LabelCap.ToString());
+        targetLabel = kind.LabelCap;
+        optionalTitle = ASMKeys.PresetTitleKind.Translate(targetLabel);
     }
 
     private KindSettings Settings => comp.GetSettings(kind);
@@ -47,8 +48,6 @@ public class KindSettingsPresetBrowserDialog : BasePresetBrowserDialog
         Settings.FromPreset(kd.Kind);
         return true;
     }
-
-    protected override string NoSliceLabel() => kind.LabelCap;
 
     // Kind/All rows carry their scope mark ("[Все виды]"); only the kind's slice is applied.
     protected override string? MarkOf(PresetEntry entry) => entry.scope == PresetScope.All

@@ -25,6 +25,10 @@ public abstract class BasePresetBrowserDialog : Window
     private string filterBuffer = "";
     private readonly Dictionary<PresetScope, bool> showScope = [];
 
+    /// <summary>The target the presets apply to (a kind's or bucket's label): the argument the
+    /// subclass's title key translates with and the name the no-slice message quotes.</summary>
+    protected TaggedString targetLabel;
+
     private const float Gap = 6f;     // consistent vertical gap (title→filter→rows→rows)
     private const float PadX = 8f;    // row left/right padding
     private const float RowH = 30f;
@@ -54,9 +58,6 @@ public abstract class BasePresetBrowserDialog : Window
 
     /// <summary>Applies the preset; false = the preset had no usable slice for this target.</summary>
     protected abstract bool Apply(PresetEntry entry);
-
-    /// <summary>Label for the "no slice" reject message when <see cref="Apply"/> fails.</summary>
-    protected abstract string NoSliceLabel();
 
     /// <summary>The row's mark-column content (cross-scope or cross-bucket mark); null = empty.</summary>
     protected virtual string? MarkOf(PresetEntry entry) => null;
@@ -337,7 +338,7 @@ public abstract class BasePresetBrowserDialog : Window
             }
             else
             {
-                Messages.Message(ASMKeys.PresetNoSlice.Translate(NoSliceLabel()), MessageTypeDefOf.RejectInput, false);
+                Messages.Message(ASMKeys.PresetNoSlice.Translate(targetLabel), MessageTypeDefOf.RejectInput, false);
             }
         }
 

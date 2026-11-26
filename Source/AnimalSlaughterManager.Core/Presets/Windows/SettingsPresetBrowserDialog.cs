@@ -16,6 +16,7 @@ public class SettingsPresetBrowserDialog : BasePresetBrowserDialog
     {
         this.comp = comp;
         optionalTitle = ASMKeys.PresetTitleAll.Translate();
+        targetLabel = optionalTitle;
     }
 
     protected override (PresetScope Scope, IEnumerable<PresetEntry> Entries)[] ScopeSources =>
@@ -37,6 +38,4 @@ public class SettingsPresetBrowserDialog : BasePresetBrowserDialog
         comp.FromPreset(dto);
         return true;
     }
-
-    protected override string NoSliceLabel() => ASMKeys.PresetTitleAll.Translate();
 }
