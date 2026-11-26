@@ -49,10 +49,10 @@ public class KindSettingsPresetBrowserDialog : BasePresetBrowserDialog
     }
 
     // Kind/All rows carry their scope mark ("[Все виды]"); only the kind's slice is applied.
-    protected override string? MarkOf(PresetEntry entry) =>
+    protected override string? GetRowMark(PresetEntry entry) =>
         entry.scope == PresetScope.All ? ASMKeys.PresetAllMark.Translate() : null;
 
-    protected override string? RowTip(PresetEntry entry) =>
+    protected override string? GetRowTip(PresetEntry entry) =>
         entry.scope == PresetScope.All ? ASMKeys.TipAllToKind.Translate(targetLabel) : null;
 
     protected override bool CanOverwrite(PresetEntry entry) => entry.scope == PresetScope.Kind && HasData();

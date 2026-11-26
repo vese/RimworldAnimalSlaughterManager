@@ -50,7 +50,7 @@ public class SpecialSettingsListPresetBrowserDialog : BasePresetBrowserDialog
     }
 
     // Kind/All rows carry their scope mark; only the slice of this list is applied.
-    protected override string? MarkOf(PresetEntry entry)
+    protected override string? GetRowMark(PresetEntry entry)
     {
         if (entry.scope == PresetScope.All)
         {
@@ -65,7 +65,7 @@ public class SpecialSettingsListPresetBrowserDialog : BasePresetBrowserDialog
         return null;
     }
 
-    protected override string? RowTip(PresetEntry entry)
+    protected override string? GetRowTip(PresetEntry entry)
     {
         string kindLabel = kind.LabelCap.ToString();
 

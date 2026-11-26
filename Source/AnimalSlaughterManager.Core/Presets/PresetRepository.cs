@@ -93,6 +93,10 @@ public static class PresetRepository
     public static void Save(string name, PresetScope scope, IVersionedPresetDto dto) =>
         Serialize(name, ScopeFolder(scope), dto);
 
+    /// <summary>Writes the full-settings model as a preset of the All scope.</summary>
+    public static void Save(string name, PresetScope scope, AllPreset preset) =>
+        Serialize(name, ScopeFolder(scope), AllPresetFile.Of(preset));
+
     /// <summary>Writes a list preset into its subfolder of the List scope.</summary>
     public static void SaveList(string name, string subfolder, ListPresetFile dto) =>
         Serialize(name, Path.Combine(ScopeFolder(PresetScope.List), subfolder), dto);
@@ -116,19 +120,19 @@ public static class PresetRepository
 
     // ---- Read (dispatch by root: the current formats, or the version-1 machinery) ---------
 
-    /// <summary>The full preset; the version-1 unified format migrates into the model.</summary>
-    public static AllPresetFile? ReadAll(PresetEntry entry)
+    /// <summary>The full preset model; the version-1 unified format migrates into it.</summary>
+    public static AllPreset? ReadAll(PresetEntry entry)
     {
         var text = Store.ReadText(entry.path);
 
         if (PresetSerializer.RootElementOf(text) == PresetSerializer.AllPresetRoot)
         {
-            return PresetSerializer.DeserializePreset<AllPresetFile>(text);
+            return PresetSerializer.DeserializePreset<AllPresetFile>(text)?.ToPreset();
         }
 
         var v1 = PresetSerializer.ReadV1Kinds(text);
 
-        return v1 == null ? null : new AllPresetFile { Kinds = [.. v1.Select(k => new KindPresetFile { Kind = k })] };
+        return v1 == null ? null : new AllPreset { Kinds = v1 };
     }
 
     /// <summary>The preset's kind slice: Kind-scope presets carry the single kind, All-scope

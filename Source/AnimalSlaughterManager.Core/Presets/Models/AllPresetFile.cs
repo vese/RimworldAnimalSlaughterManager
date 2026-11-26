@@ -1,10 +1,11 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace ASM;
 
 /// <summary>The file form of the full preset: the version plus every configured kind's file
-/// slice. Built and applied through ASM_MapComp.ToPreset/FromPreset.</summary>
+/// slice. The model mapping is Presets' business (see <see cref="AllPreset"/>).</summary>
 [XmlRoot("AllPreset")]
 public class AllPresetFile : IVersionedPresetDto
 {
@@ -13,4 +14,10 @@ public class AllPresetFile : IVersionedPresetDto
 
     [XmlElement("Kind")]
     public List<KindPresetFile> Kinds = [];
+
+    /// <summary>The file form of the model.</summary>
+    public static AllPresetFile Of(AllPreset preset) => new() { Kinds = [.. preset.Kinds.Select(k => new KindPresetFile { Kind = k })] };
+
+    /// <summary>The model of the file form.</summary>
+    public AllPreset ToPreset() => new() { Kinds = [.. Kinds.Select(k => k.Kind)] };
 }

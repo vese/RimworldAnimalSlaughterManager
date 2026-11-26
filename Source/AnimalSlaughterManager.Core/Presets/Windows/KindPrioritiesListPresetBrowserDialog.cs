@@ -28,11 +28,11 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
         this.prioritySettings = prioritySettings;
         this.male = male;
         this.adult = adult;
-        targetLabel = BucketLabel(male, adult);
+        targetLabel = GetBucketLabel(male, adult);
         optionalTitle = ASMKeys.CondPresetTitle.Translate(targetLabel);
     }
 
-    private static TaggedString BucketLabel(bool male, bool adult) => (male, adult) switch
+    private static TaggedString GetBucketLabel(bool male, bool adult) => (male, adult) switch
     {
         (true, true) => ASMKeys.AdultMales.Translate(),
         (true, false) => ASMKeys.YoungMales.Translate(),
@@ -62,7 +62,7 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
 
     // Kind/All rows carry their scope mark; a condition preset saved in another bucket —
     // that bucket's label.
-    protected override string? MarkOf(PresetEntry entry)
+    protected override string? GetRowMark(PresetEntry entry)
     {
         if (entry.scope == PresetScope.All)
         {
@@ -76,13 +76,13 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
 
         if (entry.scope == PresetScope.List && entry.condBucket is { } b && b != (male, adult))
         {
-            return BucketLabel(b.Male, b.Adult);
+            return GetBucketLabel(b.Male, b.Adult);
         }
 
         return null;
     }
 
-    protected override string? RowTip(PresetEntry entry) =>
+    protected override string? GetRowTip(PresetEntry entry) =>
         entry.scope == PresetScope.Kind || entry.scope == PresetScope.All
             ? ASMKeys.CondPresetCrossBucket.Translate(entry.scope.ToString())
             : null;

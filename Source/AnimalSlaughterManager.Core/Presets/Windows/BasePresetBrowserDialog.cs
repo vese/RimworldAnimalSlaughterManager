@@ -59,11 +59,11 @@ public abstract class BasePresetBrowserDialog : Window
     /// <summary>Applies the preset; false = the preset had no usable slice for this target.</summary>
     protected abstract bool Apply(PresetEntry entry);
 
-    /// <summary>The row's mark-column content (cross-scope or cross-bucket mark); null = empty.</summary>
-    protected virtual string? MarkOf(PresetEntry entry) => null;
+    /// <summary>Returns the row's mark-column content (cross-scope or cross-bucket mark); null = empty.</summary>
+    protected virtual string? GetRowMark(PresetEntry entry) => null;
 
-    /// <summary>The row's tooltip; null = none.</summary>
-    protected virtual string? RowTip(PresetEntry entry) => null;
+    /// <summary>Returns the row's tooltip; null = none.</summary>
+    protected virtual string? GetRowTip(PresetEntry entry) => null;
 
     /// <summary>Whether the row carries the Overwrite button.</summary>
     protected virtual bool CanOverwrite(PresetEntry entry) => HasData();
@@ -97,7 +97,7 @@ public abstract class BasePresetBrowserDialog : Window
             {
                 if (ScopeSources.Any(s => s.Scope == sc))
                 {
-                    toggleW += ScopeToggleWidth(sc) + Gap;
+                    toggleW += GetScopeToggleWidth(sc) + Gap;
                 }
             }
         }
@@ -127,7 +127,7 @@ public abstract class BasePresetBrowserDialog : Window
                     continue;
                 }
 
-                float tw = ScopeToggleWidth(sc);
+                float tw = GetScopeToggleWidth(sc);
                 tx -= tw;
                 DrawScopeToggle(tx, y, tw, sc);
 
@@ -189,21 +189,21 @@ public abstract class BasePresetBrowserDialog : Window
         GUI.enabled = true;
     }
 
-    private static float ScopeToggleWidth(PresetScope s)
+    private static float GetScopeToggleWidth(PresetScope s)
     {
-        string mark = ScopeMark(s);
+        string mark = GetScopeMark(s);
         const float iconS = 20f;
         return iconS + 4f + Text.CalcSize(mark).x + 8f;
     }
 
-    private static string ScopeMark(PresetScope s) => s == PresetScope.All ? ASMKeys.PresetAllMark.Translate()
+    private static string GetScopeMark(PresetScope s) => s == PresetScope.All ? ASMKeys.PresetAllMark.Translate()
         : s == PresetScope.Kind ? ASMKeys.PresetKindMark.Translate()
         : ASMKeys.PresetListMark.Translate();
 
     private void DrawScopeToggle(float x, float y, float w, PresetScope s)
     {
         bool on = !showScope.TryGetValue(s, out var shown) || shown;
-        string mark = ScopeMark(s);
+        string mark = GetScopeMark(s);
         const float iconS = 20f;
         Rect r = new Rect(x, y + 1f, w, 26f);
         Widgets.DrawHighlightIfMouseover(r);
@@ -266,7 +266,7 @@ public abstract class BasePresetBrowserDialog : Window
             Widgets.DrawAltRect(row);
         }
 
-        var mark = MarkOf(e);
+        var mark = GetRowMark(e);
 
         // Columns always reserved right-to-left. Overwrite (left of Load) only shown
         // for rows allowed by the policy when there is data to overwrite with.
@@ -323,7 +323,7 @@ public abstract class BasePresetBrowserDialog : Window
             }
         }
 
-        var tip = RowTip(e);
+        var tip = GetRowTip(e);
 
         if (tip != null)
         {
