@@ -12,7 +12,7 @@ internal static class PresetList
 
     // The zebra list of preset rows inside a scroll view; the empty state labels the filter.
     public static float Draw(float x, float y, float width, float height,
-        List<PresetEntry> entries, string filterBuffer, EntryRowPolicy policy,
+        List<PresetEntry> entries, string filterBuffer, EntryRowController controller,
         ref Vector2 scroll, ref float listHeight)
     {
         var outRect = new Rect(x, y, width, height);
@@ -36,7 +36,7 @@ internal static class PresetList
         foreach (var entry in entries)
         {
             var row = new Rect(view.x + RowPadX, cy, view.width - 2f * RowPadX, BasePresetBrowserDialog.RowHeight);
-            EntryRow.Draw(row, entry, index, policy);
+            EntryRow.Draw(row, entry, index, controller);
             cy += BasePresetBrowserDialog.RowHeight + UIConstants.GapX;
             index++;
         }

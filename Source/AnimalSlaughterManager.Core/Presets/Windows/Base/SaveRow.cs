@@ -11,7 +11,7 @@ internal static class SaveRow
     // Bottom row: name field + Save. Disabled when there is nothing to save or no name.
     public static float Draw(float x, float y, float width, bool hasData, Action<string> save, ref string nameBuffer)
     {
-        float saveWidth = BasePresetBrowserDialog.GetButtonWidth(ASMKeys.SavePreset.Translate());
+        float saveWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(ASMKeys.SavePreset.Translate()).x + UIConstants.ButtonPaddingX);
         bool canSave = hasData && !nameBuffer.Trim().NullOrEmpty();
         float fieldY = y + (BasePresetBrowserDialog.RowHeight - UIConstants.ButtonHeight) / 2f;
 

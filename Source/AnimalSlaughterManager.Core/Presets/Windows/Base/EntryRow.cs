@@ -11,7 +11,7 @@ internal static class EntryRow
     private const float MarkColumnMinWidth = 80f;
     private const float NameColumnMinWidth = 40f;
 
-    public static void Draw(Rect row, PresetEntry entry, int index, EntryRowPolicy policy)
+    public static void Draw(Rect row, PresetEntry entry, int index, EntryRowController controller)
     {
         // Zebra rows, like the save/load list.
         if (index % 2 == 1)
@@ -19,12 +19,12 @@ internal static class EntryRow
             Widgets.DrawAltRect(row);
         }
 
-        var mark = policy.GetMark(entry);
+        var mark = controller.GetMark(entry);
 
         // Columns always reserved right-to-left. Overwrite (left of Load) only on rows the
         // policy allows when there is data to overwrite with.
-        float loadWidth = BasePresetBrowserDialog.GetButtonWidth(ASMKeys.LoadPreset.Translate());
-        float overwriteWidth = BasePresetBrowserDialog.GetButtonWidth(ASMKeys.OverwritePreset.Translate());
+        float loadWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(ASMKeys.LoadPreset.Translate()).x + UIConstants.ButtonPaddingX);
+        float overwriteWidth = Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(ASMKeys.OverwritePreset.Translate()).x + UIConstants.ButtonPaddingX);
         float rowHeight = BasePresetBrowserDialog.RowHeight;
         float controlOffset = (rowHeight - UIConstants.ButtonHeight) / 2f;
         float labelOffset = (rowHeight - Text.LineHeight) / 2f;
@@ -69,19 +69,19 @@ internal static class EntryRow
         Text.Font = font;
 
         // Overwrite button (left of Load), with confirmation.
-        if (policy.CanOverwrite(entry))
+        if (controller.CanOverwrite(entry))
         {
             if (Widgets.ButtonText(overwriteBtn, ASMKeys.OverwritePreset.Translate()))
             {
                 var captured = entry;
                 Find.WindowStack.Add(new Dialog_MessageBox(ASMKeys.ConfirmOverwrite.Translate(captured.name),
                     ASMKeys.OverwritePreset.Translate(),
-                    () => policy.Overwrite(captured),
+                    () => controller.Overwrite(captured),
                     "No".Translate()) { doCloseX = true });
             }
         }
 
-        var tip = policy.GetTip(entry);
+        var tip = controller.GetTip(entry);
 
         if (tip != null)
         {
@@ -90,24 +90,24 @@ internal static class EntryRow
 
         if (Widgets.ButtonText(loadBtn, ASMKeys.LoadPreset.Translate()))
         {
-            if (policy.Apply(entry))
+            if (controller.Apply(entry))
             {
                 Messages.Message(ASMKeys.PresetLoaded.Translate(entry.name), MessageTypeDefOf.TaskCompletion, false);
             }
             else
             {
-                Messages.Message(ASMKeys.PresetNoSlice.Translate(policy.TargetLabel), MessageTypeDefOf.RejectInput, false);
+                Messages.Message(ASMKeys.PresetNoSlice.Translate(controller.TargetLabel), MessageTypeDefOf.RejectInput, false);
             }
         }
 
-        if (policy.CanDelete(entry))
+        if (controller.CanDelete(entry))
         {
             TooltipHandler.TipRegion(deleteBtn, ASMKeys.DeletePreset.Translate());
 
             if (Widgets.ButtonImage(deleteBtn, TexButton.Delete))
             {
                 var captured = entry;
-                Find.WindowStack.Add(new Dialog_MessageBox(policy.GetConfirmDeleteText(captured),
+                Find.WindowStack.Add(new Dialog_MessageBox(controller.GetConfirmDeleteText(captured),
                     ASMKeys.DeletePreset.Translate(), () => PresetRepository.Delete(captured),
                     "No".Translate()) { doCloseX = true });
             }

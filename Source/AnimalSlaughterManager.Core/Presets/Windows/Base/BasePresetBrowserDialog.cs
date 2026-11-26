@@ -18,6 +18,7 @@ namespace ASM;
 /// </summary>
 public abstract class BasePresetBrowserDialog : Window
 {
+    // TODO: посмотреть использования
     // Row heights follow the font, like the settings windows' controls.
     internal static readonly float RowHeight = UIConstants.ButtonHeight + 2f * UIConstants.TextPaddingY;
 
@@ -43,6 +44,8 @@ public abstract class BasePresetBrowserDialog : Window
 
     /// <summary>True when the target actually has data worth saving (enables the save row).</summary>
     protected abstract bool HasData { get; }
+
+    private EntryRowController RowPolicy => field ??= new(GetRowMark, GetRowTip, CanOverwrite, CanDelete, GetConfirmDeleteText, Apply, OverwriteEntry, targetLabel);
 
     protected BasePresetBrowserDialog()
     {
@@ -72,8 +75,6 @@ public abstract class BasePresetBrowserDialog : Window
     /// <summary>The delete-confirmation message for the entry.</summary>
     protected virtual string GetConfirmDeleteText(PresetEntry entry) => ASMKeys.ConfirmDelete.Translate(entry.name);
 
-    // ---- Frame ----------------------------------------------------------------------------
-
     public override void DoWindowContents(Rect inRect)
     {
         var font = Text.Font;
@@ -99,16 +100,6 @@ public abstract class BasePresetBrowserDialog : Window
         Save(e.name);
         Messages.Message(ASMKeys.PresetOverwritten.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
     }
-
-    // Bound once, after the subclass ctor has set targetLabel.
-    private EntryRowPolicy? rowPolicy;
-
-    private EntryRowPolicy RowPolicy => rowPolicy ??= new(GetRowMark, GetRowTip, CanOverwrite, CanDelete, GetConfirmDeleteText, Apply, OverwriteEntry, targetLabel);
-
-    // ---- Helpers ----------------------------------------------------------------------------
-
-    internal static float GetButtonWidth(string text) =>
-        Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(text).x + UIConstants.ButtonPaddingX);
 
     private List<PresetEntry> Gather((PresetScope Scope, IEnumerable<PresetEntry> Entries)[] sources)
     {

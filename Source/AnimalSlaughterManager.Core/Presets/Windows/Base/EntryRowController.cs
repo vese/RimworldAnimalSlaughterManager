@@ -6,7 +6,7 @@ namespace ASM;
 
 /// <summary>The row's policy from the browser: the marks and gating, the apply and overwrite
 /// actions, and the label the no-slice message quotes.</summary>
-internal sealed class EntryRowPolicy(
+internal sealed class EntryRowController(
     Func<PresetEntry, string?> getMark,
     Func<PresetEntry, string?> getTip,
     Func<PresetEntry, bool> canOverwrite,
