@@ -1,8 +1,7 @@
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
-using RimWorld;
 using UnityEngine;
 using Verse;
 
@@ -20,25 +19,22 @@ namespace ASM;
 public abstract class BasePresetBrowserDialog : Window
 {
     private const float RowPadX = 8f;          // preset row left/right padding
-    private const float ClearIconGap = 10f;    // search field ↔ the ✕ (or the toggles)
-    private const float ToggleIconGap = 4f;    // a toggle's icon ↔ its label
     private const float DateColumnWidth = 86f;
     private const float DeleteColumnWidth = 26f;
     private const float MarkColumnMinWidth = 80f;
     private const float NameColumnMinWidth = 40f;
 
     // Row heights follow the font, like the settings windows' controls.
-    private static float TopRowHeight => UIConstants.ButtonHeight + UIConstants.TextPaddingY;
-    private static float RowHeight => UIConstants.ButtonHeight + 2f * UIConstants.TextPaddingY;
+    private static readonly float RowHeight = UIConstants.ButtonHeight + 2f * UIConstants.TextPaddingY;
 
     // The enum's own values in numeric order (All — the broadest — first).
-    private static PresetScope[] ScopeValues => (PresetScope[])Enum.GetValues(typeof(PresetScope));
+    private static readonly PresetScope[] ScopeValues = [.. ((PresetScope[])Enum.GetValues(typeof(PresetScope))).OrderByDescending(x => (int)x)];
 
     private Vector2 scroll;
     private float listHeight = 9999f;
     private string nameBuffer = string.Empty;
     private string filterBuffer = string.Empty;
-    private readonly Dictionary<PresetScope, bool> showScope = [];
+    private Dictionary<PresetScope, bool> scopesState = [];
 
     /// <summary>The target the presets apply to (a kind's or bucket's label): the argument the
     /// subclass's title key translates with and the name the no-slice message quotes.</summary>
@@ -46,6 +42,7 @@ public abstract class BasePresetBrowserDialog : Window
 
     public override Vector2 InitialSize => new(820f, 600f);
 
+    // TODO: сделать, чтобы при использовании не было получения Entries
     /// <summary>The scopes this browser offers with their entry sources (its own scope plus
     /// any broader ones it imports from). One scope — no toggle strip.</summary>
     protected abstract (PresetScope Scope, IEnumerable<PresetEntry> Entries)[] ScopeSources { get; }
@@ -89,96 +86,18 @@ public abstract class BasePresetBrowserDialog : Window
         Text.Font = GameFont.Small;
 
         var top = inRect.y + UIConstants.GapX;
+        var scopes = ScopeValues.Where(scope => ScopeSources.Any(s => s.Scope == scope)).ToList();
 
-        DrawSearchRow(inRect.x, top, inRect.width);
+        top += SearchRow.Draw(inRect.x, top, inRect.width, scopes, ref scopesState, ref filterBuffer);
 
         // The preset list fills everything between the search row and the save row.
-        var listTop = top + TopRowHeight + UIConstants.GapX;
+        var listTop = top + UIConstants.GapX;
         var listBottom = inRect.yMax - RowHeight - UIConstants.GapX;
         DrawPresetList(inRect.x, listTop, inRect.width, listBottom - listTop);
 
         DrawSaveRow(inRect.x, inRect.yMax - RowHeight, inRect.width);
 
         Text.Font = font;
-    }
-
-    // Top row: magnifier + filter field on the left, clear ✕ after it; scope-type toggles
-    // right-aligned to the window edge.
-    private void DrawSearchRow(float x, float y, float width)
-    {
-        var hasScopeToggles = ScopeSources.Length > 1;
-        var mid = x + width - (hasScopeToggles ? GetScopeTogglesWidth() : UIConstants.IconSize + ClearIconGap);
-        var iconY = y + (TopRowHeight - UIConstants.IconSize) / 2f;
-
-        GUI.DrawTexture(new Rect(x, iconY, UIConstants.IconSize, UIConstants.IconSize), TexButton.Search);
-
-        var fieldX = x + UIConstants.IconSize + UIConstants.GapX;
-        var fieldEnd = mid - UIConstants.IconSize - ClearIconGap;
-        filterBuffer = Widgets.TextField(new Rect(fieldX, y + (TopRowHeight - UIConstants.ButtonHeight) / 2f, fieldEnd - fieldX, UIConstants.ButtonHeight), filterBuffer);
-
-        var clearBtn = new Rect(mid - UIConstants.IconSize, iconY, UIConstants.IconSize, UIConstants.IconSize);
-        TooltipHandler.TipRegion(clearBtn, ASMKeys.Clear.Translate());
-
-        if (Widgets.ButtonImage(clearBtn, TexButton.CloseXSmall))
-        {
-            filterBuffer = string.Empty;
-        }
-
-        if (hasScopeToggles)
-        {
-            DrawScopeToggles(x + width, y);
-        }
-    }
-
-    // The toggles sit flush right, laid out in the scopes' numeric order.
-    private void DrawScopeToggles(float rightEdge, float y)
-    {
-        float x = rightEdge - GetScopeTogglesWidth();
-
-        foreach (var scope in ScopeValues)
-        {
-            if (!IsOffered(scope))
-            {
-                continue;
-            }
-
-            var width = GetScopeToggleWidth(scope);
-            DrawScopeToggle(x, y, width, scope);
-
-            x += width + UIConstants.GapX;
-        }
-    }
-
-    private void DrawScopeToggle(float x, float y, float width, PresetScope scope)
-    {
-        bool on = !showScope.TryGetValue(scope, out var shown) || shown;
-        var rect = new Rect(x, y + (TopRowHeight - UIConstants.ButtonHeight) / 2f, width, UIConstants.ButtonHeight);
-        Widgets.DrawHighlightIfMouseover(rect);
-
-        // Indicator: green check (shown) or red X (hidden).
-        var iconRect = new Rect(rect.x, rect.y + (rect.height - UIConstants.IconSize) / 2f, UIConstants.IconSize, UIConstants.IconSize);
-
-        if (on)
-        {
-            GUI.color = Color.green;
-            Widgets.CheckboxDraw(iconRect.x, iconRect.y, true, false, UIConstants.IconSize);
-            GUI.color = Color.white;
-        }
-        else
-        {
-            GUI.color = Color.red;
-            GUI.DrawTexture(iconRect, TexButton.CloseXSmall);
-            GUI.color = Color.white;
-        }
-
-        Text.Anchor = TextAnchor.MiddleLeft;
-        Widgets.Label(new Rect(iconRect.xMax + ToggleIconGap, rect.y, rect.width - UIConstants.IconSize - ToggleIconGap, rect.height), GetScopeMark(scope));
-        Text.Anchor = TextAnchor.UpperLeft;
-
-        if (Widgets.ButtonInvisible(rect))
-        {
-            showScope[scope] = !on;
-        }
     }
 
     // The zebra list of preset rows inside a scroll view; the empty state labels the filter.
@@ -346,22 +265,6 @@ public abstract class BasePresetBrowserDialog : Window
     private static float GetMarkColumnWidth() =>
         Mathf.Max(MarkColumnMinWidth, Text.CalcSize(ASMKeys.PresetAllMark.Translate()).x + UIConstants.GapX);
 
-    private bool IsOffered(PresetScope scope) => ScopeSources.Any(s => s.Scope == scope);
-
-    private float GetScopeTogglesWidth()
-    {
-        var scopes = ScopeValues.Where(IsOffered).ToList();
-
-        return scopes.Sum(GetScopeToggleWidth) + UIConstants.GapX * Math.Max(scopes.Count - 1, 0);
-    }
-
-    private static float GetScopeToggleWidth(PresetScope scope) =>
-        UIConstants.IconSize + ToggleIconGap + Text.CalcSize(GetScopeMark(scope)).x + UIConstants.GapX;
-
-    private static string GetScopeMark(PresetScope scope) => scope == PresetScope.All ? ASMKeys.PresetAllMark.Translate()
-        : scope == PresetScope.Kind ? ASMKeys.PresetKindMark.Translate()
-        : ASMKeys.PresetListMark.Translate();
-
     private List<PresetEntry> Gather((PresetScope Scope, IEnumerable<PresetEntry> Entries)[] sources)
     {
         var entries = new List<PresetEntry>();
@@ -369,7 +272,7 @@ public abstract class BasePresetBrowserDialog : Window
         foreach (var source in sources)
         {
             // A single offered scope has no toggle and always contributes.
-            if (sources.Length == 1 || !showScope.TryGetValue(source.Scope, out var shown) || shown)
+            if (sources.Length == 1 || !scopesState.TryGetValue(source.Scope, out var shown) || shown)
             {
                 entries.AddRange(source.Entries);
             }
