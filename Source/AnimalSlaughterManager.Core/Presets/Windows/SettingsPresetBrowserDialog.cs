@@ -17,7 +17,7 @@ public class SettingsPresetBrowserDialog : BasePresetBrowserDialog
         (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
     ];
 
-    protected override bool HasData => comp.AllKindSettings.Any(k => k.Value.Customized);
+    protected internal override bool HasData => comp.AllKindSettings.Any(k => k.Value.Customized);
 
     public SettingsPresetBrowserDialog(ASM_MapComp comp)
     {
@@ -26,9 +26,9 @@ public class SettingsPresetBrowserDialog : BasePresetBrowserDialog
         targetLabel = optionalTitle;
     }
 
-    protected override void Save(string name) => PresetRepository.Save(name, PresetScope.All, comp.ToPreset());
+    protected internal override void Save(string name) => PresetRepository.Save(name, PresetScope.All, comp.ToPreset());
 
-    protected override bool Apply(PresetEntry entry)
+    protected internal override bool Apply(PresetEntry entry)
     {
         if (PresetRepository.ReadAll(entry) is not { } dto)
         {

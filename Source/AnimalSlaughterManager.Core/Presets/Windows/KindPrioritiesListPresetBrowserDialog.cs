@@ -23,7 +23,7 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
         (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
     ];
 
-    protected override bool HasData => prioritySettings.Get(male, adult).Count > 0;
+    protected internal override bool HasData => prioritySettings.Get(male, adult).Count > 0;
 
     public KindPrioritiesListPresetBrowserDialog(bool male, bool adult, KindPrioritySettings prioritySettings)
     {
@@ -42,10 +42,10 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
         _ => ASMKeys.YoungFemales.Translate(),
     };
 
-    protected override void Save(string name) =>
+    protected internal override void Save(string name) =>
         PresetRepository.SaveList(name, PresetRepository.ConditionsFolder((male, adult)), ListPresetFile.OfRules(prioritySettings.ToPreset((male, adult))));
 
-    protected override bool Apply(PresetEntry entry)
+    protected internal override bool Apply(PresetEntry entry)
     {
         // A condition preset carries its rule list; a Kind/All preset — the slice of this
         // bucket (cross-bucket import included).
@@ -62,7 +62,7 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
 
     // Kind/All rows carry their scope mark; a condition preset saved in another bucket —
     // that bucket's label.
-    protected override string? GetRowMark(PresetEntry entry)
+    protected internal override string? GetRowMark(PresetEntry entry)
     {
         if (entry.scope == PresetScope.All)
         {
@@ -82,11 +82,11 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
         return null;
     }
 
-    protected override string? GetRowTip(PresetEntry entry) =>
+    protected internal override string? GetRowTip(PresetEntry entry) =>
         entry.scope == PresetScope.Kind || entry.scope == PresetScope.All
             ? ASMKeys.CondPresetCrossBucket.Translate(entry.scope.ToString())
             : null;
 
-    protected override bool CanOverwrite(PresetEntry entry) =>
+    protected internal override bool CanOverwrite(PresetEntry entry) =>
         entry.scope == PresetScope.List && entry.condBucket == (male, adult) && HasData;
 }

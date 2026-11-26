@@ -26,7 +26,7 @@ public class SpecialSettingsListPresetBrowserDialog : BasePresetBrowserDialog
         (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
     ];
 
-    protected override bool HasData => hasListData?.Invoke() ?? false;
+    protected internal override bool HasData => hasListData?.Invoke() ?? false;
 
     public SpecialSettingsListPresetBrowserDialog(ThingDef kind, string titleKey,
         Action<string> exportList, Func<PresetEntry, bool> applyList, Func<bool>? hasListData = null)
@@ -40,12 +40,12 @@ public class SpecialSettingsListPresetBrowserDialog : BasePresetBrowserDialog
         optionalTitle = listTitle;
     }
 
-    protected override void Save(string name) => exportList(name);
+    protected internal override void Save(string name) => exportList(name);
 
-    protected override bool Apply(PresetEntry entry) => applyList(entry);
+    protected internal override bool Apply(PresetEntry entry) => applyList(entry);
 
     // Kind/All rows carry their scope mark; only the slice of this list is applied.
-    protected override string? GetRowMark(PresetEntry entry)
+    protected internal override string? GetRowMark(PresetEntry entry)
     {
         if (entry.scope == PresetScope.All)
         {
@@ -60,7 +60,7 @@ public class SpecialSettingsListPresetBrowserDialog : BasePresetBrowserDialog
         return null;
     }
 
-    protected override string? GetRowTip(PresetEntry entry)
+    protected internal override string? GetRowTip(PresetEntry entry)
     {
         string kindLabel = kind.LabelCap.ToString();
 
@@ -77,9 +77,9 @@ public class SpecialSettingsListPresetBrowserDialog : BasePresetBrowserDialog
         return null;
     }
 
-    protected override bool CanOverwrite(PresetEntry entry) => entry.scope == PresetScope.List && HasData;
+    protected internal override bool CanOverwrite(PresetEntry entry) => entry.scope == PresetScope.List && HasData;
 
-    protected override bool CanDelete(PresetEntry entry) => entry.DeletableFrom(PresetScope.List);
+    protected internal override bool CanDelete(PresetEntry entry) => entry.DeletableFrom(PresetScope.List);
 
-    protected override string GetConfirmDeleteText(PresetEntry entry) => ASMKeys.ConfirmDeleteList.Translate(entry.name);
+    protected internal override string GetConfirmDeleteText(PresetEntry entry) => ASMKeys.ConfirmDeleteList.Translate(entry.name);
 }
