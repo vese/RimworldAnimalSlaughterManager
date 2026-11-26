@@ -19,6 +19,23 @@ namespace ASM;
 /// </summary>
 public abstract class BasePresetBrowserDialog : Window
 {
+    private const float Gap = 6f;              // vertical gap: title→search row→rows→save row
+    private const float TopRowHeight = 28f;    // the search/toggle row
+    private const float SaveRowHeight = 30f;
+    private const float RowHeight = 30f;       // a preset row
+    private const float RowPadX = 8f;          // preset row left/right padding
+    private const float ControlHeight = 26f;   // text fields and row buttons
+    private const float LabelHeight = 22f;     // row text labels
+    private const float ClearIconGap = 10f;    // search field ↔ the ✕ (or the toggles)
+    private const float ToggleIconSize = 20f;
+    private const float ToggleIconGap = 4f;    // a toggle's icon ↔ its label
+    private const float DateColumnWidth = 86f;
+    private const float DeleteColumnWidth = 26f;
+    private const float MarkColumnMinWidth = 80f;
+    private const float NameColumnMinWidth = 40f;
+
+    private static readonly PresetScope[] ScopeOrder = [PresetScope.List, PresetScope.Kind, PresetScope.All];
+
     private Vector2 scroll;
     private float listHeight = 9999f;
     private string nameBuffer = string.Empty;
@@ -28,12 +45,6 @@ public abstract class BasePresetBrowserDialog : Window
     /// <summary>The target the presets apply to (a kind's or bucket's label): the argument the
     /// subclass's title key translates with and the name the no-slice message quotes.</summary>
     protected TaggedString targetLabel;
-
-    private const float Gap = 6f;     // consistent vertical gap (title→filter→rows→rows)
-    private const float PadX = 8f;    // row left/right padding
-    private const float RowH = 30f;
-
-    private static readonly PresetScope[] ScopeOrder = [PresetScope.List, PresetScope.Kind, PresetScope.All];
 
     public override Vector2 InitialSize => new Vector2(820f, 600f);
 
@@ -80,35 +91,32 @@ public abstract class BasePresetBrowserDialog : Window
     {
         Text.Font = GameFont.Small;
 
-        float btnW = Mathf.Max(96f, Text.CalcSize(ASMKeys.SavePreset.Translate()).x + 18f);
+        var top = inRect.y + Gap;
+        DrawSearchRow(inRect.x, top, inRect.width);
 
+        // The preset list fills everything between the search row and the save row.
+        var listTop = top + TopRowHeight + Gap;
+        var listBottom = inRect.yMax - SaveRowHeight - Gap;
+        DrawPresetList(inRect.x, listTop, inRect.width, listBottom - listTop);
+
+        DrawSaveRow(inRect.x, inRect.yMax - SaveRowHeight, inRect.width);
+    }
+
+    // Top row: magnifier + filter field on the left, clear ✕ after it; scope-type toggles
+    // right-aligned to the window edge.
+    private void DrawSearchRow(float x, float y, float width)
+    {
         bool toggles = ScopeSources.Length > 1;
+        float mid = x + width - (toggles ? GetScopeTogglesWidth() : UIConstants.IconSize + ClearIconGap);
+        float iconY = y + (TopRowHeight - UIConstants.IconSize) / 2f;
 
-        // --- Top: search row, one Gap below the title. Magnifier + filter field on the left,
-        // clear ✕ after it; scope-type toggles right-aligned to the window edge. ---
-        float y = inRect.y + Gap;
-        const float topH = 28f;
-        const float icon = 22f, gap = 6f, clearGap = 10f;
-        float toggleW = 0f;
+        GUI.DrawTexture(new Rect(x, iconY, UIConstants.IconSize, UIConstants.IconSize), TexButton.Search);
 
-        if (toggles)
-        {
-            foreach (var sc in ScopeOrder)
-            {
-                if (ScopeSources.Any(s => s.Scope == sc))
-                {
-                    toggleW += GetScopeToggleWidth(sc) + Gap;
-                }
-            }
-        }
+        float fieldX = x + UIConstants.IconSize + UIConstants.GapX;
+        float fieldEnd = mid - UIConstants.IconSize - ClearIconGap;
+        filterBuffer = Widgets.TextField(new Rect(fieldX, y + (TopRowHeight - ControlHeight) / 2f, fieldEnd - fieldX, ControlHeight), filterBuffer);
 
-        float fieldEndBase = inRect.xMax - icon - clearGap;
-        float mid = toggles ? inRect.xMax - toggleW : fieldEndBase;
-        GUI.DrawTexture(new Rect(inRect.x, y + (topH - icon) / 2f, icon, icon), TexButton.Search);
-        float fieldX = inRect.x + icon + gap;
-        float fieldEnd = mid - icon - clearGap;
-        filterBuffer = Widgets.TextField(new Rect(fieldX, y + 1f, fieldEnd - fieldX, 26f), filterBuffer);
-        Rect clearBtn = new Rect(mid - icon, y + (topH - icon) / 2f, icon, icon);
+        var clearBtn = new Rect(mid - UIConstants.IconSize, iconY, UIConstants.IconSize, UIConstants.IconSize);
         TooltipHandler.TipRegion(clearBtn, ASMKeys.Clear.Translate());
 
         if (Widgets.ButtonImage(clearBtn, TexButton.CloseXSmall))
@@ -118,33 +126,67 @@ public abstract class BasePresetBrowserDialog : Window
 
         if (toggles)
         {
-            float tx = inRect.xMax;
-            // Right-aligned: walk the scopes right-to-left.
-            foreach (var sc in ScopeOrder)
+            DrawScopeToggles(x + width, y);
+        }
+    }
+
+    private void DrawScopeToggles(float rightEdge, float y)
+    {
+        float right = rightEdge;
+
+        // Right-aligned: walk the scopes right-to-left.
+        foreach (var scope in ScopeOrder)
+        {
+            if (!ScopeSources.Any(s => s.Scope == scope))
             {
-                if (!ScopeSources.Any(s => s.Scope == sc))
-                {
-                    continue;
-                }
-
-                float tw = GetScopeToggleWidth(sc);
-                tx -= tw;
-                DrawScopeToggle(tx, y, tw, sc);
-
-                tx -= Gap;
+                continue;
             }
+
+            right -= GetScopeToggleWidth(scope);
+            DrawScopeToggle(right, y, GetScopeToggleWidth(scope), scope);
+
+            right -= Gap;
+        }
+    }
+
+    private void DrawScopeToggle(float x, float y, float width, PresetScope scope)
+    {
+        bool on = !showScope.TryGetValue(scope, out var shown) || shown;
+        var rect = new Rect(x, y + (TopRowHeight - ControlHeight) / 2f, width, ControlHeight);
+        Widgets.DrawHighlightIfMouseover(rect);
+
+        // Indicator: green check (shown) or red X (hidden).
+        var iconRect = new Rect(rect.x, rect.y + (rect.height - ToggleIconSize) / 2f, ToggleIconSize, ToggleIconSize);
+
+        if (on)
+        {
+            GUI.color = Color.green;
+            Widgets.CheckboxDraw(iconRect.x, iconRect.y, true, false, ToggleIconSize);
+            GUI.color = Color.white;
+        }
+        else
+        {
+            GUI.color = Color.red;
+            GUI.DrawTexture(iconRect, TexButton.CloseXSmall);
+            GUI.color = Color.white;
         }
 
-        y += topH + Gap;
+        Text.Anchor = TextAnchor.MiddleLeft;
+        Widgets.Label(new Rect(iconRect.xMax + ToggleIconGap, rect.y, rect.width - ToggleIconSize - ToggleIconGap, rect.height), GetScopeMark(scope));
+        Text.Anchor = TextAnchor.UpperLeft;
 
-        // --- Bottom: save row (name field + Save button). ---
-        const float saveRowH = 30f;
-        float listBottom = inRect.yMax - saveRowH - Gap;
+        if (Widgets.ButtonInvisible(rect))
+        {
+            showScope[scope] = !on;
+        }
+    }
 
-        // --- Middle: the preset list. ---
+    // The zebra list of preset rows inside a scroll view; the empty state labels the filter.
+    private void DrawPresetList(float x, float y, float width, float height)
+    {
         var entries = Gather(ScopeSources);
-        Rect outRect = new Rect(inRect.x, y, inRect.width, listBottom - y);
-        Rect view = new Rect(inRect.x, y, inRect.width - 16f, Mathf.Max(listHeight, outRect.height));
+        var outRect = new Rect(x, y, width, height);
+        var view = new Rect(x, y, width - UIConstants.ScrollbarWidth, Mathf.Max(listHeight, outRect.height));
         Widgets.BeginScrollView(outRect, ref scroll, view);
 
         float cy = view.y;
@@ -158,104 +200,39 @@ public abstract class BasePresetBrowserDialog : Window
             cy += 28f;
         }
 
-        int i = 0;
+        int index = 0;
 
-        foreach (var e in entries)
+        foreach (var entry in entries)
         {
-            Rect row = new Rect(view.x + PadX, cy, view.width - 2f * PadX, RowH);
-            DrawEntryRow(row, e, i);
-            cy += RowH + Gap;
-            i++;
+            var row = new Rect(view.x + RowPadX, cy, view.width - 2f * RowPadX, RowHeight);
+            DrawEntryRow(row, entry, index);
+            cy += RowHeight + Gap;
+            index++;
         }
 
         listHeight = Mathf.Max(cy - view.y, outRect.height);
         Widgets.EndScrollView();
+    }
 
-        // Save row: name field + Save. Disabled when nothing to save or no name.
-        bool hasData = HasData;
-        bool canSave = hasData && !nameBuffer.Trim().NullOrEmpty();
-        float sy = inRect.yMax - saveRowH + 2f;
-        GUI.enabled = hasData;
-        nameBuffer = Widgets.TextField(new Rect(inRect.x, sy, inRect.width - btnW - gap, 26f), nameBuffer);
+    // Bottom row: name field + Save. Disabled when there is nothing to save or no name.
+    private void DrawSaveRow(float x, float y, float width)
+    {
+        float saveWidth = GetButtonWidth(ASMKeys.SavePreset.Translate());
+        bool canSave = HasData && !nameBuffer.Trim().NullOrEmpty();
+        float fieldY = y + (SaveRowHeight - ControlHeight) / 2f;
 
-        if (Widgets.ButtonText(new Rect(inRect.xMax - btnW, sy, btnW, 26f), ASMKeys.SavePreset.Translate(), active: canSave) && canSave)
+        GUI.enabled = HasData;
+        nameBuffer = Widgets.TextField(new Rect(x, fieldY, width - saveWidth - UIConstants.GapX, ControlHeight), nameBuffer);
+
+        if (Widgets.ButtonText(new Rect(x + width - saveWidth, fieldY, saveWidth, ControlHeight), ASMKeys.SavePreset.Translate(), active: canSave) && canSave)
         {
-            string name = (nameBuffer ?? "").Trim();
+            string name = nameBuffer.Trim();
             Save(name);
             nameBuffer = string.Empty;
             Messages.Message(ASMKeys.PresetSaved.Translate(name), MessageTypeDefOf.TaskCompletion, false);
         }
 
         GUI.enabled = true;
-    }
-
-    private static float GetScopeToggleWidth(PresetScope s)
-    {
-        string mark = GetScopeMark(s);
-        const float iconS = 20f;
-        return iconS + 4f + Text.CalcSize(mark).x + 8f;
-    }
-
-    private static string GetScopeMark(PresetScope s) => s == PresetScope.All ? ASMKeys.PresetAllMark.Translate()
-        : s == PresetScope.Kind ? ASMKeys.PresetKindMark.Translate()
-        : ASMKeys.PresetListMark.Translate();
-
-    private void DrawScopeToggle(float x, float y, float w, PresetScope s)
-    {
-        bool on = !showScope.TryGetValue(s, out var shown) || shown;
-        string mark = GetScopeMark(s);
-        const float iconS = 20f;
-        Rect r = new Rect(x, y + 1f, w, 26f);
-        Widgets.DrawHighlightIfMouseover(r);
-        // Indicator: green check (shown) or red X (hidden).
-        Rect iconRect = new Rect(r.x, r.y + (r.height - iconS) / 2f, iconS, iconS);
-
-        if (on)
-        {
-            GUI.color = Color.green;
-            Widgets.CheckboxDraw(iconRect.x, iconRect.y, true, false, iconS);
-            GUI.color = Color.white;
-        }
-        else
-        {
-            GUI.color = Color.red;
-            GUI.DrawTexture(iconRect, TexButton.CloseXSmall);
-            GUI.color = Color.white;
-        }
-
-        Text.Anchor = TextAnchor.MiddleLeft;
-        Widgets.Label(new Rect(iconRect.xMax + 4f, r.y, r.width - iconS - 4f, r.height), mark);
-        Text.Anchor = TextAnchor.UpperLeft;
-
-        if (Widgets.ButtonInvisible(r))
-        {
-            showScope[s] = !on;
-        }
-    }
-
-    private List<PresetEntry> Gather((PresetScope Scope, IEnumerable<PresetEntry> Entries)[] sources)
-    {
-        var entries = new List<PresetEntry>();
-
-        foreach (var source in sources)
-        {
-            // A single offered scope has no toggle and always contributes.
-            if (sources.Length == 1 || !showScope.TryGetValue(source.Scope, out var shown) || shown)
-            {
-                entries.AddRange(source.Entries);
-            }
-        }
-
-        entries = entries.OrderByDescending(e => e.date).ThenBy(e => e.name).ToList();
-
-        string f = filterBuffer.Trim();
-
-        if (!f.NullOrEmpty())
-        {
-            entries = entries.Where(e => e.name.IndexOf(f, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
-        }
-
-        return entries;
     }
 
     private void DrawEntryRow(Rect row, PresetEntry e, int index)
@@ -268,37 +245,35 @@ public abstract class BasePresetBrowserDialog : Window
 
         var mark = GetRowMark(e);
 
-        // Columns always reserved right-to-left. Overwrite (left of Load) only shown
-        // for rows allowed by the policy when there is data to overwrite with.
-        float loadW = Mathf.Max(96f, Text.CalcSize(ASMKeys.LoadPreset.Translate()).x + 18f);
-        float overW = Mathf.Max(96f, Text.CalcSize(ASMKeys.OverwritePreset.Translate()).x + 18f);
-        float extraW = Mathf.Max(80f, Text.CalcSize(ASMKeys.PresetAllMark.Translate()).x + 6f);
-        const float delW = 26f, dateW = 86f, gap = 6f;
+        // Columns always reserved right-to-left. Overwrite (left of Load) only on rows the
+        // policy allows when there is data to overwrite with.
+        float loadWidth = GetButtonWidth(ASMKeys.LoadPreset.Translate());
+        float overwriteWidth = GetButtonWidth(ASMKeys.OverwritePreset.Translate());
 
         float right = row.xMax;
-        Rect delRect = new Rect(right - delW, row.y + 2f, delW, 26f);
-        right -= delW + gap;
-        Rect loadBtn = new Rect(right - loadW, row.y + 2f, loadW, 26f);
-        right -= loadW + gap;
-        Rect overBtn = new Rect(right - overW, row.y + 2f, overW, 26f);
-        right -= overW + gap;
-        Rect dateRect = new Rect(right - dateW, row.y + 4f, dateW, 22f);
-        right -= dateW + gap;
-        Rect extraRect = new Rect(right - extraW, row.y + 4f, extraW, 22f);
-        right -= extraW + gap;
-        Rect nameRect = new Rect(row.x, row.y + 5f, Mathf.Max(right - row.x, 40f), 22f);
+        var deleteBtn = new Rect(right - DeleteColumnWidth, row.y + (RowHeight - ControlHeight) / 2f, DeleteColumnWidth, ControlHeight);
+        right -= DeleteColumnWidth + UIConstants.GapX;
+        var loadBtn = new Rect(right - loadWidth, row.y + (RowHeight - ControlHeight) / 2f, loadWidth, ControlHeight);
+        right -= loadWidth + UIConstants.GapX;
+        var overwriteBtn = new Rect(right - overwriteWidth, row.y + (RowHeight - ControlHeight) / 2f, overwriteWidth, ControlHeight);
+        right -= overwriteWidth + UIConstants.GapX;
+        var dateLabel = new Rect(right - DateColumnWidth, row.y + (RowHeight - LabelHeight) / 2f, DateColumnWidth, LabelHeight);
+        right -= DateColumnWidth + UIConstants.GapX;
+        var markLabel = new Rect(right - GetMarkColumnWidth(), row.y + (RowHeight - LabelHeight) / 2f, GetMarkColumnWidth(), LabelHeight);
+        right -= GetMarkColumnWidth() + UIConstants.GapX;
+        var nameRect = new Rect(row.x, row.y, Mathf.Max(right - row.x, NameColumnMinWidth), RowHeight);
 
         // 1st column — name.
         Text.Anchor = TextAnchor.MiddleLeft;
         Widgets.Label(nameRect, e.name);
         Text.Anchor = TextAnchor.UpperLeft;
 
-        // Extra column — the policy's mark (cross-scope/cross-bucket) or empty.
+        // Mark column — the policy's mark (cross-scope/cross-bucket) or empty.
         if (mark != null)
         {
             GUI.color = Color.cyan;
             Text.Anchor = TextAnchor.MiddleRight;
-            Widgets.Label(extraRect, mark);
+            Widgets.Label(markLabel, mark);
             Text.Anchor = TextAnchor.UpperLeft;
             GUI.color = Color.white;
         }
@@ -306,14 +281,14 @@ public abstract class BasePresetBrowserDialog : Window
         // Date — Tiny font so it fits on one line (like the save/load window).
         Text.Font = GameFont.Tiny;
         GUI.color = Color.gray;
-        Widgets.Label(dateRect, e.date.ToString("yyyy-MM-dd HH:mm"));
+        Widgets.Label(dateLabel, e.date.ToString("yyyy-MM-dd HH:mm"));
         GUI.color = Color.white;
         Text.Font = GameFont.Small;
 
         // Overwrite button (left of Load), with confirmation.
         if (CanOverwrite(e))
         {
-            if (Widgets.ButtonText(overBtn, ASMKeys.OverwritePreset.Translate()))
+            if (Widgets.ButtonText(overwriteBtn, ASMKeys.OverwritePreset.Translate()))
             {
                 var captured = e;
                 Find.WindowStack.Add(new Dialog_MessageBox(ASMKeys.ConfirmOverwrite.Translate(captured.name),
@@ -344,9 +319,9 @@ public abstract class BasePresetBrowserDialog : Window
 
         if (CanDelete(e))
         {
-            TooltipHandler.TipRegion(delRect, ASMKeys.DeletePreset.Translate());
+            TooltipHandler.TipRegion(deleteBtn, ASMKeys.DeletePreset.Translate());
 
-            if (Widgets.ButtonImage(delRect, TexButton.Delete))
+            if (Widgets.ButtonImage(deleteBtn, TexButton.Delete))
             {
                 var captured = e;
                 Find.WindowStack.Add(new Dialog_MessageBox(ConfirmDelete(captured),
@@ -360,5 +335,61 @@ public abstract class BasePresetBrowserDialog : Window
     {
         Save(e.name);
         Messages.Message(ASMKeys.PresetOverwritten.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
+    }
+
+    // ---- Helpers ----------------------------------------------------------------------------
+
+    private static float GetButtonWidth(string text) =>
+        Mathf.Max(UIConstants.ButtonMinWidth, Text.CalcSize(text).x + UIConstants.ButtonPaddingX);
+
+    // The mark column fits the longest scope mark, with a floor.
+    private static float GetMarkColumnWidth() =>
+        Mathf.Max(MarkColumnMinWidth, Text.CalcSize(ASMKeys.PresetAllMark.Translate()).x + UIConstants.GapX);
+
+    private float GetScopeTogglesWidth()
+    {
+        float width = 0f;
+
+        foreach (var scope in ScopeOrder)
+        {
+            if (ScopeSources.Any(s => s.Scope == scope))
+            {
+                width += GetScopeToggleWidth(scope) + Gap;
+            }
+        }
+
+        return width;
+    }
+
+    private static float GetScopeToggleWidth(PresetScope scope) =>
+        ToggleIconSize + ToggleIconGap + Text.CalcSize(GetScopeMark(scope)).x + UIConstants.GapX;
+
+    private static string GetScopeMark(PresetScope scope) => scope == PresetScope.All ? ASMKeys.PresetAllMark.Translate()
+        : scope == PresetScope.Kind ? ASMKeys.PresetKindMark.Translate()
+        : ASMKeys.PresetListMark.Translate();
+
+    private List<PresetEntry> Gather((PresetScope Scope, IEnumerable<PresetEntry> Entries)[] sources)
+    {
+        var entries = new List<PresetEntry>();
+
+        foreach (var source in sources)
+        {
+            // A single offered scope has no toggle and always contributes.
+            if (sources.Length == 1 || !showScope.TryGetValue(source.Scope, out var shown) || shown)
+            {
+                entries.AddRange(source.Entries);
+            }
+        }
+
+        entries = entries.OrderByDescending(e => e.date).ThenBy(e => e.name).ToList();
+
+        string f = filterBuffer.Trim();
+
+        if (!f.NullOrEmpty())
+        {
+            entries = entries.Where(e => e.name.IndexOf(f, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+        }
+
+        return entries;
     }
 }
