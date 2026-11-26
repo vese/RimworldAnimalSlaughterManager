@@ -45,7 +45,8 @@ public abstract class BasePresetBrowserDialog : Window
     /// <summary>True when the target actually has data worth saving (enables the save row).</summary>
     protected abstract bool HasData { get; }
 
-    private EntryRowController RowPolicy => field ??= new(GetRowMark, GetRowTip, CanOverwrite, CanDelete, GetConfirmDeleteText, Apply, OverwriteEntry, targetLabel);
+    private EntryRowController RowPolicy =>
+        field ??= new(GetRowMark, GetRowTip, CanOverwrite, CanDelete, GetConfirmDeleteText, Apply, OverwriteEntry, targetLabel);
 
     protected BasePresetBrowserDialog()
     {
