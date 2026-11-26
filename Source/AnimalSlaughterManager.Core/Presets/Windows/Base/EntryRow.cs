@@ -11,7 +11,7 @@ internal static class EntryRow
     private const float MarkColumnMinWidth = 80f;
     private const float NameColumnMinWidth = 40f;
 
-    public static void Draw(Rect row, PresetEntry entry, int index, BasePresetBrowserDialog browser)
+    public static void Draw(Rect row, PresetEntry entry, int index, EntryRowPolicy policy)
     {
         // Zebra rows, like the save/load list.
         if (index % 2 == 1)
@@ -19,7 +19,7 @@ internal static class EntryRow
             Widgets.DrawAltRect(row);
         }
 
-        var mark = browser.GetRowMark(entry);
+        var mark = policy.GetMark(entry);
 
         // Columns always reserved right-to-left. Overwrite (left of Load) only on rows the
         // policy allows when there is data to overwrite with.
@@ -69,19 +69,19 @@ internal static class EntryRow
         Text.Font = font;
 
         // Overwrite button (left of Load), with confirmation.
-        if (browser.CanOverwrite(entry))
+        if (policy.CanOverwrite(entry))
         {
             if (Widgets.ButtonText(overwriteBtn, ASMKeys.OverwritePreset.Translate()))
             {
                 var captured = entry;
                 Find.WindowStack.Add(new Dialog_MessageBox(ASMKeys.ConfirmOverwrite.Translate(captured.name),
                     ASMKeys.OverwritePreset.Translate(),
-                    () => browser.OverwriteEntry(captured),
+                    () => policy.Overwrite(captured),
                     "No".Translate()) { doCloseX = true });
             }
         }
 
-        var tip = browser.GetRowTip(entry);
+        var tip = policy.GetTip(entry);
 
         if (tip != null)
         {
@@ -90,24 +90,24 @@ internal static class EntryRow
 
         if (Widgets.ButtonText(loadBtn, ASMKeys.LoadPreset.Translate()))
         {
-            if (browser.Apply(entry))
+            if (policy.Apply(entry))
             {
                 Messages.Message(ASMKeys.PresetLoaded.Translate(entry.name), MessageTypeDefOf.TaskCompletion, false);
             }
             else
             {
-                Messages.Message(ASMKeys.PresetNoSlice.Translate(browser.targetLabel), MessageTypeDefOf.RejectInput, false);
+                Messages.Message(ASMKeys.PresetNoSlice.Translate(policy.TargetLabel), MessageTypeDefOf.RejectInput, false);
             }
         }
 
-        if (browser.CanDelete(entry))
+        if (policy.CanDelete(entry))
         {
             TooltipHandler.TipRegion(deleteBtn, ASMKeys.DeletePreset.Translate());
 
             if (Widgets.ButtonImage(deleteBtn, TexButton.Delete))
             {
                 var captured = entry;
-                Find.WindowStack.Add(new Dialog_MessageBox(browser.GetConfirmDeleteText(captured),
+                Find.WindowStack.Add(new Dialog_MessageBox(policy.GetConfirmDeleteText(captured),
                     ASMKeys.DeletePreset.Translate(), () => PresetRepository.Delete(captured),
                     "No".Translate()) { doCloseX = true });
             }

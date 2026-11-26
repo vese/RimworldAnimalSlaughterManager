@@ -32,7 +32,7 @@ public abstract class BasePresetBrowserDialog : Window
 
     /// <summary>The target the presets apply to (a kind's or bucket's label): the argument the
     /// subclass's title key translates with and the name the no-slice message quotes.</summary>
-    protected internal TaggedString targetLabel;
+    protected TaggedString targetLabel;
 
     public override Vector2 InitialSize => new(820f, 600f);
 
@@ -42,7 +42,7 @@ public abstract class BasePresetBrowserDialog : Window
     protected abstract (PresetScope Scope, IEnumerable<PresetEntry> Entries)[] ScopeSources { get; }
 
     /// <summary>True when the target actually has data worth saving (enables the save row).</summary>
-    protected internal abstract bool HasData { get; }
+    protected abstract bool HasData { get; }
 
     protected BasePresetBrowserDialog()
     {
@@ -52,25 +52,25 @@ public abstract class BasePresetBrowserDialog : Window
     }
 
     /// <summary>Saves the target under the name. The base clears the name field and reports.</summary>
-    protected internal abstract void Save(string name);
+    protected abstract void Save(string name);
 
     /// <summary>Applies the preset; false = the preset had no usable slice for this target.</summary>
-    protected internal abstract bool Apply(PresetEntry entry);
+    protected abstract bool Apply(PresetEntry entry);
 
     /// <summary>Returns the row's mark-column content (cross-scope or cross-bucket mark); null = empty.</summary>
-    protected internal virtual string? GetRowMark(PresetEntry entry) => null;
+    protected virtual string? GetRowMark(PresetEntry entry) => null;
 
     /// <summary>Returns the row's tooltip; null = none.</summary>
-    protected internal virtual string? GetRowTip(PresetEntry entry) => null;
+    protected virtual string? GetRowTip(PresetEntry entry) => null;
 
     /// <summary>Whether the row carries the Overwrite button.</summary>
-    protected internal virtual bool CanOverwrite(PresetEntry entry) => HasData;
+    protected virtual bool CanOverwrite(PresetEntry entry) => HasData;
 
     /// <summary>Whether the row carries the Delete button.</summary>
-    protected internal virtual bool CanDelete(PresetEntry entry) => true;
+    protected virtual bool CanDelete(PresetEntry entry) => true;
 
     /// <summary>The delete-confirmation message for the entry.</summary>
-    protected internal virtual string GetConfirmDeleteText(PresetEntry entry) => ASMKeys.ConfirmDelete.Translate(entry.name);
+    protected virtual string GetConfirmDeleteText(PresetEntry entry) => ASMKeys.ConfirmDelete.Translate(entry.name);
 
     // ---- Frame ----------------------------------------------------------------------------
 
@@ -87,18 +87,23 @@ public abstract class BasePresetBrowserDialog : Window
         // The preset list fills everything between the search row and the save row.
         var listTop = top + UIConstants.GapX;
         var listBottom = inRect.yMax - RowHeight - UIConstants.GapX;
-        PresetList.Draw(inRect.x, listTop, inRect.width, listBottom - listTop, Gather(ScopeSources), filterBuffer, this, ref scroll, ref listHeight);
+        PresetList.Draw(inRect.x, listTop, inRect.width, listBottom - listTop, Gather(ScopeSources), filterBuffer, RowPolicy, ref scroll, ref listHeight);
 
-        SaveRow.Draw(inRect.x, inRect.yMax - RowHeight, inRect.width, this, ref nameBuffer);
+        SaveRow.Draw(inRect.x, inRect.yMax - RowHeight, inRect.width, HasData, Save, ref nameBuffer);
 
         Text.Font = font;
     }
 
-    internal void OverwriteEntry(PresetEntry e)
+    private void OverwriteEntry(PresetEntry e)
     {
         Save(e.name);
         Messages.Message(ASMKeys.PresetOverwritten.Translate(e.name), MessageTypeDefOf.TaskCompletion, false);
     }
+
+    // Bound once, after the subclass ctor has set targetLabel.
+    private EntryRowPolicy? rowPolicy;
+
+    private EntryRowPolicy RowPolicy => rowPolicy ??= new(GetRowMark, GetRowTip, CanOverwrite, CanDelete, GetConfirmDeleteText, Apply, OverwriteEntry, targetLabel);
 
     // ---- Helpers ----------------------------------------------------------------------------
 

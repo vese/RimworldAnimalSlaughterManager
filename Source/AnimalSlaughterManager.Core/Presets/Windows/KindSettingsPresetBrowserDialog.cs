@@ -20,7 +20,7 @@ public class KindSettingsPresetBrowserDialog : BasePresetBrowserDialog
         (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
     ];
 
-    protected internal override bool HasData => settings.Customized;
+    protected override bool HasData => settings.Customized;
 
     public KindSettingsPresetBrowserDialog(ThingDef kind, KindSettings settings)
     {
@@ -30,10 +30,10 @@ public class KindSettingsPresetBrowserDialog : BasePresetBrowserDialog
         optionalTitle = ASMKeys.PresetTitleKind.Translate(targetLabel);
     }
 
-    protected internal override void Save(string name) =>
+    protected override void Save(string name) =>
         PresetRepository.Save(name, PresetScope.Kind, new KindPresetFile { Kind = settings.ToPreset(kind) });
 
-    protected internal override bool Apply(PresetEntry entry)
+    protected override bool Apply(PresetEntry entry)
     {
         var kd = PresetRepository.ReadKind(entry, kind);
 
@@ -48,15 +48,15 @@ public class KindSettingsPresetBrowserDialog : BasePresetBrowserDialog
     }
 
     // Kind/All rows carry their scope mark ("[Все виды]"); only the kind's slice is applied.
-    protected internal override string? GetRowMark(PresetEntry entry) =>
+    protected override string? GetRowMark(PresetEntry entry) =>
         entry.scope == PresetScope.All ? ASMKeys.PresetAllMark.Translate() : null;
 
-    protected internal override string? GetRowTip(PresetEntry entry) =>
+    protected override string? GetRowTip(PresetEntry entry) =>
         entry.scope == PresetScope.All ? ASMKeys.TipAllToKind.Translate(targetLabel) : null;
 
-    protected internal override bool CanOverwrite(PresetEntry entry) => entry.scope == PresetScope.Kind && HasData;
+    protected override bool CanOverwrite(PresetEntry entry) => entry.scope == PresetScope.Kind && HasData;
 
-    protected internal override bool CanDelete(PresetEntry entry) => entry.DeletableFrom(PresetScope.Kind);
+    protected override bool CanDelete(PresetEntry entry) => entry.DeletableFrom(PresetScope.Kind);
 
-    protected internal override string GetConfirmDeleteText(PresetEntry entry) => ASMKeys.ConfirmDeleteKind.Translate(entry.name);
+    protected override string GetConfirmDeleteText(PresetEntry entry) => ASMKeys.ConfirmDeleteKind.Translate(entry.name);
 }
