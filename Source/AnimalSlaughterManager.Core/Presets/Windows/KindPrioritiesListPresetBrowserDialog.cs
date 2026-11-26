@@ -16,7 +16,14 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
     private readonly bool male;
     private readonly bool adult;
 
-    public KindPrioritiesListPresetBrowserDialog(ASM_MapComp comp, bool male, bool adult, KindPrioritySettings prioritySettings)
+    protected override (PresetScope Scope, IEnumerable<PresetEntry> Entries)[] ScopeSources =>
+    [
+        (PresetScope.List, PresetRepository.ListConditionPresets()),
+        (PresetScope.Kind, PresetRepository.ListPresets(PresetScope.Kind)),
+        (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
+    ];
+
+    public KindPrioritiesListPresetBrowserDialog(bool male, bool adult, KindPrioritySettings prioritySettings)
     {
         this.prioritySettings = prioritySettings;
         this.male = male;
@@ -25,29 +32,13 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
         optionalTitle = ASMKeys.CondPresetTitle.Translate(targetLabel);
     }
 
-    private static string BucketLabel(bool male, bool adult)
+    private static TaggedString BucketLabel(bool male, bool adult) => (male, adult) switch
     {
-        switch (male, adult)
-        {
-            case (true, true):
-                return ASMKeys.AdultMales.Translate();
-            case (true, false):
-                return ASMKeys.YoungMales.Translate();
-            case (false, true):
-                return ASMKeys.AdultFemales.Translate();
-            default:
-                return ASMKeys.YoungFemales.Translate();
-        }
-    }
-
-    // ---- Policy ---------------------------------------------------------------------------
-
-    protected override (PresetScope Scope, IEnumerable<PresetEntry> Entries)[] ScopeSources =>
-    [
-        (PresetScope.List, PresetRepository.ListConditionPresets()),
-        (PresetScope.Kind, PresetRepository.ListPresets(PresetScope.Kind)),
-        (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
-    ];
+        (true, true) => ASMKeys.AdultMales.Translate(),
+        (true, false) => ASMKeys.YoungMales.Translate(),
+        (false, true) => ASMKeys.AdultFemales.Translate(),
+        _ => ASMKeys.YoungFemales.Translate(),
+    };
 
     protected override bool HasData() => prioritySettings.Get(male, adult).Count > 0;
 

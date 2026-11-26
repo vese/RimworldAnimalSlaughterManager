@@ -12,17 +12,17 @@ public class SettingsPresetBrowserDialog : BasePresetBrowserDialog
 {
     private readonly ASM_MapComp comp;
 
+    protected override (PresetScope Scope, IEnumerable<PresetEntry> Entries)[] ScopeSources =>
+    [
+        (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
+    ];
+
     public SettingsPresetBrowserDialog(ASM_MapComp comp)
     {
         this.comp = comp;
         optionalTitle = ASMKeys.PresetTitleAll.Translate();
         targetLabel = optionalTitle;
     }
-
-    protected override (PresetScope Scope, IEnumerable<PresetEntry> Entries)[] ScopeSources =>
-    [
-        (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
-    ];
 
     protected override bool HasData() => comp.AllKindSettings.Any(k => k.Value.Customized);
 
@@ -36,6 +36,7 @@ public class SettingsPresetBrowserDialog : BasePresetBrowserDialog
         }
 
         comp.FromPreset(dto);
+
         return true;
     }
 }

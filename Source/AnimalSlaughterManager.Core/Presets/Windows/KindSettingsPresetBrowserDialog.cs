@@ -11,18 +11,8 @@ namespace ASM;
 /// </summary>
 public class KindSettingsPresetBrowserDialog : BasePresetBrowserDialog
 {
-    private readonly ASM_MapComp comp;
     private readonly ThingDef kind;
-
-    public KindSettingsPresetBrowserDialog(ASM_MapComp comp, ThingDef kind)
-    {
-        this.comp = comp;
-        this.kind = kind;
-        targetLabel = kind.LabelCap;
-        optionalTitle = ASMKeys.PresetTitleKind.Translate(targetLabel);
-    }
-
-    private KindSettings Settings => comp.GetSettings(kind);
+    private readonly KindSettings settings;
 
     protected override (PresetScope Scope, IEnumerable<PresetEntry> Entries)[] ScopeSources =>
     [
@@ -30,10 +20,18 @@ public class KindSettingsPresetBrowserDialog : BasePresetBrowserDialog
         (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
     ];
 
-    protected override bool HasData() => Settings.Customized;
+    public KindSettingsPresetBrowserDialog(ThingDef kind, KindSettings settings)
+    {
+        this.kind = kind;
+        this.settings = settings;
+        targetLabel = kind.LabelCap;
+        optionalTitle = ASMKeys.PresetTitleKind.Translate(targetLabel);
+    }
+
+    protected override bool HasData() => settings.Customized;
 
     protected override void Save(string name) =>
-        PresetRepository.Save(name, PresetScope.Kind, new KindPresetFile { Kind = Settings.ToPreset(kind) });
+        PresetRepository.Save(name, PresetScope.Kind, new KindPresetFile { Kind = settings.ToPreset(kind) });
 
     protected override bool Apply(PresetEntry entry)
     {
@@ -45,18 +43,17 @@ public class KindSettingsPresetBrowserDialog : BasePresetBrowserDialog
             return false;
         }
 
-        Settings.FromPreset(kd.Kind);
+        settings.FromPreset(kd.Kind);
+
         return true;
     }
 
     // Kind/All rows carry their scope mark ("[Все виды]"); only the kind's slice is applied.
-    protected override string? MarkOf(PresetEntry entry) => entry.scope == PresetScope.All
-        ? ASMKeys.PresetAllMark.Translate()
-        : null;
+    protected override string? MarkOf(PresetEntry entry) =>
+        entry.scope == PresetScope.All ? ASMKeys.PresetAllMark.Translate() : null;
 
-    protected override string? RowTip(PresetEntry entry) => entry.scope == PresetScope.All
-        ? ASMKeys.TipAllToKind.Translate(kind.LabelCap.ToString())
-        : null;
+    protected override string? RowTip(PresetEntry entry) =>
+        entry.scope == PresetScope.All ? ASMKeys.TipAllToKind.Translate(targetLabel) : null;
 
     protected override bool CanOverwrite(PresetEntry entry) => entry.scope == PresetScope.Kind && HasData();
 

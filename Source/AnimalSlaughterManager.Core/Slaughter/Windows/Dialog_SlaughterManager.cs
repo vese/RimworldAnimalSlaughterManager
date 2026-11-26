@@ -46,7 +46,7 @@ namespace ASM
         public Dialog_SlaughterManager(ASM_MapComp comp)
         {
             this.comp = comp;
-            this.map = Find.CurrentMap;
+            map = Find.CurrentMap;
             doCloseX = true;
             draggable = true;
             resizeable = true;

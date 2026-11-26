@@ -19,6 +19,13 @@ public class SpecialSettingsListPresetBrowserDialog : BasePresetBrowserDialog
     private readonly Func<PresetEntry, bool> applyList;
     private readonly Func<bool>? hasListData;
 
+    protected override (PresetScope Scope, IEnumerable<PresetEntry> Entries)[] ScopeSources =>
+    [
+        (PresetScope.List, PresetRepository.ListPresets(PresetScope.List)),
+        (PresetScope.Kind, PresetRepository.ListPresets(PresetScope.Kind)),
+        (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
+    ];
+
     public SpecialSettingsListPresetBrowserDialog(ThingDef kind, string titleKey,
         Action<string> exportList, Func<PresetEntry, bool> applyList, Func<bool>? hasListData = null)
     {
@@ -30,13 +37,6 @@ public class SpecialSettingsListPresetBrowserDialog : BasePresetBrowserDialog
         listTitle = titleKey.Translate(targetLabel);
         optionalTitle = listTitle;
     }
-
-    protected override (PresetScope Scope, IEnumerable<PresetEntry> Entries)[] ScopeSources =>
-    [
-        (PresetScope.List, PresetRepository.ListPresets(PresetScope.List)),
-        (PresetScope.Kind, PresetRepository.ListPresets(PresetScope.Kind)),
-        (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
-    ];
 
     protected override bool HasData() => hasListData?.Invoke() ?? false;
 
