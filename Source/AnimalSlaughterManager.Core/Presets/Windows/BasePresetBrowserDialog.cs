@@ -82,8 +82,7 @@ public abstract class BasePresetBrowserDialog : Window
 
         float btnW = Mathf.Max(96f, Text.CalcSize(ASMKeys.SavePreset.Translate()).x + 18f);
 
-        var sources = ScopeSources.ToList();
-        bool toggles = sources.Count > 1;
+        bool toggles = ScopeSources.Length > 1;
 
         // --- Top: search row, one Gap below the title. Magnifier + filter field on the left,
         // clear ✕ after it; scope-type toggles right-aligned to the window edge. ---
@@ -96,7 +95,7 @@ public abstract class BasePresetBrowserDialog : Window
         {
             foreach (var sc in ScopeOrder)
             {
-                if (sources.Any(s => s.Scope == sc))
+                if (ScopeSources.Any(s => s.Scope == sc))
                 {
                     toggleW += ScopeToggleWidth(sc) + Gap;
                 }
@@ -123,7 +122,7 @@ public abstract class BasePresetBrowserDialog : Window
             // Right-aligned: walk the scopes right-to-left.
             foreach (var sc in ScopeOrder)
             {
-                if (!sources.Any(s => s.Scope == sc))
+                if (!ScopeSources.Any(s => s.Scope == sc))
                 {
                     continue;
                 }
@@ -143,7 +142,7 @@ public abstract class BasePresetBrowserDialog : Window
         float listBottom = inRect.yMax - saveRowH - Gap;
 
         // --- Middle: the preset list. ---
-        var entries = Gather(sources);
+        var entries = Gather(ScopeSources);
         Rect outRect = new Rect(inRect.x, y, inRect.width, listBottom - y);
         Rect view = new Rect(inRect.x, y, inRect.width - 16f, Mathf.Max(listHeight, outRect.height));
         Widgets.BeginScrollView(outRect, ref scroll, view);
@@ -234,14 +233,14 @@ public abstract class BasePresetBrowserDialog : Window
         }
     }
 
-    private List<PresetEntry> Gather(List<(PresetScope Scope, IEnumerable<PresetEntry> Entries)> sources)
+    private List<PresetEntry> Gather((PresetScope Scope, IEnumerable<PresetEntry> Entries)[] sources)
     {
         var entries = new List<PresetEntry>();
 
         foreach (var source in sources)
         {
             // A single offered scope has no toggle and always contributes.
-            if (sources.Count == 1 || !showScope.TryGetValue(source.Scope, out var shown) || shown)
+            if (sources.Length == 1 || !showScope.TryGetValue(source.Scope, out var shown) || shown)
             {
                 entries.AddRange(source.Entries);
             }
@@ -318,7 +317,8 @@ public abstract class BasePresetBrowserDialog : Window
             {
                 var captured = e;
                 Find.WindowStack.Add(new Dialog_MessageBox(ASMKeys.ConfirmOverwrite.Translate(captured.name),
-                    ASMKeys.OverwritePreset.Translate(), () => OverwriteEntry(captured),
+                    ASMKeys.OverwritePreset.Translate(),
+                    () => OverwriteEntry(captured),
                     "No".Translate()) { doCloseX = true });
             }
         }
