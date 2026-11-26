@@ -138,6 +138,8 @@ public class KindSettings : IExposable
         prioritySettings.FromPreset(preset.Priorities);
 
         FromSpecialPresets(preset);
+
+        SettingsChangeTracker.Raise();
     }
 
     private Dictionary<string, BaseSpecialSettingsPreset> ToSpecialPresets()

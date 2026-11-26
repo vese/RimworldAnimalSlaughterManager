@@ -48,7 +48,14 @@ public abstract class KindTraitsRuleSet<T> : IEditableTraitsRuleSet<T> where T :
     public bool FromPreset(ListPresetFile dto)
     {
         var kind = PresetSectionSerialization.Wrap([.. dto.Sections]);
-        return ReadXml(kind);
+
+        if (!ReadXml(kind))
+        {
+            return false;
+        }
+
+        SettingsChangeTracker.Raise();
+        return true;
     }
 
 

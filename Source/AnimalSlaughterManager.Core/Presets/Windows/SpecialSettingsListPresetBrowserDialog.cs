@@ -42,12 +42,7 @@ public class SpecialSettingsListPresetBrowserDialog : BasePresetBrowserDialog
 
     protected override void Save(string name) => exportList(name);
 
-    protected override bool Apply(PresetEntry entry)
-    {
-        bool ok = applyList(entry);
-        SettingsChangeTracker.Raise();
-        return ok;
-    }
+    protected override bool Apply(PresetEntry entry) => applyList(entry);
 
     // Kind/All rows carry their scope mark; only the slice of this list is applied.
     protected override string? GetRowMark(PresetEntry entry)
