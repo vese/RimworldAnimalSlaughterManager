@@ -31,7 +31,8 @@ public abstract class BasePresetBrowserDialog : Window
     private static float TopRowHeight => UIConstants.ButtonHeight + UIConstants.TextPaddingY;
     private static float RowHeight => UIConstants.ButtonHeight + 2f * UIConstants.TextPaddingY;
 
-    private static readonly PresetScope[] ScopeOrder = [PresetScope.List, PresetScope.Kind, PresetScope.All];
+    // The enum's own values in numeric order (All — the broadest — first).
+    private static PresetScope[] ScopeValues => (PresetScope[])Enum.GetValues(typeof(PresetScope));
 
     private Vector2 scroll;
     private float listHeight = 9999f;
@@ -129,22 +130,22 @@ public abstract class BasePresetBrowserDialog : Window
         }
     }
 
+    // The toggles sit flush right, laid out in the scopes' numeric order.
     private void DrawScopeToggles(float rightEdge, float y)
     {
-        float right = rightEdge;
+        float x = rightEdge - GetScopeTogglesWidth();
 
-        // Right-aligned: walk the scopes right-to-left.
-        foreach (var scope in ScopeOrder)
+        foreach (var scope in ScopeValues)
         {
-            if (!ScopeSources.Any(s => s.Scope == scope))
+            if (!IsOffered(scope))
             {
                 continue;
             }
 
-            right -= GetScopeToggleWidth(scope);
-            DrawScopeToggle(right, y, GetScopeToggleWidth(scope), scope);
+            var width = GetScopeToggleWidth(scope);
+            DrawScopeToggle(x, y, width, scope);
 
-            right -= UIConstants.GapX;
+            x += width + UIConstants.GapX;
         }
     }
 
@@ -345,19 +346,13 @@ public abstract class BasePresetBrowserDialog : Window
     private static float GetMarkColumnWidth() =>
         Mathf.Max(MarkColumnMinWidth, Text.CalcSize(ASMKeys.PresetAllMark.Translate()).x + UIConstants.GapX);
 
+    private bool IsOffered(PresetScope scope) => ScopeSources.Any(s => s.Scope == scope);
+
     private float GetScopeTogglesWidth()
     {
-        float width = 0f;
+        var scopes = ScopeValues.Where(IsOffered).ToList();
 
-        foreach (var scope in ScopeOrder)
-        {
-            if (ScopeSources.Any(s => s.Scope == scope))
-            {
-                width += GetScopeToggleWidth(scope) + UIConstants.GapX;
-            }
-        }
-
-        return width;
+        return scopes.Sum(GetScopeToggleWidth) + UIConstants.GapX * Math.Max(scopes.Count - 1, 0);
     }
 
     private static float GetScopeToggleWidth(PresetScope scope) =>
