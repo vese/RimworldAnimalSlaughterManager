@@ -96,7 +96,7 @@ public abstract class BaseTraitRulesListSection<T>(IEditableTraitsRuleSet<T> rul
 
         if (Widgets.ButtonText(presetBtn, presetButtonText))
         {
-            Find.WindowStack.Add(new Dialog_PresetBrowser((ASM_MapComp)comp, PresetScope.List, animalDef, PresetsTitleKey.Translate(animalDef.LabelCap).ToString(),
+            Find.WindowStack.Add(new Dialog_ListPresetBrowser(animalDef, PresetsTitleKey.Translate(animalDef.LabelCap).ToString(),
                 name => PresetRepository.SaveList(name, RuleSet.PresetsFolder, RuleSet.ToPreset()),
                 e => PresetRepository.ReadList(e) is { } dto && RuleSet.FromPreset(dto),
                 () => RuleSet.HasRules));

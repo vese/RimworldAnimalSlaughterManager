@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 
-using RimWorld;
-using UnityEngine;
 using Verse;
 
 namespace ASM;
@@ -10,9 +8,9 @@ namespace ASM;
 /// Preset browser for one condition-list bucket (age×sex). Lists the condition presets of all
 /// four buckets plus Kind/All presets (their bucket slice is taken on apply); cross-bucket rows
 /// carry the bucket's mark. Saving writes the current bucket's list. The frame lives in
-/// <see cref="Dialog_PresetBrowserBase"/>.
+/// <see cref="Dialog_PresetBrowser"/>.
 /// </summary>
-public class Dialog_ConditionPresetBrowser : Dialog_PresetBrowserBase
+public class Dialog_ConditionPresetBrowser : Dialog_PresetBrowser
 {
     private readonly KindPrioritySettings prioritySettings;
     private readonly bool male;
@@ -43,7 +41,12 @@ public class Dialog_ConditionPresetBrowser : Dialog_PresetBrowserBase
 
     // ---- Policy ---------------------------------------------------------------------------
 
-    protected override IEnumerable<PresetEntry> ListEntries() => PresetRepository.ListConditionPresets();
+    protected override IEnumerable<(PresetScope Scope, IEnumerable<PresetEntry> Entries)> ScopeSources()
+    {
+        yield return (PresetScope.List, PresetRepository.ListConditionPresets());
+        yield return (PresetScope.Kind, PresetRepository.ListPresets(PresetScope.Kind));
+        yield return (PresetScope.All, PresetRepository.ListPresets(PresetScope.All));
+    }
 
     protected override bool HasData() => prioritySettings.Get(male, adult).Count > 0;
 

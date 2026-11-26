@@ -83,7 +83,7 @@ ATS (`packageId = luved.animaltraits`), Steam-Workshop ID 3652630316. Исход
 - **Трёхзначная колонка беременных**: Never (галка) / Defer (пауза) / Always (галка). Defer: учитываются в пороге, но забиваются после родов.
 - **Яйцекладущие** считаются «беременными» (`CompEggLayer.eggProgress > 0` через рефлексию).
 - **Защита** (keep) и **принудительный забой** (forceCull) — на вкладке «Особые правила».
-- **Пресеты трёх уровней** (All/Kind/List): `Dialog_PresetBrowser` для черт, `Dialog_ConditionPresetBrowser` для списков условий. Сериализация в `<persistentDataPath>/AnimalSlaughterManagerPresets/`.
+- **Пресеты трёх уровней** (All/Kind/List): по окну на скоуп (`Dialog_AllPresetBrowser`/`Dialog_KindPresetBrowser`/`Dialog_ListPresetBrowser`) на общем каркасе `Dialog_PresetBrowser`; списки условий — `Dialog_ConditionPresetBrowser`. Сериализация в `<persistentDataPath>/AnimalSlaughterManagerPresets/`.
 
 ## Типичные правки / грабли
 
