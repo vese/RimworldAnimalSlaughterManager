@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
@@ -12,18 +11,13 @@ namespace ASM;
 /// <summary>
 /// The preset format layer: every current-format preset is one file form (PresetFile — the
 /// version, the metadata and the serialized content model), so reading is two plain steps
-/// with no root-element guessing. Historical formats are recognized by their root elements
-/// and read by the v1 machinery. The version is stamped on save, versions above the current
-/// are refused. RimWorld is touched only by the refusal warning.
+/// with no root-element guessing; versions above the current are refused. The historical
+/// formats live in Legacy. RimWorld is touched only by the refusal warning.
 /// </summary>
 public static class PresetSerializer
 {
     /// <summary>The current format's root element; everything else is a historical format.</summary>
     public const string CurrentRoot = "Preset";
-
-    // The historical root elements the v1 dispatch still matches.
-    public const string V1PresetRoot = "SlaughterPreset";
-    public const string V1RuleRoot = "RulePresetDto";
 
     // XmlSerializer generates a serialization assembly on first use — cache the instances.
     private static readonly Dictionary<Type, XmlSerializer> serializers = new();
@@ -51,18 +45,8 @@ public static class PresetSerializer
         return ser;
     }
 
-
-#pragma warning disable CS0618
-    public static List<PriorityRuleDto>? ReadRulePreset(string? text)
-    {
-        var dto = Deserialize<RulePresetDto>(text);
-        return dto?.rules?.ToList();
-    }
-
-    private static KindPreset? V1ToCurrent(KindPresetDto v1) => KindPresetFile.FromV1(v1)?.Kind;
-#pragma warning restore CS0618
-
-    private static T? Deserialize<T>(string? text) where T : class
+    /// <summary>Deserialized text as T; null when the text is null or not parsable.</summary>
+    public static T? Deserialize<T>(string? text) where T : class
     {
         if (text == null)
         {
@@ -155,25 +139,6 @@ public static class PresetSerializer
     /// preset is not of the expected shape).</summary>
     public static T? ReadContent<T>(PresetFile file) where T : class =>
         file.Type == typeof(T).Name ? Deserialize<T>(file.Content) : null;
-
-    /// <summary>The kind slices of a version-1 or older preset: the v1 carrier's own, or the
-    /// old format's converted; null when the text is not a preset.</summary>
-#pragma warning disable CS0618
-    public static List<KindPreset>? ReadV1Kinds(string? text)
-    {
-        var dto = Deserialize<PresetDto>(text);
-
-        if (dto?.Kinds.Any(k => k.PrioRulesAdultMale?.Length > 0 || k.PrioRulesYoungMale?.Length > 0
-            || k.PrioRulesAdultFemale?.Length > 0 || k.PrioRulesYoungFemale?.Length > 0) == true)
-        {
-            return [.. dto.Kinds.Select(V1ToCurrent).Where(k => k != null)];
-        }
-
-        // An old format has no rule lists — its kinds come converted; a current prefs-only
-        // v1 preset stays as parsed.
-        return LegacyPresets.TryReadPreset(text) ?? (dto == null ? null : [.. dto.Kinds.Select(V1ToCurrent).Where(k => k != null)]);
-    }
-#pragma warning restore CS0618
 
     private static string SerializeContent(object content)
     {

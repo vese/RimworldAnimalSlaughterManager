@@ -123,7 +123,9 @@ public static class PresetRepository
             return PresetSerializer.ReadContent<AllPresetFile>(file)?.ToPreset();
         }
 
-        var v1 = PresetSerializer.ReadV1Kinds(text);
+#pragma warning disable CS0618
+        var v1 = LegacyPresets.ReadV1Kinds(text);
+#pragma warning restore CS0618
 
         return v1 == null ? null : new AllPreset { Kinds = v1 };
     }
@@ -149,7 +151,9 @@ public static class PresetRepository
             return match == null ? null : new KindPresetFile { Kind = match.Kind };
         }
 
-        var kinds = PresetSerializer.ReadV1Kinds(text);
+#pragma warning disable CS0618
+        var kinds = LegacyPresets.ReadV1Kinds(text);
+#pragma warning restore CS0618
 
         if (kinds == null || kinds.Count == 0)
         {
@@ -193,22 +197,20 @@ public static class PresetRepository
             return slice == null ? null : ListSliceOf(slice);
         }
 
+#pragma warning disable CS0618
         switch (PresetSerializer.RootElementOf(text))
         {
-            case PresetSerializer.V1RuleRoot:
-#pragma warning disable CS0618
-                return FromRules(LegacyPresets.V1Rules(PresetSerializer.ReadRulePreset(text)));
-#pragma warning restore CS0618
-            case PresetSerializer.V1PresetRoot:
+            case LegacyPresets.RuleRoot:
+                return FromRules(LegacyPresets.V1Rules(LegacyPresets.ReadRulePreset(text)));
+            case LegacyPresets.PresetRoot:
                 // The v1 unified carrier: the first kind's slice.
-                var kind = PresetSerializer.ReadV1Kinds(text)?.FirstOrDefault();
+                var kind = LegacyPresets.ReadV1Kinds(text)?.FirstOrDefault();
 
                 return kind == null ? null : ListSliceOf(new KindPresetFile { Kind = kind });
             default:
-#pragma warning disable CS0618
                 return FromRules(LegacyPresets.TryReadConditions(entry));
-#pragma warning restore CS0618
         }
+#pragma warning restore CS0618
     }
 
     // The list payload of a kind slice: the first non-empty rule bucket, or the raw

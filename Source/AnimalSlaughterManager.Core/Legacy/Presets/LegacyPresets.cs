@@ -86,6 +86,36 @@ public static class LegacyPresets
     public static List<BasePriorityRule>? V1Rules(List<PriorityRuleDto>? dtos) =>
         dtos?.Select(r => r.ToRule()).Where(r => r != null).ToList();
 
+    // The version-1 root elements the repository's dispatch matches.
+    public const string PresetRoot = "SlaughterPreset";
+    public const string RuleRoot = "RulePresetDto";
+
+    /// <summary>The rules of a RulePresetDto-rooted file; null when the text is not one.</summary>
+    public static List<PriorityRuleDto>? ReadRulePreset(string? text)
+    {
+        var dto = PresetSerializer.Deserialize<RulePresetDto>(text);
+        return dto?.rules?.ToList();
+    }
+
+    /// <summary>The kind slices of a version-1 or older preset: the v1 carrier's own, or the
+    /// old format's converted; null when the text is not a preset.</summary>
+    public static List<KindPreset>? ReadV1Kinds(string? text)
+    {
+        var dto = PresetSerializer.Deserialize<PresetDto>(text);
+
+        if (dto?.Kinds.Any(k => k.PrioRulesAdultMale?.Length > 0 || k.PrioRulesYoungMale?.Length > 0
+            || k.PrioRulesAdultFemale?.Length > 0 || k.PrioRulesYoungFemale?.Length > 0) == true)
+        {
+            return [.. dto.Kinds.Select(V1ToCurrent).Where(k => k != null)];
+        }
+
+        // An old format has no rule lists — its kinds come converted; a current prefs-only
+        // v1 preset stays as parsed.
+        return TryReadPreset(text) ?? (dto == null ? null : [.. dto.Kinds.Select(V1ToCurrent).Where(k => k != null)]);
+    }
+
+    private static KindPreset? V1ToCurrent(KindPresetDto v1) => KindPresetFile.FromV1(v1)?.Kind;
+
     private static List<ConditionDto>? ReadConditionPreset(string? text)
     {
         if (text == null)
