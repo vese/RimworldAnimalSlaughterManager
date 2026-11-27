@@ -30,11 +30,11 @@ public class V2KindPresetConverter : IV2PresetConverter<KindPreset>
             MaleYoungPref = model.Preferences.MaleYoungPref,
             FemaleYoungPref = model.Preferences.FemaleYoungPref
         },
-        PriorityRulesAdultMale = ToV2(model.Priorities.PriorityRulesAdultMale),
-        PriorityRulesYoungMale = ToV2(model.Priorities.PriorityRulesYoungMale),
-        PriorityRulesAdultFemale = ToV2(model.Priorities.PriorityRulesAdultFemale),
-        PriorityRulesYoungFemale = ToV2(model.Priorities.PriorityRulesYoungFemale),
-        SpecialSettings = [.. model.SpecialSettings.Select(kv => V2SpecialSettingsMapper.ToV2(kv.Key, kv.Value)).Where(v2 => v2 != null)]
+        PriorityRulesAdultMale = model.Priorities.PriorityRulesAdultMale,
+        PriorityRulesYoungMale = model.Priorities.PriorityRulesYoungMale,
+        PriorityRulesAdultFemale = model.Priorities.PriorityRulesAdultFemale,
+        PriorityRulesYoungFemale = model.Priorities.PriorityRulesYoungFemale,
+        SpecialSettings = [.. model.SpecialSettings.Select(kv => new V2SpecialSettingsEntry { Key = kv.Key, Settings = kv.Value })]
     };
 
     internal static KindPreset ToModel(V2KindPreset content)
@@ -51,38 +51,18 @@ public class V2KindPresetConverter : IV2PresetConverter<KindPreset>
             },
             Priorities = new PrioritySettingsPreset
             {
-                PriorityRulesAdultMale = ToSettings(content.PriorityRulesAdultMale),
-                PriorityRulesYoungMale = ToSettings(content.PriorityRulesYoungMale),
-                PriorityRulesAdultFemale = ToSettings(content.PriorityRulesAdultFemale),
-                PriorityRulesYoungFemale = ToSettings(content.PriorityRulesYoungFemale)
+                PriorityRulesAdultMale = content.PriorityRulesAdultMale,
+                PriorityRulesYoungMale = content.PriorityRulesYoungMale,
+                PriorityRulesAdultFemale = content.PriorityRulesAdultFemale,
+                PriorityRulesYoungFemale = content.PriorityRulesYoungFemale
             }
         };
 
-        foreach (var v2 in content.SpecialSettings)
+        foreach (var entry in content.SpecialSettings)
         {
-            var settings = V2SpecialSettingsMapper.ToSettings(v2);
-
-            if (settings != null)
-            {
-                model.SpecialSettings[v2.Key] = settings;
-            }
+            model.SpecialSettings[entry.Key] = entry.Settings;
         }
 
         return model;
     }
-
-    /// <summary>The kind's rule bucket matching the age×sex key; empty when absent.</summary>
-    internal static List<BasePriorityRulePreset> GetRules(V2KindPreset content, (bool Male, bool Adult) bucket) => bucket switch
-    {
-        (true, true) => ToSettings(content.PriorityRulesAdultMale),
-        (true, false) => ToSettings(content.PriorityRulesYoungMale),
-        (false, true) => ToSettings(content.PriorityRulesAdultFemale),
-        _ => ToSettings(content.PriorityRulesYoungFemale)
-    };
-
-    private static List<V2RulePreset> ToV2(List<BasePriorityRulePreset> rules) =>
-        [.. rules.Select(V2RulePresetMapper.ToV2).Where(v2 => v2 != null)];
-
-    private static List<BasePriorityRulePreset> ToSettings(List<V2RulePreset> rules) =>
-        [.. rules.Select(V2RulePresetMapper.ToDto).Where(dto => dto != null)];
 }

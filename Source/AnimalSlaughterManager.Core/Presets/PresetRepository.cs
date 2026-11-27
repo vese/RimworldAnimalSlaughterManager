@@ -184,7 +184,7 @@ public static class PresetRepository
             return specials is { Count: > 0 } ?
                 new SpecialListPreset
                 {
-                    Sections = [.. specials.SelectMany(kv => V2SpecialSettingsMapper.ToSections(kv.Key, kv.Value)) ]
+                    Sections = [.. specials.SelectMany(kv => PresetContentSerializers.ToChildElements(kv.Value)) ]
                 } :
                 null;
         }

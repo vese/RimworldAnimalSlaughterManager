@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml;
@@ -7,19 +8,22 @@ using System.Xml.Serialization;
 
 namespace ASM;
 
-/// <summary>The content serializers of the V2 file models: their polymorphic lists
-/// (V2RulePreset, V2SpecialSettingsPreset) need every registered subtype passed to the
-/// XmlSerializer constructor — the subtypes are discovered over the loaded assemblies once
-/// and the serializers are cached per root type.</summary>
+/// <summary>The content serializers of the V2 file models: their polymorphic members (the rule
+/// and special-settings DTOs) need every registered subtype passed to the XmlSerializer
+/// constructor — the subtypes are discovered over the loaded assemblies once and the
+/// serializers are cached per root type. Also bridges the special-list sections between
+/// elements and their typed models (a section subclass's [XmlRoot] is its element name).</summary>
 public static class PresetContentSerializers
 {
     private static Type[]? subtypes;
 
     private static readonly Dictionary<Type, XmlSerializer> serializers = [];
 
+    private static readonly Dictionary<string, Type> sectionTypes = [];
+
     private static Type[] Subtypes => subtypes ??= AppDomain.CurrentDomain.GetAssemblies()
         .SelectMany(SafeTypes)
-        .Where(t => !t.IsAbstract && (t.IsSubclassOf(typeof(V2RulePreset)) || t.IsSubclassOf(typeof(V2SpecialSettingsPreset))))
+        .Where(t => !t.IsAbstract && (t.IsSubclassOf(typeof(BasePriorityRulePreset)) || t.IsSubclassOf(typeof(BaseSpecialSettingsPreset))))
         .ToArray();
 
     public static XmlSerializer SerializerOf(Type type)
@@ -47,6 +51,52 @@ public static class PresetContentSerializers
         return [.. doc.ChildNodes.Cast<XmlElement>()];
     }
 
+    /// <summary>The model's serialized children — the per-list section elements (the save
+    /// format of a special list).</summary>
+    public static List<XmlElement> ToChildElements(object content) =>
+        [.. ToElements(content)[0].ChildNodes.Cast<XmlElement>()];
+
+    /// <summary>A section element as its typed model (matched by [XmlRoot] over the registered
+    /// V2SpecialListSection subclasses); null for a foreign section.</summary>
+    public static V2SpecialListSection? ToSection(XmlElement element)
+    {
+        if (!sectionTypes.TryGetValue(element.LocalName, out var type))
+        {
+            sectionTypes[element.LocalName] = type = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(SafeTypes)
+                .FirstOrDefault(t => !t.IsAbstract && t.IsSubclassOf(typeof(V2SpecialListSection))
+                    && t.GetCustomAttribute<XmlRootAttribute>()?.ElementName == element.LocalName) ?? typeof(None);
+        }
+
+        if (type == typeof(None))
+        {
+            return null;
+        }
+
+        try
+        {
+            using var reader = new StringReader(element.OuterXml);
+            return (V2SpecialListSection?)PresetSerializer.GetSerializer(type).Deserialize(reader);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>The typed section model as its element.</summary>
+    public static XmlElement ToElement(V2SpecialListSection section)
+    {
+        var doc = new XmlDocument();
+
+        using (var writer = doc.CreateNavigator()!.AppendChild())
+        {
+            PresetSerializer.GetSerializer(section.GetType()).Serialize(writer, section);
+        }
+
+        return doc.DocumentElement!;
+    }
+
     private static IEnumerable<Type> SafeTypes(Assembly assembly)
     {
         try
@@ -58,4 +108,6 @@ public static class PresetContentSerializers
             return e.Types.Where(t => t != null)!;
         }
     }
+
+    private sealed class None : V2SpecialListSection;
 }
