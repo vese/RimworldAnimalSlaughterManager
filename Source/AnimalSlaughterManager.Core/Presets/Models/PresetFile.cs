@@ -15,6 +15,10 @@ public class PresetFile
     /// <summary>The scope the preset was saved for.</summary>
     public PresetScope Scope;
 
+    /// <summary>The list bucket the preset belongs to (a priority condition bucket or a
+    /// special-list kind); null outside the list scopes.</summary>
+    public string? Bucket;
+
     /// <summary>The content model's class name.</summary>
     public string Type = null!;
 

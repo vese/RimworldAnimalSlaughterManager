@@ -62,13 +62,14 @@ public static class PresetSerializer
     }
 
     /// <summary>Writes a preset of the current format: the content model wrapped in the file
-    /// form carrying the version and the metadata.</summary>
-    public static string SerializePreset(object content, PresetScope scope)
+    /// form carrying the version and the metadata (the scope, the list bucket).</summary>
+    public static string SerializePreset(object content, PresetScope scope, string? bucket = null)
     {
         var file = new PresetFile
         {
             Version = PresetFormat.CurrentVersion,
             Scope = scope,
+            Bucket = bucket,
             Type = content.GetType().Name,
             Content = SerializeContent(content)
         };
