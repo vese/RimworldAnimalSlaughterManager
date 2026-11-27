@@ -6,17 +6,17 @@ namespace ASM;
 /// (top = keep, bottom = cull).</summary>
 public class PrioritySettingsPreset
 {
-    public List<BasePriorityRulePreset> PrioRulesAdultMale { get; set; } = [];
-    public List<BasePriorityRulePreset> PrioRulesYoungMale { get; set; } = [];
-    public List<BasePriorityRulePreset> PrioRulesAdultFemale { get; set; } = [];
-    public List<BasePriorityRulePreset> PrioRulesYoungFemale { get; set; } = [];
+    public List<BasePriorityRulePreset> PriorityRulesAdultMale { get; set; } = [];
+    public List<BasePriorityRulePreset> PriorityRulesYoungMale { get; set; } = [];
+    public List<BasePriorityRulePreset> PriorityRulesAdultFemale { get; set; } = [];
+    public List<BasePriorityRulePreset> PriorityRulesYoungFemale { get; set; } = [];
 
     public List<BasePriorityRulePreset> GetBucket((bool Male, bool Adult) bucket) => bucket switch
     {
-        (true, true) => PrioRulesAdultMale,
-        (true, false) => PrioRulesYoungMale,
-        (false, true) => PrioRulesAdultFemale,
-        _ => PrioRulesYoungFemale,
+        (true, true) => PriorityRulesAdultMale,
+        (true, false) => PriorityRulesYoungMale,
+        (false, true) => PriorityRulesAdultFemale,
+        _ => PriorityRulesYoungFemale,
     };
 
     public void SetBucket((bool Male, bool Adult) bucket, List<BasePriorityRulePreset> presets)
@@ -24,16 +24,16 @@ public class PrioritySettingsPreset
         switch (bucket)
         {
             case (true, true):
-                PrioRulesAdultMale = presets;
+                PriorityRulesAdultMale = presets;
                 break;
             case (true, false):
-                PrioRulesYoungMale = presets;
+                PriorityRulesYoungMale = presets;
                 break;
             case (false, true):
-                PrioRulesAdultFemale = presets;
+                PriorityRulesAdultFemale = presets;
                 break;
             default:
-                PrioRulesYoungFemale = presets;
+                PriorityRulesYoungFemale = presets;
                 break;
         }
     }

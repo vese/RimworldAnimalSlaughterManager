@@ -225,10 +225,10 @@ public static class PresetRepository
     {
         var rules = bucket switch
         {
-            (true, true) => file.Kind.Priorities.PrioRulesAdultMale,
-            (true, false) => file.Kind.Priorities.PrioRulesYoungMale,
-            (false, true) => file.Kind.Priorities.PrioRulesAdultFemale,
-            _ => file.Kind.Priorities.PrioRulesYoungFemale
+            (true, true) => file.Kind.Priorities.PriorityRulesAdultMale,
+            (true, false) => file.Kind.Priorities.PriorityRulesYoungMale,
+            (false, true) => file.Kind.Priorities.PriorityRulesAdultFemale,
+            _ => file.Kind.Priorities.PriorityRulesYoungFemale
         };
 
         return rules.Count == 0 ? null : new PriorityListPresetFile { Rules = rules };
