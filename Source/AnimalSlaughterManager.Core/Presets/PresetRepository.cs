@@ -55,27 +55,25 @@ public static class PresetRepository
             }
         }
 
-        if (scope is PresetScope.SpecialList)
+        if (scope is PresetScope.PriorityList or PresetScope.SpecialList)
         {
-            foreach (var sub in Store.GetFolders(ScopeFolder(scope)))
+            var buckets = GetBuckets(scope).ToList();
+
+            foreach (var (bucket, folder) in buckets)
             {
-                AddFolder(sub);
+                AddFolder(Path.Combine(ScopeFolder(scope), folder), bucket);
             }
 
+            // The version-1 shared List root.
 #pragma warning disable CS0618
-            LegacyListPresets.AddSpecialListPresets(result, RootFolder, scope);
-#pragma warning restore CS0618
-        }
-        else if (scope is PresetScope.PriorityList)
-        {
-            // Every condition bucket (cross-bucket import).
-            foreach (var bucket in Buckets)
+            if (scope is PresetScope.SpecialList)
             {
-                AddFolder(BucketFolder(bucket), bucket);
+                LegacyListPresets.AddSpecialListPresets(result, RootFolder, scope);
             }
-
-#pragma warning disable CS0618
-            LegacyListPresets.AddConditionPresets(result, RootFolder, scope, Buckets.Select(bucket => (Bucket: bucket, Folder: BucketFolderName(bucket))));
+            else
+            {
+                LegacyListPresets.AddConditionPresets(result, RootFolder, scope, buckets);
+            }
 #pragma warning restore CS0618
         }
         else
@@ -96,35 +94,13 @@ public static class PresetRepository
 
     // ---- Save (the current-version serializer) -------------------------------------------
 
-    /// <summary>Writes a preset DTO of the current format into its scope folder.</summary>
-    public static void Save(string name, PresetScope scope, IVersionedPresetDto dto) =>
-        Serialize(name, ScopeFolder(scope), dto);
+    /// <summary>Writes a preset DTO of the current format into its scope folder; a list preset
+    /// goes into its bucket subfolder.</summary>
+    public static void Save(string name, PresetScope scope, IVersionedPresetDto dto, string? bucket = null) =>
+        Serialize(name, bucket == null ? ScopeFolder(scope) : Path.Combine(ScopeFolder(scope), bucket), dto);
 
-    /// <summary>Writes the full-settings model as a preset of the All scope.</summary>
-    public static void Save(string name, PresetScope scope, AllPreset preset) =>
-        Serialize(name, ScopeFolder(scope), AllPresetFile.Of(preset));
-
-    /// <summary>Writes a list preset into its subfolder of its scope's folder.</summary>
-    public static void SaveList(string name, PresetScope scope, string subfolder, ListPresetFile dto) =>
-        Serialize(name, Path.Combine(ScopeFolder(scope), subfolder), dto);
-
-    // ---- Condition list presets ----------------------------------------------------------
-
-    private static readonly (bool Male, bool Adult)[] Buckets = [(true, true), (true, false), (false, true), (false, false)];
-
-    /// <summary>The bucket subfolder of the PriorityList scope.</summary>
-    public static string ConditionsFolder((bool Male, bool Adult) bucket) => BucketFolderName(bucket);
-
-    private static string BucketFolder((bool Male, bool Adult) bucket) => Path.Combine(ScopeFolder(PresetScope.PriorityList), BucketFolderName(bucket));
-
-    // Folder names predate the tuple keys — same age×sex buckets as the settings themselves.
-    private static string BucketFolderName((bool Male, bool Adult) bucket) => bucket switch
-    {
-        (true, true) => "AdultMale",
-        (true, false) => "YoungMale",
-        (false, true) => "AdultFemale",
-        _ => "YoungFemale",
-    };
+    private static IEnumerable<((bool Male, bool Adult)? Bucket, string Folder)> GetBuckets(PresetScope scope) =>
+        IntegrationServices.GetServices<IPresetBucketProvider>().Where(p => p.Scope == scope).SelectMany(p => p.Buckets);
 
 
     // ---- Read (dispatch by root: the current formats, or the version-1 machinery) ---------
