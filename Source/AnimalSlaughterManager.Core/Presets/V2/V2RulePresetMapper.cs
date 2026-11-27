@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -45,6 +46,34 @@ public static class V2RulePresetMapper
     internal static Type? FindType(string fullName) =>
         AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetType(fullName, false)).FirstOrDefault(t => t != null);
 
+    /// <summary>A list member whose element type has a "V2" counterpart maps element-wise.</summary>
+    private static object? MemberValue(MemberInfo source, object from, Type targetType)
+    {
+        var sourceType = source is PropertyInfo p ? p.PropertyType : ((FieldInfo)source).FieldType;
+
+        if (sourceType.IsGenericType && targetType.IsGenericType
+            && sourceType.GetGenericTypeDefinition() == typeof(List<>)
+            && targetType.GetGenericTypeDefinition() == typeof(List<>)
+            && (targetType.GetGenericArguments()[0].Name == "V2" + sourceType.GetGenericArguments()[0].Name
+                || sourceType.GetGenericArguments()[0].Name == "V2" + targetType.GetGenericArguments()[0].Name))
+        {
+            var sourceList = (System.Collections.IEnumerable)(source is PropertyInfo pp ? pp.GetValue(from) : ((FieldInfo)source).GetValue(from))!;
+            var list = (System.Collections.IList)Activator.CreateInstance(targetType)!;
+            var elemV2 = targetType.GetGenericArguments()[0];
+
+            foreach (var item in sourceList)
+            {
+                var v2 = Activator.CreateInstance(elemV2)!;
+                Copy(item, v2);
+                list.Add(v2);
+            }
+
+            return list;
+        }
+
+        return null;
+    }
+
     internal static void Copy(object from, object to)
     {
         foreach (var member in to.GetType().GetMembers(BindingFlags.Public | BindingFlags.Instance))
@@ -70,7 +99,7 @@ public static class V2RulePresetMapper
                 continue;
             }
 
-            var value = source is PropertyInfo p2 ? p2.GetValue(from) : ((FieldInfo)source).GetValue(from);
+            var value = MemberValue(source, from, targetType) ?? (source is PropertyInfo p2 ? p2.GetValue(from) : ((FieldInfo)source).GetValue(from));
 
             if (member is FieldInfo field)
             {

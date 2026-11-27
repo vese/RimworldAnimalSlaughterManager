@@ -195,7 +195,7 @@ public static class PresetRepository
         if (file.Scope == PresetScope.SpecialList)
         {
             return PresetSerializer.ReadContent<V2SpecialListPreset>(file) is { } content
-                ? new SpecialListPreset { Sections = [.. content.Sections ?? []] }
+                ? new SpecialListPreset { Sections = [.. content.Sections.Select(V2SpecialSettingsMapper.ToElement)] }
                 : null;
         }
 
