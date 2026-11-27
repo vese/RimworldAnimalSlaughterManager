@@ -21,7 +21,7 @@ public class V2SpecialListPresetConverter : IV2PresetConverter<SpecialListPreset
     };
 
     public SpecialListPreset? ToModel(PresetFile file, ThingDef? targetDef = null) =>
-        PresetSerializer.ReadContent<V2SpecialListPreset>(file) is { } content
+        PresetSerializer.DeserializeContent<V2SpecialListPreset>(file) is { } content
             ? new SpecialListPreset { Sections = [.. content.Sections.Select(PresetContentSerializers.ToElement)] }
             : null;
 }

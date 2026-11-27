@@ -196,7 +196,7 @@ public static class PresetRepository
     {
         var text = Store.ReadText(entry.path);
 
-        return PresetSerializer.ReadPreset(text) ?? new PresetFile { Version = 1, Scope = entry.scope, Content = text ?? string.Empty };
+        return PresetSerializer.Deserialize(text) ?? new PresetFile { Version = 1, Scope = entry.scope, Content = text ?? string.Empty };
     }
 
     private static AllKindsPreset? ReadAllKindsSettings(PresetFile file) =>

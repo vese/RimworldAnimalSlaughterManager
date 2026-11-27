@@ -18,7 +18,7 @@ public class V2PriorityListPresetConverter : IV2PresetConverter<PriorityListPres
     };
 
     public PriorityListPreset? ToModel(PresetFile file, ThingDef? targetDef = null) =>
-        PresetSerializer.ReadContent<V2PriorityListPreset>(file) is { } content
+        PresetSerializer.DeserializeContent<V2PriorityListPreset>(file) is { } content
             ? new PriorityListPreset { Rules = [.. content.Rules.Select(r => PresetContentSerializers.ToSettings(r)).OfType<BasePriorityRulePreset>()] }
             : null;
 }

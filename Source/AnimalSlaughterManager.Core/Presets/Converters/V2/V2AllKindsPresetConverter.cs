@@ -17,7 +17,7 @@ public class V2AllKindsPresetConverter : IV2PresetConverter<AllKindsPreset>
     };
 
     public AllKindsPreset? ToModel(PresetFile file, ThingDef? targetDef = null) =>
-        PresetSerializer.ReadContent<V2AllKindsPreset>(file) is { } content
+        PresetSerializer.DeserializeContent<V2AllKindsPreset>(file) is { } content
             ? new AllKindsPreset { Kinds = [.. content.Kinds.Select(V2KindPresetConverter.ToModel)] }
             : null;
 }
