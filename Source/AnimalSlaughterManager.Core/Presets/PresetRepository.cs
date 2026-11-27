@@ -99,8 +99,6 @@ public static class PresetRepository
         return [.. result.OrderByDescending(e => e.date).ThenBy(e => e.name)];
     }
 
-    // ---- Save (the current-version serializer) -------------------------------------------
-
     /// <summary>Writes a preset of the current format (the content model in the file form) into
     /// its scope folder; a list preset goes into its bucket subfolder.</summary>
     public static void Save(string name, PresetScope scope, object content, string? bucket = null)
@@ -109,57 +107,64 @@ public static class PresetRepository
         Store.WriteText(Path.Combine(folder, name + ".xml"), PresetSerializer.SerializePreset(content, scope));
     }
 
+    public static void Delete(PresetEntry entry)
+    {
+        if (entry == null || string.IsNullOrEmpty(entry.path))
+        {
+            return;
+        }
 
-    // ---- Read (the file's metadata, or the version-1 machinery by root) -------------------
+        Store.Delete(entry.path);
+    }
 
     /// <summary>The full preset model; the version-1 unified format migrates into it.</summary>
-    public static AllKindsPreset? ReadAll(PresetEntry entry)
+    public static AllKindsPreset? ReadAllKindsSettings(PresetEntry entry)
     {
         var text = Store.ReadText(entry.path);
         var file = PresetSerializer.ReadPreset(text);
 
-        if (file != null)
+        if (file is null)
         {
-            if (file.Scope is not PresetScope.All)
-            {
-                return null;
-            }
-
-            return PresetSerializer.ReadContent<AllKindsPresetFile>(file)?.ToPreset();
+#pragma warning disable CS0612
+            return LegacyPresets.TryReadAll(text);
+#pragma warning restore CS0612
         }
 
-#pragma warning disable CS0618
-        return LegacyPresets.TryReadAll(text);
-#pragma warning restore CS0618
+        if (file.Scope is not PresetScope.All)
+        {
+            return null;
+        }
+
+        return PresetSerializer.ReadContent<AllKindsPresetFile>(file)?.ToPreset();
     }
 
     /// <summary>The preset's kind slice: Kind-scope presets carry the single kind, All-scope
     /// presets the slice matching the target def. The caller applies it to the settings itself.</summary>
-    public static KindPresetFile? ReadKind(PresetEntry entry, ThingDef targetDef)
+    public static KindPresetFile? ReadKindSettings(PresetEntry entry, ThingDef targetDef)
     {
         var text = Store.ReadText(entry.path);
         var file = PresetSerializer.ReadPreset(text);
 
-        if (file != null)
+        if (file is null)
         {
-            if (file.Scope is PresetScope.Kind)
-            {
-                return PresetSerializer.ReadContent<KindPresetFile>(file);
-            }
-            else if (file.Scope is PresetScope.All)
-            {
-                var match = PresetSerializer.ReadContent<AllKindsPresetFile>(file)?.Kinds
-                    .FirstOrDefault(k => k.Kind.AnimalDefName == targetDef.defName);
-
-                return match == null ? null : new KindPresetFile { Kind = match.Kind };
-            }
-
-            return null;
+#pragma warning disable CS0612
+            return LegacyPresets.TryReadKind(entry, text, targetDef);
+#pragma warning restore CS0612
         }
 
-#pragma warning disable CS0618
-        return LegacyPresets.TryReadKind(entry, text, targetDef);
-#pragma warning restore CS0618
+        if (file.Scope is PresetScope.Kind)
+        {
+            return PresetSerializer.ReadContent<KindPresetFile>(file);
+        }
+        else if (file.Scope is PresetScope.All)
+        {
+            var match = PresetSerializer.ReadContent<AllKindsPresetFile>(file)?.Kinds
+                .FirstOrDefault(k => k.Kind.AnimalDefName == targetDef.defName);
+
+            return match == null ? null : new KindPresetFile { Kind = match.Kind };
+        }
+
+        return null;
     }
 
     /// <summary>A priority rule list of a PriorityList preset, or the matching bucket's slice
@@ -170,21 +175,38 @@ public static class PresetRepository
         var text = Store.ReadText(entry.path);
         var file = PresetSerializer.ReadPreset(text);
 
-        if (file != null)
+        if (file is null)
         {
-            if (file.Scope == PresetScope.PriorityList)
-            {
-                return PresetSerializer.ReadContent<PriorityListPresetFile>(file);
-            }
-
-            var slice = KindSliceOf(file, targetDef);
-
-            return slice == null ? null : RuleBucketOf(slice, bucket);
+#pragma warning disable CS0612
+            return LegacyPresets.TryReadPriorityList(entry, text, targetDef, bucket);
+#pragma warning restore CS0612
         }
 
-#pragma warning disable CS0618
-        return LegacyPresets.TryReadPriorityList(entry, text, targetDef, bucket);
-#pragma warning restore CS0618
+        if (file.Scope is PresetScope.PriorityList)
+        {
+            return PresetSerializer.ReadContent<PriorityListPresetFile>(file);
+        }
+        else if (file.Scope is PresetScope.All or PresetScope.Kind)
+        {
+            var slice = GetKindSettings(file, targetDef);
+
+            if (slice is null)
+            {
+                return null;
+            }
+
+            var rules = bucket switch
+            {
+                (true, true) => slice.Kind.Priorities.PriorityRulesAdultMale,
+                (true, false) => slice.Kind.Priorities.PriorityRulesYoungMale,
+                (false, true) => slice.Kind.Priorities.PriorityRulesAdultFemale,
+                (false, false) => slice.Kind.Priorities.PriorityRulesYoungFemale
+            };
+
+            return rules.Count == 0 ? null : new PriorityListPresetFile { Rules = rules };
+        }
+
+        return null;
     }
 
     /// <summary>A special-settings list of a SpecialList preset, or the sections slice of a
@@ -195,55 +217,35 @@ public static class PresetRepository
         var text = Store.ReadText(entry.path);
         var file = PresetSerializer.ReadPreset(text);
 
-        if (file != null)
+        if (file is null)
         {
-            if (file.Scope == PresetScope.SpecialList)
-            {
-                return PresetSerializer.ReadContent<SpecialListPresetFile>(file);
-            }
-
-            var slice = KindSliceOf(file, targetDef);
-
-            return slice == null ? null : SectionsSliceOf(slice);
+#pragma warning disable CS0612
+            return LegacyPresets.TryReadSpecialList(text, targetDef);
+#pragma warning restore CS0612
         }
 
-#pragma warning disable CS0618
-        return LegacyPresets.TryReadSpecialList(text, targetDef);
-#pragma warning restore CS0618
+        if (file.Scope == PresetScope.SpecialList)
+        {
+            return PresetSerializer.ReadContent<SpecialListPresetFile>(file);
+        }
+        else if (file.Scope is PresetScope.All or PresetScope.Kind)
+        {
+            var slice = GetKindSettings(file, targetDef);
+
+            if (slice is null || slice.Kind.SpecialSettings.Count == 0)
+            {
+                return null;
+            }
+
+            return SpecialListPresetFile.OfSections(KindPresetFileSections.SectionsOf(slice));
+        }
+
+        return null;
     }
 
-    // The kind slice a list import takes: a Kind preset's own kind (its defName is the SOURCE
-    // kind — the import applies to the TARGET kind), an All preset's slice of the target kind.
-    private static KindPresetFile? KindSliceOf(PresetFile file, ThingDef targetDef) =>
+    private static KindPresetFile? GetKindSettings(PresetFile file, ThingDef targetDef) =>
         file.Scope == PresetScope.Kind
             ? PresetSerializer.ReadContent<KindPresetFile>(file)
             : PresetSerializer.ReadContent<AllKindsPresetFile>(file)?.Kinds
                 .FirstOrDefault(k => k.Kind.AnimalDefName == targetDef.defName);
-
-    // The kind slice's rule bucket matching the import's bucket; null when it is empty.
-    private static PriorityListPresetFile? RuleBucketOf(KindPresetFile file, (bool Male, bool Adult) bucket)
-    {
-        var rules = bucket switch
-        {
-            (true, true) => file.Kind.Priorities.PriorityRulesAdultMale,
-            (true, false) => file.Kind.Priorities.PriorityRulesYoungMale,
-            (false, true) => file.Kind.Priorities.PriorityRulesAdultFemale,
-            _ => file.Kind.Priorities.PriorityRulesYoungFemale
-        };
-
-        return rules.Count == 0 ? null : new PriorityListPresetFile { Rules = rules };
-    }
-
-    // The raw integration sections of a kind slice (a special-list import); null when none.
-    private static SpecialListPresetFile? SectionsSliceOf(KindPresetFile file) =>
-        file.Kind.SpecialSettings.Count > 0 ? SpecialListPresetFile.OfSections(KindPresetFileSections.SectionsOf(file)) : null;
-
-    public static void Delete(PresetEntry entry)
-    {
-        if (entry == null || string.IsNullOrEmpty(entry.path))
-        {
-            return;
-        }
-        Store.Delete(entry.path);
-    }
 }

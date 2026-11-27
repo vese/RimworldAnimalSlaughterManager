@@ -27,7 +27,7 @@ public class SettingsPresetBrowserDialog : BasePresetBrowserDialog
 
     protected override bool Apply(PresetEntry entry)
     {
-        if (PresetRepository.ReadAll(entry) is not { } dto)
+        if (PresetRepository.ReadAllKindsSettings(entry) is not { } dto)
         {
             return false;
         }

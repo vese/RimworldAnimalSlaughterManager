@@ -31,7 +31,7 @@ public class KindSettingsPresetBrowserDialog : BasePresetBrowserDialog
 
     protected override bool Apply(PresetEntry entry)
     {
-        var kd = PresetRepository.ReadKind(entry, kind);
+        var kd = PresetRepository.ReadKindSettings(entry, kind);
 
         if (kd == null)
         {
