@@ -106,7 +106,7 @@ public static class PresetRepository
     public static void Save<TModel>(string name, PresetScope scope, TModel model, string? bucket = null)
         where TModel : class
     {
-        var file = PresetConverterFactory.GetConverter<TModel>(new PresetFile { Version = PresetFormat.CurrentVersion })?.ToFile(model, scope, bucket)
+        var file = PresetConverterFactory.GetConverter<TModel>(PresetFormat.CurrentVersion)?.ToFile(model, scope, bucket)
             ?? throw new InvalidOperationException($"No converter registered for {typeof(TModel).Name}.");
 
         var folder = bucket == null ? ScopeFolder(scope) : Path.Combine(ScopeFolder(scope), bucket);
@@ -128,7 +128,7 @@ public static class PresetRepository
     {
         var file = GetFile(entry);
 
-        return PresetConverterFactory.GetConverter<AllKindsPreset>(file)?.ToModel(file, entry);
+        return PresetConverterFactory.GetConverter<AllKindsPreset>(file.Version)?.ToModel(file, entry);
     }
 
     /// <summary>The preset's kind slice: Kind-scope presets carry the single kind, All-scope
@@ -145,7 +145,7 @@ public static class PresetRepository
             return match == null ? null : V2KindPresetConverter.ToModel(match);
         }
 
-        return PresetConverterFactory.GetConverter<KindPreset>(file)?.ToModel(file, entry, targetDef);
+        return PresetConverterFactory.GetConverter<KindPreset>(file.Version)?.ToModel(file, entry, targetDef);
     }
 
     /// <summary>A priority rule list of a PriorityList preset, or the matching bucket's slice
