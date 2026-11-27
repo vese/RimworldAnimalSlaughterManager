@@ -124,10 +124,8 @@ public static class PresetRepository
         }
 
 #pragma warning disable CS0618
-        var v1 = LegacyPresets.ReadV1Kinds(text);
+        return LegacyPresets.TryReadAll(text);
 #pragma warning restore CS0618
-
-        return v1 == null ? null : new AllPreset { Kinds = v1 };
     }
 
     /// <summary>The preset's kind slice: Kind-scope presets carry the single kind, All-scope
