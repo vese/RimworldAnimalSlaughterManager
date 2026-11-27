@@ -9,25 +9,22 @@ namespace ASM;
 public abstract class BasePriorityRule : IExposable
 {
     /// <summary>Rules from their preset models: each preset's registered factory creates its
-    /// rule, the preset fills it. Presets without a registered factory are dropped.</summary>
+    /// rule filled from the preset. Presets without a registered factory are dropped.</summary>
     public static List<BasePriorityRule> FromPresets(IEnumerable<BasePriorityRulePreset> presets)
     {
         var rules = new List<BasePriorityRule>();
 
         foreach (var preset in presets)
         {
-            var factory = ServiceRegistry.GetServices(typeof(IPriorityRuleFactory<>).MakeGenericType(preset.GetType()))
+            var rule = ServiceRegistry.GetServices(typeof(IPriorityRuleFactory<>).MakeGenericType(preset.GetType()))
                 .OfType<IPriorityRuleFactory<BasePriorityRulePreset>>()
-                .FirstOrDefault();
+                .FirstOrDefault()
+                ?.Create(preset);
 
-            if (factory == null)
+            if (rule != null)
             {
-                continue;
+                rules.Add(rule);
             }
-
-            var rule = factory.Create();
-            rule.FromPreset(preset);
-            rules.Add(rule);
         }
 
         return rules;
