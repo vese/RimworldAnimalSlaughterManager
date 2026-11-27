@@ -11,12 +11,12 @@ public class V2SpecialListPresetConverter : IV2PresetConverter<SpecialListPreset
         Version = PresetFormat.CurrentVersion,
         Scope = scope,
         Bucket = bucket,
-        Type = nameof(SpecialListPresetFile),
-        Content = PresetSerializer.SerializeContent(SpecialListPresetFile.OfSections(model.Sections))
+        Type = nameof(V2SpecialListPreset),
+        Content = PresetSerializer.SerializeContent(new V2SpecialListPreset { Sections = [.. model.Sections] })
     };
 
     public SpecialListPreset? ToModel(PresetFile file, PresetEntry entry, ThingDef? targetDef = null) =>
-        PresetSerializer.ReadContent<SpecialListPresetFile>(file) is { } content
-            ? new SpecialListPreset { Sections = content.Sections }
+        PresetSerializer.ReadContent<V2SpecialListPreset>(file) is { } content
+            ? new SpecialListPreset { Sections = [.. content.Sections ?? []] }
             : null;
 }

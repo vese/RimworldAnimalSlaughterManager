@@ -158,13 +158,13 @@ public static class PresetRepository
         if (file.Version == 1)
         {
 #pragma warning disable CS0612, CS0618
-            return LegacyPresets.TryReadPriorityList(entry, file.Content, targetDef, bucket)?.Rules;
+            return LegacyPresets.TryReadPriorityList(entry, file.Content, targetDef, bucket);
 #pragma warning restore CS0612, CS0618
         }
 
         if (file.Scope is PresetScope.PriorityList)
         {
-            return PresetSerializer.ReadContent<PriorityListPresetFile>(file)?.Rules;
+            return PresetSerializer.ReadContent<V2PriorityListPreset>(file)?.ToRuleList();
         }
 
         if (file.Scope is PresetScope.All or PresetScope.Kind)
@@ -187,16 +187,14 @@ public static class PresetRepository
         if (file.Version == 1)
         {
 #pragma warning disable CS0612, CS0618
-            return LegacyPresets.TryReadSpecialList(file.Content, targetDef) is { } legacy
-                ? new SpecialListPreset { Sections = legacy.Sections }
-                : null;
+            return LegacyPresets.TryReadSpecialList(file.Content, targetDef);
 #pragma warning restore CS0612, CS0618
         }
 
         if (file.Scope == PresetScope.SpecialList)
         {
-            return PresetSerializer.ReadContent<SpecialListPresetFile>(file) is { } content
-                ? new SpecialListPreset { Sections = content.Sections }
+            return PresetSerializer.ReadContent<V2SpecialListPreset>(file) is { } content
+                ? new SpecialListPreset { Sections = [.. content.Sections ?? []] }
                 : null;
         }
 

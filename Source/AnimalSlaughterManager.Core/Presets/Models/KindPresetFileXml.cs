@@ -1,0 +1,79 @@
+using System;
+using System.Collections.Generic;
+using System.Xml;
+using System.Xml.Schema;
+using System.Linq;
+using System.Xml.Serialization;
+
+namespace ASM;
+
+/// <summary>The file form of a kind preset: the version plus the typed model. The buckets and
+/// the integration sections serialize here (each integration owns its section's shape —
+/// WriteXml/ReadXml — while this wrapper owns the element layout).</summary>
+public static class KindPresetFileSerialization
+{
+    /// <summary>Writes one bucket as an element with the rule presets inside.</summary>
+    internal static void SerializeBucket(XmlWriter writer, string name, List<BasePriorityRulePreset> presets)
+    {
+        RulePresetXml.Bucket(name, PriorityRuleXml.ToRulePresets(presets)).WriteTo(writer);
+    }
+
+    /// <summary>The non-bucket children of a kind element (the integration sections).</summary>
+    internal static List<XmlElement> GetSections(XmlElement root)
+    {
+        var sections = new List<XmlElement>();
+
+        foreach (XmlElement child in root.ChildNodes)
+        {
+            if (child.LocalName is not ("PriorityRulesAdultMale" or "PriorityRulesYoungMale" or "PriorityRulesAdultFemale" or "PriorityRulesYoungFemale"))
+            {
+                sections.Add(child);
+            }
+        }
+
+        return sections;
+    }
+
+    /// <summary>Integration settings from their sections: every provider reads the wrapped
+    /// children; the ones that find their section join the slice.</summary>
+    internal static Dictionary<string, BaseSpecialSettingsPreset> ReadIntegrations(List<XmlElement> sections)
+    {
+        var integrations = new Dictionary<string, BaseSpecialSettingsPreset>();
+        var kind = PresetSectionSerialization.Wrap(sections);
+
+        foreach (var provider in ServiceRegistry.GetServices<IKindSettingsProvider>())
+        {
+            var settings = provider.ReadSection(kind);
+
+            if (settings != null)
+            {
+                integrations[provider.Key] = settings;
+            }
+        }
+
+        return integrations;
+    }
+}
+
+public static class KindPresetFileSections
+{
+    /// <summary>The integration sections of a kind file (serialized on demand).</summary>
+    public static List<XmlElement> GetSections(KindPreset file)
+    {
+        var holder = PresetSectionSerialization.Holder();
+
+        foreach (var kv in file.SpecialSettings)
+        {
+            ServiceRegistry.GetServices<IKindSettingsProvider>().FirstOrDefault(p => p.Key == kv.Key)?.WriteSection(kv.Value, holder);
+        }
+
+        return [.. PresetSectionSerialization.Children(holder)];
+    }
+}
+
+public static class KindPresetFileParsing
+{
+    /// <summary>A pref attribute of the v1 unified slice; the default when missing.</summary>
+    public static SlaughterPreference ParsePref(string? value) =>
+        Enum.TryParse(value, out SlaughterPreference parsed) ? parsed : SlaughterPreference.OldestFirst;
+}

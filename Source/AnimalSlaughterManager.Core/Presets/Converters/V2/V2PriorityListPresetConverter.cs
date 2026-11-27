@@ -12,10 +12,10 @@ public class V2PriorityListPresetConverter : IV2PresetConverter<List<BasePriorit
         Version = PresetFormat.CurrentVersion,
         Scope = scope,
         Bucket = bucket,
-        Type = nameof(PriorityListPresetFile),
-        Content = PresetSerializer.SerializeContent(PriorityListPresetFile.OfRules(model))
+        Type = nameof(V2PriorityListPreset),
+        Content = PresetSerializer.SerializeContent(V2PriorityListPreset.OfRules(model))
     };
 
     public List<BasePriorityRulePreset>? ToModel(PresetFile file, PresetEntry entry, ThingDef? targetDef = null) =>
-        PresetSerializer.ReadContent<PriorityListPresetFile>(file)?.Rules;
+        PresetSerializer.ReadContent<V2PriorityListPreset>(file)?.ToRuleList();
 }

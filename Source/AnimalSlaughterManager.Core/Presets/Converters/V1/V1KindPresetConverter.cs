@@ -14,7 +14,7 @@ public class V1KindPresetConverter : IV1PresetConverter<KindPreset>
     public KindPreset? ToModel(PresetFile file, PresetEntry entry, ThingDef? targetDef = null)
     {
 #pragma warning disable CS0612, CS0618
-        return LegacyPresets.TryReadKind(entry, file.Content, targetDef!)?.Kind;
+        return LegacyPresets.TryReadKind(entry, file.Content, targetDef!);
 #pragma warning restore CS0612, CS0618
     }
 }
