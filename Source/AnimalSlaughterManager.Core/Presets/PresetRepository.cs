@@ -31,7 +31,6 @@ public static class PresetRepository
 {
     // Preset tree layout under the game persistentDataPath.
     private const string RootFolderName = "AnimalSlaughterManagerPresets";
-    private const string FolderConditions = "Conditions";
 
     /// <summary>File access of the preset subsystem; tests may substitute their own store.</summary>
     private static readonly IPresetStore Store = new FilePresetStore();
@@ -40,9 +39,6 @@ public static class PresetRepository
 
     // The scope folder is the enum value's own name.
     private static string ScopeFolder(PresetScope scope) => Path.Combine(RootFolder, scope.ToString());
-
-    // The version-1 layout: both list flavors shared the "List" root. It is read, never written.
-    private static string V1ListFolder => Path.Combine(RootFolder, "List");
 
     /// <summary>Presets of one scope (SpecialList — every subfolder of its folder, PriorityList —
     /// every condition bucket; both also read their version-1 folders), newest-first by file
@@ -66,23 +62,21 @@ public static class PresetRepository
                 AddFolder(sub);
             }
 
-            // v1: the special lists shared the "List" root with the conditions tree.
-            foreach (var sub in Store.GetFolders(V1ListFolder))
-            {
-                if (Path.GetFileName(sub) != FolderConditions)
-                {
-                    AddFolder(sub);
-                }
-            }
+#pragma warning disable CS0618
+            LegacyListPresets.AddSpecialListPresets(result, RootFolder, scope);
+#pragma warning restore CS0618
         }
         else if (scope is PresetScope.PriorityList)
         {
-            // Every condition bucket (cross-bucket import), current and v1 folders.
+            // Every condition bucket (cross-bucket import).
             foreach (var bucket in Buckets)
             {
                 AddFolder(BucketFolder(bucket), bucket);
-                AddFolder(V1BucketFolder(bucket), bucket);
             }
+
+#pragma warning disable CS0618
+            LegacyListPresets.AddConditionPresets(result, RootFolder, scope, Buckets.Select(bucket => (Bucket: bucket, Folder: BucketFolderName(bucket))));
+#pragma warning restore CS0618
         }
         else
         {
@@ -122,9 +116,6 @@ public static class PresetRepository
     public static string ConditionsFolder((bool Male, bool Adult) bucket) => BucketFolderName(bucket);
 
     private static string BucketFolder((bool Male, bool Adult) bucket) => Path.Combine(ScopeFolder(PresetScope.PriorityList), BucketFolderName(bucket));
-
-    // The version-1 condition folders under the shared List root.
-    private static string V1BucketFolder((bool Male, bool Adult) bucket) => Path.Combine(V1ListFolder, FolderConditions, BucketFolderName(bucket));
 
     // Folder names predate the tuple keys — same age×sex buckets as the settings themselves.
     private static string BucketFolderName((bool Male, bool Adult) bucket) => bucket switch
