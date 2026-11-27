@@ -204,7 +204,7 @@ public static class PresetRepository
 
     // The list payload of a kind slice: the first non-empty rule bucket, or the raw
     // integration sections (a special-settings list); null when neither.
-    internal static ListPresetFile? ListSliceOf(KindPresetFile file)
+    private static ListPresetFile? ListSliceOf(KindPresetFile file)
     {
         var typed = new[] { file.Kind.Priorities.PrioRulesAdultMale, file.Kind.Priorities.PrioRulesYoungMale, file.Kind.Priorities.PrioRulesAdultFemale, file.Kind.Priorities.PrioRulesYoungFemale }
             .FirstOrDefault(rules => rules.Count > 0);

@@ -129,7 +129,7 @@ public static class LegacyPresets
                 // The v1 unified carrier: the first kind's slice.
                 var kind = ReadV1Kinds(text)?.FirstOrDefault();
 
-                return kind == null ? null : PresetRepository.ListSliceOf(new KindPresetFile { Kind = kind });
+                return kind == null ? null : ListSliceOf(new KindPresetFile { Kind = kind });
             default:
                 return FromRules(TryReadConditions(entry));
         }
@@ -137,6 +137,17 @@ public static class LegacyPresets
 
     private static ListPresetFile? FromRules(List<BasePriorityRule>? rules) =>
         rules == null ? null : new ListPresetFile { Rules = rules.Select(r => r.ToPreset()).ToList() };
+
+    // A copy of the repository's kind-slice reader — Legacy stays self-contained and goes
+    // away together with this folder.
+    private static ListPresetFile? ListSliceOf(KindPresetFile file)
+    {
+        var typed = new[] { file.Kind.Priorities.PrioRulesAdultMale, file.Kind.Priorities.PrioRulesYoungMale, file.Kind.Priorities.PrioRulesAdultFemale, file.Kind.Priorities.PrioRulesYoungFemale }
+            .FirstOrDefault(rules => rules.Count > 0);
+
+        return typed != null ? new ListPresetFile { Rules = typed }
+            : file.Kind.SpecialSettings.Count > 0 ? ListPresetFile.OfSections(KindPresetFileSections.SectionsOf(file)) : null;
+    }
 
     /// <summary>Root element name of the file — identifies which of the historical formats it is.</summary>
     private static string? RootElementOf(string? text)
