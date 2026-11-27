@@ -17,19 +17,6 @@ namespace ASM;
 public static class PresetSerializer
 {
     // XmlSerializer generates a serialization assembly on first use — cache the instances.
-    private static readonly Dictionary<Type, XmlSerializer> serializers = [];
-
-    /// <summary>Cached serializer of a preset model type (the DTO element name is its root).</summary>
-    public static XmlSerializer GetSerializer(Type type)
-    {
-        if (!serializers.TryGetValue(type, out var ser))
-        {
-            ser = new XmlSerializer(type);
-            serializers[type] = ser;
-        }
-
-        return ser;
-    }
 
     /// <summary>The file form's text.</summary>
     public static string Serialize(PresetFile file)

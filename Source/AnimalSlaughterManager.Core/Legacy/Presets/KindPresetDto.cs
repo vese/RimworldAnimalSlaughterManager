@@ -61,10 +61,10 @@ public static class KindPresetDtoConversion
             },
             Priorities = new PrioritySettingsPreset
             {
-                PriorityRulesAdultMale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(v1.PrioRulesAdultMale?.FirstOrDefault())),
-                PriorityRulesYoungMale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(v1.PrioRulesYoungMale?.FirstOrDefault())),
-                PriorityRulesAdultFemale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(v1.PrioRulesAdultFemale?.FirstOrDefault())),
-                PriorityRulesYoungFemale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(v1.PrioRulesYoungFemale?.FirstOrDefault()))
+                PriorityRulesAdultMale = LegacyRulePresets.ToDtos(LegacyRulePresets.ReadBucket(v1.PrioRulesAdultMale?.FirstOrDefault())),
+                PriorityRulesYoungMale = LegacyRulePresets.ToDtos(LegacyRulePresets.ReadBucket(v1.PrioRulesYoungMale?.FirstOrDefault())),
+                PriorityRulesAdultFemale = LegacyRulePresets.ToDtos(LegacyRulePresets.ReadBucket(v1.PrioRulesAdultFemale?.FirstOrDefault())),
+                PriorityRulesYoungFemale = LegacyRulePresets.ToDtos(LegacyRulePresets.ReadBucket(v1.PrioRulesYoungFemale?.FirstOrDefault()))
             }
         };
 

@@ -12,12 +12,6 @@ namespace ASM;
 /// WriteXml/ReadXml — while this wrapper owns the element layout).</summary>
 public static class KindPresetFileSerialization
 {
-    /// <summary>Writes one bucket as an element with the rule presets inside.</summary>
-    internal static void SerializeBucket(XmlWriter writer, string name, List<BasePriorityRulePreset> presets)
-    {
-        RulePresetXml.Bucket(name, PriorityRuleXml.ToRulePresets(presets)).WriteTo(writer);
-    }
-
     /// <summary>The non-bucket children of a kind element (the integration sections).</summary>
     internal static List<XmlElement> GetSections(XmlElement root)
     {

@@ -110,7 +110,7 @@ public class KindPrioritySettings : IPresettable<PrioritySettingsPreset>
     {
         foreach (var key in keys)
         {
-            ruleSets[key].ReplaceAll(PriorityRuleXml.ToRules(preset.GetBucket(key)));
+            ruleSets[key].ReplaceAll(PriorityRuleFactory.ToRules(preset.GetBucket(key)));
         }
     }
 
@@ -120,7 +120,7 @@ public class KindPrioritySettings : IPresettable<PrioritySettingsPreset>
 
     public void FromPreset(List<BasePriorityRulePreset> rules, (bool Male, bool Adult) bucket)
     {
-        ruleSets[bucket].ReplaceAll(PriorityRuleXml.ToRules(rules));
+        ruleSets[bucket].ReplaceAll(PriorityRuleFactory.ToRules(rules));
     }
 
 
