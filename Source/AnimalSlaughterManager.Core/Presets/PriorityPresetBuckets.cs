@@ -17,6 +17,8 @@ public static class PriorityPresetBuckets
         ["YoungFemale"] = (false, false),
     };
 
+    private static readonly Dictionary<(bool Male, bool Adult), string> folders = Buckets.ToDictionary(kv => kv.Value, kv => kv.Key);
+
     /// <summary>The age×sex bucket's folder name.</summary>
-    public static string GetBucket((bool Male, bool Adult) bucket) => Buckets.First(kv => kv.Value == bucket).Key;
+    public static string GetBucket((bool Male, bool Adult) bucket) => folders[bucket];
 }
