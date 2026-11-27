@@ -16,5 +16,13 @@ public static class KindPrioritySettingsRegistration
         ServiceRegistry.Add<IRuleOptionsSource>(new BondRuleOptionsSource());
         ServiceRegistry.Add<IRuleOptionsSource>(new DiseaseRuleOptionsSource());
         ServiceRegistry.Add<IRuleOptionsSource>(new TrainingRuleOptionsSource());
+
+        // The rules' factories: the preset model's factory creates its rule.
+        ServiceRegistry.Add<IPriorityRuleFactory<PregnancyRulePreset>>(new PriorityRuleFactory<PregnancyPriorityRule, PregnancyRulePreset>());
+        ServiceRegistry.Add<IPriorityRuleFactory<BondRulePreset>>(new PriorityRuleFactory<BondPriorityRule, BondRulePreset>());
+        ServiceRegistry.Add<IPriorityRuleFactory<DiseaseRulePreset>>(new PriorityRuleFactory<DiseasePriorityRule, DiseaseRulePreset>());
+        ServiceRegistry.Add<IPriorityRuleFactory<DiseaseAnyRulePreset>>(new PriorityRuleFactory<DiseaseAnyPriorityRule, DiseaseAnyRulePreset>());
+        ServiceRegistry.Add<IPriorityRuleFactory<TrainingRulePreset>>(new PriorityRuleFactory<TrainingPriorityRule, TrainingRulePreset>());
+        ServiceRegistry.Add<IPriorityRuleFactory<TrainingGeneralRulePreset>>(new PriorityRuleFactory<TrainingGeneralPriorityRule, TrainingGeneralRulePreset>());
     }
 }
