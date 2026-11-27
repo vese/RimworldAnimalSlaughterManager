@@ -38,7 +38,7 @@ public static class PresetSerializer
 
         using (var w = new StringWriter(sb))
         {
-            GetSerializer(typeof(PresetFile)).Serialize(w, file);
+            PresetContentSerializers.SerializerOf(typeof(PresetFile)).Serialize(w, file);
         }
 
         return sb.ToString();

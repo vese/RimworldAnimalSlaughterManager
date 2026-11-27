@@ -76,7 +76,7 @@ public static class PresetContentSerializers
         try
         {
             using var reader = new StringReader(element.OuterXml);
-            return (V2SpecialListSection?)PresetSerializer.GetSerializer(type).Deserialize(reader);
+            return (V2SpecialListSection?)SerializerOf(type).Deserialize(reader);
         }
         catch
         {
@@ -91,7 +91,7 @@ public static class PresetContentSerializers
 
         using (var writer = doc.CreateNavigator()!.AppendChild())
         {
-            PresetSerializer.GetSerializer(section.GetType()).Serialize(writer, section);
+            SerializerOf(section.GetType()).Serialize(writer, section);
         }
 
         return doc.DocumentElement!;
