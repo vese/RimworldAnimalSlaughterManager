@@ -51,7 +51,14 @@ public static class PresetRepository
         {
             foreach (var p in Store.GetFiles(dir))
             {
-                result.Add(new PresetEntry { name = Path.GetFileNameWithoutExtension(p), path = p, date = Store.GetLastWriteTime(p), scope = scope, condBucket = bucket });
+                result.Add(new PresetEntry
+                {
+                    name = Path.GetFileNameWithoutExtension(p),
+                    path = p,
+                    date = Store.GetLastWriteTime(p),
+                    scope = scope,
+                    condBucket = bucket
+                });
             }
         }
 

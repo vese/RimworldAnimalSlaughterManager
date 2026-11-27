@@ -37,8 +37,11 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
         _ => ASMKeys.YoungFemales.Translate(),
     };
 
-    protected override void Save(string name) =>
-        PresetRepository.Save(name, PresetScope.PriorityList, ListPresetFile.OfRules(prioritySettings.ToPreset((male, adult))), PriorityPresetBuckets.GetBucket((male, adult)));
+    protected override void Save(string name) => PresetRepository.Save(
+        name,
+        PresetScope.PriorityList,
+        ListPresetFile.OfRules(prioritySettings.ToPreset((male, adult))),
+        PriorityPresetBuckets.GetBucket((male, adult)));
 
     protected override bool Apply(PresetEntry entry)
     {
