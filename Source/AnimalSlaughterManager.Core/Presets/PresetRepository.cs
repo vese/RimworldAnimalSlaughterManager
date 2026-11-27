@@ -232,18 +232,10 @@ public static class PresetRepository
 
     // ---- Helpers -------------------------------------------------------------------------
 
+    // The name comes from the browser's field, which blocks the invalid characters and the
+    // length (see SaveRow) — it is the file name as-is.
     private static void Serialize(string name, string folder, object content, PresetScope scope)
     {
-        Store.WriteText(Path.Combine(folder, Sanitize(name) + ".xml"), PresetSerializer.SerializePreset(content, scope));
-    }
-
-    private static string Sanitize(string name)
-    {
-        foreach (char c in Path.GetInvalidFileNameChars())
-        {
-            name = name.Replace(c, '_');
-        }
-
-        return name.Trim();
+        Store.WriteText(Path.Combine(folder, name + ".xml"), PresetSerializer.SerializePreset(content, scope));
     }
 }
