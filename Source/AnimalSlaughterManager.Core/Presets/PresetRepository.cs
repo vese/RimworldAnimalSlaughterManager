@@ -9,15 +9,16 @@ namespace ASM;
 /// <summary>
 /// Export/import slaughter configuration so it can be reused across games.
 ///
-/// Presets come in three scopes, stored in separate subfolders of
-/// <c>&lt;persistentDataPath&gt;/AnimalSlaughterManagerPresets/</c>:
+/// Presets come in scopes, stored in subfolders of
+/// <c>&lt;persistentDataPath&gt;/AnimalSlaughterManagerPresets/</c> named after the scope:
 /// <list type="bullet">
 /// <item><description><c>All/</c> — every configured kind (full settings). Also: legacy root
 /// <c>*.xml</c> files are treated as All-scope for backward compatibility.</description></item>
 /// <item><description><c>Kind/</c> — one kind's full settings (save for one kind, load into
 /// another).</description></item>
-/// <item><description><c>List/&lt;Keep|ForceCull|Conditions&gt;/…</c> — a single rule list for
-/// one kind (save a list, load the corresponding list into another kind).</description></item>
+/// <item><description><c>PriorityList/&lt;bucket&gt;/…</c> and <c>SpecialList/&lt;kind&gt;/…</c> —
+/// a single rule list (save a list, load the corresponding list into another kind). The
+/// version-1 shared <c>List/…</c> tree is still read.</description></item>
 /// </list>
 /// A higher-scope preset can be applied to a narrower target (All→kind, All→list, kind→list):
 /// only the target's slice is taken. Higher-scope presets cannot be deleted from a narrower
@@ -37,15 +38,15 @@ public static class PresetRepository
 
     private static string RootFolder => Path.Combine(Application.persistentDataPath, RootFolderName);
 
-    // The scope folder is the enum value's own name (All/Kind); both list flavors share the
-    // "List" root — the flavor splits semantics and listings, not the on-disk layout.
-    private static string ListFolder => Path.Combine(RootFolder, "List");
+    // The scope folder is the enum value's own name.
+    private static string ScopeFolder(PresetScope scope) => Path.Combine(RootFolder, scope.ToString());
 
-    private static string ScopeFolder(PresetScope scope) =>
-        scope is PresetScope.PriorityList or PresetScope.SpecialList ? ListFolder : Path.Combine(RootFolder, scope.ToString());
+    // The version-1 layout: both list flavors shared the "List" root. It is read, never written.
+    private static string V1ListFolder => Path.Combine(RootFolder, "List");
 
-    /// <summary>Presets of one scope (SpecialList — every non-core subfolder of the List root,
-    /// PriorityList — every condition bucket), newest-first by file write time.</summary>
+    /// <summary>Presets of one scope (SpecialList — every subfolder of its folder, PriorityList —
+    /// every condition bucket; both also read their version-1 folders), newest-first by file
+    /// write time.</summary>
     public static List<PresetEntry> ListPresets(PresetScope scope)
     {
         var result = new List<PresetEntry>();
@@ -60,9 +61,13 @@ public static class PresetRepository
 
         if (scope is PresetScope.SpecialList)
         {
-            // The special lists own every subfolder of the List root as it is on disk, except
-            // the core's own conditions tree (a PriorityList has its own browser).
-            foreach (var sub in Store.GetFolders(ListFolder))
+            foreach (var sub in Store.GetFolders(ScopeFolder(scope)))
+            {
+                AddFolder(sub);
+            }
+
+            // v1: the special lists shared the "List" root with the conditions tree.
+            foreach (var sub in Store.GetFolders(V1ListFolder))
             {
                 if (Path.GetFileName(sub) != FolderConditions)
                 {
@@ -72,11 +77,12 @@ public static class PresetRepository
         }
         else if (scope is PresetScope.PriorityList)
         {
-            // Every condition bucket (cross-bucket import).
-            AddFolder(CondFolder((true, true)), (true, true));
-            AddFolder(CondFolder((true, false)), (true, false));
-            AddFolder(CondFolder((false, true)), (false, true));
-            AddFolder(CondFolder((false, false)), (false, false));
+            // Every condition bucket (cross-bucket import), current and v1 folders.
+            foreach (var bucket in Buckets)
+            {
+                AddFolder(BucketFolder(bucket), bucket);
+                AddFolder(V1BucketFolder(bucket), bucket);
+            }
         }
         else
         {
@@ -104,16 +110,21 @@ public static class PresetRepository
     public static void Save(string name, PresetScope scope, AllPreset preset) =>
         Serialize(name, ScopeFolder(scope), AllPresetFile.Of(preset));
 
-    /// <summary>Writes a list preset into its subfolder of the List root.</summary>
-    public static void SaveList(string name, string subfolder, ListPresetFile dto) =>
-        Serialize(name, Path.Combine(ListFolder, subfolder), dto);
+    /// <summary>Writes a list preset into its subfolder of its scope's folder.</summary>
+    public static void SaveList(string name, PresetScope scope, string subfolder, ListPresetFile dto) =>
+        Serialize(name, Path.Combine(ScopeFolder(scope), subfolder), dto);
 
     // ---- Condition list presets ----------------------------------------------------------
 
-    /// <summary>The conditions subfolder of the List scope (one folder per bucket).</summary>
-    public static string ConditionsFolder((bool Male, bool Adult) bucket) => Path.Combine(FolderConditions, BucketFolderName(bucket));
+    private static readonly (bool Male, bool Adult)[] Buckets = [(true, true), (true, false), (false, true), (false, false)];
 
-    private static string CondFolder((bool Male, bool Adult) bucket) => Path.Combine(ListFolder, FolderConditions, BucketFolderName(bucket));
+    /// <summary>The bucket subfolder of the PriorityList scope.</summary>
+    public static string ConditionsFolder((bool Male, bool Adult) bucket) => BucketFolderName(bucket);
+
+    private static string BucketFolder((bool Male, bool Adult) bucket) => Path.Combine(ScopeFolder(PresetScope.PriorityList), BucketFolderName(bucket));
+
+    // The version-1 condition folders under the shared List root.
+    private static string V1BucketFolder((bool Male, bool Adult) bucket) => Path.Combine(V1ListFolder, FolderConditions, BucketFolderName(bucket));
 
     // Folder names predate the tuple keys — same age×sex buckets as the settings themselves.
     private static string BucketFolderName((bool Male, bool Adult) bucket) => bucket switch
