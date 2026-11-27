@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -66,18 +65,11 @@ public static class PresetRepository
 
         if (scope is PresetScope.PriorityList or PresetScope.SpecialList)
         {
-            // The folder is flat — the bucket rides in each file's metadata (cross-bucket
-            // import included).
-            foreach (var p in Store.GetFiles(ScopeFolder(scope)))
+            // Every bucket folder (cross-bucket import) — the bucket comes from the path, and
+            // rides in each file's metadata as well.
+            foreach (var sub in Store.GetFolders(ScopeFolder(scope)))
             {
-                result.Add(new PresetEntry
-                {
-                    name = Path.GetFileNameWithoutExtension(p),
-                    path = p,
-                    date = Store.GetLastWriteTime(p),
-                    scope = scope,
-                    bucket = BucketOf(p)
-                });
+                AddFolder(sub, Path.GetFileName(sub));
             }
 
             // The version-1 shared List root.
@@ -108,11 +100,12 @@ public static class PresetRepository
         return [.. result.OrderByDescending(e => e.date).ThenBy(e => e.name)];
     }
 
-    /// <summary>Writes a preset of the current format into its scope folder; the list bucket
-    /// rides in the file's metadata, not the path.</summary>
+    /// <summary>Writes a preset of the current format into its scope folder; a list preset
+    /// goes into its bucket subfolder, and the bucket rides in the file's metadata too.</summary>
     public static void Save(string name, PresetScope scope, object content, string? bucket = null)
     {
-        Store.WriteText(Path.Combine(ScopeFolder(scope), name + ".xml"), PresetSerializer.SerializePreset(content, scope, bucket));
+        var folder = bucket == null ? ScopeFolder(scope) : Path.Combine(ScopeFolder(scope), bucket);
+        Store.WriteText(Path.Combine(folder, name + ".xml"), PresetSerializer.SerializePreset(content, scope, bucket));
     }
 
     public static void Delete(PresetEntry entry)
@@ -249,25 +242,6 @@ public static class PresetRepository
         }
 
         return null;
-    }
-
-    // Listings run every UI frame — the bucket comes from the file's metadata, parsed once
-    // per file version (the write time).
-    private static readonly Dictionary<string, KeyValuePair<DateTime, string?>> bucketCache = [];
-
-    private static string? BucketOf(string path)
-    {
-        var time = Store.GetLastWriteTime(path);
-
-        if (bucketCache.TryGetValue(path, out var cached) && cached.Key == time)
-        {
-            return cached.Value;
-        }
-
-        var bucket = PresetSerializer.ReadPreset(Store.ReadText(path))?.Bucket;
-        bucketCache[path] = new(time, bucket);
-
-        return bucket;
     }
 
     private static KindPresetFile? GetKindSettings(PresetFile file, ThingDef targetDef) =>
