@@ -148,9 +148,9 @@ public static class LegacyPresets
     }
 
     /// <summary>A priority rule list of a legacy file: the RulePresetDto format, the v1 unified
-    /// carrier's rule-bucket slice of the target kind, or the condition-preset format; null
-    /// when nothing readable.</summary>
-    public static PriorityListPresetFile? TryReadPriorityList(PresetEntry entry, string? text, ThingDef targetDef)
+    /// carrier's matching-bucket slice of the target kind, or the condition-preset format;
+    /// null when nothing readable.</summary>
+    public static PriorityListPresetFile? TryReadPriorityList(PresetEntry entry, string? text, ThingDef targetDef, (bool Male, bool Adult) bucket)
     {
         switch (RootElementOf(text))
         {
@@ -159,7 +159,7 @@ public static class LegacyPresets
             case PresetRoot:
                 var kind = ReadV1Kinds(text)?.FirstOrDefault(k => k.AnimalDefName == targetDef.defName);
 
-                return kind == null ? null : RuleBucketOf(new KindPresetFile { Kind = kind });
+                return kind == null ? null : RuleBucketOf(new KindPresetFile { Kind = kind }, bucket);
             default:
                 return FromRules(TryReadConditions(entry));
         }
@@ -179,12 +179,17 @@ public static class LegacyPresets
 
     // Copies of the repository's kind-slice readers — Legacy stays self-contained and goes
     // away together with this folder.
-    private static PriorityListPresetFile? RuleBucketOf(KindPresetFile file)
+    private static PriorityListPresetFile? RuleBucketOf(KindPresetFile file, (bool Male, bool Adult) bucket)
     {
-        var rules = new[] { file.Kind.Priorities.PrioRulesAdultMale, file.Kind.Priorities.PrioRulesYoungMale, file.Kind.Priorities.PrioRulesAdultFemale, file.Kind.Priorities.PrioRulesYoungFemale }
-            .FirstOrDefault(rules => rules.Count > 0);
+        var rules = bucket switch
+        {
+            (true, true) => file.Kind.Priorities.PrioRulesAdultMale,
+            (true, false) => file.Kind.Priorities.PrioRulesYoungMale,
+            (false, true) => file.Kind.Priorities.PrioRulesAdultFemale,
+            _ => file.Kind.Priorities.PrioRulesYoungFemale
+        };
 
-        return rules == null ? null : new PriorityListPresetFile { Rules = rules };
+        return rules.Count == 0 ? null : new PriorityListPresetFile { Rules = rules };
     }
 
     private static SpecialListPresetFile? SectionsSliceOf(KindPresetFile file) =>

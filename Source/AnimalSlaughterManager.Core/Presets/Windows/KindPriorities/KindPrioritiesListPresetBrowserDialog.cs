@@ -51,7 +51,7 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
     {
         // A condition preset carries its rule list; a Kind/All preset — the slice of this
         // bucket (cross-bucket import included).
-        var dto = PresetRepository.ReadPriorityList(entry, kind);
+        var dto = PresetRepository.ReadPriorityList(entry, kind, (male, adult));
 
         if (dto == null)
         {

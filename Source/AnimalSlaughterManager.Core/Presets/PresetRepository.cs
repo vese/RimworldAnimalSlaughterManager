@@ -162,10 +162,10 @@ public static class PresetRepository
 #pragma warning restore CS0618
     }
 
-    /// <summary>A priority rule list of a PriorityList preset, or the rule-bucket slice of a
-    /// Kind/All preset (cross-scope import); the version-1 formats migrate into the model.
-    /// Null when nothing readable.</summary>
-    public static PriorityListPresetFile? ReadPriorityList(PresetEntry entry, ThingDef targetDef)
+    /// <summary>A priority rule list of a PriorityList preset, or the matching bucket's slice
+    /// of a Kind/All preset (cross-scope import); the version-1 formats migrate into the
+    /// model. Null when nothing readable.</summary>
+    public static PriorityListPresetFile? ReadPriorityList(PresetEntry entry, ThingDef targetDef, (bool Male, bool Adult) bucket)
     {
         var text = Store.ReadText(entry.path);
         var file = PresetSerializer.ReadPreset(text);
@@ -179,11 +179,11 @@ public static class PresetRepository
 
             var slice = KindSliceOf(file, targetDef);
 
-            return slice == null ? null : RuleBucketOf(slice);
+            return slice == null ? null : RuleBucketOf(slice, bucket);
         }
 
 #pragma warning disable CS0618
-        return LegacyPresets.TryReadPriorityList(entry, text, targetDef);
+        return LegacyPresets.TryReadPriorityList(entry, text, targetDef, bucket);
 #pragma warning restore CS0618
     }
 
@@ -220,13 +220,18 @@ public static class PresetRepository
             : PresetSerializer.ReadContent<AllKindsPresetFile>(file)?.Kinds
                 .FirstOrDefault(k => k.Kind.AnimalDefName == targetDef.defName);
 
-    // The first non-empty rule bucket of a kind slice (a priority-list import); null when none.
-    private static PriorityListPresetFile? RuleBucketOf(KindPresetFile file)
+    // The kind slice's rule bucket matching the import's bucket; null when it is empty.
+    private static PriorityListPresetFile? RuleBucketOf(KindPresetFile file, (bool Male, bool Adult) bucket)
     {
-        var rules = new[] { file.Kind.Priorities.PrioRulesAdultMale, file.Kind.Priorities.PrioRulesYoungMale, file.Kind.Priorities.PrioRulesAdultFemale, file.Kind.Priorities.PrioRulesYoungFemale }
-            .FirstOrDefault(rules => rules.Count > 0);
+        var rules = bucket switch
+        {
+            (true, true) => file.Kind.Priorities.PrioRulesAdultMale,
+            (true, false) => file.Kind.Priorities.PrioRulesYoungMale,
+            (false, true) => file.Kind.Priorities.PrioRulesAdultFemale,
+            _ => file.Kind.Priorities.PrioRulesYoungFemale
+        };
 
-        return rules == null ? null : new PriorityListPresetFile { Rules = rules };
+        return rules.Count == 0 ? null : new PriorityListPresetFile { Rules = rules };
     }
 
     // The raw integration sections of a kind slice (a special-list import); null when none.
