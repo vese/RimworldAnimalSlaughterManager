@@ -63,21 +63,35 @@ public static class PresetSerializer
 
     /// <summary>Writes a preset of the current format: the content model wrapped in the file
     /// form carrying the version and the metadata (the scope, the list bucket).</summary>
-    public static string SerializePreset(object content, PresetScope scope, string? bucket = null)
-    {
-        var file = new PresetFile
+    public static string SerializePreset(object content, PresetScope scope, string? bucket = null) =>
+        Serialize(new PresetFile
         {
             Version = PresetFormat.CurrentVersion,
             Scope = scope,
             Bucket = bucket,
             Type = content.GetType().Name,
             Content = SerializeContent(content)
-        };
+        });
 
+    /// <summary>The file form's text.</summary>
+    public static string Serialize(PresetFile file)
+    {
         var sb = new StringBuilder();
         using (var w = new StringWriter(sb))
         {
             SerializerOf(typeof(PresetFile)).Serialize(w, file);
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>The content model serialized to XML text.</summary>
+    public static string SerializeContent(object content)
+    {
+        var sb = new StringBuilder();
+        using (var w = new StringWriter(sb))
+        {
+            SerializerOf(content.GetType()).Serialize(w, content);
         }
 
         return sb.ToString();
@@ -104,14 +118,4 @@ public static class PresetSerializer
     public static T? ReadContent<T>(PresetFile file) where T : class =>
         file.Type == typeof(T).Name ? Deserialize<T>(file.Content) : null;
 
-    private static string SerializeContent(object content)
-    {
-        var sb = new StringBuilder();
-        using (var w = new StringWriter(sb))
-        {
-            SerializerOf(content.GetType()).Serialize(w, content);
-        }
-
-        return sb.ToString();
-    }
 }

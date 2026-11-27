@@ -23,7 +23,7 @@ public class SettingsPresetBrowserDialog : BasePresetBrowserDialog
         targetLabel = optionalTitle;
     }
 
-    protected override void Save(string name) => PresetRepository.Save(name, PresetScope.All, AllKindsPresetFile.Of(comp.ToPreset()));
+    protected override void Save(string name) => PresetRepository.Save(name, PresetScope.All, comp.ToPreset());
 
     protected override bool Apply(PresetEntry entry)
     {

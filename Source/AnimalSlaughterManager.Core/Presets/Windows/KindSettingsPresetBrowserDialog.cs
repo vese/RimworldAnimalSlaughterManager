@@ -27,7 +27,7 @@ public class KindSettingsPresetBrowserDialog : BasePresetBrowserDialog
     }
 
     protected override void Save(string name) =>
-        PresetRepository.Save(name, PresetScope.Kind, new KindPresetFile { Kind = settings.ToPreset(kind) });
+        PresetRepository.Save(name, PresetScope.Kind, settings.ToPreset(kind));
 
     protected override bool Apply(PresetEntry entry)
     {
@@ -38,7 +38,7 @@ public class KindSettingsPresetBrowserDialog : BasePresetBrowserDialog
             return false;
         }
 
-        settings.FromPreset(kd.Kind);
+        settings.FromPreset(kd);
 
         return true;
     }

@@ -44,7 +44,7 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
     protected override void Save(string name) => PresetRepository.Save(
         name,
         PresetScope.PriorityList,
-        PriorityListPresetFile.OfRules(prioritySettings.ToPreset((male, adult))),
+        prioritySettings.ToPreset((male, adult)),
         bucket);
 
     protected override bool Apply(PresetEntry entry)
@@ -58,7 +58,7 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
             return false;
         }
 
-        prioritySettings.FromPreset(dto.Rules, (male, adult));
+        prioritySettings.FromPreset(dto, (male, adult));
         return true;
     }
 
