@@ -52,10 +52,8 @@ public static class PresetSerializer
 
         try
         {
-            using (var r = new StringReader(text))
-            {
-                return (T)Serializer<T>().Deserialize(r);
-            }
+            using var r = new StringReader(text);
+            return (T)Serializer<T>().Deserialize(r);
         }
         catch
         {
