@@ -1,3 +1,4 @@
+using System;
 using System.Xml.Serialization;
 using System.Collections.Generic;
 using System.Xml;
@@ -9,6 +10,7 @@ namespace ASM;
 /// children are the attribute-form Rule elements of main) and raw integration sections.
 /// Read-only — KindPresetFile.FromV1 migrates it into the current model.
 /// </summary>
+[Obsolete]
 public class KindPresetDto
 {
     [XmlAttribute]

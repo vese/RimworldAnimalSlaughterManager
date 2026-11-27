@@ -80,6 +80,7 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
     }
 
     /// <summary>A current-format kind file from a version-1 unified slice; null for null.</summary>
+#pragma warning disable CS0618
     public static KindPresetFile? FromV1(KindPresetDto? v1)
     {
         if (v1 == null)
@@ -113,6 +114,7 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
 
         return file;
     }
+#pragma warning restore CS0618
 }
 
 public static class KindPresetFileSerialization

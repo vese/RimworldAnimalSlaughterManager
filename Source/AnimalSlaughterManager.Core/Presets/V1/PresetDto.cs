@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
@@ -8,6 +9,7 @@ namespace ASM;
 /// "SlaughterPreset" carrier. Read-only — the current version writes its own models; PresetSerializer
 /// migrates this into them.
 /// </summary>
+[Obsolete]
 [XmlRoot("SlaughterPreset")]
 public class PresetDto
 {

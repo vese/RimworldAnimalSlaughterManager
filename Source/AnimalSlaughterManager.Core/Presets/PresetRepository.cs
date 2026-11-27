@@ -163,63 +163,23 @@ public static class PresetRepository
         {
             case PresetSerializer.ListPresetRoot:
                 return PresetSerializer.DeserializePreset<ListPresetFile>(text);
-            case PresetSerializer.KindPresetRoot:
-                return FromSliceV1(text, PresetSerializer.KindPresetRoot);
-            case PresetSerializer.AllPresetRoot:
-                return FromSliceV1(text, PresetSerializer.AllPresetRoot);
-            case PresetSerializer.PresetRoot:
-                return FromSliceV1(text, PresetSerializer.PresetRoot);
-            case PresetSerializer.RulePresetRoot:
-                return FromRules(V1Rules(PresetSerializer.ReadRulePreset(text)));
-            default:
 #pragma warning disable CS0618
+            case PresetSerializer.KindPresetRoot:
+                return LegacyPresets.FromSliceV1(text, PresetSerializer.KindPresetRoot);
+            case PresetSerializer.AllPresetRoot:
+                return LegacyPresets.FromSliceV1(text, PresetSerializer.AllPresetRoot);
+            case PresetSerializer.PresetRoot:
+                return LegacyPresets.FromSliceV1(text, PresetSerializer.PresetRoot);
+            case PresetSerializer.RulePresetRoot:
+                return FromRules(LegacyPresets.V1Rules(PresetSerializer.ReadRulePreset(text)));
+            default:
                 return FromRules(LegacyPresets.TryReadConditions(entry));
 #pragma warning restore CS0618
         }
     }
 
-    // The list payload of a kind slice: the first non-empty rule bucket, or the raw
-    // integration sections (a special-settings list); both the current and the v1 kind forms.
-    private static ListPresetFile? FromSliceV1(string? text, string root)
-    {
-        if (root == PresetSerializer.KindPresetRoot)
-        {
-            var file = PresetSerializer.DeserializePreset<KindPresetFile>(text);
-
-            if (file == null)
-            {
-                return null;
-            }
-
-            var typed = new[] { file.Kind.Priorities.PrioRulesAdultMale, file.Kind.Priorities.PrioRulesYoungMale, file.Kind.Priorities.PrioRulesAdultFemale, file.Kind.Priorities.PrioRulesYoungFemale }
-                .FirstOrDefault(rules => rules.Count > 0);
-
-            return typed != null ? new ListPresetFile { Rules = typed }
-                : ListPresetFile.OfSections(KindPresetFileSections.SectionsOf(file));
-        }
-
-        var kd = PresetSerializer.ReadV1Kinds(text)?.FirstOrDefault();
-
-        if (kd == null)
-        {
-            return null;
-        }
-
-        var kdTyped = new[] { kd.Priorities.PrioRulesAdultMale, kd.Priorities.PrioRulesYoungMale, kd.Priorities.PrioRulesAdultFemale, kd.Priorities.PrioRulesYoungFemale }
-            .FirstOrDefault(rules => rules.Count > 0);
-
-        return kdTyped != null ? new ListPresetFile { Rules = kdTyped }
-            : kd.SpecialSettings.Count > 0 ? ListPresetFile.OfSections(KindPresetFileSections.SectionsOf(new KindPresetFile { Kind = kd })) : null;
-    }
-
-#pragma warning disable CS0618
-    // The pre-unification RulePresetDto format still yields attribute-form rules.
     private static ListPresetFile? FromRules(List<BasePriorityRule>? rules) =>
         rules == null ? null : new ListPresetFile { Rules = rules.Select(r => r.ToPreset()).ToList() };
-
-    private static List<BasePriorityRule>? V1Rules(List<PriorityRuleDto>? dtos) =>
-        dtos?.Select(r => r.ToRule()).Where(r => r != null).ToList();
-#pragma warning restore CS0618
 
     public static void Delete(PresetEntry entry)
     {

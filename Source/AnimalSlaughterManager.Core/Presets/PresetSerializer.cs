@@ -59,10 +59,10 @@ public static class PresetSerializer
     {
         var dto = Deserialize<RulePresetDto>(text);
         return dto?.rules?.ToList();
-#pragma warning restore CS0618
     }
 
     private static KindPreset? V1ToCurrent(KindPresetDto v1) => KindPresetFile.FromV1(v1)?.Kind;
+#pragma warning restore CS0618
 
     private static T? Deserialize<T>(string? text) where T : class
     {
@@ -144,6 +144,7 @@ public static class PresetSerializer
 
     /// <summary>The kind slices of a version-1 or older preset: the v1 carrier's own, or the
     /// old format's converted; null when the text is not a preset.</summary>
+#pragma warning disable CS0618
     public static List<KindPreset>? ReadV1Kinds(string? text)
     {
         var dto = Deserialize<PresetDto>(text);
@@ -154,10 +155,9 @@ public static class PresetSerializer
             return [.. dto.Kinds.Select(V1ToCurrent).Where(k => k != null)];
         }
 
-#pragma warning disable CS0618
         // An old format has no rule lists — its kinds come converted; a current prefs-only
         // v1 preset stays as parsed.
         return LegacyPresets.TryReadPreset(text) ?? (dto == null ? null : [.. dto.Kinds.Select(V1ToCurrent).Where(k => k != null)]);
-#pragma warning restore CS0618
     }
+#pragma warning restore CS0618
 }
