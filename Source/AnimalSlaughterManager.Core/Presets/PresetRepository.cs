@@ -103,7 +103,7 @@ public static class PresetRepository
     /// <summary>Writes a Settings preset model as a preset of the current format into its
     /// scope folder; a list preset goes into its bucket subfolder, and the bucket rides in the
     /// file's metadata too.</summary>
-    public static void Save<TModel>(string name, PresetScope scope, TModel model, string? bucket = null) where TModel : class
+    public static void Save<TModel>(string name, PresetScope scope, TModel model, string? bucket = null) where TModel : BasePreset
     {
         var file = PresetConverterFactory.GetConverter<TModel>(PresetFormat.CurrentVersion)?.ToFile(model, scope, bucket)
             ?? throw new InvalidOperationException($"No converter registered for {typeof(TModel).Name}.");
@@ -150,20 +150,22 @@ public static class PresetRepository
     /// <summary>A priority rule list of a PriorityList preset, or the matching bucket's slice
     /// of a Kind/All preset (cross-scope import); the version-1 formats migrate into the
     /// model. Null when nothing readable.</summary>
-    public static List<BasePriorityRulePreset>? ReadPriorityList(PresetEntry entry, ThingDef targetDef, (bool Male, bool Adult) bucket)
+    public static PriorityListPreset? ReadPriorityList(PresetEntry entry, ThingDef targetDef, (bool Male, bool Adult) bucket)
     {
         var file = GetFile(entry);
 
         if (file.Version == 1)
         {
 #pragma warning disable CS0612, CS0618
-            return LegacyPresets.TryReadPriorityList(entry, file.Content, targetDef, bucket);
+            return LegacyPresets.TryReadPriorityList(entry, file.Content, targetDef, bucket) is { } v1Rules
+                ? new PriorityListPreset { Rules = v1Rules }
+                : null;
 #pragma warning restore CS0612, CS0618
         }
 
         if (file.Scope is PresetScope.PriorityList)
         {
-            return PresetSerializer.ReadContent<V2PriorityListPreset>(file)?.ToRuleList();
+            return PresetSerializer.ReadContent<V2PriorityListPreset>(file)?.ToRuleList() is { } rules ? new PriorityListPreset { Rules = rules } : null;
         }
 
         if (file.Scope is PresetScope.All or PresetScope.Kind)
@@ -228,10 +230,10 @@ public static class PresetRepository
             : PresetSerializer.ReadContent<V2AllKindsPreset>(file)?.Kinds
                 .FirstOrDefault(k => k.AnimalDefName == targetDef.defName);
 
-    private static List<BasePriorityRulePreset>? GetRulesBucket(V2KindPreset slice, (bool Male, bool Adult) bucket)
+    private static PriorityListPreset? GetRulesBucket(V2KindPreset slice, (bool Male, bool Adult) bucket)
     {
         var rules = V2KindPresetConverter.GetRules(slice, bucket);
 
-        return rules.Count == 0 ? null : rules;
+        return rules.Count == 0 ? null : new PriorityListPreset { Rules = rules };
     }
 }

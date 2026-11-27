@@ -6,7 +6,7 @@ namespace ASM;
 /// integration settings as their own objects (each integration owns its section format).
 /// Built and read by KindSettings.ToPreset/FromPreset; the file form is Presets'
 /// business.</summary>
-public class KindPreset
+public class KindPreset : BasePreset
 {
     /// <summary>The kind's defName.</summary>
     public string AnimalDefName { get; set; } = null!;

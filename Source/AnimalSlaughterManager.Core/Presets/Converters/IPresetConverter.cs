@@ -5,7 +5,7 @@ namespace ASM;
 /// <summary>Converts a Settings preset model into the file form of a format version and back.
 /// The implementation is resolved by the Settings model's type and the file's version; the
 /// methods speak the base file form (the envelope).</summary>
-public interface IPresetConverter<TModel> where TModel : class
+public interface IPresetConverter<TModel> where TModel : BasePreset
 {
     /// <summary>The model wrapped in the file form (the envelope) of this version.</summary>
     PresetFile ToFile(TModel model, PresetScope scope, string? bucket = null);
