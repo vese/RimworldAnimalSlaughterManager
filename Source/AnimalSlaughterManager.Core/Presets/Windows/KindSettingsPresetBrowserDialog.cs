@@ -14,11 +14,9 @@ public class KindSettingsPresetBrowserDialog : BasePresetBrowserDialog
     private readonly ThingDef kind;
     private readonly KindSettings settings;
 
-    protected override (PresetScope Scope, IEnumerable<PresetEntry> Entries)[] ScopeSources =>
-    [
-        (PresetScope.Kind, PresetRepository.ListPresets(PresetScope.Kind)),
-        (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
-    ];
+    protected override IEnumerable<PresetScope> OfferedScopes => [PresetScope.Kind, PresetScope.All];
+
+    protected override IEnumerable<PresetEntry> GetEntries(PresetScope scope) => PresetRepository.ListPresets(scope);
 
     protected override bool HasData => settings.Customized;
 

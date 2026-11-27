@@ -16,12 +16,10 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
     private readonly bool male;
     private readonly bool adult;
 
-    protected override (PresetScope Scope, IEnumerable<PresetEntry> Entries)[] ScopeSources =>
-    [
-        (PresetScope.List, PresetRepository.ListConditionPresets()),
-        (PresetScope.Kind, PresetRepository.ListPresets(PresetScope.Kind)),
-        (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
-    ];
+    protected override IEnumerable<PresetScope> OfferedScopes => [PresetScope.List, PresetScope.Kind, PresetScope.All];
+
+    protected override IEnumerable<PresetEntry> GetEntries(PresetScope scope) =>
+        scope == PresetScope.List ? PresetRepository.ListConditionPresets() : PresetRepository.ListPresets(scope);
 
     protected override bool HasData => prioritySettings.Get(male, adult).Count > 0;
 

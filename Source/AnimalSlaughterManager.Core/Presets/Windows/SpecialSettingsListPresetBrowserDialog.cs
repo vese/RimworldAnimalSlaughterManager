@@ -19,12 +19,9 @@ public class SpecialSettingsListPresetBrowserDialog : BasePresetBrowserDialog
     private readonly Func<PresetEntry, bool> applyList;
     private readonly Func<bool>? hasListData;
 
-    protected override (PresetScope Scope, IEnumerable<PresetEntry> Entries)[] ScopeSources =>
-    [
-        (PresetScope.List, PresetRepository.ListPresets(PresetScope.List)),
-        (PresetScope.Kind, PresetRepository.ListPresets(PresetScope.Kind)),
-        (PresetScope.All, PresetRepository.ListPresets(PresetScope.All))
-    ];
+    protected override IEnumerable<PresetScope> OfferedScopes => [PresetScope.List, PresetScope.Kind, PresetScope.All];
+
+    protected override IEnumerable<PresetEntry> GetEntries(PresetScope scope) => PresetRepository.ListPresets(scope);
 
     protected override bool HasData => hasListData?.Invoke() ?? false;
 
