@@ -198,24 +198,13 @@ public static class PresetRepository
         }
 
 #pragma warning disable CS0618
-        switch (PresetSerializer.RootElementOf(text))
-        {
-            case LegacyPresets.RuleRoot:
-                return FromRules(LegacyPresets.V1Rules(LegacyPresets.ReadRulePreset(text)));
-            case LegacyPresets.PresetRoot:
-                // The v1 unified carrier: the first kind's slice.
-                var kind = LegacyPresets.ReadV1Kinds(text)?.FirstOrDefault();
-
-                return kind == null ? null : ListSliceOf(new KindPresetFile { Kind = kind });
-            default:
-                return FromRules(LegacyPresets.TryReadConditions(entry));
-        }
+        return LegacyPresets.TryReadList(entry, text);
 #pragma warning restore CS0618
     }
 
     // The list payload of a kind slice: the first non-empty rule bucket, or the raw
     // integration sections (a special-settings list); null when neither.
-    private static ListPresetFile? ListSliceOf(KindPresetFile file)
+    internal static ListPresetFile? ListSliceOf(KindPresetFile file)
     {
         var typed = new[] { file.Kind.Priorities.PrioRulesAdultMale, file.Kind.Priorities.PrioRulesYoungMale, file.Kind.Priorities.PrioRulesAdultFemale, file.Kind.Priorities.PrioRulesYoungFemale }
             .FirstOrDefault(rules => rules.Count > 0);
@@ -223,9 +212,6 @@ public static class PresetRepository
         return typed != null ? new ListPresetFile { Rules = typed }
             : file.Kind.SpecialSettings.Count > 0 ? ListPresetFile.OfSections(KindPresetFileSections.SectionsOf(file)) : null;
     }
-
-    private static ListPresetFile? FromRules(List<BasePriorityRule>? rules) =>
-        rules == null ? null : new ListPresetFile { Rules = rules.Select(r => r.ToPreset()).ToList() };
 
     public static void Delete(PresetEntry entry)
     {
