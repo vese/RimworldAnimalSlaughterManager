@@ -8,17 +8,21 @@ namespace ASM;
 /// version-1 layout.</summary>
 public static class PriorityPresetBuckets
 {
-    /// <summary>The age×sex buckets by their folder names.</summary>
-    public static readonly Dictionary<string, (bool Male, bool Adult)> Buckets = new()
+    private static readonly Dictionary<(bool Male, bool Adult), string> folders = new()
     {
-        ["AdultMale"] = (true, true),
-        ["YoungMale"] = (true, false),
-        ["AdultFemale"] = (false, true),
-        ["YoungFemale"] = (false, false),
+        [(true, true)] = "AdultMale",
+        [(true, false)] = "YoungMale",
+        [(false, true)] = "AdultFemale",
+        [(false, false)] = "YoungFemale",
     };
 
-    private static readonly Dictionary<(bool Male, bool Adult), string> folders = Buckets.ToDictionary(kv => kv.Value, kv => kv.Key);
+    private static readonly Dictionary<string, (bool Male, bool Adult)> buckets = folders.ToDictionary(kv => kv.Value, kv => kv.Key);
 
     /// <summary>The age×sex bucket's folder name.</summary>
     public static string GetBucket((bool Male, bool Adult) bucket) => folders[bucket];
+
+    /// <summary>The age×sex keys of a folder name; null when the folder is not a condition
+    /// bucket.</summary>
+    public static (bool Male, bool Adult)? GetKeys(string? folder) =>
+        folder != null && buckets.TryGetValue(folder, out var keys) ? keys : null;
 }

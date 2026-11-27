@@ -74,7 +74,7 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
             return ASMKeys.PresetKindMark.Translate();
         }
 
-        if (entry.scope == PresetScope.PriorityList && entry.bucket != bucket && PriorityPresetBuckets.Buckets.TryGetValue(entry.bucket ?? "", out var b))
+        if (entry.scope == PresetScope.PriorityList && entry.bucket != bucket && PriorityPresetBuckets.GetKeys(entry.bucket) is { } b)
         {
             return GetBucketLabel(b.Male, b.Adult);
         }
