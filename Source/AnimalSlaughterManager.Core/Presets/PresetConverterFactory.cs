@@ -7,9 +7,8 @@ namespace ASM;
 /// interface.</summary>
 internal static class PresetConverterFactory
 {
-    public static IPresetConverter<TModel>? GetConverter<TModel>(int version)
-        where TModel : BasePreset =>
-        version == 1
-            ? ServiceRegistry.GetServices<IV1PresetConverter<TModel>>().FirstOrDefault()
-            : ServiceRegistry.GetServices<IV2PresetConverter<TModel>>().FirstOrDefault();
+    public static IPresetConverter<TModel>? GetConverter<TModel>(int version) where TModel : BasePreset =>
+        version == 1 ?
+            ServiceRegistry.GetServices<IV1PresetConverter<TModel>>().FirstOrDefault() :
+            ServiceRegistry.GetServices<IV2PresetConverter<TModel>>().FirstOrDefault();
 }
