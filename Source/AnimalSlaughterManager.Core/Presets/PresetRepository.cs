@@ -137,15 +137,6 @@ public static class PresetRepository
     {
         var file = GetFile(entry);
 
-        if (file.Version == 1)
-        {
-#pragma warning disable CS0612, CS0618
-            return LegacyPresets.TryReadPriorityList(entry, file.Content, targetDef, bucket) is { } v1Rules
-                ? new PriorityListPreset { Rules = v1Rules }
-                : null;
-#pragma warning restore CS0612, CS0618
-        }
-
         if (file.Scope is PresetScope.PriorityList)
         {
             return PresetConverterFactory.GetConverter<PriorityListPreset>(file.Version)?.ToModel(file);
@@ -175,13 +166,6 @@ public static class PresetRepository
     public static SpecialListPreset? ReadSpecialList(PresetEntry entry, ThingDef targetDef)
     {
         var file = GetFile(entry);
-
-        if (file.Version == 1)
-        {
-#pragma warning disable CS0612, CS0618
-            return LegacyPresets.TryReadSpecialList(file.Content, targetDef);
-#pragma warning restore CS0612, CS0618
-        }
 
         if (file.Scope == PresetScope.SpecialList)
         {

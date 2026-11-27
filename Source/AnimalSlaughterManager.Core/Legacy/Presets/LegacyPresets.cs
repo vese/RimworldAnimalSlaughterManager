@@ -38,9 +38,9 @@ public static class LegacyPresets
 
     /// <summary>Condition rules of a legacy condition-preset file; null when the file is not
     /// one (the current-format reader falls back here).</summary>
-    public static List<BasePriorityRule>? TryReadConditions(PresetEntry entry)
+    public static List<BasePriorityRule>? TryReadConditions(string? text)
     {
-        var conditions = ReadConditionPreset(Store.ReadText(entry.path));
+        var conditions = ReadConditionPreset(text);
 
         if (conditions == null)
         {
@@ -147,56 +147,20 @@ public static class LegacyPresets
         return kinds[0];
     }
 
-    /// <summary>A priority rule list of a legacy file: the RulePresetDto format, the v1 unified
-    /// carrier's matching-bucket slice of the target kind, or the condition-preset format;
-    /// null when nothing readable.</summary>
-    public static List<BasePriorityRulePreset>? TryReadPriorityList(PresetEntry entry, string? text, ThingDef targetDef, (bool Male, bool Adult) bucket)
-    {
-        switch (RootElementOf(text))
-        {
-            case RuleRoot:
-                return FromRules(V1Rules(ReadRulePreset(text)));
-            case PresetRoot:
-                var kind = ReadV1Kinds(text)?.FirstOrDefault(k => k.AnimalDefName == targetDef.defName);
-
-                return kind == null ? null : RuleBucketOf(kind, bucket);
-            default:
-                return FromRules(TryReadConditions(entry));
-        }
-    }
-
     /// <summary>A special-settings list of a legacy file: the v1 unified carrier's sections
     /// slice of the target kind; null when nothing readable.</summary>
-    public static SpecialListPreset? TryReadSpecialList(string? text, ThingDef targetDef)
+    public static SpecialListPreset? TryReadSpecialList(string? text)
     {
-        var kind = ReadV1Kinds(text)?.FirstOrDefault(k => k.AnimalDefName == targetDef.defName);
+        var kind = ReadV1Kinds(text)?.FirstOrDefault();
 
         return kind == null ? null : GetSectionsSlice(kind);
-    }
-
-    private static List<BasePriorityRulePreset>? FromRules(List<BasePriorityRule>? rules) =>
-        rules == null ? null : [.. rules.Select(r => r.ToPreset())];
-
-    // Copies of the repository's kind-slice readers — Legacy stays self-contained and goes
-    // away together with this folder.
-    private static List<BasePriorityRulePreset>? RuleBucketOf(KindPreset file, (bool Male, bool Adult) bucket)
-    {
-        var rules = bucket switch
-        {
-            (true, true) => file.Priorities.PriorityRulesAdultMale,
-            (true, false) => file.Priorities.PriorityRulesYoungMale,
-            (false, true) => file.Priorities.PriorityRulesAdultFemale,
-            _ => file.Priorities.PriorityRulesYoungFemale
-        };
-
-        return rules.Count == 0 ? null : rules;
     }
 
     private static SpecialListPreset? GetSectionsSlice(KindPreset file) =>
         file.SpecialSettings.Count > 0 ? new SpecialListPreset { Sections = KindPresetFileSections.GetSections(file) } : null;
 
     /// <summary>Root element name of the file — identifies which of the historical formats it is.</summary>
-    private static string? RootElementOf(string? text)
+    public static string? RootElementOf(string? text)
     {
         if (text == null)
         {

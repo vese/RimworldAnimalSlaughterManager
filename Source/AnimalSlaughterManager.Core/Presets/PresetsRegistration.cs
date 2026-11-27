@@ -21,5 +21,7 @@ public static class PresetsRegistration
 
         ServiceRegistry.Add<IV1PresetConverter<AllKindsPreset>>(new V1AllKindsPresetConverter());
         ServiceRegistry.Add<IV1PresetConverter<KindPreset>>(new V1KindPresetConverter());
+        ServiceRegistry.Add<IV1PresetConverter<PriorityListPreset>>(new V1PriorityListPresetConverter());
+        ServiceRegistry.Add<IV1PresetConverter<SpecialListPreset>>(new V1SpecialListPresetConverter());
     }
 }
