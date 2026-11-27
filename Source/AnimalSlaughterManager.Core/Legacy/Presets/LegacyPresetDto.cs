@@ -39,10 +39,10 @@ public class LegacyPresetDto
                 },
                 Priorities = new PrioritySettingsPreset
                 {
-                    PrioRulesAdultMale = ToPresets(k.PrioAdultMale),
-                    PrioRulesYoungMale = ToPresets(k.PrioYoungMale),
-                    PrioRulesAdultFemale = ToPresets(k.PrioAdultFemale),
-                    PrioRulesYoungFemale = ToPresets(k.PrioYoungFemale)
+                    PriorityRulesAdultMale = ToPresets(k.PrioAdultMale),
+                    PriorityRulesYoungMale = ToPresets(k.PrioYoungMale),
+                    PriorityRulesAdultFemale = ToPresets(k.PrioAdultFemale),
+                    PriorityRulesYoungFemale = ToPresets(k.PrioYoungFemale)
                 }
             };
             kd.SpecialSettings = KindPresetFileSerialization.ReadIntegrations([.. k.IntegrationSections]);
