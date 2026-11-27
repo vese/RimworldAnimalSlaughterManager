@@ -31,14 +31,6 @@ public static class PriorityRuleFactory
         return result;
     }
 
-    /// <summary>The rule's name for its DTO type (the v1 payload discriminator).</summary>
-    internal static string RuleNameOf(Type dtoType)
-    {
-        EnsureMap();
-
-        return ruleNames.TryGetValue(dtoType, out var name) ? name : "";
-    }
-
     private static BasePriorityRule? RuleOf(Type dtoType)
     {
         EnsureMap();
