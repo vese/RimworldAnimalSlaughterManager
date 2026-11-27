@@ -28,13 +28,13 @@ internal static class V2Conversion
         var sb = new System.Text.StringBuilder();
         using (var w = new StringWriter(sb))
         {
-            PresetContentSerializers.SerializerOf(value.GetType()).Serialize(w, value);
+            PresetSerializer.SerializerOf(value.GetType()).Serialize(w, value);
         }
 
         try
         {
             using var r = new StringReader(sb.ToString());
-            return PresetContentSerializers.SerializerOf(target).Deserialize(r);
+            return PresetSerializer.SerializerOf(target).Deserialize(r);
         }
         catch
         {
