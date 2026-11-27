@@ -8,7 +8,7 @@ namespace ASM;
 public class V2KeepTraitsSection : V2SpecialListSection
 {
     [XmlElement("Trait")]
-    public List<TraitDto> Trait = [];
+    public List<V2TraitDto> Trait = [];
 }
 
 /// <summary>The version-2 file model of the force-cull-list section of a special-list
@@ -17,5 +17,5 @@ public class V2KeepTraitsSection : V2SpecialListSection
 public class V2ForceCullTraitsSection : V2SpecialListSection
 {
     [XmlElement("Trait")]
-    public List<TraitDto> Trait = [];
+    public List<V2TraitDto> Trait = [];
 }

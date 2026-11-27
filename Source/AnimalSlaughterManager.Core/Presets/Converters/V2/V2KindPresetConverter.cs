@@ -30,11 +30,11 @@ public class V2KindPresetConverter : IV2PresetConverter<KindPreset>
             MaleYoungPref = model.Preferences.MaleYoungPref,
             FemaleYoungPref = model.Preferences.FemaleYoungPref
         },
-        PriorityRulesAdultMale = model.Priorities.PriorityRulesAdultMale,
-        PriorityRulesYoungMale = model.Priorities.PriorityRulesYoungMale,
-        PriorityRulesAdultFemale = model.Priorities.PriorityRulesAdultFemale,
-        PriorityRulesYoungFemale = model.Priorities.PriorityRulesYoungFemale,
-        SpecialSettings = [.. model.SpecialSettings.Select(kv => new V2SpecialSettingsEntry { Key = kv.Key, Settings = kv.Value })]
+        PriorityRulesAdultMale = ToV2Rules(model.Priorities.PriorityRulesAdultMale),
+        PriorityRulesYoungMale = ToV2Rules(model.Priorities.PriorityRulesYoungMale),
+        PriorityRulesAdultFemale = ToV2Rules(model.Priorities.PriorityRulesAdultFemale),
+        PriorityRulesYoungFemale = ToV2Rules(model.Priorities.PriorityRulesYoungFemale),
+        SpecialSettings = [.. model.SpecialSettings.Select(ToV2Special).Where(v2 => v2 != null)]
     };
 
     internal static KindPreset ToModel(V2KindPreset content)
@@ -51,18 +51,30 @@ public class V2KindPresetConverter : IV2PresetConverter<KindPreset>
             },
             Priorities = new PrioritySettingsPreset
             {
-                PriorityRulesAdultMale = content.PriorityRulesAdultMale,
-                PriorityRulesYoungMale = content.PriorityRulesYoungMale,
-                PriorityRulesAdultFemale = content.PriorityRulesAdultFemale,
-                PriorityRulesYoungFemale = content.PriorityRulesYoungFemale
+                PriorityRulesAdultMale = ToSettingsRules(content.PriorityRulesAdultMale),
+                PriorityRulesYoungMale = ToSettingsRules(content.PriorityRulesYoungMale),
+                PriorityRulesAdultFemale = ToSettingsRules(content.PriorityRulesAdultFemale),
+                PriorityRulesYoungFemale = ToSettingsRules(content.PriorityRulesYoungFemale)
             }
         };
 
-        foreach (var entry in content.SpecialSettings)
+        foreach (var v2 in content.SpecialSettings)
         {
-            model.SpecialSettings[entry.Key] = entry.Settings;
+            if (PresetContentSerializers.ToSettings(v2) is BaseSpecialSettingsPreset settings)
+            {
+                model.SpecialSettings[v2.Key] = settings;
+            }
         }
 
         return model;
     }
+
+    private static List<V2RulePreset> ToV2Rules(List<BasePriorityRulePreset> rules) =>
+        [.. rules.Select(r => PresetContentSerializers.ToV2(r)).OfType<V2RulePreset>()];
+
+    private static List<BasePriorityRulePreset> ToSettingsRules(List<V2RulePreset> rules) =>
+        [.. rules.Select(r => PresetContentSerializers.ToSettings(r)).OfType<BasePriorityRulePreset>()];
+
+    private static V2SpecialSettingsPreset? ToV2Special(KeyValuePair<string, BaseSpecialSettingsPreset> kv) =>
+        PresetContentSerializers.ToV2(kv.Value) is V2SpecialSettingsPreset v2 ? v2.WithKey(kv.Key) : null;
 }

@@ -23,7 +23,7 @@ public static class PresetContentSerializers
 
     private static Type[] Subtypes => subtypes ??= AppDomain.CurrentDomain.GetAssemblies()
         .SelectMany(SafeTypes)
-        .Where(t => !t.IsAbstract && (t.IsSubclassOf(typeof(BasePriorityRulePreset)) || t.IsSubclassOf(typeof(BaseSpecialSettingsPreset))))
+        .Where(t => !t.IsAbstract && (t.IsSubclassOf(typeof(V2RulePreset)) || t.IsSubclassOf(typeof(V2SpecialSettingsPreset))))
         .ToArray();
 
     public static XmlSerializer SerializerOf(Type type)
@@ -95,6 +95,75 @@ public static class PresetContentSerializers
         }
 
         return doc.DocumentElement!;
+    }
+
+    /// <summary>The Settings DTO's V2 file model (the "V2" name convention), converted through
+    /// their shared serialized shape — no field copying.</summary>
+    public static object? ToV2(object dto)
+    {
+        var target = TypeByName("V2" + dto.GetType().Name);
+
+        if (target == null)
+        {
+            return null;
+        }
+
+        var sb = new System.Text.StringBuilder();
+        using (var w = new StringWriter(sb))
+        {
+            SerializerOf(dto.GetType()).Serialize(w, dto);
+        }
+
+        try
+        {
+            using var r = new StringReader(sb.ToString());
+            return SerializerOf(target).Deserialize(r);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>The V2 file model's Settings DTO, converted the same way.</summary>
+    public static object? ToSettings(object v2)
+    {
+        var target = TypeByName(v2.GetType().Name["V2".Length..]);
+
+        if (target == null)
+        {
+            return null;
+        }
+
+        var sb = new System.Text.StringBuilder();
+        using (var w = new StringWriter(sb))
+        {
+            SerializerOf(v2.GetType()).Serialize(w, v2);
+        }
+
+        try
+        {
+            using var r = new StringReader(sb.ToString());
+            return SerializerOf(target).Deserialize(r);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static readonly Dictionary<string, Type?> typesByName = [];
+
+    private static Type? TypeByName(string name)
+    {
+        if (!typesByName.TryGetValue(name, out var type))
+        {
+            typesByName[name] = type = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(SafeTypes)
+                .FirstOrDefault(t => t.Name == name);
+        }
+
+        return type;
     }
 
     private static IEnumerable<Type> SafeTypes(Assembly assembly)
