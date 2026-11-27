@@ -37,7 +37,7 @@ public static class PresetSerializer
 
         using (var w = new StringWriter(sb))
         {
-            SerializerOf(typeof(PresetFile)).Serialize(w, file);
+            GetSerializer(typeof(PresetFile)).Serialize(w, file);
         }
 
         return sb.ToString();
@@ -50,7 +50,7 @@ public static class PresetSerializer
 
         using (var w = new StringWriter(sb))
         {
-            SerializerOf(content.GetType()).Serialize(w, content);
+            GetSerializer(content.GetType()).Serialize(w, content);
         }
 
         return sb.ToString();
@@ -78,7 +78,7 @@ public static class PresetSerializer
         file.Type == typeof(T).Name ? Deserialize<T>(file.Content) : null;
 
     /// <summary>The cached serializer of a model type, aware of every registered subtype.</summary>
-    internal static XmlSerializer SerializerOf(Type type)
+    internal static XmlSerializer GetSerializer(Type type)
     {
         if (!serializers.TryGetValue(type, out var ser))
         {
@@ -100,7 +100,7 @@ public static class PresetSerializer
         try
         {
             using var r = new StringReader(text);
-            return (T)SerializerOf(typeof(T)).Deserialize(r);
+            return (T)GetSerializer(typeof(T)).Deserialize(r);
         }
         catch
         {

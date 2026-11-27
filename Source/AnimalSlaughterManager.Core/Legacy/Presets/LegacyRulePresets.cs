@@ -19,7 +19,7 @@ public static class LegacyRulePresets
 {
     private static readonly Dictionary<Type, XmlSerializer> serializers = [];
 
-    private static XmlSerializer SerializerOf(Type type)
+    private static XmlSerializer GetSerializer(Type type)
     {
         if (!serializers.TryGetValue(type, out var ser))
         {
@@ -93,7 +93,7 @@ public static class LegacyRulePresets
         try
         {
             using var reader = new StringReader(payload[0].OuterXml);
-            return SerializerOf(dtoType).Deserialize(reader);
+            return GetSerializer(dtoType).Deserialize(reader);
         }
         catch
         {
