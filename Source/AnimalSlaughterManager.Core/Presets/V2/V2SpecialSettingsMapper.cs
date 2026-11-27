@@ -78,5 +78,12 @@ public static class V2SpecialSettingsMapper
         return doc.DocumentElement!;
     }
 
+    /// <summary>The settings' per-list section elements — the children of the model's own
+    /// serialized form (the save format of a special list).</summary>
+    public static List<System.Xml.XmlElement> ToSections(string key, BaseSpecialSettingsPreset settings) =>
+        ToV2(key, settings) is { } v2
+            ? [.. PresetContentSerializers.ToElements(v2)[0].ChildNodes.Cast<System.Xml.XmlElement>()]
+            : [];
+
     private sealed class None : V2SpecialListSection;
 }

@@ -132,19 +132,8 @@ public static class PresetRepository
 
     /// <summary>The preset's kind slice: Kind-scope presets carry the single kind, All-scope
     /// presets the slice matching the target def. The caller applies it to the settings itself.</summary>
-    public static KindPreset? ReadKindSettings(PresetEntry entry, ThingDef targetDef)
-    {
-        var file = GetFile(entry);
-
-        if (file.Version != 1 && file.Scope is PresetScope.All)
-        {
-            var all = PresetConverterFactory.GetConverter<AllKindsPreset>(file.Version)?.ToModel(file, entry);
-
-            return all?.Kinds.FirstOrDefault(k => k.AnimalDefName == targetDef.defName);
-        }
-
-        return PresetConverterFactory.GetConverter<KindPreset>(file.Version)?.ToModel(file, entry, targetDef);
-    }
+    public static KindPreset? ReadKindSettings(PresetEntry entry, ThingDef targetDef) =>
+        KindSettingsOf(GetFile(entry), entry, targetDef);
 
     /// <summary>A priority rule list of a PriorityList preset, or the matching bucket's slice
     /// of a Kind/All preset (cross-scope import); the version-1 formats migrate into the
@@ -164,14 +153,22 @@ public static class PresetRepository
 
         if (file.Scope is PresetScope.PriorityList)
         {
-            return PresetSerializer.ReadContent<V2PriorityListPreset>(file)?.ToRuleList() is { } rules ? new PriorityListPreset { Rules = rules } : null;
+            return PresetConverterFactory.GetConverter<PriorityListPreset>(file.Version)?.ToModel(file, entry);
         }
 
         if (file.Scope is PresetScope.All or PresetScope.Kind)
         {
-            var slice = GetKindSlice(file, targetDef);
+            var rules = KindSettingsOf(file, entry, targetDef) is { } kind
+                ? bucket switch
+                {
+                    (true, true) => kind.Priorities.PriorityRulesAdultMale,
+                    (true, false) => kind.Priorities.PriorityRulesYoungMale,
+                    (false, true) => kind.Priorities.PriorityRulesAdultFemale,
+                    _ => kind.Priorities.PriorityRulesYoungFemale
+                }
+                : null;
 
-            return slice == null ? null : GetRulesBucket(slice, bucket);
+            return rules is { Count: > 0 } ? new PriorityListPreset { Rules = rules } : null;
         }
 
         return null;
@@ -193,17 +190,15 @@ public static class PresetRepository
 
         if (file.Scope == PresetScope.SpecialList)
         {
-            return PresetSerializer.ReadContent<V2SpecialListPreset>(file) is { } content
-                ? new SpecialListPreset { Sections = [.. content.Sections.Select(V2SpecialSettingsMapper.ToElement)] }
-                : null;
+            return PresetConverterFactory.GetConverter<SpecialListPreset>(file.Version)?.ToModel(file, entry);
         }
 
         if (file.Scope is PresetScope.All or PresetScope.Kind)
         {
-            var slice = GetKindSlice(file, targetDef);
+            var specials = KindSettingsOf(file, entry, targetDef)?.SpecialSettings;
 
-            return slice?.SpecialSettings is { Count: > 0 } specials
-                ? new SpecialListPreset { Sections = [.. specials.SelectMany(PresetContentSerializers.ToElements)] }
+            return specials is { Count: > 0 }
+                ? new SpecialListPreset { Sections = [.. specials.SelectMany(kv => V2SpecialSettingsMapper.ToSections(kv.Key, kv.Value)) ] }
                 : null;
         }
 
@@ -221,18 +216,18 @@ public static class PresetRepository
         return PresetSerializer.ReadPreset(text) ?? new PresetFile { Version = 1, Content = text };
     }
 
-    // The kind slice a list import takes: a Kind preset's own kind (its defName is the SOURCE
-    // kind — the import applies to the TARGET kind), an All preset's slice of the target kind.
-    private static V2KindPreset? GetKindSlice(PresetFile file, ThingDef targetDef) =>
-        file.Scope == PresetScope.Kind
-            ? PresetSerializer.ReadContent<V2KindPreset>(file)
-            : PresetSerializer.ReadContent<V2AllKindsPreset>(file)?.Kinds
-                .FirstOrDefault(k => k.AnimalDefName == targetDef.defName);
-
-    private static PriorityListPreset? GetRulesBucket(V2KindPreset slice, (bool Male, bool Adult) bucket)
+    /// <summary>The kind settings of a file for the target def — through the converters, the
+    /// version's own model hidden: an All preset's slice of the target kind, a Kind preset's
+    /// own kind (its defName is the SOURCE kind — the import applies to the TARGET kind).</summary>
+    private static KindPreset? KindSettingsOf(PresetFile file, PresetEntry entry, ThingDef targetDef)
     {
-        var rules = V2KindPresetConverter.GetRules(slice, bucket);
+        if (file.Version != 1 && file.Scope is PresetScope.All)
+        {
+            return PresetConverterFactory.GetConverter<AllKindsPreset>(file.Version)?.ToModel(file, entry)
+                ?.Kinds.FirstOrDefault(k => k.AnimalDefName == targetDef.defName);
+        }
 
-        return rules.Count == 0 ? null : new PriorityListPreset { Rules = rules };
+        return PresetConverterFactory.GetConverter<KindPreset>(file.Version)?.ToModel(file, entry, targetDef);
     }
+
 }
