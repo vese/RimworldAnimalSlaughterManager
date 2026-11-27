@@ -138,10 +138,9 @@ public static class PresetRepository
 
         if (file.Version != 1 && file.Scope is PresetScope.All)
         {
-            var match = PresetSerializer.ReadContent<V2AllKindsPreset>(file)?.Kinds
-                .FirstOrDefault(k => k.AnimalDefName == targetDef.defName);
+            var all = PresetConverterFactory.GetConverter<AllKindsPreset>(file.Version)?.ToModel(file, entry);
 
-            return match == null ? null : V2KindPresetConverter.ToModel(match);
+            return all?.Kinds.FirstOrDefault(k => k.AnimalDefName == targetDef.defName);
         }
 
         return PresetConverterFactory.GetConverter<KindPreset>(file.Version)?.ToModel(file, entry, targetDef);
