@@ -278,7 +278,6 @@ public class KindTraitsSettings : ISpecialSettings
                 if (t != null)
                 {
                     protectRuleSet.rules.Add(t);
-                    protectRuleSet.rules.Add(t);
                 }
             }
         }
