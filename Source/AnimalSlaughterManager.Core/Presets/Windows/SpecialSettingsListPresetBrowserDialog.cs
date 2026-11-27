@@ -21,8 +21,6 @@ public class SpecialSettingsListPresetBrowserDialog : BasePresetBrowserDialog
 
     protected override IEnumerable<PresetScope> OfferedScopes => [PresetScope.SpecialList, PresetScope.Kind, PresetScope.All];
 
-    protected override IEnumerable<PresetEntry> GetEntries(PresetScope scope) => PresetRepository.ListPresets(scope);
-
     protected override bool HasData => hasListData?.Invoke() ?? false;
 
     public SpecialSettingsListPresetBrowserDialog(ThingDef kind, string titleKey,

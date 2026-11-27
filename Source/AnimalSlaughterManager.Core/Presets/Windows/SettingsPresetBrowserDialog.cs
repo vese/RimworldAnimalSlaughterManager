@@ -14,8 +14,6 @@ public class SettingsPresetBrowserDialog : BasePresetBrowserDialog
 
     protected override IEnumerable<PresetScope> OfferedScopes => [PresetScope.All];
 
-    protected override IEnumerable<PresetEntry> GetEntries(PresetScope scope) => PresetRepository.ListPresets(scope);
-
     protected override bool HasData => comp.AllKindSettings.Any(k => k.Value.Customized);
 
     public SettingsPresetBrowserDialog(ASM_MapComp comp)

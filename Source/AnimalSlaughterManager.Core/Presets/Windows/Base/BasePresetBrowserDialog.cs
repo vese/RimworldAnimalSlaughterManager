@@ -41,9 +41,6 @@ public abstract class BasePresetBrowserDialog : Window
     /// imports from). One scope — no toggle strip.</summary>
     protected abstract IEnumerable<PresetScope> OfferedScopes { get; }
 
-    /// <summary>The entries of one offered scope; called only for the scopes the frame shows.</summary>
-    protected abstract IEnumerable<PresetEntry> GetEntries(PresetScope scope);
-
     /// <summary>True when the target actually has data worth saving (enables the save row).</summary>
     protected abstract bool HasData { get; }
 
@@ -113,7 +110,7 @@ public abstract class BasePresetBrowserDialog : Window
             // A single offered scope has no toggle and always contributes.
             if (scopes.Count == 1 || !scopesState.TryGetValue(scope, out var shown) || shown)
             {
-                entries.AddRange(GetEntries(scope));
+                entries.AddRange(PresetRepository.ListPresets(scope));
             }
         }
 
