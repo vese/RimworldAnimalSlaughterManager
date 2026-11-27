@@ -8,9 +8,6 @@ namespace ASM;
 
 public abstract class BasePriorityRule : IExposable
 {
-    // The preset model's factory, resolved once per DTO type.
-    private static readonly Dictionary<Type, IPriorityRuleFactory<BasePriorityRulePreset>?> factories = [];
-
     /// <summary>Rules from their preset models: each preset's registered factory creates its
     /// rule, the preset fills it. Presets without a registered factory are dropped.</summary>
     public static List<BasePriorityRule> FromPresets(IEnumerable<BasePriorityRulePreset> presets)
@@ -19,28 +16,21 @@ public abstract class BasePriorityRule : IExposable
 
         foreach (var preset in presets)
         {
-            if (FactoryOf(preset.GetType()) is { } factory)
+            var factory = ServiceRegistry.GetServices(typeof(IPriorityRuleFactory<>).MakeGenericType(preset.GetType()))
+                .OfType<IPriorityRuleFactory<BasePriorityRulePreset>>()
+                .FirstOrDefault();
+
+            if (factory == null)
             {
-                var rule = factory.Create();
-                rule.FromPreset(preset);
-                rules.Add(rule);
+                continue;
             }
+
+            var rule = factory.Create();
+            rule.FromPreset(preset);
+            rules.Add(rule);
         }
 
         return rules;
-    }
-
-    private static IPriorityRuleFactory<BasePriorityRulePreset>? FactoryOf(Type presetType)
-    {
-        if (!factories.TryGetValue(presetType, out var factory))
-        {
-            var contract = typeof(IPriorityRuleFactory<>).MakeGenericType(presetType);
-            factories[presetType] = factory = ServiceRegistry.GetServices(contract)
-                .OfType<IPriorityRuleFactory<BasePriorityRulePreset>>()
-                .FirstOrDefault();
-        }
-
-        return factory;
     }
 
     /// <summary>
