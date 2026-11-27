@@ -45,7 +45,7 @@ public abstract class BasePresetBrowserDialog : Window
     /// <summary>True when the target actually has data worth saving (enables the save row).</summary>
     protected abstract bool HasData { get; }
 
-    private EntryRowController RowPolicy =>
+    private EntryRowController RowController =>
         field ??= new(GetRowMark, GetRowTip, CanOverwrite, CanDelete, GetConfirmDeleteText, Apply, OverwriteEntry, targetLabel);
 
     protected BasePresetBrowserDialog()
@@ -89,7 +89,7 @@ public abstract class BasePresetBrowserDialog : Window
         // The preset list fills everything between the search row and the save row.
         var listTop = top + UIConstants.GapX;
         var listBottom = inRect.yMax - RowHeight - UIConstants.GapX;
-        PresetList.Draw(inRect.x, listTop, inRect.width, listBottom - listTop, Gather(ScopeSources), filterBuffer, RowPolicy, ref scroll, ref listHeight);
+        PresetList.Draw(inRect.x, listTop, inRect.width, listBottom - listTop, Gather(ScopeSources), filterBuffer, RowController, ref scroll, ref listHeight);
 
         SaveRow.Draw(inRect.x, inRect.yMax - RowHeight, inRect.width, HasData, Save, ref nameBuffer);
 
