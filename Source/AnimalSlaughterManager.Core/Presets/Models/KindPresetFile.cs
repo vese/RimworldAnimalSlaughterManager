@@ -71,7 +71,7 @@ public class KindPresetFile : IXmlSerializable
             PriorityRulesYoungFemale = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(root[BucketYoungFemale]))
         };
 
-        Kind.SpecialSettings = KindPresetFileSerialization.ReadIntegrations(KindPresetFileSerialization.SectionsOf(root));
+        Kind.SpecialSettings = KindPresetFileSerialization.ReadIntegrations(KindPresetFileSerialization.GetSections(root));
     }
 
     /// <summary>A current-format kind file from a version-1 unified slice; null for null.</summary>
@@ -121,7 +121,7 @@ public static class KindPresetFileSerialization
     }
 
     /// <summary>The non-bucket children of a kind element (the integration sections).</summary>
-    internal static List<XmlElement> SectionsOf(XmlElement root)
+    internal static List<XmlElement> GetSections(XmlElement root)
     {
         var sections = new List<XmlElement>();
 
@@ -160,7 +160,7 @@ public static class KindPresetFileSerialization
 public static class KindPresetFileSections
 {
     /// <summary>The integration sections of a kind file (serialized on demand).</summary>
-    public static List<XmlElement> SectionsOf(KindPresetFile file)
+    public static List<XmlElement> GetSections(KindPresetFile file)
     {
         var holder = PresetSectionSerialization.Holder();
 

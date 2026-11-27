@@ -27,10 +27,10 @@ public static class PriorityRuleXml
             var doc = new XmlDocument();
             using (var writer = doc.CreateNavigator()!.AppendChild())
             {
-                PresetSerializer.SerializerOf(preset.GetType()).Serialize(writer, preset);
+                PresetSerializer.GetSerializer(preset.GetType()).Serialize(writer, preset);
             }
 
-            result.Add(new RulePresetFile { Type = RuleNameOf(preset.GetType()), Payload = [.. doc.ChildNodes.Cast<XmlElement>()] });
+            result.Add(new RulePresetFile { Type = GetRuleName(preset.GetType()), Payload = [.. doc.ChildNodes.Cast<XmlElement>()] });
         }
 
         return result;
@@ -44,7 +44,7 @@ public static class PriorityRuleXml
 
         foreach (var preset in presets)
         {
-            var rule = RuleOf(preset.GetType());
+            var rule = GetRule(preset.GetType());
 
             if (rule != null)
             {
@@ -110,7 +110,7 @@ public static class PriorityRuleXml
             try
             {
                 using var reader = new StringReader(child.OuterXml);
-                return (RulePresetFile?)PresetSerializer.SerializerOf(typeof(RulePresetFile)).Deserialize(reader);
+                return (RulePresetFile?)PresetSerializer.GetSerializer(typeof(RulePresetFile)).Deserialize(reader);
             }
             catch
             {
@@ -151,7 +151,7 @@ public static class PriorityRuleXml
         try
         {
             using var reader = new StringReader(payload[0].OuterXml);
-            return PresetSerializer.SerializerOf(presetType).Deserialize(reader);
+            return PresetSerializer.GetSerializer(presetType).Deserialize(reader);
         }
         catch
         {
@@ -159,14 +159,14 @@ public static class PriorityRuleXml
         }
     }
 
-    private static string RuleNameOf(Type dtoType)
+    private static string GetRuleName(Type dtoType)
     {
         EnsureMap();
 
         return dtoMap.TryGetValue(dtoType, out var entry) ? entry.RuleName : "";
     }
 
-    private static BasePriorityRule? RuleOf(Type dtoType)
+    private static BasePriorityRule? GetRule(Type dtoType)
     {
         EnsureMap();
 

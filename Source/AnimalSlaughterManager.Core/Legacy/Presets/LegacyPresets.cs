@@ -171,7 +171,7 @@ public static class LegacyPresets
     {
         var kind = ReadV1Kinds(text)?.FirstOrDefault(k => k.AnimalDefName == targetDef.defName);
 
-        return kind == null ? null : SectionsSliceOf(new KindPresetFile { Kind = kind });
+        return kind == null ? null : GetSectionsSlice(new KindPresetFile { Kind = kind });
     }
 
     private static PriorityListPresetFile? FromRules(List<BasePriorityRule>? rules) =>
@@ -192,8 +192,8 @@ public static class LegacyPresets
         return rules.Count == 0 ? null : new PriorityListPresetFile { Rules = rules };
     }
 
-    private static SpecialListPresetFile? SectionsSliceOf(KindPresetFile file) =>
-        file.Kind.SpecialSettings.Count > 0 ? SpecialListPresetFile.OfSections(KindPresetFileSections.SectionsOf(file)) : null;
+    private static SpecialListPresetFile? GetSectionsSlice(KindPresetFile file) =>
+        file.Kind.SpecialSettings.Count > 0 ? SpecialListPresetFile.OfSections(KindPresetFileSections.GetSections(file)) : null;
 
     /// <summary>Root element name of the file — identifies which of the historical formats it is.</summary>
     private static string? RootElementOf(string? text)

@@ -106,7 +106,7 @@ public static class PresetRepository
     public static void Save<TModel>(string name, PresetScope scope, TModel model, string? bucket = null)
         where TModel : class
     {
-        var file = PresetConverters.For<TModel>(new PresetFile { Version = PresetFormat.CurrentVersion })?.ToFile(model, scope, bucket)
+        var file = PresetConverterFactory.GetConverter<TModel>(new PresetFile { Version = PresetFormat.CurrentVersion })?.ToFile(model, scope, bucket)
             ?? throw new InvalidOperationException($"No converter registered for {typeof(TModel).Name}.");
 
         var folder = bucket == null ? ScopeFolder(scope) : Path.Combine(ScopeFolder(scope), bucket);
@@ -126,16 +126,16 @@ public static class PresetRepository
     /// <summary>The full preset model; the version-1 formats migrate into it.</summary>
     public static AllKindsPreset? ReadAllKindsSettings(PresetEntry entry)
     {
-        var file = FileOf(entry);
+        var file = GetFile(entry);
 
-        return PresetConverters.For<AllKindsPreset>(file)?.ToModel(file, entry);
+        return PresetConverterFactory.GetConverter<AllKindsPreset>(file)?.ToModel(file, entry);
     }
 
     /// <summary>The preset's kind slice: Kind-scope presets carry the single kind, All-scope
     /// presets the slice matching the target def. The caller applies it to the settings itself.</summary>
     public static KindPreset? ReadKindSettings(PresetEntry entry, ThingDef targetDef)
     {
-        var file = FileOf(entry);
+        var file = GetFile(entry);
 
         if (file.Version != 1 && file.Scope is PresetScope.All)
         {
@@ -145,7 +145,7 @@ public static class PresetRepository
             return match == null ? null : V2KindPresetConverter.ToModel(match);
         }
 
-        return PresetConverters.For<KindPreset>(file)?.ToModel(file, entry, targetDef);
+        return PresetConverterFactory.GetConverter<KindPreset>(file)?.ToModel(file, entry, targetDef);
     }
 
     /// <summary>A priority rule list of a PriorityList preset, or the matching bucket's slice
@@ -153,7 +153,7 @@ public static class PresetRepository
     /// model. Null when nothing readable.</summary>
     public static List<BasePriorityRulePreset>? ReadPriorityList(PresetEntry entry, ThingDef targetDef, (bool Male, bool Adult) bucket)
     {
-        var file = FileOf(entry);
+        var file = GetFile(entry);
 
         if (file.Version == 1)
         {
@@ -169,9 +169,9 @@ public static class PresetRepository
 
         if (file.Scope is PresetScope.All or PresetScope.Kind)
         {
-            var slice = KindSliceOf(file, targetDef);
+            var slice = GetKindSlice(file, targetDef);
 
-            return slice == null ? null : RulesBucketOf(slice, bucket);
+            return slice == null ? null : GetRulesBucket(slice, bucket);
         }
 
         return null;
@@ -182,7 +182,7 @@ public static class PresetRepository
     /// Null when nothing readable.</summary>
     public static SpecialListPreset? ReadSpecialList(PresetEntry entry, ThingDef targetDef)
     {
-        var file = FileOf(entry);
+        var file = GetFile(entry);
 
         if (file.Version == 1)
         {
@@ -202,7 +202,7 @@ public static class PresetRepository
 
         if (file.Scope is PresetScope.All or PresetScope.Kind)
         {
-            var slice = KindSliceOf(file, targetDef);
+            var slice = GetKindSlice(file, targetDef);
 
             return slice?.Elements is { Length: > 0 } elements
                 ? new SpecialListPreset { Sections = [.. elements.Where(e => !e.LocalName.StartsWith("PriorityRules"))] }
@@ -216,7 +216,7 @@ public static class PresetRepository
 
     /// <summary>The entry's file form: the current format's envelope, or a synthesized one for
     /// a version-1 file (Version 1, the raw text as the content).</summary>
-    private static PresetFile FileOf(PresetEntry entry)
+    private static PresetFile GetFile(PresetEntry entry)
     {
         var text = Store.ReadText(entry.path);
 
@@ -225,15 +225,15 @@ public static class PresetRepository
 
     // The kind slice a list import takes: a Kind preset's own kind (its defName is the SOURCE
     // kind — the import applies to the TARGET kind), an All preset's slice of the target kind.
-    private static V2KindPreset? KindSliceOf(PresetFile file, ThingDef targetDef) =>
+    private static V2KindPreset? GetKindSlice(PresetFile file, ThingDef targetDef) =>
         file.Scope == PresetScope.Kind
             ? PresetSerializer.ReadContent<V2KindPreset>(file)
             : PresetSerializer.ReadContent<V2AllKindsPreset>(file)?.Kinds
                 .FirstOrDefault(k => k.AnimalDefName == targetDef.defName);
 
-    private static List<BasePriorityRulePreset>? RulesBucketOf(V2KindPreset slice, (bool Male, bool Adult) bucket)
+    private static List<BasePriorityRulePreset>? GetRulesBucket(V2KindPreset slice, (bool Male, bool Adult) bucket)
     {
-        var rules = V2KindPresetConverter.RulesOf(slice, bucket);
+        var rules = V2KindPresetConverter.GetRules(slice, bucket);
 
         return rules.Count == 0 ? null : rules;
     }

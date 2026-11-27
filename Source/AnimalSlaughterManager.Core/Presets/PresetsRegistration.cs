@@ -7,7 +7,7 @@ namespace ASM;
 /// <summary>
 /// Self-registration of the preset converters: RimWorld runs every [StaticConstructorOnStartup]
 /// type, and each Settings model's version conversions join the registry under their version
-/// interface (resolved by PresetConverters through ServiceRegistry).
+/// interface (resolved by PresetConverterFactory through ServiceRegistry).
 /// </summary>
 [StaticConstructorOnStartup]
 public static class PresetsRegistration

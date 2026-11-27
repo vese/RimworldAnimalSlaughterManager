@@ -20,7 +20,7 @@ public static class PresetSerializer
     private static readonly Dictionary<Type, XmlSerializer> serializers = new();
 
     /// <summary>Cached serializer of a preset model type (the DTO element name is its root).</summary>
-    public static XmlSerializer SerializerOf(Type type)
+    public static XmlSerializer GetSerializer(Type type)
     {
         if (!serializers.TryGetValue(type, out var ser))
         {
@@ -79,7 +79,7 @@ public static class PresetSerializer
         var sb = new StringBuilder();
         using (var w = new StringWriter(sb))
         {
-            SerializerOf(typeof(PresetFile)).Serialize(w, file);
+            GetSerializer(typeof(PresetFile)).Serialize(w, file);
         }
 
         return sb.ToString();
@@ -91,7 +91,7 @@ public static class PresetSerializer
         var sb = new StringBuilder();
         using (var w = new StringWriter(sb))
         {
-            SerializerOf(content.GetType()).Serialize(w, content);
+            GetSerializer(content.GetType()).Serialize(w, content);
         }
 
         return sb.ToString();

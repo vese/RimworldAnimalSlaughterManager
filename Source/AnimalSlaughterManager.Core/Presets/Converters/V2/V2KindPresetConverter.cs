@@ -44,7 +44,7 @@ public class V2KindPresetConverter : IV2PresetConverter<KindPreset>
             RulePresetXml.Bucket(BucketYoungMale, PriorityRuleXml.ToRulePresets(model.Priorities.PriorityRulesYoungMale)),
             RulePresetXml.Bucket(BucketAdultFemale, PriorityRuleXml.ToRulePresets(model.Priorities.PriorityRulesAdultFemale)),
             RulePresetXml.Bucket(BucketYoungFemale, PriorityRuleXml.ToRulePresets(model.Priorities.PriorityRulesYoungFemale)),
-            .. SpecialSectionsOf(model)
+            .. GetSpecialSections(model)
         ]
     };
 
@@ -90,7 +90,7 @@ public class V2KindPresetConverter : IV2PresetConverter<KindPreset>
     }
 
     /// <summary>The kind's rule bucket matching the age×sex key; empty when absent.</summary>
-    internal static List<BasePriorityRulePreset> RulesOf(V2KindPreset content, (bool Male, bool Adult) bucket)
+    internal static List<BasePriorityRulePreset> GetRules(V2KindPreset content, (bool Male, bool Adult) bucket)
     {
         var name = bucket switch
         {
@@ -105,7 +105,7 @@ public class V2KindPresetConverter : IV2PresetConverter<KindPreset>
 
     /// <summary>The integration sections of the Settings model, serialized through their
     /// providers.</summary>
-    private static List<XmlElement> SpecialSectionsOf(KindPreset model)
+    private static List<XmlElement> GetSpecialSections(KindPreset model)
     {
         var holder = PresetSectionSerialization.Holder();
 
