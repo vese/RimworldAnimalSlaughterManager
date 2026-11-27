@@ -18,7 +18,6 @@
 | `IKindForceCullSource` | `Slaughter/Interfaces/` | принудительный забой по правилам | кого забивать вопреки лимитам |
 | `IExternalForceCullSource` | `Slaughter/Interfaces/` | принудительный забой чужим модом | решения чужого мода (его UI), гейт прохода |
 | `IKindSettingsProvider` | `KindSettings/Interfaces/` | настройки вида | свои данные в сейве/пресетах — своим ключом и XML-секцией |
-| `IPresetBucketProvider` | `Presets/Interfaces/` | листинг/сохранение списковых пресетов | корзины (подпапки) своего спискового скоупа |
 | `ILegacyConditionConverter` | `Legacy/Interfaces/` | чтение легаси-сейвов/пресетов | условия чужой концепции — в правила интеграции |
 
 Ядро суммирует/объединяет ответы всех реализаций (сигналы складываются, опции меню и выборки

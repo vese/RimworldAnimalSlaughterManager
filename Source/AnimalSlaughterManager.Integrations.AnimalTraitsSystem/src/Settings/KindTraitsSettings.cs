@@ -297,9 +297,7 @@ public class ProtectRuleSet() : KindTraitsRuleSet<TraitProtectRule>
 {
     public override ITraitRulesListSection<TraitProtectRule> GetEditor() => new TraitProtectRulesListSection(this);
 
-    public const string PresetsFolderName = "Keep";
-
-    public override string PresetsFolder => PresetsFolderName;
+    public override string PresetsFolder => "Keep";
 
     public override string ListElementName => nameof(TraitsSectionDto.KeepTraits);
 
@@ -335,9 +333,7 @@ public class ForceCullRuleSet() : KindTraitsRuleSet<TraitRule>
 {
     public override ITraitRulesListSection<TraitRule> GetEditor() => new TraitRulesListSection(this);
 
-    public const string PresetsFolderName = "ForceCull";
-
-    public override string PresetsFolder => PresetsFolderName;
+    public override string PresetsFolder => "ForceCull";
 
     public override string ListElementName => nameof(TraitsSectionDto.ForceCullTraits);
 

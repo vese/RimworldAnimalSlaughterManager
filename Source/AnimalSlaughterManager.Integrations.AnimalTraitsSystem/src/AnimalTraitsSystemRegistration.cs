@@ -20,8 +20,6 @@ public static class AnimalTraitsSystemRegistration
         // survives ATS being disabled (the types live in this assembly).
         IntegrationServices.Add<IKindSettingsProvider>(new KindTraitsSettings.Provider());
 
-        // The list buckets too: the preset folders stay listed with the mod disabled.
-        IntegrationServices.Add<IPresetBucketProvider>(new TraitListPresetBuckets());
 #pragma warning disable CS0618
         // Legacy save/preset conversion — goes away together with the Legacy folder.
         IntegrationServices.Add<ILegacyConditionConverter>(new LegacyTraitConditions());
