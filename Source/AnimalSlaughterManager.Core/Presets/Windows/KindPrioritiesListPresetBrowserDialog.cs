@@ -16,10 +16,10 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
     private readonly bool male;
     private readonly bool adult;
 
-    protected override IEnumerable<PresetScope> OfferedScopes => [PresetScope.List, PresetScope.Kind, PresetScope.All];
+    protected override IEnumerable<PresetScope> OfferedScopes => [PresetScope.PriorityList, PresetScope.Kind, PresetScope.All];
 
     protected override IEnumerable<PresetEntry> GetEntries(PresetScope scope) =>
-        scope == PresetScope.List ? PresetRepository.ListConditionPresets() : PresetRepository.ListPresets(scope);
+        scope == PresetScope.PriorityList ? PresetRepository.ListConditionPresets() : PresetRepository.ListPresets(scope);
 
     protected override bool HasData => prioritySettings.Get(male, adult).Count > 0;
 
@@ -72,7 +72,7 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
             return ASMKeys.PresetKindMark.Translate();
         }
 
-        if (entry.scope == PresetScope.List && entry.condBucket is { } b && b != (male, adult))
+        if (entry.scope == PresetScope.PriorityList && entry.condBucket is { } b && b != (male, adult))
         {
             return GetBucketLabel(b.Male, b.Adult);
         }
@@ -86,5 +86,5 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
             : null;
 
     protected override bool CanOverwrite(PresetEntry entry) =>
-        entry.scope == PresetScope.List && entry.condBucket == (male, adult) && HasData;
+        entry.scope == PresetScope.PriorityList && entry.condBucket == (male, adult) && HasData;
 }

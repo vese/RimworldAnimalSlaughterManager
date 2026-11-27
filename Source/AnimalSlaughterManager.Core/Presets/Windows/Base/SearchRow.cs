@@ -113,7 +113,8 @@ internal static class SearchRow
     {
         PresetScope.All => ASMKeys.PresetAllMark.Translate(),
         PresetScope.Kind => ASMKeys.PresetKindMark.Translate(),
-        PresetScope.List => ASMKeys.PresetListMark.Translate(),
+        PresetScope.PriorityList => ASMKeys.PresetPriorityListMark.Translate(),
+        PresetScope.SpecialList => ASMKeys.PresetSpecialListMark.Translate(),
         _ => throw new NotImplementedException(),
     };
 }

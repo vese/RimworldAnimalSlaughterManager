@@ -19,7 +19,7 @@ public class SpecialSettingsListPresetBrowserDialog : BasePresetBrowserDialog
     private readonly Func<PresetEntry, bool> applyList;
     private readonly Func<bool>? hasListData;
 
-    protected override IEnumerable<PresetScope> OfferedScopes => [PresetScope.List, PresetScope.Kind, PresetScope.All];
+    protected override IEnumerable<PresetScope> OfferedScopes => [PresetScope.SpecialList, PresetScope.Kind, PresetScope.All];
 
     protected override IEnumerable<PresetEntry> GetEntries(PresetScope scope) => PresetRepository.ListPresets(scope);
 
@@ -74,9 +74,9 @@ public class SpecialSettingsListPresetBrowserDialog : BasePresetBrowserDialog
         return null;
     }
 
-    protected override bool CanOverwrite(PresetEntry entry) => entry.scope == PresetScope.List && HasData;
+    protected override bool CanOverwrite(PresetEntry entry) => entry.scope == PresetScope.SpecialList && HasData;
 
-    protected override bool CanDelete(PresetEntry entry) => entry.DeletableFrom(PresetScope.List);
+    protected override bool CanDelete(PresetEntry entry) => entry.DeletableFrom(PresetScope.SpecialList);
 
     protected override string GetConfirmDeleteText(PresetEntry entry) => ASMKeys.ConfirmDeleteList.Translate(entry.name);
 }

@@ -282,8 +282,11 @@ public static class ASMKeys
     /// <summary>PresetKindMark</summary>
     public const string PresetKindMark = "ASM.PresetKindMark";
 
-    /// <summary>PresetListMark</summary>
-    public const string PresetListMark = "ASM.PresetListMark";
+    /// <summary>PresetPriorityListMark</summary>
+    public const string PresetPriorityListMark = "ASM.PresetPriorityListMark";
+
+    /// <summary>PresetSpecialListMark</summary>
+    public const string PresetSpecialListMark = "ASM.PresetSpecialListMark";
 
     /// <summary>PresetLoaded</summary>
     public const string PresetLoaded = "ASM.PresetLoaded";

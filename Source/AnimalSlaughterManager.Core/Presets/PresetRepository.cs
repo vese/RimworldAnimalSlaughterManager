@@ -37,8 +37,12 @@ public static class PresetRepository
 
     private static string RootFolder => Path.Combine(Application.persistentDataPath, RootFolderName);
 
-    // The scope folder is the enum value's own name (All/Kind/List).
-    private static string ScopeFolder(PresetScope scope) => Path.Combine(RootFolder, scope.ToString());
+    // The scope folder is the enum value's own name (All/Kind); both list flavors share the
+    // "List" root — the flavor splits semantics and listings, not the on-disk layout.
+    private static string ListFolder => Path.Combine(RootFolder, "List");
+
+    private static string ScopeFolder(PresetScope scope) =>
+        scope is PresetScope.PriorityList or PresetScope.SpecialList ? ListFolder : Path.Combine(RootFolder, scope.ToString());
 
     /// <summary>Presets of one scope (List covers every rule-set subfolder), newest-first by file write time.</summary>
     public static List<PresetEntry> ListPresets(PresetScope scope)
@@ -59,11 +63,11 @@ public static class PresetRepository
             }
         }
         
-        if (scope is PresetScope.List)
+        if (scope is PresetScope.SpecialList)
         {
-            // Every rule-list kind writes into its own PresetsFolder subfolder — list them as
-            // they are on disk, except the core's own conditions tree (it has its own browser).
-            foreach (var sub in Store.GetFolders(ScopeFolder(scope)))
+            // The special lists own every subfolder of the List root as it is on disk, except
+            // the core's own conditions tree (a PriorityList has its own browser).
+            foreach (var sub in Store.GetFolders(ListFolder))
             {
                 if (Path.GetFileName(sub) != FolderConditions)
                 {
@@ -97,16 +101,16 @@ public static class PresetRepository
     public static void Save(string name, PresetScope scope, AllPreset preset) =>
         Serialize(name, ScopeFolder(scope), AllPresetFile.Of(preset));
 
-    /// <summary>Writes a list preset into its subfolder of the List scope.</summary>
+    /// <summary>Writes a list preset into its subfolder of the List root.</summary>
     public static void SaveList(string name, string subfolder, ListPresetFile dto) =>
-        Serialize(name, Path.Combine(ScopeFolder(PresetScope.List), subfolder), dto);
+        Serialize(name, Path.Combine(ListFolder, subfolder), dto);
 
     // ---- Condition list presets ----------------------------------------------------------
 
     /// <summary>The conditions subfolder of the List scope (one folder per bucket).</summary>
     public static string ConditionsFolder((bool Male, bool Adult) bucket) => Path.Combine(FolderConditions, BucketFolderName(bucket));
 
-    private static string CondFolder((bool Male, bool Adult) bucket) => Path.Combine(RootFolder, PresetScope.List.ToString(), FolderConditions, BucketFolderName(bucket));
+    private static string CondFolder((bool Male, bool Adult) bucket) => Path.Combine(ListFolder, FolderConditions, BucketFolderName(bucket));
 
     // Folder names predate the tuple keys — same age×sex buckets as the settings themselves.
     private static string BucketFolderName((bool Male, bool Adult) bucket) => bucket switch
@@ -241,7 +245,7 @@ public static class PresetRepository
         {
             foreach (var p in Store.GetFiles(dir))
             {
-                result.Add(new PresetEntry { name = Path.GetFileNameWithoutExtension(p), path = p, date = Store.GetLastWriteTime(p), scope = PresetScope.List, condBucket = bucket });
+                result.Add(new PresetEntry { name = Path.GetFileNameWithoutExtension(p), path = p, date = Store.GetLastWriteTime(p), scope = PresetScope.PriorityList, condBucket = bucket });
             }
         }
 
