@@ -44,19 +44,26 @@ public static class PresetSerializer
         return ser;
     }
 
-    public static XmlSerializer Serializer<T>() where T : class
+    public static T? Deserialize<T>(string? text) where T : class
     {
-        if (!serializers.TryGetValue(typeof(T), out var ser))
+        if (text == null)
         {
-            ser = new XmlSerializer(typeof(T));
-            serializers[typeof(T)] = ser;
+            return null;
         }
 
-        return ser;
+        try
+        {
+            using var r = new StringReader(text);
+            return (T)PresetContentSerializers.SerializerOf(typeof(T)).Deserialize(r);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     /// <summary>Deserialized text as T; null when the text is null or not parsable.</summary>
-    public static T? Deserialize<T>(string? text) where T : class
+    private static T? DeserializeCore<T>(string? text) where T : class
     {
         if (text == null)
         {
@@ -91,7 +98,7 @@ public static class PresetSerializer
     /// (a preset saved by a newer mod) are refused. Null when the text is not one.</summary>
     public static PresetFile? ReadPreset(string? text)
     {
-        var file = Deserialize<PresetFile>(text);
+        var file = DeserializeCore<PresetFile>(text);
 
         if (file != null && file.Version > PresetFormat.CurrentVersion)
         {
@@ -105,6 +112,6 @@ public static class PresetSerializer
     /// <summary>The file's content as the model; null when the type name does not match (the
     /// preset is not of the expected shape).</summary>
     public static T? ReadContent<T>(PresetFile file) where T : class =>
-        file.Type == typeof(T).Name ? Deserialize<T>(file.Content) : null;
+        file.Type == typeof(T).Name ? DeserializeCore<T>(file.Content) : null;
 
 }

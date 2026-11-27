@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using System.Xml.Serialization;
 using Verse;
 
 namespace ASM;
@@ -20,6 +21,40 @@ namespace ASM;
 public static class LegacyPresets
 {
     private static readonly IPresetStore Store = new FilePresetStore();
+
+    /// <summary>Cached serializer of a legacy DTO type (no subtypes — the legacy forms are
+    /// monomorphic).</summary>
+    private static readonly Dictionary<Type, XmlSerializer> serializers = [];
+
+    private static XmlSerializer Serializer<T>() where T : class
+    {
+        if (!serializers.TryGetValue(typeof(T), out var ser))
+        {
+            ser = new XmlSerializer(typeof(T));
+            serializers[typeof(T)] = ser;
+        }
+
+        return ser;
+    }
+
+    /// <summary>Deserialized text as T; null when the text is null or not parsable.</summary>
+    private static T? Deserialize<T>(string? text) where T : class
+    {
+        if (text == null)
+        {
+            return null;
+        }
+
+        try
+        {
+            using var r = new StringReader(text);
+            return (T)Serializer<T>().Deserialize(r);
+        }
+        catch
+        {
+            return null;
+        }
+    }
 
     /// <summary>Adds root-folder presets to an All-scope listing (they have no scope folder).</summary>
     public static void AddRootPresets(List<PresetEntry> result, string rootFolder)
@@ -74,7 +109,7 @@ public static class LegacyPresets
         try
         {
             using var reader = new StringReader(text);
-            var legacy = (LegacyPresetDto)PresetSerializer.Serializer<LegacyPresetDto>().Deserialize(reader);
+            var legacy = (LegacyPresetDto)Serializer<LegacyPresetDto>().Deserialize(reader);
 
             return legacy != null && legacy.HasConditions ? legacy.ToCurrent() : null;
         }
@@ -95,7 +130,7 @@ public static class LegacyPresets
     /// <summary>The rules of a RulePresetDto-rooted file; null when the text is not one.</summary>
     public static List<PriorityRuleDto>? ReadRulePreset(string? text)
     {
-        var dto = PresetSerializer.Deserialize<RulePresetDto>(text);
+        var dto = Deserialize<RulePresetDto>(text);
         return dto?.rules?.ToList();
     }
 
@@ -103,7 +138,7 @@ public static class LegacyPresets
     /// old format's converted; null when the text is not a preset.</summary>
     private static List<KindPreset>? ReadV1Kinds(string? text)
     {
-        var dto = PresetSerializer.Deserialize<PresetDto>(text);
+        var dto = Deserialize<PresetDto>(text);
 
         if (dto?.Kinds.Any(k => k.PrioRulesAdultMale?.Length > 0 || k.PrioRulesYoungMale?.Length > 0
             || k.PrioRulesAdultFemale?.Length > 0 || k.PrioRulesYoungFemale?.Length > 0) == true)
@@ -197,7 +232,7 @@ public static class LegacyPresets
         try
         {
             using var reader = new StringReader(text);
-            var dto = (ConditionPresetDto)PresetSerializer.Serializer<ConditionPresetDto>().Deserialize(reader);
+            var dto = (ConditionPresetDto)Serializer<ConditionPresetDto>().Deserialize(reader);
 
             return dto?.conditions?.ToList();
         }
