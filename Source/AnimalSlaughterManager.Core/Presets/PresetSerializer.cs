@@ -25,7 +25,7 @@ public static class PresetSerializer
 
         using (var w = new StringWriter(sb))
         {
-            PresetContentSerializers.SerializerOf(typeof(PresetFile)).Serialize(w, file);
+            PresetContentSerializers.GetSerializer(typeof(PresetFile)).Serialize(w, file);
         }
 
         return sb.ToString();
@@ -38,7 +38,7 @@ public static class PresetSerializer
 
         using (var w = new StringWriter(sb))
         {
-            PresetContentSerializers.SerializerOf(content.GetType()).Serialize(w, content);
+            PresetContentSerializers.GetSerializer(content.GetType()).Serialize(w, content);
         }
 
         return sb.ToString();
@@ -76,7 +76,7 @@ public static class PresetSerializer
         try
         {
             using var r = new StringReader(text);
-            return (T)PresetContentSerializers.SerializerOf(typeof(T)).Deserialize(r);
+            return (T)PresetContentSerializers.GetSerializer(typeof(T)).Deserialize(r);
         }
         catch
         {

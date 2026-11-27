@@ -15,16 +15,16 @@ namespace ASM;
 /// elements and their typed models (a section subclass's [XmlRoot] is its element name).</summary>
 public static class PresetContentSerializers
 {
-    private static Type[]? subtypes;
-
     private static readonly Dictionary<Type, XmlSerializer> serializers = [];
 
-    private static Type[] Subtypes => subtypes ??= AppDomain.CurrentDomain.GetAssemblies()
-        .SelectMany(SafeTypes)
-        .Where(t => !t.IsAbstract && (t.IsSubclassOf(typeof(V2RulePreset)) || t.IsSubclassOf(typeof(V2SpecialSettingsPreset))))
-        .ToArray();
+    private static readonly Type[] Subtypes =
+    [
+        ..AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(SafeTypes)
+            .Where(t => !t.IsAbstract && (t.IsSubclassOf(typeof(V2RulePreset)) || t.IsSubclassOf(typeof(V2SpecialSettingsPreset))))
+    ];
 
-    public static XmlSerializer SerializerOf(Type type)
+    public static XmlSerializer GetSerializer(Type type)
     {
         if (!serializers.TryGetValue(type, out var ser))
         {
@@ -33,20 +33,6 @@ public static class PresetContentSerializers
         }
 
         return ser;
-    }
-
-    /// <summary>The model serialized as its root element (for the section-based legacy
-    /// consumers).</summary>
-    public static List<XmlElement> ToElements(object content)
-    {
-        var doc = new XmlDocument();
-
-        using (var writer = doc.CreateNavigator()!.AppendChild())
-        {
-            SerializerOf(content.GetType()).Serialize(writer, content);
-        }
-
-        return [.. doc.ChildNodes.Cast<XmlElement>()];
     }
 
     private static IEnumerable<Type> SafeTypes(Assembly assembly)
