@@ -10,7 +10,7 @@ public class V1AllKindsPresetConverter : IV1PresetConverter<AllKindsPreset>
     public PresetFile ToFile(AllKindsPreset model, PresetScope scope, string? bucket = null) =>
         throw new NotSupportedException("The version-1 formats are read-only.");
 
-    public AllKindsPreset? ToModel(PresetFile file, PresetEntry entry, ThingDef? targetDef = null)
+    public AllKindsPreset? ToModel(PresetFile file, ThingDef? targetDef = null)
     {
 #pragma warning disable CS0612, CS0618
         return LegacyPresets.TryReadAll(file.Content);

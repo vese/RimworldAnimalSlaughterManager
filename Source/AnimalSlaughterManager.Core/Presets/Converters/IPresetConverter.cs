@@ -13,5 +13,5 @@ public interface IPresetConverter<TModel> where TModel : BasePreset
     /// <summary>The model from the file form; null when the file is not one of this model. A
     /// version-1 file arrives as a synthesized envelope (Version 1, the raw text as the
     /// content); the entry and the target def carry the apply's slicing context.</summary>
-    TModel? ToModel(PresetFile file, PresetEntry entry, ThingDef? targetDef = null);
+    TModel? ToModel(PresetFile file, ThingDef? targetDef = null);
 }

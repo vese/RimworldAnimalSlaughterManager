@@ -17,7 +17,7 @@ public class V2KindPresetConverter : IV2PresetConverter<KindPreset>
         Content = PresetSerializer.SerializeContent(ToContent(model))
     };
 
-    public KindPreset? ToModel(PresetFile file, PresetEntry entry, ThingDef? targetDef = null) =>
+    public KindPreset? ToModel(PresetFile file, ThingDef? targetDef = null) =>
         PresetSerializer.ReadContent<V2KindPreset>(file) is { } content ? ToModel(content) : null;
 
     internal static V2KindPreset ToContent(KindPreset model) => new()

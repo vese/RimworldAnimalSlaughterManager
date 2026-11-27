@@ -126,7 +126,7 @@ public static class PresetRepository
     public static AllKindsPreset? ReadAllKindsSettings(PresetEntry entry) => ReadAllKindsSettings(GetFile(entry), entry);
 
     private static AllKindsPreset? ReadAllKindsSettings(PresetFile file, PresetEntry entry) =>
-        PresetConverterFactory.GetConverter<AllKindsPreset>(file.Version)?.ToModel(file, entry);
+        PresetConverterFactory.GetConverter<AllKindsPreset>(file.Version)?.ToModel(file);
 
     /// <summary>The preset's kind slice: Kind-scope presets carry the single kind, All-scope
     /// presets the slice matching the target def. The caller applies it to the settings itself.</summary>
@@ -135,13 +135,13 @@ public static class PresetRepository
 
     private static KindPreset? ReadKindSettings(PresetFile file, PresetEntry entry, ThingDef targetDef)
     {
-        if (file.Version != 1 && file.Scope is PresetScope.All)
+        if (file.Scope is PresetScope.All)
         {
-            return PresetConverterFactory.GetConverter<AllKindsPreset>(file.Version)?.ToModel(file, entry)
+            return PresetConverterFactory.GetConverter<AllKindsPreset>(file.Version)?.ToModel(file)
                 ?.Kinds.FirstOrDefault(k => k.AnimalDefName == targetDef.defName);
         }
 
-        return PresetConverterFactory.GetConverter<KindPreset>(file.Version)?.ToModel(file, entry, targetDef);
+        return PresetConverterFactory.GetConverter<KindPreset>(file.Version)?.ToModel(file, targetDef);
     }
 
     /// <summary>A priority rule list of a PriorityList preset, or the matching bucket's slice
@@ -162,7 +162,7 @@ public static class PresetRepository
 
         if (file.Scope is PresetScope.PriorityList)
         {
-            return PresetConverterFactory.GetConverter<PriorityListPreset>(file.Version)?.ToModel(file, entry);
+            return PresetConverterFactory.GetConverter<PriorityListPreset>(file.Version)?.ToModel(file);
         }
 
         if (file.Scope is PresetScope.All or PresetScope.Kind)
@@ -199,7 +199,7 @@ public static class PresetRepository
 
         if (file.Scope == PresetScope.SpecialList)
         {
-            return PresetConverterFactory.GetConverter<SpecialListPreset>(file.Version)?.ToModel(file, entry);
+            return PresetConverterFactory.GetConverter<SpecialListPreset>(file.Version)?.ToModel(file);
         }
 
         if (file.Scope is PresetScope.All or PresetScope.Kind)
@@ -222,6 +222,6 @@ public static class PresetRepository
     {
         var text = Store.ReadText(entry.path);
 
-        return PresetSerializer.ReadPreset(text) ?? new PresetFile { Version = 1, Content = text };
+        return PresetSerializer.ReadPreset(text) ?? new PresetFile { Version = 1, Scope = entry.scope, Content = text };
     }
 }

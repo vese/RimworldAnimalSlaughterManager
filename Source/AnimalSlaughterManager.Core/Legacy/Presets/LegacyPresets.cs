@@ -125,7 +125,7 @@ public static class LegacyPresets
 
     /// <summary>The version-1 preset's kind slice: from an All-scope file the kind matching
     /// the target, otherwise the single kind; null when nothing applies.</summary>
-    public static KindPreset? TryReadKind(PresetEntry entry, string? text, ThingDef targetDef)
+    public static KindPreset? TryReadKind(PresetScope scope, string? text, ThingDef targetDef)
     {
         var kinds = ReadV1Kinds(text);
 
@@ -134,7 +134,7 @@ public static class LegacyPresets
             return null;
         }
 
-        if (entry.scope == PresetScope.All)
+        if (scope == PresetScope.All)
         {
             // Find the slice for the target kind; if absent, nothing applies.
             var match = kinds.FirstOrDefault(k => k.AnimalDefName == targetDef.defName);
