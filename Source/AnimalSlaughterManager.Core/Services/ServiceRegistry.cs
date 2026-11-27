@@ -5,13 +5,14 @@ using System.Linq;
 namespace ASM;
 
 /// <summary>
-/// The service registry of the integrations — a small DI-like mechanism (in the spirit of the
-/// ASP.NET service collection, sized for a mod): an integration registers its adapter as an
-/// implementation of one or more service contracts, the core resolves every implementation of
-/// a contract and never knows the concrete types. Registrations come from each integration's
-/// own [StaticConstructorOnStartup] class (or from a foreign mod hosting an integration).
+/// The mod's service registry — a small DI-like mechanism (in the spirit of the ASP.NET
+/// service collection, sized for a mod): a feature or an integration registers its
+/// implementation of one or more service contracts, the consumers resolve every
+/// implementation of a contract and never know the concrete types. Registrations come from
+/// [StaticConstructorOnStartup] classes — the core's own and each integration's (or a foreign
+/// mod hosting an integration).
 /// </summary>
-public static class IntegrationServices
+public static class ServiceRegistry
 {
     private static readonly Dictionary<Type, List<object>> services = [];
 

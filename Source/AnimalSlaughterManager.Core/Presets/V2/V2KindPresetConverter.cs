@@ -111,7 +111,7 @@ public class V2KindPresetConverter : IV2PresetConverter<KindPreset>
 
         foreach (var kv in model.SpecialSettings)
         {
-            IntegrationServices.GetServices<IKindSettingsProvider>().FirstOrDefault(p => p.Key == kv.Key)?.WriteSection(kv.Value, holder);
+            ServiceRegistry.GetServices<IKindSettingsProvider>().FirstOrDefault(p => p.Key == kv.Key)?.WriteSection(kv.Value, holder);
         }
 
         return [.. PresetSectionSerialization.Children(holder)];

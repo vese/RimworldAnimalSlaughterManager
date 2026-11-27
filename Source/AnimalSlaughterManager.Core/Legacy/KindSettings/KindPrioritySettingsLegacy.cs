@@ -81,7 +81,7 @@ public class KindPrioritySettingsLegacy
         },
         // Concepts this core does not know (trait conditions) go to the integrations that
         // own them; the first non-null rule wins.
-        _ => IntegrationServices.GetServices<ILegacyConditionConverter>()
+        _ => ServiceRegistry.GetServices<ILegacyConditionConverter>()
             .Select(converter => converter.Convert(slaughterCondition))
             .FirstOrDefault(rule => rule != null),
     };

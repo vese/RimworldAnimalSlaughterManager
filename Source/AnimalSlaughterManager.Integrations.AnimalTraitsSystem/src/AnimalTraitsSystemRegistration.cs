@@ -18,25 +18,25 @@ public static class AnimalTraitsSystemRegistration
     {
         // The kind-settings provider is registered unconditionally: the settings data
         // survives ATS being disabled (the types live in this assembly).
-        IntegrationServices.Add<IKindSettingsProvider>(new KindTraitsSettings.Provider());
+        ServiceRegistry.Add<IKindSettingsProvider>(new KindTraitsSettings.Provider());
 
 #pragma warning disable CS0618
         // Legacy save/preset conversion — goes away together with the Legacy folder.
-        IntegrationServices.Add<ILegacyConditionConverter>(new LegacyTraitConditions());
+        ServiceRegistry.Add<ILegacyConditionConverter>(new LegacyTraitConditions());
 #pragma warning restore CS0618
         // The section source too: with the mod disabled the shared special-rules tab shows
         // its notice instead of the section.
-        IntegrationServices.Add<ISpecialSettingsSectionSource>(new TraitSettingsSections());
+        ServiceRegistry.Add<ISpecialSettingsSectionSource>(new TraitSettingsSections());
 
         if (!ModsConfig.IsActive(PackageId))
         {
             return;
         }
 
-        IntegrationServices.Add<IRuleOptionsSource>(new TraitRuleOptionsSource());
-        IntegrationServices.Add<IPawnSlaughterSignals>(new TraitSlaughterSignals());
-        IntegrationServices.Add<IKeepReserveSource>(new TraitKeepReserve());
-        IntegrationServices.Add<IKindForceCullSource>(new TraitKindForceCull());
-        IntegrationServices.Add<IExternalForceCullSource>(new AtsExternalForceCull());
+        ServiceRegistry.Add<IRuleOptionsSource>(new TraitRuleOptionsSource());
+        ServiceRegistry.Add<IPawnSlaughterSignals>(new TraitSlaughterSignals());
+        ServiceRegistry.Add<IKeepReserveSource>(new TraitKeepReserve());
+        ServiceRegistry.Add<IKindForceCullSource>(new TraitKindForceCull());
+        ServiceRegistry.Add<IExternalForceCullSource>(new AtsExternalForceCull());
     }
 }

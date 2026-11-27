@@ -48,7 +48,7 @@ public static class SlaughterListBuilder
 
         foreach (var kv in comp.kindSettings)
         {
-            foreach (var source in IntegrationServices.GetServices<IKeepReserveSource>())
+            foreach (var source in ServiceRegistry.GetServices<IKeepReserveSource>())
             {
                 foreach (var pawn in source.SelectKeepReserved(comp.map, kv.Key, kv.Value))
                 {
@@ -62,7 +62,7 @@ public static class SlaughterListBuilder
 
     private static void AddExternalForceCull(ASM_MapComp comp, List<Pawn> slaughter, HashSet<Pawn> reserved)
     {
-        var sources = IntegrationServices.GetServices<IExternalForceCullSource>().Where(s => s.HasCullRules).ToList();
+        var sources = ServiceRegistry.GetServices<IExternalForceCullSource>().Where(s => s.HasCullRules).ToList();
 
         if (sources.Count == 0)
         {
@@ -96,7 +96,7 @@ public static class SlaughterListBuilder
         {
             var ks = kv.Value;
 
-            if (!IntegrationServices.GetServices<IKindForceCullSource>().Any(s => s.HasForceCullRules(ks)))
+            if (!ServiceRegistry.GetServices<IKindForceCullSource>().Any(s => s.HasForceCullRules(ks)))
             {
                 continue;
             }
@@ -124,7 +124,7 @@ public static class SlaughterListBuilder
         var femalesYoung = new List<Pawn>();
         var pregnant = new List<Pawn>();
         var all = new List<Pawn>();
-        // Precompute each pawn's slaughter tie-breaker signals once (pregnancy, good/bad        // signals, sickness) so the per-bucket sort doesn't re-scan hediffs per comparison.        var signals = IntegrationServices.GetServices<IPawnSlaughterSignals>();        var vitals = new Dictionary<Pawn, PawnVitals>();
+        // Precompute each pawn's slaughter tie-breaker signals once (pregnancy, good/bad        // signals, sickness) so the per-bucket sort doesn't re-scan hediffs per comparison.        var signals = ServiceRegistry.GetServices<IPawnSlaughterSignals>();        var vitals = new Dictionary<Pawn, PawnVitals>();
         PregnantMode pregMode = comp.ResolvePregnantMode(config.animal, config.allowSlaughterPregnant);
 
         // Reserved (keep-trait-protected) animals of this kind count toward each threshold but
@@ -156,7 +156,7 @@ public static class SlaughterListBuilder
                 continue;
             }
 
-            vitals[pawn] = VitalsOf(pawn, IntegrationServices.GetServices<IPawnSlaughterSignals>());
+            vitals[pawn] = VitalsOf(pawn, ServiceRegistry.GetServices<IPawnSlaughterSignals>());
             bool repro = pawn.ageTracker.CurLifeStage.reproductive;
 
             if (pawn.gender == Gender.Male)
@@ -220,7 +220,7 @@ public static class SlaughterListBuilder
             return 0;
         }
 
-        return IntegrationServices.GetServices<IKeepReserveSource>().Sum(s => s.CountKept(comp.map, def, ks));
+        return ServiceRegistry.GetServices<IKeepReserveSource>().Sum(s => s.CountKept(comp.map, def, ks));
     }
 
     /// <summary>Animals of this kind individually marked protected.</summary>
@@ -358,5 +358,5 @@ public static class SlaughterListBuilder
         return false;
     }
 
-    private static bool HasForceCullTrait(Pawn p, KindSettings ks) =>        IntegrationServices.GetServices<IKindForceCullSource>().Any(s => s.ShouldForceCull(p, ks));
+    private static bool HasForceCullTrait(Pawn p, KindSettings ks) =>        ServiceRegistry.GetServices<IKindForceCullSource>().Any(s => s.ShouldForceCull(p, ks));
 }

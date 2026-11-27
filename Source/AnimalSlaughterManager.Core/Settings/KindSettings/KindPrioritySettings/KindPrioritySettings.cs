@@ -66,7 +66,7 @@ public class KindPrioritySettings : IPresettable<PrioritySettingsPreset>
     {
         var options = new List<FloatMenuOption>();
 
-        foreach (var source in IntegrationServices.GetServices<IRuleOptionsSource>())
+        foreach (var source in ServiceRegistry.GetServices<IRuleOptionsSource>())
         {
             source.AddRuleOptions(options, male, adult, animalDef, rule => Add(male, adult, rule));
         }

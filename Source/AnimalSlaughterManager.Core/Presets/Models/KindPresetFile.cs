@@ -39,7 +39,7 @@ public class KindPresetFile : IXmlSerializable
 
         foreach (var kv in Kind.SpecialSettings)
         {
-            IntegrationServices.GetServices<IKindSettingsProvider>().FirstOrDefault(p => p.Key == kv.Key)?.WriteSection(kv.Value, holder);
+            ServiceRegistry.GetServices<IKindSettingsProvider>().FirstOrDefault(p => p.Key == kv.Key)?.WriteSection(kv.Value, holder);
         }
 
         foreach (var section in PresetSectionSerialization.Children(holder))
@@ -143,7 +143,7 @@ public static class KindPresetFileSerialization
         var integrations = new Dictionary<string, BaseSpecialSettingsPreset>();
         var kind = PresetSectionSerialization.Wrap(sections);
 
-        foreach (var provider in IntegrationServices.GetServices<IKindSettingsProvider>())
+        foreach (var provider in ServiceRegistry.GetServices<IKindSettingsProvider>())
         {
             var settings = provider.ReadSection(kind);
 
@@ -166,7 +166,7 @@ public static class KindPresetFileSections
 
         foreach (var kv in file.Kind.SpecialSettings)
         {
-            IntegrationServices.GetServices<IKindSettingsProvider>().FirstOrDefault(p => p.Key == kv.Key)?.WriteSection(kv.Value, holder);
+            ServiceRegistry.GetServices<IKindSettingsProvider>().FirstOrDefault(p => p.Key == kv.Key)?.WriteSection(kv.Value, holder);
         }
 
         return [.. PresetSectionSerialization.Children(holder)];

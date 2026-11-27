@@ -12,7 +12,7 @@ public class SpecialSettingsTab(KindSettings settings) : BaseSettingsTab
 {
     // Ready sections in registration order; null results of CreateSection are dropped here.
     private readonly List<ISpecialSettingsSection> sections =
-        [.. IntegrationServices.GetServices<ISpecialSettingsSectionSource>()
+        [.. ServiceRegistry.GetServices<ISpecialSettingsSectionSource>()
             .Where(source => source.Available)
             .Select(source => source.CreateSection(settings))
             .Where(section => section != null)
@@ -20,7 +20,7 @@ public class SpecialSettingsTab(KindSettings settings) : BaseSettingsTab
 
     // One notice per source whose mod is missing.
     private readonly List<TaggedString> missingModNotices =
-        [.. IntegrationServices.GetServices<ISpecialSettingsSectionSource>()
+        [.. ServiceRegistry.GetServices<ISpecialSettingsSectionSource>()
             .Where(source => !source.Available)
             .Select(source => source.MissingModNotice)];
 
