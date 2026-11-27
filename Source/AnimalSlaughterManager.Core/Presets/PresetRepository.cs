@@ -100,23 +100,23 @@ public static class PresetRepository
 
     // ---- Save (the current-version serializer) -------------------------------------------
 
-    /// <summary>Writes a preset of the current format (the content model in the envelope) into
+    /// <summary>Writes a preset of the current format (the content model in the file form) into
     /// its scope folder; a list preset goes into its bucket subfolder.</summary>
     public static void Save(string name, PresetScope scope, object content, string? bucket = null) =>
         Serialize(name, bucket == null ? ScopeFolder(scope) : Path.Combine(ScopeFolder(scope), bucket), content, scope);
 
 
-    // ---- Read (the envelope's metadata, or the version-1 machinery by root) ---------------
+    // ---- Read (the file's metadata, or the version-1 machinery by root) -------------------
 
     /// <summary>The full preset model; the version-1 unified format migrates into it.</summary>
     public static AllPreset? ReadAll(PresetEntry entry)
     {
         var text = Store.ReadText(entry.path);
-        var envelope = PresetSerializer.ReadEnvelope(text);
+        var file = PresetSerializer.ReadPreset(text);
 
-        if (envelope != null)
+        if (file != null)
         {
-            return PresetSerializer.ReadContent<AllPresetFile>(envelope)?.ToPreset();
+            return PresetSerializer.ReadContent<AllPresetFile>(file)?.ToPreset();
         }
 
         var v1 = PresetSerializer.ReadV1Kinds(text);
@@ -129,17 +129,17 @@ public static class PresetRepository
     public static KindPresetFile? ReadKind(PresetEntry entry, ThingDef targetDef)
     {
         var text = Store.ReadText(entry.path);
-        var envelope = PresetSerializer.ReadEnvelope(text);
+        var file = PresetSerializer.ReadPreset(text);
 
-        if (envelope != null)
+        if (file != null)
         {
-            if (envelope.Scope == PresetScope.Kind.ToString())
+            if (file.Scope == PresetScope.Kind)
             {
-                return PresetSerializer.ReadContent<KindPresetFile>(envelope);
+                return PresetSerializer.ReadContent<KindPresetFile>(file);
             }
 
             // An All preset applies the slice matching the target kind; if absent — nothing.
-            var match = PresetSerializer.ReadContent<AllPresetFile>(envelope)?.Kinds
+            var match = PresetSerializer.ReadContent<AllPresetFile>(file)?.Kinds
                 .FirstOrDefault(k => k.Kind.AnimalDefName == targetDef.defName);
 
             return match == null ? null : new KindPresetFile { Kind = match.Kind };
@@ -171,31 +171,31 @@ public static class PresetRepository
     public static ListPresetFile? ReadList(PresetEntry entry)
     {
         var text = Store.ReadText(entry.path);
-        var envelope = PresetSerializer.ReadEnvelope(text);
+        var file = PresetSerializer.ReadPreset(text);
 
-        if (envelope != null)
+        if (file != null)
         {
             // The metadata routes the content: a list preset carries it directly, a Kind/All
             // preset — its slice (cross-scope import).
-            if (envelope.Scope == PresetScope.PriorityList.ToString() || envelope.Scope == PresetScope.SpecialList.ToString())
+            if (file.Scope is PresetScope.PriorityList or PresetScope.SpecialList)
             {
-                return PresetSerializer.ReadContent<ListPresetFile>(envelope);
+                return PresetSerializer.ReadContent<ListPresetFile>(file);
             }
 
-            var slice = envelope.Scope == PresetScope.Kind.ToString()
-                ? PresetSerializer.ReadContent<KindPresetFile>(envelope)
-                : PresetSerializer.ReadContent<AllPresetFile>(envelope)?.Kinds.FirstOrDefault();
+            var slice = file.Scope == PresetScope.Kind
+                ? PresetSerializer.ReadContent<KindPresetFile>(file)
+                : PresetSerializer.ReadContent<AllPresetFile>(file)?.Kinds.FirstOrDefault();
 
             return slice == null ? null : ListSliceOf(slice);
         }
 
         switch (PresetSerializer.RootElementOf(text))
         {
-            case PresetSerializer.RulePresetRoot:
+            case PresetSerializer.V1RuleRoot:
 #pragma warning disable CS0618
                 return FromRules(LegacyPresets.V1Rules(PresetSerializer.ReadRulePreset(text)));
 #pragma warning restore CS0618
-            case PresetSerializer.PresetRoot:
+            case PresetSerializer.V1PresetRoot:
                 // The v1 unified carrier: the first kind's slice.
                 var kind = PresetSerializer.ReadV1Kinds(text)?.FirstOrDefault();
 
