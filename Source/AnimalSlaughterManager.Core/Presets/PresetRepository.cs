@@ -69,14 +69,15 @@ public static class PresetRepository
         }
         else if (scope is PresetScope.PriorityList)
         {
-            // Every condition bucket (cross-bucket import).
-            foreach (var bucket in Buckets)
+            // Every condition bucket (cross-bucket import): all folders of the scope, stamped
+            // with the bucket the folder name maps to.
+            foreach (var sub in Store.GetFolders(ScopeFolder(scope)))
             {
-                AddFolder(Path.Combine(ScopeFolder(scope), PriorityPresetBuckets.GetBucket(bucket)), bucket);
+                AddFolder(sub, PriorityPresetBuckets.Buckets.TryGetValue(Path.GetFileName(sub), out var bucket) ? bucket : null);
             }
 
 #pragma warning disable CS0618
-            LegacyListPresets.AddConditionPresets(result, RootFolder, scope, Buckets.Select(bucket => (bucket, PriorityPresetBuckets.GetBucket(bucket))));
+            LegacyListPresets.AddConditionPresets(result, RootFolder, scope);
 #pragma warning restore CS0618
         }
         else
@@ -101,8 +102,6 @@ public static class PresetRepository
     /// goes into its bucket subfolder.</summary>
     public static void Save(string name, PresetScope scope, IVersionedPresetDto dto, string? bucket = null) =>
         Serialize(name, bucket == null ? ScopeFolder(scope) : Path.Combine(ScopeFolder(scope), bucket), dto);
-
-    private static readonly (bool Male, bool Adult)[] Buckets = [(true, true), (true, false), (false, true), (false, false)];
 
 
     // ---- Read (dispatch by root: the current formats, or the version-1 machinery) ---------

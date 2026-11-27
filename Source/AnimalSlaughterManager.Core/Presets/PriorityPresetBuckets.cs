@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+
 namespace ASM;
 
 /// <summary>The condition buckets of the PriorityList scope. The folder names predate the
@@ -5,12 +8,15 @@ namespace ASM;
 /// version-1 layout.</summary>
 public static class PriorityPresetBuckets
 {
-    /// <summary>The age×sex bucket's folder name.</summary>
-    public static string GetBucket((bool Male, bool Adult) bucket) => bucket switch
+    /// <summary>The age×sex buckets by their folder names.</summary>
+    public static readonly Dictionary<string, (bool Male, bool Adult)> Buckets = new()
     {
-        (true, true) => "AdultMale",
-        (true, false) => "YoungMale",
-        (false, true) => "AdultFemale",
-        _ => "YoungFemale",
+        ["AdultMale"] = (true, true),
+        ["YoungMale"] = (true, false),
+        ["AdultFemale"] = (false, true),
+        ["YoungFemale"] = (false, false),
     };
+
+    /// <summary>The age×sex bucket's folder name.</summary>
+    public static string GetBucket((bool Male, bool Adult) bucket) => Buckets.First(kv => kv.Value == bucket).Key;
 }

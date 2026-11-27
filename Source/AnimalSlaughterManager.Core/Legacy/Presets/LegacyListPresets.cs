@@ -37,10 +37,9 @@ public static class LegacyListPresets
 
     /// <summary>Adds the v1 condition presets of every bucket folder
     /// (<c>List/Conditions/&lt;folder&gt;</c>), stamped with the bucket.</summary>
-    public static void AddConditionPresets(List<PresetEntry> result, string presetRoot, PresetScope scope,
-        IEnumerable<((bool Male, bool Adult) Bucket, string Folder)> buckets)
+    public static void AddConditionPresets(List<PresetEntry> result, string presetRoot, PresetScope scope)
     {
-        foreach (var (bucket, folder) in buckets)
+        foreach (var (folder, bucket) in PriorityPresetBuckets.Buckets)
         {
             AddFolder(result, Path.Combine(presetRoot, RootFolderName, FolderConditions, folder), scope, bucket);
         }
