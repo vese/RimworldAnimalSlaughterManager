@@ -144,15 +144,20 @@ public static class PresetRepository
 
         if (file.Scope is PresetScope.All or PresetScope.Kind)
         {
-            var rules = ReadKindSettings(file, targetDef) is { } kind
-                ? bucket switch
-                {
-                    (true, true) => kind.Priorities.PriorityRulesAdultMale,
-                    (true, false) => kind.Priorities.PriorityRulesYoungMale,
-                    (false, true) => kind.Priorities.PriorityRulesAdultFemale,
-                    _ => kind.Priorities.PriorityRulesYoungFemale
-                }
-                : null;
+            var kindSettings = ReadKindSettings(file, targetDef);
+
+            if (kindSettings is null)
+            {
+                return null;
+            }
+
+            var rules = bucket switch
+            {
+                (true, true) => kindSettings.Priorities.PriorityRulesAdultMale,
+                (true, false) => kindSettings.Priorities.PriorityRulesYoungMale,
+                (false, true) => kindSettings.Priorities.PriorityRulesAdultFemale,
+                (false, false) => kindSettings.Priorities.PriorityRulesYoungFemale
+            };
 
             return rules is { Count: > 0 } ? new PriorityListPreset { Rules = rules } : null;
         }
@@ -167,7 +172,7 @@ public static class PresetRepository
     {
         var file = GetFile(entry);
 
-        if (file.Scope == PresetScope.SpecialList)
+        if (file.Scope is PresetScope.SpecialList)
         {
             return PresetConverterFactory.GetConverter<SpecialListPreset>(file.Version)?.ToModel(file);
         }
@@ -176,9 +181,12 @@ public static class PresetRepository
         {
             var specials = ReadKindSettings(file, targetDef)?.SpecialSettings;
 
-            return specials is { Count: > 0 }
-                ? new SpecialListPreset { Sections = [.. specials.SelectMany(kv => V2SpecialSettingsMapper.ToSections(kv.Key, kv.Value)) ] }
-                : null;
+            return specials is { Count: > 0 } ?
+                new SpecialListPreset
+                {
+                    Sections = [.. specials.SelectMany(kv => V2SpecialSettingsMapper.ToSections(kv.Key, kv.Value)) ]
+                } :
+                null;
         }
 
         return null;
@@ -196,11 +204,16 @@ public static class PresetRepository
 
     private static KindPreset? ReadKindSettings(PresetFile file, ThingDef targetDef)
     {
+        if (file.Scope is PresetScope.Kind)
+        {
+            return PresetConverterFactory.GetConverter<KindPreset>(file.Version)?.ToModel(file, targetDef);
+        }
+
         if (file.Scope is PresetScope.All)
         {
             return ReadAllKindsSettings(file)?.Kinds.FirstOrDefault(k => k.AnimalDefName == targetDef.defName);
         }
 
-        return PresetConverterFactory.GetConverter<KindPreset>(file.Version)?.ToModel(file, targetDef);
+        return null;
     }
 }
