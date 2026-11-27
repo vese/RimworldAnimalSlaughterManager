@@ -165,7 +165,7 @@ public static class PresetRepository
     /// <summary>A priority rule list of a PriorityList preset, or the rule-bucket slice of a
     /// Kind/All preset (cross-scope import); the version-1 formats migrate into the model.
     /// Null when nothing readable.</summary>
-    public static PriorityListPresetFile? ReadPriorityList(PresetEntry entry)
+    public static PriorityListPresetFile? ReadPriorityList(PresetEntry entry, ThingDef targetDef)
     {
         var text = Store.ReadText(entry.path);
         var file = PresetSerializer.ReadPreset(text);
@@ -177,20 +177,20 @@ public static class PresetRepository
                 return PresetSerializer.ReadContent<PriorityListPresetFile>(file);
             }
 
-            var slice = KindSliceOf(file);
+            var slice = KindSliceOf(file, targetDef);
 
             return slice == null ? null : RuleBucketOf(slice);
         }
 
 #pragma warning disable CS0618
-        return LegacyPresets.TryReadPriorityList(entry, text);
+        return LegacyPresets.TryReadPriorityList(entry, text, targetDef);
 #pragma warning restore CS0618
     }
 
     /// <summary>A special-settings list of a SpecialList preset, or the sections slice of a
     /// Kind/All preset (cross-scope import); the version-1 format migrates into the model.
     /// Null when nothing readable.</summary>
-    public static SpecialListPresetFile? ReadSpecialList(PresetEntry entry)
+    public static SpecialListPresetFile? ReadSpecialList(PresetEntry entry, ThingDef targetDef)
     {
         var text = Store.ReadText(entry.path);
         var file = PresetSerializer.ReadPreset(text);
@@ -202,21 +202,23 @@ public static class PresetRepository
                 return PresetSerializer.ReadContent<SpecialListPresetFile>(file);
             }
 
-            var slice = KindSliceOf(file);
+            var slice = KindSliceOf(file, targetDef);
 
             return slice == null ? null : SectionsSliceOf(slice);
         }
 
 #pragma warning disable CS0618
-        return LegacyPresets.TryReadSpecialList(text);
+        return LegacyPresets.TryReadSpecialList(text, targetDef);
 #pragma warning restore CS0618
     }
 
-    // The kind slice a list import takes: a Kind preset's own kind, an All preset's first one.
-    private static KindPresetFile? KindSliceOf(PresetFile file) =>
+    // The kind slice a list import takes: a Kind preset's own kind (its defName is the SOURCE
+    // kind — the import applies to the TARGET kind), an All preset's slice of the target kind.
+    private static KindPresetFile? KindSliceOf(PresetFile file, ThingDef targetDef) =>
         file.Scope == PresetScope.Kind
             ? PresetSerializer.ReadContent<KindPresetFile>(file)
-            : PresetSerializer.ReadContent<AllKindsPresetFile>(file)?.Kinds.FirstOrDefault();
+            : PresetSerializer.ReadContent<AllKindsPresetFile>(file)?.Kinds
+                .FirstOrDefault(k => k.Kind.AnimalDefName == targetDef.defName);
 
     // The first non-empty rule bucket of a kind slice (a priority-list import); null when none.
     private static PriorityListPresetFile? RuleBucketOf(KindPresetFile file)

@@ -198,7 +198,7 @@ public class KindSlaughterPrioritiesTab(ISettingsProvider comp, ThingDef animalD
 
         if (Widgets.ButtonText(presetBtn, presetButtonText))
         {
-            Find.WindowStack.Add(new KindPrioritiesListPresetBrowserDialog(male, adult, settings.prioritySettings));
+            Find.WindowStack.Add(new KindPrioritiesListPresetBrowserDialog(animalDef, male, adult, settings.prioritySettings));
         }
 
         var clearButtonText = ASMKeys.ClearList.Translate();

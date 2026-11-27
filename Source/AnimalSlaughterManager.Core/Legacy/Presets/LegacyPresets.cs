@@ -148,17 +148,16 @@ public static class LegacyPresets
     }
 
     /// <summary>A priority rule list of a legacy file: the RulePresetDto format, the v1 unified
-    /// carrier's rule-bucket slice, or the condition-preset format; null when nothing
-    /// readable.</summary>
-    public static PriorityListPresetFile? TryReadPriorityList(PresetEntry entry, string? text)
+    /// carrier's rule-bucket slice of the target kind, or the condition-preset format; null
+    /// when nothing readable.</summary>
+    public static PriorityListPresetFile? TryReadPriorityList(PresetEntry entry, string? text, ThingDef targetDef)
     {
         switch (RootElementOf(text))
         {
             case RuleRoot:
                 return FromRules(V1Rules(ReadRulePreset(text)));
             case PresetRoot:
-                // The v1 unified carrier: the first kind's rule-bucket slice.
-                var kind = ReadV1Kinds(text)?.FirstOrDefault();
+                var kind = ReadV1Kinds(text)?.FirstOrDefault(k => k.AnimalDefName == targetDef.defName);
 
                 return kind == null ? null : RuleBucketOf(new KindPresetFile { Kind = kind });
             default:
@@ -166,11 +165,11 @@ public static class LegacyPresets
         }
     }
 
-    /// <summary>A special-settings list of a legacy file: the v1 unified carrier's first kind's
-    /// sections; null when nothing readable.</summary>
-    public static SpecialListPresetFile? TryReadSpecialList(string? text)
+    /// <summary>A special-settings list of a legacy file: the v1 unified carrier's sections
+    /// slice of the target kind; null when nothing readable.</summary>
+    public static SpecialListPresetFile? TryReadSpecialList(string? text, ThingDef targetDef)
     {
-        var kind = ReadV1Kinds(text)?.FirstOrDefault();
+        var kind = ReadV1Kinds(text)?.FirstOrDefault(k => k.AnimalDefName == targetDef.defName);
 
         return kind == null ? null : SectionsSliceOf(new KindPresetFile { Kind = kind });
     }

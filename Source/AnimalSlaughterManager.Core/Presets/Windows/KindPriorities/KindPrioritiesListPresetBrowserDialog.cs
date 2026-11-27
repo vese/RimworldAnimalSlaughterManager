@@ -13,6 +13,7 @@ namespace ASM;
 public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
 {
     private readonly KindPrioritySettings prioritySettings;
+    private readonly ThingDef kind;
     private readonly bool male;
     private readonly bool adult;
     private readonly string bucket;
@@ -21,8 +22,9 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
 
     protected override bool HasData => prioritySettings.Get(male, adult).Count > 0;
 
-    public KindPrioritiesListPresetBrowserDialog(bool male, bool adult, KindPrioritySettings prioritySettings)
+    public KindPrioritiesListPresetBrowserDialog(ThingDef kind, bool male, bool adult, KindPrioritySettings prioritySettings)
     {
+        this.kind = kind;
         this.male = male;
         this.adult = adult;
         this.prioritySettings = prioritySettings;
@@ -49,7 +51,7 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
     {
         // A condition preset carries its rule list; a Kind/All preset — the slice of this
         // bucket (cross-bucket import included).
-        var dto = PresetRepository.ReadPriorityList(entry);
+        var dto = PresetRepository.ReadPriorityList(entry, kind);
 
         if (dto == null)
         {
