@@ -40,14 +40,14 @@ public static class PresetRepository
     // The scope folder is the enum value's own name.
     private static string ScopeFolder(PresetScope scope) => Path.Combine(RootFolder, scope.ToString());
 
-    /// <summary>Presets of one scope (SpecialList — every subfolder of its folder, PriorityList —
-    /// every condition bucket; both also read their version-1 folders), newest-first by file
-    /// write time.</summary>
+    /// <summary>Presets of one scope (the list scopes — every bucket subfolder, each entry
+    /// stamped with the folder name; both also read their version-1 folders), newest-first by
+    /// file write time.</summary>
     public static List<PresetEntry> ListPresets(PresetScope scope)
     {
         var result = new List<PresetEntry>();
 
-        void AddFolder(string dir, (bool Male, bool Adult)? bucket = null)
+        void AddFolder(string dir, string? bucket = null)
         {
             foreach (var p in Store.GetFiles(dir))
             {
@@ -57,34 +57,29 @@ public static class PresetRepository
                     path = p,
                     date = Store.GetLastWriteTime(p),
                     scope = scope,
-                    condBucket = bucket
+                    bucket = bucket
                 });
             }
         }
 
-        if (scope is PresetScope.SpecialList)
+        if (scope is PresetScope.PriorityList or PresetScope.SpecialList)
         {
+            // Every bucket folder (cross-bucket import).
             foreach (var sub in Store.GetFolders(ScopeFolder(scope)))
             {
-                AddFolder(sub);
+                AddFolder(sub, Path.GetFileName(sub));
             }
 
             // The version-1 shared List root.
 #pragma warning disable CS0618
-            LegacyListPresets.AddSpecialListPresets(result, RootFolder, scope);
-#pragma warning restore CS0618
-        }
-        else if (scope is PresetScope.PriorityList)
-        {
-            // Every condition bucket (cross-bucket import): all folders of the scope, stamped
-            // with the bucket the folder name maps to.
-            foreach (var sub in Store.GetFolders(ScopeFolder(scope)))
+            if (scope is PresetScope.SpecialList)
             {
-                AddFolder(sub, PriorityPresetBuckets.Buckets.TryGetValue(Path.GetFileName(sub), out var bucket) ? bucket : null);
+                LegacyListPresets.AddSpecialListPresets(result, RootFolder, scope);
             }
-
-#pragma warning disable CS0618
-            LegacyListPresets.AddConditionPresets(result, RootFolder, scope);
+            else
+            {
+                LegacyListPresets.AddConditionPresets(result, RootFolder, scope);
+            }
 #pragma warning restore CS0618
         }
         else

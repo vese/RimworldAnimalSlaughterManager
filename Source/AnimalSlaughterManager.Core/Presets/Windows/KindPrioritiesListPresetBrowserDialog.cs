@@ -15,6 +15,7 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
     private readonly KindPrioritySettings prioritySettings;
     private readonly bool male;
     private readonly bool adult;
+    private readonly string bucket;
 
     protected override IEnumerable<PresetScope> OfferedScopes => [PresetScope.PriorityList, PresetScope.Kind, PresetScope.All];
 
@@ -25,6 +26,7 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
         this.male = male;
         this.adult = adult;
         this.prioritySettings = prioritySettings;
+        bucket = PriorityPresetBuckets.GetBucket((male, adult));
         targetLabel = GetBucketLabel(male, adult);
         optionalTitle = ASMKeys.CondPresetTitle.Translate(targetLabel);
     }
@@ -41,7 +43,7 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
         name,
         PresetScope.PriorityList,
         ListPresetFile.OfRules(prioritySettings.ToPreset((male, adult))),
-        PriorityPresetBuckets.GetBucket((male, adult)));
+        bucket);
 
     protected override bool Apply(PresetEntry entry)
     {
@@ -72,7 +74,7 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
             return ASMKeys.PresetKindMark.Translate();
         }
 
-        if (entry.scope == PresetScope.PriorityList && entry.condBucket is { } b && b != (male, adult))
+        if (entry.scope == PresetScope.PriorityList && entry.bucket != bucket && PriorityPresetBuckets.Buckets.TryGetValue(entry.bucket ?? "", out var b))
         {
             return GetBucketLabel(b.Male, b.Adult);
         }
@@ -86,5 +88,5 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
             : null;
 
     protected override bool CanOverwrite(PresetEntry entry) =>
-        entry.scope == PresetScope.PriorityList && entry.condBucket == (male, adult) && HasData;
+        entry.scope == PresetScope.PriorityList && entry.bucket == bucket && HasData;
 }

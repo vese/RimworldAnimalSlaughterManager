@@ -31,25 +31,25 @@ public static class LegacyListPresets
                 continue;
             }
 
-            AddFolder(result, sub, scope);
+            AddFolder(result, sub, scope, Path.GetFileName(sub));
         }
     }
 
     /// <summary>Adds the v1 condition presets of every bucket folder
-    /// (<c>List/Conditions/&lt;folder&gt;</c>), stamped with the bucket.</summary>
+    /// (<c>List/Conditions/&lt;folder&gt;</c>), stamped with the folder name.</summary>
     public static void AddConditionPresets(List<PresetEntry> result, string presetRoot, PresetScope scope)
     {
-        foreach (var (folder, bucket) in PriorityPresetBuckets.Buckets)
+        foreach (var sub in Store.GetFolders(Path.Combine(presetRoot, RootFolderName, FolderConditions)))
         {
-            AddFolder(result, Path.Combine(presetRoot, RootFolderName, FolderConditions, folder), scope, bucket);
+            AddFolder(result, sub, scope, Path.GetFileName(sub));
         }
     }
 
-    private static void AddFolder(List<PresetEntry> result, string dir, PresetScope scope, (bool Male, bool Adult)? bucket = null)
+    private static void AddFolder(List<PresetEntry> result, string dir, PresetScope scope, string? bucket = null)
     {
         foreach (var p in Store.GetFiles(dir))
         {
-            result.Add(new PresetEntry { name = Path.GetFileNameWithoutExtension(p), path = p, date = Store.GetLastWriteTime(p), scope = scope, condBucket = bucket });
+            result.Add(new PresetEntry { name = Path.GetFileNameWithoutExtension(p), path = p, date = Store.GetLastWriteTime(p), scope = scope, bucket = bucket });
         }
     }
 }
