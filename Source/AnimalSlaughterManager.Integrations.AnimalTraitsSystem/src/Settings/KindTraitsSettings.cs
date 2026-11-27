@@ -20,9 +20,9 @@ public interface IEditableTraitsRuleSet<T> : IPresettableRuleSet where T : ITrai
     void RemoveAt(int i);
     void ReplaceAt(int i, List<HediffDef> items);
 
-    ListPresetFile ToPreset();
+    SpecialListPresetFile ToPreset();
 
-    bool FromPreset(ListPresetFile dto);
+    bool FromPreset(SpecialListPresetFile dto);
 }
 
 public abstract class KindTraitsRuleSet<T> : IEditableTraitsRuleSet<T> where T : ITraitRule
@@ -38,14 +38,14 @@ public abstract class KindTraitsRuleSet<T> : IEditableTraitsRuleSet<T> where T :
     public abstract ITraitRulesListSection<T> GetEditor();
 
     /// <summary>The rule set as a list preset: the section element is the payload.</summary>
-    public ListPresetFile ToPreset()
+    public SpecialListPresetFile ToPreset()
     {
         var holder = PresetSectionSerialization.Holder();
         WriteXml(holder);
-        return ListPresetFile.OfSections(PresetSectionSerialization.Children(holder));
+        return SpecialListPresetFile.OfSections(PresetSectionSerialization.Children(holder));
     }
 
-    public bool FromPreset(ListPresetFile dto)
+    public bool FromPreset(SpecialListPresetFile dto)
     {
         var kind = PresetSectionSerialization.Wrap([.. dto.Sections]);
 

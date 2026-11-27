@@ -42,21 +42,21 @@ public class KindPrioritiesListPresetBrowserDialog : BasePresetBrowserDialog
     protected override void Save(string name) => PresetRepository.Save(
         name,
         PresetScope.PriorityList,
-        ListPresetFile.OfRules(prioritySettings.ToPreset((male, adult))),
+        PriorityListPresetFile.OfRules(prioritySettings.ToPreset((male, adult))),
         bucket);
 
     protected override bool Apply(PresetEntry entry)
     {
         // A condition preset carries its rule list; a Kind/All preset — the slice of this
         // bucket (cross-bucket import included).
-        var dto = PresetRepository.ReadList(entry);
+        var dto = PresetRepository.ReadPriorityList(entry);
 
         if (dto == null)
         {
             return false;
         }
 
-        prioritySettings.FromPreset(dto.ToRuleList(), (male, adult));
+        prioritySettings.FromPreset(dto.Rules, (male, adult));
         return true;
     }
 

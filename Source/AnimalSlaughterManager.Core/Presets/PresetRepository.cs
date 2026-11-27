@@ -162,45 +162,74 @@ public static class PresetRepository
 #pragma warning restore CS0618
     }
 
-    /// <summary>A rule list of a List-scope preset, or the list slice of a Kind/All preset
-    /// (cross-scope import); the version-1 formats migrate into the model. The payload is
-    /// opaque — the owning settings class reads it. Null when nothing readable.</summary>
-    public static ListPresetFile? ReadList(PresetEntry entry)
+    /// <summary>A priority rule list of a PriorityList preset, or the rule-bucket slice of a
+    /// Kind/All preset (cross-scope import); the version-1 formats migrate into the model.
+    /// Null when nothing readable.</summary>
+    public static PriorityListPresetFile? ReadPriorityList(PresetEntry entry)
     {
         var text = Store.ReadText(entry.path);
         var file = PresetSerializer.ReadPreset(text);
 
         if (file != null)
         {
-            // The metadata routes the content: a list preset carries it directly, a Kind/All
-            // preset — its slice (cross-scope import).
-            if (file.Scope is PresetScope.PriorityList or PresetScope.SpecialList)
+            if (file.Scope == PresetScope.PriorityList)
             {
-                return PresetSerializer.ReadContent<ListPresetFile>(file);
+                return PresetSerializer.ReadContent<PriorityListPresetFile>(file);
             }
 
-            var slice = file.Scope == PresetScope.Kind
-                ? PresetSerializer.ReadContent<KindPresetFile>(file)
-                : PresetSerializer.ReadContent<AllKindsPresetFile>(file)?.Kinds.FirstOrDefault();
+            var slice = KindSliceOf(file);
 
-            return slice == null ? null : ListSliceOf(slice);
+            return slice == null ? null : RuleBucketOf(slice);
         }
 
 #pragma warning disable CS0618
-        return LegacyPresets.TryReadList(entry, text);
+        return LegacyPresets.TryReadPriorityList(entry, text);
 #pragma warning restore CS0618
     }
 
-    // The list payload of a kind slice: the first non-empty rule bucket, or the raw
-    // integration sections (a special-settings list); null when neither.
-    private static ListPresetFile? ListSliceOf(KindPresetFile file)
+    /// <summary>A special-settings list of a SpecialList preset, or the sections slice of a
+    /// Kind/All preset (cross-scope import); the version-1 format migrates into the model.
+    /// Null when nothing readable.</summary>
+    public static SpecialListPresetFile? ReadSpecialList(PresetEntry entry)
     {
-        var typed = new[] { file.Kind.Priorities.PrioRulesAdultMale, file.Kind.Priorities.PrioRulesYoungMale, file.Kind.Priorities.PrioRulesAdultFemale, file.Kind.Priorities.PrioRulesYoungFemale }
+        var text = Store.ReadText(entry.path);
+        var file = PresetSerializer.ReadPreset(text);
+
+        if (file != null)
+        {
+            if (file.Scope == PresetScope.SpecialList)
+            {
+                return PresetSerializer.ReadContent<SpecialListPresetFile>(file);
+            }
+
+            var slice = KindSliceOf(file);
+
+            return slice == null ? null : SectionsSliceOf(slice);
+        }
+
+#pragma warning disable CS0618
+        return LegacyPresets.TryReadSpecialList(text);
+#pragma warning restore CS0618
+    }
+
+    // The kind slice a list import takes: a Kind preset's own kind, an All preset's first one.
+    private static KindPresetFile? KindSliceOf(PresetFile file) =>
+        file.Scope == PresetScope.Kind
+            ? PresetSerializer.ReadContent<KindPresetFile>(file)
+            : PresetSerializer.ReadContent<AllKindsPresetFile>(file)?.Kinds.FirstOrDefault();
+
+    // The first non-empty rule bucket of a kind slice (a priority-list import); null when none.
+    private static PriorityListPresetFile? RuleBucketOf(KindPresetFile file)
+    {
+        var rules = new[] { file.Kind.Priorities.PrioRulesAdultMale, file.Kind.Priorities.PrioRulesYoungMale, file.Kind.Priorities.PrioRulesAdultFemale, file.Kind.Priorities.PrioRulesYoungFemale }
             .FirstOrDefault(rules => rules.Count > 0);
 
-        return typed != null ? new ListPresetFile { Rules = typed }
-            : file.Kind.SpecialSettings.Count > 0 ? ListPresetFile.OfSections(KindPresetFileSections.SectionsOf(file)) : null;
+        return rules == null ? null : new PriorityListPresetFile { Rules = rules };
     }
+
+    // The raw integration sections of a kind slice (a special-list import); null when none.
+    private static SpecialListPresetFile? SectionsSliceOf(KindPresetFile file) =>
+        file.Kind.SpecialSettings.Count > 0 ? SpecialListPresetFile.OfSections(KindPresetFileSections.SectionsOf(file)) : null;
 
     public static void Delete(PresetEntry entry)
     {
