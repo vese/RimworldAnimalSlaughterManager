@@ -103,8 +103,7 @@ public static class PresetRepository
     /// <summary>Writes a Settings preset model as a preset of the current format into its
     /// scope folder; a list preset goes into its bucket subfolder, and the bucket rides in the
     /// file's metadata too.</summary>
-    public static void Save<TModel>(string name, PresetScope scope, TModel model, string? bucket = null)
-        where TModel : class
+    public static void Save<TModel>(string name, PresetScope scope, TModel model, string? bucket = null) where TModel : class
     {
         var file = PresetConverterFactory.GetConverter<TModel>(PresetFormat.CurrentVersion)?.ToFile(model, scope, bucket)
             ?? throw new InvalidOperationException($"No converter registered for {typeof(TModel).Name}.");
