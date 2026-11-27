@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using Verse;
 
 namespace ASM;
 
@@ -100,7 +101,7 @@ public static class LegacyPresets
 
     /// <summary>The kind slices of a version-1 or older preset: the v1 carrier's own, or the
     /// old format's converted; null when the text is not a preset.</summary>
-    public static List<KindPreset>? ReadV1Kinds(string? text)
+    private static List<KindPreset>? ReadV1Kinds(string? text)
     {
         var dto = PresetSerializer.Deserialize<PresetDto>(text);
 
@@ -121,6 +122,30 @@ public static class LegacyPresets
     /// preset.</summary>
     public static AllKindsPreset? TryReadAll(string? text) =>
         ReadV1Kinds(text) is { } kinds ? new AllKindsPreset { Kinds = kinds } : null;
+
+    /// <summary>The version-1 preset's kind slice: from an All-scope file the kind matching
+    /// the target, otherwise the single kind; null when nothing applies.</summary>
+    public static KindPresetFile? TryReadKind(PresetEntry entry, string? text, ThingDef targetDef)
+    {
+        var kinds = ReadV1Kinds(text);
+
+        if (kinds == null || kinds.Count == 0)
+        {
+            return null;
+        }
+
+        if (entry.scope == PresetScope.All)
+        {
+            // Find the slice for the target kind; if absent, nothing applies.
+            var match = kinds.FirstOrDefault(k => k.AnimalDefName == targetDef.defName);
+
+            return match == null ? null : new KindPresetFile { Kind = match };
+        }
+
+        // Kind- and List-scope presets store a single kind whose defName is the SOURCE kind —
+        // on apply we ignore it and use the list/settings for the TARGET kind.
+        return new KindPresetFile { Kind = kinds[0] };
+    }
 
     /// <summary>A rule list of a legacy file: the RulePresetDto format, the v1 unified
     /// carrier's kind slice, or the condition-preset format; null when nothing readable.</summary>

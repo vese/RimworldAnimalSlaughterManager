@@ -150,25 +150,8 @@ public static class PresetRepository
         }
 
 #pragma warning disable CS0618
-        var kinds = LegacyPresets.ReadV1Kinds(text);
+        return LegacyPresets.TryReadKind(entry, text, targetDef);
 #pragma warning restore CS0618
-
-        if (kinds == null || kinds.Count == 0)
-        {
-            return null;
-        }
-
-        if (entry.scope == PresetScope.All)
-        {
-            // Find the slice for the target kind; if absent, nothing applies.
-            var match = kinds.FirstOrDefault(k => k.AnimalDefName == targetDef.defName);
-
-            return match == null ? null : new KindPresetFile { Kind = match };
-        }
-
-        // Kind- and List-scope presets store a single kind whose defName is the SOURCE kind —
-        // on apply we ignore it and use the list/settings for the TARGET kind.
-        return new KindPresetFile { Kind = kinds[0] };
     }
 
     /// <summary>A rule list of a List-scope preset, or the list slice of a Kind/All preset
