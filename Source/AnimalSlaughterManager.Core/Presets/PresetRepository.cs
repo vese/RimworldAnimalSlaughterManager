@@ -44,25 +44,20 @@ public static class PresetRepository
     private static string ScopeFolder(PresetScope scope) =>
         scope is PresetScope.PriorityList or PresetScope.SpecialList ? ListFolder : Path.Combine(RootFolder, scope.ToString());
 
-    /// <summary>Presets of one scope (List covers every rule-set subfolder), newest-first by file write time.</summary>
+    /// <summary>Presets of one scope (SpecialList — every non-core subfolder of the List root,
+    /// PriorityList — every condition bucket), newest-first by file write time.</summary>
     public static List<PresetEntry> ListPresets(PresetScope scope)
     {
         var result = new List<PresetEntry>();
 
-        void AddFolder(string dir)
+        void AddFolder(string dir, (bool Male, bool Adult)? bucket = null)
         {
             foreach (var p in Store.GetFiles(dir))
             {
-                result.Add(new PresetEntry
-                {
-                    name = Path.GetFileNameWithoutExtension(p),
-                    path = p,
-                    date = Store.GetLastWriteTime(p),
-                    scope = scope
-                });
+                result.Add(new PresetEntry { name = Path.GetFileNameWithoutExtension(p), path = p, date = Store.GetLastWriteTime(p), scope = scope, condBucket = bucket });
             }
         }
-        
+
         if (scope is PresetScope.SpecialList)
         {
             // The special lists own every subfolder of the List root as it is on disk, except
@@ -74,6 +69,14 @@ public static class PresetRepository
                     AddFolder(sub);
                 }
             }
+        }
+        else if (scope is PresetScope.PriorityList)
+        {
+            // Every condition bucket (cross-bucket import).
+            AddFolder(CondFolder((true, true)), (true, true));
+            AddFolder(CondFolder((true, false)), (true, false));
+            AddFolder(CondFolder((false, true)), (false, true));
+            AddFolder(CondFolder((false, false)), (false, false));
         }
         else
         {
@@ -236,27 +239,6 @@ public static class PresetRepository
     private static List<BasePriorityRule>? V1Rules(List<PriorityRuleDto>? dtos) =>
         dtos?.Select(r => r.ToRule()).Where(r => r != null).ToList();
 #pragma warning restore CS0618
-
-    public static List<PresetEntry> ListConditionPresets()
-    {
-        var result = new List<PresetEntry>();
-
-        void AddFolder(string dir, (bool Male, bool Adult)? bucket)
-        {
-            foreach (var p in Store.GetFiles(dir))
-            {
-                result.Add(new PresetEntry { name = Path.GetFileNameWithoutExtension(p), path = p, date = Store.GetLastWriteTime(p), scope = PresetScope.PriorityList, condBucket = bucket });
-            }
-        }
-
-        // Every condition bucket (cross-bucket import).
-        AddFolder(CondFolder((true, true)), (true, true));
-        AddFolder(CondFolder((true, false)), (true, false));
-        AddFolder(CondFolder((false, true)), (false, true));
-        AddFolder(CondFolder((false, false)), (false, false));
-
-        return result.OrderByDescending(e => e.date).ThenBy(e => e.name).ToList();
-    }
 
     public static void Delete(PresetEntry entry)
     {
