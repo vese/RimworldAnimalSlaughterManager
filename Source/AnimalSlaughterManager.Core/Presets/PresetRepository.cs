@@ -123,26 +123,12 @@ public static class PresetRepository
     }
 
     /// <summary>The full preset model; the version-1 formats migrate into it.</summary>
-    public static AllKindsPreset? ReadAllKindsSettings(PresetEntry entry) => ReadAllKindsSettings(GetFile(entry), entry);
-
-    private static AllKindsPreset? ReadAllKindsSettings(PresetFile file, PresetEntry entry) =>
-        PresetConverterFactory.GetConverter<AllKindsPreset>(file.Version)?.ToModel(file);
+    public static AllKindsPreset? ReadAllKindsSettings(PresetEntry entry) => ReadAllKindsSettings(GetFile(entry));
 
     /// <summary>The preset's kind slice: Kind-scope presets carry the single kind, All-scope
     /// presets the slice matching the target def. The caller applies it to the settings itself.</summary>
     public static KindPreset? ReadKindSettings(PresetEntry entry, ThingDef targetDef) =>
-        ReadKindSettings(GetFile(entry), entry, targetDef);
-
-    private static KindPreset? ReadKindSettings(PresetFile file, PresetEntry entry, ThingDef targetDef)
-    {
-        if (file.Scope is PresetScope.All)
-        {
-            return PresetConverterFactory.GetConverter<AllKindsPreset>(file.Version)?.ToModel(file)
-                ?.Kinds.FirstOrDefault(k => k.AnimalDefName == targetDef.defName);
-        }
-
-        return PresetConverterFactory.GetConverter<KindPreset>(file.Version)?.ToModel(file, targetDef);
-    }
+        ReadKindSettings(GetFile(entry), targetDef);
 
     /// <summary>A priority rule list of a PriorityList preset, or the matching bucket's slice
     /// of a Kind/All preset (cross-scope import); the version-1 formats migrate into the
@@ -167,7 +153,7 @@ public static class PresetRepository
 
         if (file.Scope is PresetScope.All or PresetScope.Kind)
         {
-            var rules = ReadKindSettings(file, entry, targetDef) is { } kind
+            var rules = ReadKindSettings(file, targetDef) is { } kind
                 ? bucket switch
                 {
                     (true, true) => kind.Priorities.PriorityRulesAdultMale,
@@ -204,7 +190,7 @@ public static class PresetRepository
 
         if (file.Scope is PresetScope.All or PresetScope.Kind)
         {
-            var specials = ReadKindSettings(file, entry, targetDef)?.SpecialSettings;
+            var specials = ReadKindSettings(file, targetDef)?.SpecialSettings;
 
             return specials is { Count: > 0 }
                 ? new SpecialListPreset { Sections = [.. specials.SelectMany(kv => V2SpecialSettingsMapper.ToSections(kv.Key, kv.Value)) ] }
@@ -214,14 +200,23 @@ public static class PresetRepository
         return null;
     }
 
-    // ---- Helpers -------------------------------------------------------------------------
-
-    /// <summary>The entry's file form: the current format's envelope, or a synthesized one for
-    /// a version-1 file (Version 1, the raw text as the content).</summary>
     private static PresetFile GetFile(PresetEntry entry)
     {
         var text = Store.ReadText(entry.path);
 
-        return PresetSerializer.ReadPreset(text) ?? new PresetFile { Version = 1, Scope = entry.scope, Content = text };
+        return PresetSerializer.ReadPreset(text) ?? new PresetFile { Version = 1, Scope = entry.scope, Content = text ?? string.Empty };
+    }
+
+    private static AllKindsPreset? ReadAllKindsSettings(PresetFile file) =>
+        PresetConverterFactory.GetConverter<AllKindsPreset>(file.Version)?.ToModel(file);
+
+    private static KindPreset? ReadKindSettings(PresetFile file, ThingDef targetDef)
+    {
+        if (file.Scope is PresetScope.All)
+        {
+            return ReadAllKindsSettings(file)?.Kinds.FirstOrDefault(k => k.AnimalDefName == targetDef.defName);
+        }
+
+        return PresetConverterFactory.GetConverter<KindPreset>(file.Version)?.ToModel(file, targetDef);
     }
 }
