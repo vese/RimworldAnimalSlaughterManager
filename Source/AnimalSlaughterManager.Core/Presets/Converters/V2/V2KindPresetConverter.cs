@@ -60,7 +60,7 @@ public class V2KindPresetConverter : IV2PresetConverter<KindPreset>
 
         foreach (var v2 in content.SpecialSettings)
         {
-            if (PresetContentSerializers.ToSettings(v2) is BaseSpecialSettingsPreset settings)
+            if (V2Conversion.ToSettings(v2) is BaseSpecialSettingsPreset settings)
             {
                 model.SpecialSettings[v2.Key] = settings;
             }
@@ -70,11 +70,11 @@ public class V2KindPresetConverter : IV2PresetConverter<KindPreset>
     }
 
     private static List<V2RulePreset> ToV2Rules(List<BasePriorityRulePreset> rules) =>
-        [.. rules.Select(r => PresetContentSerializers.ToV2(r)).OfType<V2RulePreset>()];
+        [.. rules.Select(r => V2Conversion.ToV2(r)).OfType<V2RulePreset>()];
 
     private static List<BasePriorityRulePreset> ToSettingsRules(List<V2RulePreset> rules) =>
-        [.. rules.Select(r => PresetContentSerializers.ToSettings(r)).OfType<BasePriorityRulePreset>()];
+        [.. rules.Select(r => V2Conversion.ToSettings(r)).OfType<BasePriorityRulePreset>()];
 
     private static V2SpecialSettingsPreset? ToV2Special(KeyValuePair<string, BaseSpecialSettingsPreset> kv) =>
-        PresetContentSerializers.ToV2(kv.Value) is V2SpecialSettingsPreset v2 ? v2.WithKey(kv.Key) : null;
+        V2Conversion.ToV2(kv.Value) is V2SpecialSettingsPreset v2 ? v2.WithKey(kv.Key) : null;
 }

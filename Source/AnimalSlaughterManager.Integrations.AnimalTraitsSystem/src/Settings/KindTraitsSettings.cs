@@ -37,35 +37,38 @@ public abstract class KindTraitsRuleSet<T> : IEditableTraitsRuleSet<T> where T :
 
     public abstract ITraitRulesListSection<T> GetEditor();
 
-    /// <summary>The rule set as a list preset: the section element is the payload.</summary>
+    /// <summary>The rule set as a list preset: its own list of the provider's settings model
+    /// (the other lists stay untouched — the per-list semantics).</summary>
     public SpecialListPreset ToPreset()
     {
-        var holder = PresetSectionSerialization.Holder();
-        WriteXml(holder);
-        return new SpecialListPreset { Sections = [.. PresetSectionSerialization.Children(holder)] };
+        var traits = new TraitsPreset();
+        WriteTraits(traits);
+
+        return new SpecialListPreset { Settings = { [KindTraitsSettings.SettingsKey] = traits } };
     }
 
     public bool FromPreset(SpecialListPreset dto)
     {
-        var kind = PresetSectionSerialization.Wrap([.. dto.Sections]);
-
-        if (!ReadXml(kind))
+        if (dto.Settings.TryGetValue(KindTraitsSettings.SettingsKey, out var settings) && settings is TraitsPreset traits)
         {
-            return false;
+            ReadTraits(traits);
+            SettingsChangeTracker.Raise();
+
+            return true;
         }
 
-        SettingsChangeTracker.Raise();
-        return true;
+        return false;
     }
 
 
     public abstract string PresetsFolder { get; }
 
-    public abstract string ListElementName { get; }
 
-    public abstract void WriteXml(XmlElement parent);
+    /// <summary>Fills the settings model with this rule set's own list.</summary>
+    protected internal abstract void WriteTraits(TraitsPreset preset);
 
-    public abstract bool ReadXml(XmlElement kind);
+    /// <summary>Replaces this rule set's rules with its own list of the settings model.</summary>
+    protected internal abstract void ReadTraits(TraitsPreset preset);
 
     public void Clear()
     {
@@ -299,33 +302,22 @@ public class ProtectRuleSet() : KindTraitsRuleSet<TraitProtectRule>
 
     public override string PresetsFolder => "Keep";
 
-    public override string ListElementName => nameof(TraitsSectionDto.KeepTraits);
-
-    public override void WriteXml(XmlElement parent)
+    protected internal override void WriteTraits(TraitsPreset preset)
     {
-        PresetSectionSerialization.Serialize(parent, new KeepTraitsListDto { Trait = rules.Select(TraitDto.From).ToList() });
+        preset.KeepTraits = rules.Select(TraitDto.From).ToList();
     }
 
-    public override bool ReadXml(XmlElement kind)
+    protected internal override void ReadTraits(TraitsPreset preset)
     {
-        var list = kind[ListElementName];
-
-        if (list == null)
-        {
-            return false;
-        }
-
         rules.Clear();
 
-        foreach (var t in (PresetSectionSerialization.Deserialize<KeepTraitsListDto>(list)?.Trait ?? []).Select(t => t.ToTarget()))
+        foreach (var t in preset.KeepTraits.Select(t => t.ToTarget()))
         {
             if (t != null)
             {
                 rules.Add(t);
             }
         }
-
-        return true;
     }
 }
 
@@ -335,32 +327,21 @@ public class ForceCullRuleSet() : KindTraitsRuleSet<TraitRule>
 
     public override string PresetsFolder => "ForceCull";
 
-    public override string ListElementName => nameof(TraitsSectionDto.ForceCullTraits);
-
-    public override void WriteXml(XmlElement parent)
+    protected internal override void WriteTraits(TraitsPreset preset)
     {
-        PresetSectionSerialization.Serialize(parent, new ForceCullTraitsListDto { Trait = rules.Select(TraitDto.From).ToList() });
+        preset.ForceCullTraits = rules.Select(TraitDto.From).ToList();
     }
 
-    public override bool ReadXml(XmlElement kind)
+    protected internal override void ReadTraits(TraitsPreset preset)
     {
-        var list = kind[ListElementName];
-
-        if (list == null)
-        {
-            return false;
-        }
-
         rules.Clear();
 
-        foreach (var c in (PresetSectionSerialization.Deserialize<ForceCullTraitsListDto>(list)?.Trait ?? []).Select(t => t.ToCull()))
+        foreach (var c in preset.ForceCullTraits.Select(t => t.ToCull()))
         {
             if (c != null)
             {
                 rules.Add(c);
             }
         }
-
-        return true;
     }
 }

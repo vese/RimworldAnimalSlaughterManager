@@ -181,12 +181,7 @@ public static class PresetRepository
         {
             var specials = ReadKindSettings(file, targetDef)?.SpecialSettings;
 
-            return specials is { Count: > 0 } ?
-                new SpecialListPreset
-                {
-                    Sections = [.. specials.SelectMany(kv => PresetContentSerializers.ToChildElements(kv.Value)) ]
-                } :
-                null;
+            return specials is { Count: > 0 } ? new SpecialListPreset { Settings = specials } : null;
         }
 
         return null;

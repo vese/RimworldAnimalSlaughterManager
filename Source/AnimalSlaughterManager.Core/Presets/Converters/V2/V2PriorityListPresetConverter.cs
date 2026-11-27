@@ -14,11 +14,11 @@ public class V2PriorityListPresetConverter : IV2PresetConverter<PriorityListPres
         Scope = scope,
         Bucket = bucket,
         Type = nameof(V2PriorityListPreset),
-        Content = PresetSerializer.SerializeContent(new V2PriorityListPreset { Rules = [.. model.Rules.Select(r => PresetContentSerializers.ToV2(r)).OfType<V2RulePreset>()] })
+        Content = PresetSerializer.SerializeContent(new V2PriorityListPreset { Rules = [.. model.Rules.Select(r => V2Conversion.ToV2(r)).OfType<V2RulePreset>()] })
     };
 
     public PriorityListPreset? ToModel(PresetFile file, ThingDef? targetDef = null) =>
         PresetSerializer.DeserializeContent<V2PriorityListPreset>(file) is { } content
-            ? new PriorityListPreset { Rules = [.. content.Rules.Select(r => PresetContentSerializers.ToSettings(r)).OfType<BasePriorityRulePreset>()] }
+            ? new PriorityListPreset { Rules = [.. content.Rules.Select(r => V2Conversion.ToSettings(r)).OfType<BasePriorityRulePreset>()] }
             : null;
 }

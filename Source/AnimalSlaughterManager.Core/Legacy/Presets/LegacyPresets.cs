@@ -188,11 +188,8 @@ public static class LegacyPresets
     {
         var kind = ReadV1Kinds(text)?.FirstOrDefault();
 
-        return kind == null ? null : GetSectionsSlice(kind);
+        return kind == null ? null : new SpecialListPreset { Settings = kind.SpecialSettings };
     }
-
-    private static SpecialListPreset? GetSectionsSlice(KindPreset file) =>
-        file.SpecialSettings.Count > 0 ? new SpecialListPreset { Sections = KindPresetFileSections.GetSections(file) } : null;
 
     /// <summary>Root element name of the file — identifies which of the historical formats it is.</summary>
     public static string? RootElementOf(string? text)

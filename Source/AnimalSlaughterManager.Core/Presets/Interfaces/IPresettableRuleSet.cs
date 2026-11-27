@@ -1,22 +1,8 @@
-using System.Xml;
-
 namespace ASM;
 
-/// <summary>
-/// A rule set that knows its own List-preset slot: the presets subfolder, its element name in
-/// a preset, and how to save/read its rules as that element.
-/// </summary>
+/// <summary>A rule set that knows its own List-preset slot: the presets subfolder it saves
+/// into.</summary>
 public interface IPresettableRuleSet
 {
     string PresetsFolder { get; }
-
-    /// <summary>Name of the list's element in a preset file.</summary>
-    string ListElementName { get; }
-
-    /// <summary>Appends the list's element with its rules under the parent.</summary>
-    void WriteXml(XmlElement parent);
-
-    /// <summary>Reads the rules from the list's element among the kind's children; true when
-    /// the element was there.</summary>
-    bool ReadXml(XmlElement kind);
 }
