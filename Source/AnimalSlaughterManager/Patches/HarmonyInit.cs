@@ -1,14 +1,14 @@
 using HarmonyLib;
 using Verse;
 
-namespace ASM
+namespace ASM;
+
+[StaticConstructorOnStartup]
+public static class ASM_HarmonyInit
 {
-    [StaticConstructorOnStartup]
-    public static class ASM_HarmonyInit
+    static ASM_HarmonyInit()
     {
-        static ASM_HarmonyInit()
-        {
-            new Harmony("vesilya.animalslaughtermanager").PatchAll();
-        }
+        var harmony = new Harmony("vesilya.animalslaughtermanager");
+        harmony.PatchAll(typeof(ASM_MapComp).Assembly);
     }
 }

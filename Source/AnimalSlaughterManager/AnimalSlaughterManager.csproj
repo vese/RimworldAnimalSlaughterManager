@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <!-- RimWorld 1.6 mods target .NET Framework 4.7.2 (Unity 2022.3 / Mono). -->
   <PropertyGroup>
@@ -23,6 +23,11 @@
     <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" PrivateAssets="all" />
     <!-- Harmony ships inside RimWorld; we only need it at compile time. -->
     <PackageReference Include="Lib.Harmony" Version="2.*" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AnimalSlaughterManager.Core\AnimalSlaughterManager.Core.csproj" />
+    <ProjectReference Include="..\AnimalSlaughterManager.Integrations.AnimalTraitsSystem\AnimalSlaughterManager.Integrations.AnimalTraitsSystem.csproj" />
   </ItemGroup>
 
 </Project>

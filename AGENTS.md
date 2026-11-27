@@ -4,19 +4,44 @@
 
 ```
 About/                         — метаданные мода
-Assemblies/                    — собранная DLL
+1.6/Assemblies/                — собранные DLL (мод, Core, ATS-интеграция)
 Languages/                     — переводы
 Defs/                          — PawnColumnDef (колонка защиты)
 Textures/                      — иконки (щит, шестерёнка)
-Source/AnimalSlaughterManager/ — исходники (.csproj + src/)
+Source/AnimalSlaughterManager/                  — точки входа: ASMMod, ASMSettings,
+                                                 HarmonyInit (применяет патчи Core), GlobalSuppressions
+Source/AnimalSlaughterManager.Core/            — ядро, фичи: Slaughter/ (движок забоя: MapComp,
+                                                 ListBuilder, Patches/, Windows/, Columns/),
+                                                 Settings/ (BasePreferenceSettings/ (база+панель
+                                                 предпочтений, Common-энумы),
+                                                 GlobalSettings/, KindSettings/ (KindPrioritySettings/
+                                                 — Rules/, Validation/, Presets/, Alerts/;
+                                                 KindPreferenceSettings/; SpecialSettings/ — вкладка
+                                                 «Особые правила» + контракты секций; Interfaces/,
+                                                 Presets/), Dialog/ (окно вида + Interfaces/ контракта
+                                                 таба, каркас вкладок, GeneralTab/, PrioritiesTab/)),
+                                                 Presets/ (IO + браузеры), Integrations/ (DI-реестр),
+                                                 Legacy/, Ui/ (Dropdown, ReorderableList), Translations/ (ASMKeys)
+Source/AnimalSlaughterManager.Integrations.AnimalTraitsSystem/ — ATS-интеграция (ссылается на Core)
 ```
+
+Core: верхний уровень — фичи, внутри фичи — по функциональности (настройки, пресеты, окна,
+UI-элементы фичи). Интерфейсы фичи — в `Interfaces/` соответствующего уровня; контракт лежит
+в `Interfaces/` фичи-потребителя (`Slaughter/Interfaces/` — движок, `KindSettings/Interfaces/` —
+данные интеграций в настройках вида, `KindSettings/SpecialSettings/Interfaces/` — секции вкладки
+«Особые правила», `Settings/Dialog/Interfaces/` — табы окна вида,
+`KindSettings/KindPrioritySettings/Interfaces/` — меню правил,
+`Legacy/Interfaces/`). Пресеты — отдельные модели per скоуп (`AllPresetDto`/`KindPresetDto`/`ListPresetDto`): To/FromPreset у владельцев (ASM_MapComp — полный, KindSettings — вида, KindPrioritySettings и специальные настройки — списков); репозиторий пишет DTO сериализатором текущей версии (`IVersionedPresetDto.version`) и читает по корню файла: новые корни — текущий формат, старые корни — машина чтения v1 (`PresetSerializer.ReadPreset` + Legacy) с миграцией в модели. Смену модели сопровождать bump `PresetFormat.CurrentVersion` + шагом миграции.
+Устаревшее — в `Legacy/` по фичам, всё внутри помечено `[Obsolete]` и изолировано за фасадами `LegacyPresets`/`LegacyListPresets`/`LegacyKindPriority` (v1-модели пресетов — там же, в `Legacy/Presets`): снаружи — вызовы в Core (`PresetRepository.ListPresets`/`ReadAll`/`ReadKind`/`ReadList`, `KindPrioritySettings.ExposeData`, `KindPresetFile.FromV1`) и реализация `ILegacyConditionConverter` в ATS; удаление Legacy = убрать эти точки (+ ATS-`LegacyTraitConditions`). Патчи лежат
+в Core, применяет их HarmonyInit главного проекта (`PatchAll()` без аргументов патчит только свою
+сборку).
 
 ## Сборка
 
 Мод — SDK-style .csproj, `net472` (RimWorld 1.6 = Unity 2022.3 / Mono), ссылается на API через NuGet **`Krafs.Rimworld.Ref` 1.6.\*** (reference-only, игра для сборки не нужна) и **`Lib.Harmony` 2.\*** (только компиляция; сама библиотека уже в игре).
 
 ```bash
-dotnet build Source/AnimalSlaughterManager/AnimalSlaughterManager.csproj -c Release   # DLL → Assemblies/
+dotnet build Source/AnimalSlaughterManager/AnimalSlaughterManager.csproj -c Release   # три DLL (сборка главного тянет все проекты)
 ```
 
 Собранные DLL коммитятся (в `.gitignore` исключены только `**/bin`, `**/obj`, `**/Assemblies/*.pdb|*.xml`). **Перед коммитом — собрать.**
@@ -47,18 +72,18 @@ ATS (`packageId = luved.animaltraits`), Steam-Workshop ID 3652630316. Исход
 
 ## Animal Slaughter Manager (`namespace ASM`)
 
-Структура `Source/AnimalSlaughterManager/src/` (C#-исходники): `Data/` (модели/энумы), `Comps/` (`ASM_MapComp`, `AnimalTraitsAccess`, `PresetIO`), `Patches/` (Harmony), `Windows/` (диалоги), `Columns/` (колонки вкладки Питомцы), `Alerts/` (Alert для конфликтов).
+Главный проект `Source/AnimalSlaughterManager/` — только точки входа: `ASMMod` (Mod: регистрация настроек, окно мода), `ASMSettings` (ModSettings: флаг логирования), `Patches/HarmonyInit` (применяет Harmony-патчи главного проекта и Core), `GlobalSuppressions`. Весь движок, окна и колонки — в Core.
 
 Ключевое:
 - **`ASM_MapComp.Recompute`** порядок: (1) vanilla per-config cull по лимитам с приоритетами по корзинам; (2) ATS force-cull; (3) forceCull-черты; (4) keep-trait защита (резервируется до забоя, входит в порог). Защита перевешивает forceCull.
 - **4 настройки возраста×пола** (глобальные, вкладка «Общие»): `globalMalePref` и т.д. — применяются ко всем видам как дефолтные. Per-kind override — на вкладке «Приоритеты».
-- **Списки условий приоритетов** (4 корзины: взрослые/молодые × самцы/самки): упорядоченные списки `SlaughterCondition` (верх = сохранение, низ = забой). Условия: беременность, привязанность, черта (наличие/отсутствие + наследуемость), болезнь, тренировка (не/обучено/полностью), положительные/отрицательные черты.
-- **`SlaughterCondition`**: `CondType` + `has` + `trait/disease/trainable` + `inheritMode`. `Matches(Pawn)` проверяет животное. Ранжирование: позиция в списке = приоритет.
+- **Списки правил приоритетов** (4 корзины: взрослые/молодые × самцы/самки): упорядоченные списки `BasePriorityRule` (верх = сохранение, низ = забой). Ванильные правила: беременность, привязанность, болезнь, тренировка; правила черт — из ATS-интеграции. Легаси-формат `SlaughterCondition` (`CondType` + `has` + defs + `inheritMode`) конвертируется при загрузке сейва/пресета; неизвестные ядру условия отдаются контрактам `ILegacyConditionConverter`.
+- Ранжирование: позиция в списке = приоритет.
 - **Валидация**: дубликаты и противоречия подсвечиваются (красный фон + Alert). Для тренировок: 2 из 3 состояний — нормально, все 3 или дубликаты — конфликт.
 - **Трёхзначная колонка беременных**: Never (галка) / Defer (пауза) / Always (галка). Defer: учитываются в пороге, но забиваются после родов.
 - **Яйцекладущие** считаются «беременными» (`CompEggLayer.eggProgress > 0` через рефлексию).
 - **Защита** (keep) и **принудительный забой** (forceCull) — на вкладке «Особые правила».
-- **Пресеты трёх уровней** (All/Kind/List): `Dialog_PresetBrowser` для черт, `Dialog_ConditionPresetBrowser` для списков условий. Сериализация в `<persistentDataPath>/AnimalSlaughterManagerPresets/`.
+- **Пресеты**: скоупы All/Kind + два вкуса списков (`PriorityList` — списки правил приоритетов, `SpecialList` — списки спец-настроек; вкусы друг к другу не применяются). Папки — по имени значения скоупа (`PriorityList/<корзина>`, `SpecialList/<вид списка>`); v1-раскладка `List/…` (общий корень из main) читается, но не пишется. По окну на скоуп на общем каркасе `BasePresetBrowserDialog` (зоны — `SearchRow`/`PresetList`/`EntryRow`/`SaveRow`). Сериализация в `<persistentDataPath>/AnimalSlaughterManagerPresets/`.
 
 ## Типичные правки / грабли
 

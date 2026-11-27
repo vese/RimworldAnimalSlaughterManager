@@ -136,7 +136,8 @@
   <ASM.NoPresetsFiltered>No matches</ASM.NoPresetsFiltered>
   <ASM.PresetAllMark>[All]</ASM.PresetAllMark>
   <ASM.PresetKindMark>[Kind]</ASM.PresetKindMark>
-  <ASM.PresetListMark>[List]</ASM.PresetListMark>
+  <ASM.PresetPriorityListMark>[Priorities]</ASM.PresetPriorityListMark>
+  <ASM.PresetSpecialListMark>[Special]</ASM.PresetSpecialListMark>
   <ASM.TipAllToKind>All-animals preset. Only the settings for {0} are applied.</ASM.TipAllToKind>
   <ASM.TipAllToList>All-animals preset. Only the '{0}' list of {1} is applied.</ASM.TipAllToList>
   <ASM.TipKindToList>Kind preset. Only the '{0}' list is applied.</ASM.TipKindToList>

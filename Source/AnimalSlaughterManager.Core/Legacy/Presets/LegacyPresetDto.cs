@@ -1,0 +1,116 @@
+using System.Xml;
+#pragma warning disable CS0612, CS0618
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using System.Xml.Serialization;
+
+namespace ASM;
+
+/// <summary>The preset shape saved by older versions: condition lists instead of rule lists.
+/// Deserializes an old file and converts it into the current format; delete together with the
+/// rest of the Legacy folder when the save-compatibility horizon allows.</summary>
+[Obsolete]
+[XmlRoot("SlaughterPreset")]
+public class LegacyPresetDto
+{
+    [XmlElement("Kind")]
+    public List<LegacyKindDto> Kinds = new List<LegacyKindDto>();
+
+    /// <summary>The same preset in the current format: prefs and integration sections copied,
+    /// condition lists converted into rule lists.</summary>
+    public List<KindPreset> ToCurrent()
+    {
+        var kinds = new List<KindPreset>();
+
+        foreach (var k in Kinds)
+        {
+            var kd = new KindPreset
+            {
+                AnimalDefName = k.animal,
+                Preferences = new PreferenceSettingsPreset
+                {
+                    MalePref = KindPresetFileParsing.ParsePref(k.malePref),
+                    FemalePref = KindPresetFileParsing.ParsePref(k.femalePref),
+                    MaleYoungPref = KindPresetFileParsing.ParsePref(k.maleYoungPref),
+                    FemaleYoungPref = KindPresetFileParsing.ParsePref(k.femaleYoungPref)
+                },
+                Priorities = new PrioritySettingsPreset
+                {
+                    PriorityRulesAdultMale = ToPresets(k.PrioAdultMale),
+                    PriorityRulesYoungMale = ToPresets(k.PrioYoungMale),
+                    PriorityRulesAdultFemale = ToPresets(k.PrioAdultFemale),
+                    PriorityRulesYoungFemale = ToPresets(k.PrioYoungFemale)
+                }
+            };
+            kd.SpecialSettings = KindPresetFileSerialization.ReadIntegrations([.. k.IntegrationSections]);
+            kinds.Add(kd);
+        }
+
+        return kinds;
+    }
+
+    /// <summary>True when any kind carries legacy condition lists (identifies an old file).</summary>
+    public bool HasConditions =>
+        Kinds.Any(k => k.PrioAdultMale?.Count > 0 || k.PrioYoungMale?.Count > 0
+            || k.PrioAdultFemale?.Count > 0 || k.PrioYoungFemale?.Count > 0);
+
+    private static List<BasePriorityRulePreset> ToPresets(List<ConditionDto>? conditions)
+    {
+        var rules = new List<BasePriorityRule>();
+
+        if (conditions != null)
+        {
+            foreach (var c in conditions)
+            {
+                var rule = KindPrioritySettingsLegacy.Convert(c.ToCondition());
+
+                if (rule != null)
+                {
+                    rules.Add(rule);
+                }
+            }
+        }
+
+        return rules.Select(r => r.ToPreset()).ToList();
+    }
+}
+
+/// <summary>The per-kind slice of an old preset: preference fields, condition lists and raw
+/// integration sections.</summary>
+[Obsolete]
+public class LegacyKindDto
+{
+    [XmlAttribute]
+    public string animal;
+
+    public string malePref;
+    public string femalePref;
+    public string maleYoungPref;
+    public string femaleYoungPref;
+
+    [XmlArray("PrioAdultMale")]
+    [XmlArrayItem("Cond")]
+    public List<ConditionDto> PrioAdultMale;
+
+    [XmlArray("PrioYoungMale")]
+    [XmlArrayItem("Cond")]
+    public List<ConditionDto> PrioYoungMale;
+
+    [XmlArray("PrioAdultFemale")]
+    [XmlArrayItem("Cond")]
+    public List<ConditionDto> PrioAdultFemale;
+
+    [XmlArray("PrioYoungFemale")]
+    [XmlArrayItem("Cond")]
+    public List<ConditionDto> PrioYoungFemale;
+
+    [XmlAnyElement]
+    public List<XmlElement> IntegrationSections = new List<XmlElement>();
+}
+
+public static class LegacyPresetDtoConversion
+{
+}

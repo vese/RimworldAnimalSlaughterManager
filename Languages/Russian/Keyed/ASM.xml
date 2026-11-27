@@ -136,7 +136,8 @@
   <ASM.NoPresetsFiltered>Ничего не найдено</ASM.NoPresetsFiltered>
   <ASM.PresetAllMark>[Все виды]</ASM.PresetAllMark>
   <ASM.PresetKindMark>[Вид]</ASM.PresetKindMark>
-  <ASM.PresetListMark>[Список]</ASM.PresetListMark>
+  <ASM.PresetPriorityListMark>[Приоритеты]</ASM.PresetPriorityListMark>
+  <ASM.PresetSpecialListMark>[Особые]</ASM.PresetSpecialListMark>
   <ASM.TipAllToKind>Пресет всех видов. Применяются только настройки вида {0}.</ASM.TipAllToKind>
   <ASM.TipAllToList>Пресет всех видов. Применяется только список «{0}» вида {1}.</ASM.TipAllToList>
   <ASM.TipKindToList>Пресет вида. Применяется только список «{0}».</ASM.TipKindToList>

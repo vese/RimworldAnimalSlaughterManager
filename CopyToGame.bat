@@ -13,6 +13,13 @@ if not defined DEST (
 
 git pull
 
+dotnet build Source/AnimalSlaughterManager/AnimalSlaughterManager.csproj -c Release
+if errorlevel 1 (
+    echo ERROR: build failed
+    pause
+    exit /b 1
+)
+
 :: Сохраняем PublishedFileId.txt (ID Workshop-предмета) из папки игры в репо,
 :: иначе rd ниже полностью стирает папку мода и следующая публикация в Steam
 :: создаёт НОВЫЙ предмет вместо обновления существующего.
