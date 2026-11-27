@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml;
 
 using Verse;
 
@@ -9,13 +8,6 @@ namespace ASM;
 /// <summary>The version-2 conversion of one kind's Settings model (KindPreset).</summary>
 public class V2KindPresetConverter : IV2PresetConverter<KindPreset>
 {
-    private const string BucketAdultMale = "PriorityRulesAdultMale";
-    private const string BucketYoungMale = "PriorityRulesYoungMale";
-    private const string BucketAdultFemale = "PriorityRulesAdultFemale";
-    private const string BucketYoungFemale = "PriorityRulesYoungFemale";
-
-    private static readonly string[] BucketNames = [BucketAdultMale, BucketYoungMale, BucketAdultFemale, BucketYoungFemale];
-
     public PresetFile ToFile(KindPreset model, PresetScope scope, string? bucket = null) => new()
     {
         Version = PresetFormat.CurrentVersion,
@@ -38,14 +30,11 @@ public class V2KindPresetConverter : IV2PresetConverter<KindPreset>
             MaleYoungPref = model.Preferences.MaleYoungPref,
             FemaleYoungPref = model.Preferences.FemaleYoungPref
         },
-        Elements =
-        [
-            RulePresetXml.Bucket(BucketAdultMale, PriorityRuleXml.ToRulePresets(model.Priorities.PriorityRulesAdultMale)),
-            RulePresetXml.Bucket(BucketYoungMale, PriorityRuleXml.ToRulePresets(model.Priorities.PriorityRulesYoungMale)),
-            RulePresetXml.Bucket(BucketAdultFemale, PriorityRuleXml.ToRulePresets(model.Priorities.PriorityRulesAdultFemale)),
-            RulePresetXml.Bucket(BucketYoungFemale, PriorityRuleXml.ToRulePresets(model.Priorities.PriorityRulesYoungFemale)),
-            .. GetSpecialSections(model)
-        ]
+        PriorityRulesAdultMale = ToV2(model.Priorities.PriorityRulesAdultMale),
+        PriorityRulesYoungMale = ToV2(model.Priorities.PriorityRulesYoungMale),
+        PriorityRulesAdultFemale = ToV2(model.Priorities.PriorityRulesAdultFemale),
+        PriorityRulesYoungFemale = ToV2(model.Priorities.PriorityRulesYoungFemale),
+        SpecialSettings = [.. model.SpecialSettings.Select(kv => V2SpecialSettingsMapper.ToV2(kv.Key, kv.Value)).Where(v2 => v2 != null)]
     };
 
     internal static KindPreset ToModel(V2KindPreset content)
@@ -60,60 +49,40 @@ public class V2KindPresetConverter : IV2PresetConverter<KindPreset>
                 MaleYoungPref = content.Preferences.MaleYoungPref,
                 FemaleYoungPref = content.Preferences.FemaleYoungPref
             },
-            Priorities = new PrioritySettingsPreset()
+            Priorities = new PrioritySettingsPreset
+            {
+                PriorityRulesAdultMale = ToSettings(content.PriorityRulesAdultMale),
+                PriorityRulesYoungMale = ToSettings(content.PriorityRulesYoungMale),
+                PriorityRulesAdultFemale = ToSettings(content.PriorityRulesAdultFemale),
+                PriorityRulesYoungFemale = ToSettings(content.PriorityRulesYoungFemale)
+            }
         };
 
-        foreach (var element in content.Elements ?? [])
+        foreach (var v2 in content.SpecialSettings)
         {
-            var rules = PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket(element));
+            var settings = V2SpecialSettingsMapper.ToSettings(v2);
 
-            switch (element.LocalName)
+            if (settings != null)
             {
-                case BucketAdultMale:
-                    model.Priorities.PriorityRulesAdultMale = rules;
-                    break;
-                case BucketYoungMale:
-                    model.Priorities.PriorityRulesYoungMale = rules;
-                    break;
-                case BucketAdultFemale:
-                    model.Priorities.PriorityRulesAdultFemale = rules;
-                    break;
-                case BucketYoungFemale:
-                    model.Priorities.PriorityRulesYoungFemale = rules;
-                    break;
+                model.SpecialSettings[v2.Key] = settings;
             }
         }
-
-        model.SpecialSettings = KindPresetFileSerialization.ReadIntegrations([.. (content.Elements ?? []).Where(e => !BucketNames.Contains(e.LocalName))]);
 
         return model;
     }
 
     /// <summary>The kind's rule bucket matching the age×sex key; empty when absent.</summary>
-    internal static List<BasePriorityRulePreset> GetRules(V2KindPreset content, (bool Male, bool Adult) bucket)
+    internal static List<BasePriorityRulePreset> GetRules(V2KindPreset content, (bool Male, bool Adult) bucket) => bucket switch
     {
-        var name = bucket switch
-        {
-            (true, true) => BucketAdultMale,
-            (true, false) => BucketYoungMale,
-            (false, true) => BucketAdultFemale,
-            _ => BucketYoungFemale
-        };
+        (true, true) => ToSettings(content.PriorityRulesAdultMale),
+        (true, false) => ToSettings(content.PriorityRulesYoungMale),
+        (false, true) => ToSettings(content.PriorityRulesAdultFemale),
+        _ => ToSettings(content.PriorityRulesYoungFemale)
+    };
 
-        return PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket((content.Elements ?? []).FirstOrDefault(e => e.LocalName == name)));
-    }
+    private static List<V2RulePreset> ToV2(List<BasePriorityRulePreset> rules) =>
+        [.. rules.Select(V2RulePresetMapper.ToV2).Where(v2 => v2 != null)];
 
-    /// <summary>The integration sections of the Settings model, serialized through their
-    /// providers.</summary>
-    private static List<XmlElement> GetSpecialSections(KindPreset model)
-    {
-        var holder = PresetSectionSerialization.Holder();
-
-        foreach (var kv in model.SpecialSettings)
-        {
-            ServiceRegistry.GetServices<IKindSettingsProvider>().FirstOrDefault(p => p.Key == kv.Key)?.WriteSection(kv.Value, holder);
-        }
-
-        return [.. PresetSectionSerialization.Children(holder)];
-    }
+    private static List<BasePriorityRulePreset> ToSettings(List<V2RulePreset> rules) =>
+        [.. rules.Select(V2RulePresetMapper.ToDto).Where(dto => dto != null)];
 }

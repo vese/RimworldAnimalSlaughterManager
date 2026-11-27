@@ -9,7 +9,7 @@ namespace ASM;
 /// shapes diverge).</summary>
 public static class V2RulePresetMapper
 {
-    public static object? ToV2(BasePriorityRulePreset dto)
+    public static V2RulePreset? ToV2(BasePriorityRulePreset dto)
     {
         var type = FindType("ASM.V2" + dto.GetType().Name);
 
@@ -18,7 +18,7 @@ public static class V2RulePresetMapper
             return null;
         }
 
-        var v2 = Activator.CreateInstance(type)!;
+        var v2 = (V2RulePreset)Activator.CreateInstance(type)!;
         Copy(dto, v2);
 
         return v2;
@@ -40,10 +40,12 @@ public static class V2RulePresetMapper
 
     public static Type? V2TypeOf(Type dtoType) => FindType("ASM.V2" + dtoType.Name);
 
-    private static Type? FindType(string fullName) =>
+    internal static Type? FindSettingsType(Type v2Type) => FindType("ASM." + v2Type.Name["V2".Length..]);
+
+    internal static Type? FindType(string fullName) =>
         AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetType(fullName, false)).FirstOrDefault(t => t != null);
 
-    private static void Copy(object from, object to)
+    internal static void Copy(object from, object to)
     {
         foreach (var member in to.GetType().GetMembers(BindingFlags.Public | BindingFlags.Instance))
         {

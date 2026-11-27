@@ -1,12 +1,12 @@
-using System.Xml;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace ASM;
 
-/// <summary>The version-2 file model of one kind's slice: the def name, the preferences and
-/// the rule buckets and integration sections as raw elements (the buckets are named
-/// PriorityRules*, the rest are the integrations' own sections — each integration owns its
-/// element's shape). The converter maps it to and from the Settings model.</summary>
+/// <summary>The version-2 file model of one kind's slice: the def name, the preferences, the
+/// rule buckets (polymorphic V2RulePreset items — the serializer knows every registered rule
+/// type) and the integration settings (V2SpecialSettingsPreset items under their provider
+/// keys).</summary>
 public class V2KindPreset
 {
     [XmlAttribute]
@@ -14,7 +14,10 @@ public class V2KindPreset
 
     public V2PreferenceSettings Preferences = new();
 
-    /// <summary>The rule buckets and the integration sections, in document order.</summary>
-    [XmlAnyElement]
-    public XmlElement[]? Elements;
+    public List<V2RulePreset> PriorityRulesAdultMale = [];
+    public List<V2RulePreset> PriorityRulesYoungMale = [];
+    public List<V2RulePreset> PriorityRulesAdultFemale = [];
+    public List<V2RulePreset> PriorityRulesYoungFemale = [];
+
+    public List<V2SpecialSettingsPreset> SpecialSettings = [];
 }

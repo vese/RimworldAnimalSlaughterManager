@@ -203,8 +203,8 @@ public static class PresetRepository
         {
             var slice = GetKindSlice(file, targetDef);
 
-            return slice?.Elements is { Length: > 0 } elements
-                ? new SpecialListPreset { Sections = [.. elements.Where(e => !e.LocalName.StartsWith("PriorityRules"))] }
+            return slice?.SpecialSettings is { Count: > 0 } specials
+                ? new SpecialListPreset { Sections = [.. specials.SelectMany(PresetContentSerializers.ToElements)] }
                 : null;
         }
 

@@ -1,19 +1,19 @@
-using System.Xml;
+using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace ASM;
 
-/// <summary>The version-2 file model of a priority-list preset: the rule bucket's Rule
-/// elements.</summary>
+/// <summary>The version-2 file model of a priority-list preset: the ordered rules
+/// (polymorphic V2RulePreset items — the serializer knows every registered rule type).</summary>
 [XmlRoot("PriorityList")]
-public class V2PriorityListPreset : V2RulePreset
+public class V2PriorityListPreset
 {
-    private const string RulesElement = "Rules";
+    public List<V2RulePreset> Rules = [];
 
-    [XmlAnyElement]
-    public XmlElement[]? Rules;
+    public static V2PriorityListPreset OfRules(List<BasePriorityRulePreset> rules) =>
+        new() { Rules = [.. rules.Select(V2RulePresetMapper.ToV2).Where(v2 => v2 != null)] };
 
-    public static V2PriorityListPreset OfRules(System.Collections.Generic.List<BasePriorityRulePreset> rules) => new() { Rules = [RulePresetXml.Bucket(RulesElement, PriorityRuleXml.ToRulePresets(rules))] };
-
-    public System.Collections.Generic.List<BasePriorityRulePreset> ToRuleList() => PriorityRuleXml.ToDtos(RulePresetXml.ReadBucket((Rules ?? [])[0]));
+    public List<BasePriorityRulePreset> ToRuleList() =>
+        [.. Rules.Select(V2RulePresetMapper.ToDto).Where(dto => dto != null)];
 }

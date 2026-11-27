@@ -53,7 +53,7 @@ public static class PresetSerializer
         try
         {
             using var r = new StringReader(text);
-            return (T)Serializer<T>().Deserialize(r);
+            return (T)PresetContentSerializers.SerializerOf(typeof(T)).Deserialize(r);
         }
         catch
         {
@@ -91,7 +91,7 @@ public static class PresetSerializer
         var sb = new StringBuilder();
         using (var w = new StringWriter(sb))
         {
-            GetSerializer(content.GetType()).Serialize(w, content);
+            PresetContentSerializers.SerializerOf(content.GetType()).Serialize(w, content);
         }
 
         return sb.ToString();
