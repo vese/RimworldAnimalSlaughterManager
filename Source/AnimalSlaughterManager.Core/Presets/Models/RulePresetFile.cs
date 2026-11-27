@@ -10,7 +10,7 @@ namespace ASM;
 public class RulePresetFile
 {
     [XmlAttribute]
-    public string Type = "";
+    public string Type = null!;
 
     /// <summary>The serialized rule DTO (its element is the DTO's own root).</summary>
     [XmlAnyElement]
