@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using Verse.Noise;
 
 namespace ASM;
 
@@ -102,8 +103,11 @@ public static class PresetRepository
 
     /// <summary>Writes a preset of the current format (the content model in the file form) into
     /// its scope folder; a list preset goes into its bucket subfolder.</summary>
-    public static void Save(string name, PresetScope scope, object content, string? bucket = null) =>
-        Serialize(name, bucket == null ? ScopeFolder(scope) : Path.Combine(ScopeFolder(scope), bucket), content, scope);
+    public static void Save(string name, PresetScope scope, object content, string? bucket = null)
+    {
+        var folder = bucket == null ? ScopeFolder(scope) : Path.Combine(ScopeFolder(scope), bucket);
+        Store.WriteText(Path.Combine(folder, name + ".xml"), PresetSerializer.SerializePreset(content, scope));
+    }
 
 
     // ---- Read (the file's metadata, or the version-1 machinery by root) -------------------
@@ -228,14 +232,5 @@ public static class PresetRepository
             return;
         }
         Store.Delete(entry.path);
-    }
-
-    // ---- Helpers -------------------------------------------------------------------------
-
-    // The name comes from the browser's field, which blocks the invalid characters and the
-    // length (see SaveRow) — it is the file name as-is.
-    private static void Serialize(string name, string folder, object content, PresetScope scope)
-    {
-        Store.WriteText(Path.Combine(folder, name + ".xml"), PresetSerializer.SerializePreset(content, scope));
     }
 }
