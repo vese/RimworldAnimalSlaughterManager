@@ -24,10 +24,11 @@ public static class PriorityRuleXml
 
         foreach (var preset in presets)
         {
+            var v2 = V2RulePresetMapper.ToV2(preset);
             var doc = new XmlDocument();
             using (var writer = doc.CreateNavigator()!.AppendChild())
             {
-                PresetSerializer.GetSerializer(preset.GetType()).Serialize(writer, preset);
+                PresetSerializer.GetSerializer(v2!.GetType()).Serialize(writer, v2);
             }
 
             result.Add(new RulePresetFile { Type = GetRuleName(preset.GetType()), Payload = [.. doc.ChildNodes.Cast<XmlElement>()] });
@@ -92,7 +93,8 @@ public static class PriorityRuleXml
                 continue;
             }
 
-            var dto = (BasePriorityRulePreset?)DeserializePayload(preset.Payload, entry.Value.Factory().ToPreset().GetType());
+            var v2 = DeserializePayload(preset.Payload, V2RulePresetMapper.V2TypeOf(entry.Value.Factory().ToPreset().GetType()));
+            var dto = v2 == null ? null : V2RulePresetMapper.ToDto(v2);
 
             if (dto != null)
             {
