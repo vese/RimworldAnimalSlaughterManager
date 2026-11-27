@@ -32,7 +32,7 @@ UI-элементы фичи). Интерфейсы фичи — в `Interfaces/
 «Особые правила», `Settings/Dialog/Interfaces/` — табы окна вида,
 `KindSettings/KindPrioritySettings/Interfaces/` — меню правил,
 `Legacy/Interfaces/`). Пресеты — отдельные модели per скоуп (`AllPresetDto`/`KindPresetDto`/`ListPresetDto`): To/FromPreset у владельцев (ASM_MapComp — полный, KindSettings — вида, KindPrioritySettings и специальные настройки — списков); репозиторий пишет DTO сериализатором текущей версии (`IVersionedPresetDto.version`) и читает по корню файла: новые корни — текущий формат, старые корни — машина чтения v1 (`PresetSerializer.ReadPreset` + Legacy) с миграцией в модели. Смену модели сопровождать bump `PresetFormat.CurrentVersion` + шагом миграции.
-Устаревшее — в `Legacy/` по фичам, всё внутри помечено `[Obsolete]` и изолировано за фасадами `LegacyPresets`/`LegacyKindPriority`: снаружи — три вызова в Core (`PresetSerializer.ReadCarrier`, `PresetRepository.ListPresets`/`ApplyConditions`, `KindPrioritySettings.ExposeData`) и реализация `ILegacyConditionConverter` в ATS; удаление папки = убрать эти точки (+ ATS-`LegacyTraitConditions`). Патчи лежат
+Устаревшее — в `Legacy/` по фичам, всё внутри помечено `[Obsolete]` и изолировано за фасадами `LegacyPresets`/`LegacyListPresets`/`LegacyKindPriority`: снаружи — вызовы в Core (`PresetSerializer`, `PresetRepository.ListPresets`, `KindPrioritySettings.ExposeData`) и реализация `ILegacyConditionConverter` в ATS; удаление папки = убрать эти точки (+ ATS-`LegacyTraitConditions`). Патчи лежат
 в Core, применяет их HarmonyInit главного проекта (`PatchAll()` без аргументов патчит только свою
 сборку).
 
