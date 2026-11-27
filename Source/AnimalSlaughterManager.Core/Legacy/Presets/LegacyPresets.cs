@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml;
 
 namespace ASM;
 
@@ -115,6 +116,66 @@ public static class LegacyPresets
     }
 
     private static KindPreset? V1ToCurrent(KindPresetDto v1) => KindPresetFile.FromV1(v1)?.Kind;
+
+    /// <summary>A rule list of a legacy file: the RulePresetDto format, the v1 unified
+    /// carrier's kind slice, or the condition-preset format; null when nothing readable.</summary>
+    public static ListPresetFile? TryReadList(PresetEntry entry, string? text)
+    {
+        switch (RootElementOf(text))
+        {
+            case RuleRoot:
+                return FromRules(V1Rules(ReadRulePreset(text)));
+            case PresetRoot:
+                // The v1 unified carrier: the first kind's slice.
+                var kind = ReadV1Kinds(text)?.FirstOrDefault();
+
+                return kind == null ? null : ListSliceOf(new KindPresetFile { Kind = kind });
+            default:
+                return FromRules(TryReadConditions(entry));
+        }
+    }
+
+    private static ListPresetFile? FromRules(List<BasePriorityRule>? rules) =>
+        rules == null ? null : new ListPresetFile { Rules = rules.Select(r => r.ToPreset()).ToList() };
+
+    // A copy of the repository's kind-slice reader — Legacy stays self-contained and goes
+    // away together with this folder.
+    private static ListPresetFile? ListSliceOf(KindPresetFile file)
+    {
+        var typed = new[] { file.Kind.Priorities.PrioRulesAdultMale, file.Kind.Priorities.PrioRulesYoungMale, file.Kind.Priorities.PrioRulesAdultFemale, file.Kind.Priorities.PrioRulesYoungFemale }
+            .FirstOrDefault(rules => rules.Count > 0);
+
+        return typed != null ? new ListPresetFile { Rules = typed }
+            : file.Kind.SpecialSettings.Count > 0 ? ListPresetFile.OfSections(KindPresetFileSections.SectionsOf(file)) : null;
+    }
+
+    /// <summary>Root element name of the file — identifies which of the historical formats it is.</summary>
+    private static string? RootElementOf(string? text)
+    {
+        if (text == null)
+        {
+            return null;
+        }
+
+        try
+        {
+            using (var reader = XmlReader.Create(new StringReader(text)))
+            {
+                while (reader.Read())
+                {
+                    if (reader.NodeType == XmlNodeType.Element)
+                    {
+                        return reader.LocalName;
+                    }
+                }
+            }
+        }
+        catch
+        {
+        }
+
+        return null;
+    }
 
     private static List<ConditionDto>? ReadConditionPreset(string? text)
     {

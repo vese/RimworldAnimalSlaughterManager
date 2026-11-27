@@ -61,34 +61,6 @@ public static class PresetSerializer
         }
     }
 
-    /// <summary>Root element name of the file — identifies a historical format.</summary>
-    public static string? RootElementOf(string? text)
-    {
-        if (text == null)
-        {
-            return null;
-        }
-
-        try
-        {
-            using (var reader = XmlReader.Create(new StringReader(text)))
-            {
-                while (reader.Read())
-                {
-                    if (reader.NodeType == XmlNodeType.Element)
-                    {
-                        return reader.LocalName;
-                    }
-                }
-            }
-        }
-        catch
-        {
-        }
-
-        return null;
-    }
-
     /// <summary>Writes a preset of the current format: the content model wrapped in the file
     /// form carrying the version and the metadata.</summary>
     public static string SerializePreset(object content, PresetScope scope)
