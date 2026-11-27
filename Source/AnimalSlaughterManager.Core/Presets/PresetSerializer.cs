@@ -16,9 +16,6 @@ namespace ASM;
 /// </summary>
 public static class PresetSerializer
 {
-    /// <summary>The current format's root element; everything else is a historical format.</summary>
-    public const string CurrentRoot = "Preset";
-
     // XmlSerializer generates a serialization assembly on first use — cache the instances.
     private static readonly Dictionary<Type, XmlSerializer> serializers = new();
 
@@ -115,15 +112,11 @@ public static class PresetSerializer
         return sb.ToString();
     }
 
-    /// <summary>The file form of a current-format preset; refuses versions above the current one
-    /// (a preset saved by a newer mod), null when the text is not one.</summary>
+    /// <summary>The file form of a current-format preset. A foreign root simply fails to
+    /// deserialize into it (the root lives in [XmlRoot] alone); versions above the current one
+    /// (a preset saved by a newer mod) are refused. Null when the text is not one.</summary>
     public static PresetFile? ReadPreset(string? text)
     {
-        if (RootElementOf(text) != CurrentRoot)
-        {
-            return null;
-        }
-
         var file = Deserialize<PresetFile>(text);
 
         if (file != null && file.Version > PresetFormat.CurrentVersion)
