@@ -120,6 +120,11 @@ public static class PresetRepository
 
         if (file != null)
         {
+            if (file.Scope is not PresetScope.All)
+            {
+                return null;
+            }
+
             return PresetSerializer.ReadContent<AllKindsPresetFile>(file)?.ToPreset();
         }
 
@@ -137,16 +142,19 @@ public static class PresetRepository
 
         if (file != null)
         {
-            if (file.Scope == PresetScope.Kind)
+            if (file.Scope is PresetScope.Kind)
             {
                 return PresetSerializer.ReadContent<KindPresetFile>(file);
             }
+            else if (file.Scope is PresetScope.All)
+            {
+                var match = PresetSerializer.ReadContent<AllKindsPresetFile>(file)?.Kinds
+                    .FirstOrDefault(k => k.Kind.AnimalDefName == targetDef.defName);
 
-            // An All preset applies the slice matching the target kind; if absent — nothing.
-            var match = PresetSerializer.ReadContent<AllKindsPresetFile>(file)?.Kinds
-                .FirstOrDefault(k => k.Kind.AnimalDefName == targetDef.defName);
+                return match == null ? null : new KindPresetFile { Kind = match.Kind };
+            }
 
-            return match == null ? null : new KindPresetFile { Kind = match.Kind };
+            return null;
         }
 
 #pragma warning disable CS0618
