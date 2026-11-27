@@ -13,10 +13,10 @@ namespace ASM;
 [XmlRoot("KindPreset")]
 public class KindPresetFile : IXmlSerializable
 {
-    private const string BucketAdultMale = "PrioRulesAdultMale";
-    private const string BucketYoungMale = "PrioRulesYoungMale";
-    private const string BucketAdultFemale = "PrioRulesAdultFemale";
-    private const string BucketYoungFemale = "PrioRulesYoungFemale";
+    private const string BucketAdultMale = "PriorityRulesAdultMale";
+    private const string BucketYoungMale = "PriorityRulesYoungMale";
+    private const string BucketAdultFemale = "PriorityRulesAdultFemale";
+    private const string BucketYoungFemale = "PriorityRulesYoungFemale";
 
     public KindPreset Kind = new();
 
@@ -127,7 +127,7 @@ public static class KindPresetFileSerialization
 
         foreach (XmlElement child in root.ChildNodes)
         {
-            if (child.LocalName is not ("PrioRulesAdultMale" or "PrioRulesYoungMale" or "PrioRulesAdultFemale" or "PrioRulesYoungFemale"))
+            if (child.LocalName is not ("PriorityRulesAdultMale" or "PriorityRulesYoungMale" or "PriorityRulesAdultFemale" or "PriorityRulesYoungFemale"))
             {
                 sections.Add(child);
             }
