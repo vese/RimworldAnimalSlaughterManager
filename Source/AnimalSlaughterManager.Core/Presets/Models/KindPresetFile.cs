@@ -11,15 +11,12 @@ namespace ASM;
 /// the integration sections serialize here (each integration owns its section's shape —
 /// WriteXml/ReadXml — while this wrapper owns the element layout).</summary>
 [XmlRoot("KindPreset")]
-public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
+public class KindPresetFile : IXmlSerializable
 {
     private const string BucketAdultMale = "PrioRulesAdultMale";
     private const string BucketYoungMale = "PrioRulesYoungMale";
     private const string BucketAdultFemale = "PrioRulesAdultFemale";
     private const string BucketYoungFemale = "PrioRulesYoungFemale";
-
-    [XmlAttribute]
-    public int Version { get; set; }
 
     public KindPreset Kind = new();
 
@@ -27,7 +24,6 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
 
     public void WriteXml(XmlWriter writer)
     {
-        writer.WriteAttributeString(nameof(Version), Version.ToString());
         writer.WriteAttributeString(nameof(KindPreset.AnimalDefName), Kind.AnimalDefName);
         writer.WriteAttributeString(nameof(PreferenceSettingsPreset.MalePref), Kind.Preferences.MalePref.ToString());
         writer.WriteAttributeString(nameof(PreferenceSettingsPreset.FemalePref), Kind.Preferences.FemalePref.ToString());
@@ -55,7 +51,6 @@ public class KindPresetFile : IVersionedPresetDto, IXmlSerializable
     public void ReadXml(XmlReader reader)
     {
         reader.MoveToContent();
-        Version = int.TryParse(reader.GetAttribute(nameof(Version)), out var v) ? v : 0;
         Kind.AnimalDefName = reader.GetAttribute(nameof(KindPreset.AnimalDefName)) ?? null!;
         Kind.Preferences = new PreferenceSettingsPreset
         {

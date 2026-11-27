@@ -82,41 +82,6 @@ public static class LegacyPresets
         }
     }
 
-    /// <summary>The list payload of a version-1 kind/all/unified slice: the first non-empty
-    /// rule bucket, or the raw integration sections (a special-settings list); both the current
-    /// and the v1 kind forms.</summary>
-    public static ListPresetFile? FromSliceV1(string? text, string root)
-    {
-        if (root == PresetSerializer.KindPresetRoot)
-        {
-            var file = PresetSerializer.DeserializePreset<KindPresetFile>(text);
-
-            if (file == null)
-            {
-                return null;
-            }
-
-            var typed = new[] { file.Kind.Priorities.PrioRulesAdultMale, file.Kind.Priorities.PrioRulesYoungMale, file.Kind.Priorities.PrioRulesAdultFemale, file.Kind.Priorities.PrioRulesYoungFemale }
-                .FirstOrDefault(rules => rules.Count > 0);
-
-            return typed != null ? new ListPresetFile { Rules = typed }
-                : ListPresetFile.OfSections(KindPresetFileSections.SectionsOf(file));
-        }
-
-        var kd = PresetSerializer.ReadV1Kinds(text)?.FirstOrDefault();
-
-        if (kd == null)
-        {
-            return null;
-        }
-
-        var kdTyped = new[] { kd.Priorities.PrioRulesAdultMale, kd.Priorities.PrioRulesYoungMale, kd.Priorities.PrioRulesAdultFemale, kd.Priorities.PrioRulesYoungFemale }
-            .FirstOrDefault(rules => rules.Count > 0);
-
-        return kdTyped != null ? new ListPresetFile { Rules = kdTyped }
-            : kd.SpecialSettings.Count > 0 ? ListPresetFile.OfSections(KindPresetFileSections.SectionsOf(new KindPresetFile { Kind = kd })) : null;
-    }
-
     /// <summary>The rules of the pre-unification RulePresetDto format (attribute-form rules).</summary>
     public static List<BasePriorityRule>? V1Rules(List<PriorityRuleDto>? dtos) =>
         dtos?.Select(r => r.ToRule()).Where(r => r != null).ToList();

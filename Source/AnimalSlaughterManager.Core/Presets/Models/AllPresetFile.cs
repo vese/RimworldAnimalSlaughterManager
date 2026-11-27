@@ -4,14 +4,11 @@ using System.Xml.Serialization;
 
 namespace ASM;
 
-/// <summary>The file form of the full preset: the version plus every configured kind's file
-/// slice. The model mapping is Presets' business (see <see cref="AllPreset"/>).</summary>
+/// <summary>The file form of the full preset: every configured kind's file slice. The model
+/// mapping is Presets' business (see <see cref="AllPreset"/>).</summary>
 [XmlRoot("AllPreset")]
-public class AllPresetFile : IVersionedPresetDto
+public class AllPresetFile
 {
-    [XmlAttribute]
-    public int Version { get; set; }
-
     [XmlElement("Kind")]
     public List<KindPresetFile> Kinds = [];
 

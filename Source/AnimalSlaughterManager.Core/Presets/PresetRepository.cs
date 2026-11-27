@@ -100,22 +100,23 @@ public static class PresetRepository
 
     // ---- Save (the current-version serializer) -------------------------------------------
 
-    /// <summary>Writes a preset DTO of the current format into its scope folder; a list preset
-    /// goes into its bucket subfolder.</summary>
-    public static void Save(string name, PresetScope scope, IVersionedPresetDto dto, string? bucket = null) =>
-        Serialize(name, bucket == null ? ScopeFolder(scope) : Path.Combine(ScopeFolder(scope), bucket), dto);
+    /// <summary>Writes a preset of the current format (the content model in the envelope) into
+    /// its scope folder; a list preset goes into its bucket subfolder.</summary>
+    public static void Save(string name, PresetScope scope, object content, string? bucket = null) =>
+        Serialize(name, bucket == null ? ScopeFolder(scope) : Path.Combine(ScopeFolder(scope), bucket), content, scope);
 
 
-    // ---- Read (dispatch by root: the current formats, or the version-1 machinery) ---------
+    // ---- Read (the envelope's metadata, or the version-1 machinery by root) ---------------
 
     /// <summary>The full preset model; the version-1 unified format migrates into it.</summary>
     public static AllPreset? ReadAll(PresetEntry entry)
     {
         var text = Store.ReadText(entry.path);
+        var envelope = PresetSerializer.ReadEnvelope(text);
 
-        if (PresetSerializer.RootElementOf(text) == PresetSerializer.AllPresetRoot)
+        if (envelope != null)
         {
-            return PresetSerializer.DeserializePreset<AllPresetFile>(text)?.ToPreset();
+            return PresetSerializer.ReadContent<AllPresetFile>(envelope)?.ToPreset();
         }
 
         var v1 = PresetSerializer.ReadV1Kinds(text);
@@ -128,10 +129,20 @@ public static class PresetRepository
     public static KindPresetFile? ReadKind(PresetEntry entry, ThingDef targetDef)
     {
         var text = Store.ReadText(entry.path);
+        var envelope = PresetSerializer.ReadEnvelope(text);
 
-        if (PresetSerializer.RootElementOf(text) == PresetSerializer.KindPresetRoot)
+        if (envelope != null)
         {
-            return PresetSerializer.DeserializePreset<KindPresetFile>(text);
+            if (envelope.Scope == PresetScope.Kind.ToString())
+            {
+                return PresetSerializer.ReadContent<KindPresetFile>(envelope);
+            }
+
+            // An All preset applies the slice matching the target kind; if absent — nothing.
+            var match = PresetSerializer.ReadContent<AllPresetFile>(envelope)?.Kinds
+                .FirstOrDefault(k => k.Kind.AnimalDefName == targetDef.defName);
+
+            return match == null ? null : new KindPresetFile { Kind = match.Kind };
         }
 
         var kinds = PresetSerializer.ReadV1Kinds(text);
@@ -144,7 +155,9 @@ public static class PresetRepository
         if (entry.scope == PresetScope.All)
         {
             // Find the slice for the target kind; if absent, nothing applies.
-            return new KindPresetFile { Kind = kinds.FirstOrDefault(k => k.AnimalDefName == targetDef.defName) };
+            var match = kinds.FirstOrDefault(k => k.AnimalDefName == targetDef.defName);
+
+            return match == null ? null : new KindPresetFile { Kind = match };
         }
 
         // Kind- and List-scope presets store a single kind whose defName is the SOURCE kind —
@@ -158,24 +171,51 @@ public static class PresetRepository
     public static ListPresetFile? ReadList(PresetEntry entry)
     {
         var text = Store.ReadText(entry.path);
+        var envelope = PresetSerializer.ReadEnvelope(text);
+
+        if (envelope != null)
+        {
+            // The metadata routes the content: a list preset carries it directly, a Kind/All
+            // preset — its slice (cross-scope import).
+            if (envelope.Scope == PresetScope.PriorityList.ToString() || envelope.Scope == PresetScope.SpecialList.ToString())
+            {
+                return PresetSerializer.ReadContent<ListPresetFile>(envelope);
+            }
+
+            var slice = envelope.Scope == PresetScope.Kind.ToString()
+                ? PresetSerializer.ReadContent<KindPresetFile>(envelope)
+                : PresetSerializer.ReadContent<AllPresetFile>(envelope)?.Kinds.FirstOrDefault();
+
+            return slice == null ? null : ListSliceOf(slice);
+        }
 
         switch (PresetSerializer.RootElementOf(text))
         {
-            case PresetSerializer.ListPresetRoot:
-                return PresetSerializer.DeserializePreset<ListPresetFile>(text);
-#pragma warning disable CS0618
-            case PresetSerializer.KindPresetRoot:
-                return LegacyPresets.FromSliceV1(text, PresetSerializer.KindPresetRoot);
-            case PresetSerializer.AllPresetRoot:
-                return LegacyPresets.FromSliceV1(text, PresetSerializer.AllPresetRoot);
-            case PresetSerializer.PresetRoot:
-                return LegacyPresets.FromSliceV1(text, PresetSerializer.PresetRoot);
             case PresetSerializer.RulePresetRoot:
+#pragma warning disable CS0618
                 return FromRules(LegacyPresets.V1Rules(PresetSerializer.ReadRulePreset(text)));
+#pragma warning restore CS0618
+            case PresetSerializer.PresetRoot:
+                // The v1 unified carrier: the first kind's slice.
+                var kind = PresetSerializer.ReadV1Kinds(text)?.FirstOrDefault();
+
+                return kind == null ? null : ListSliceOf(new KindPresetFile { Kind = kind });
             default:
+#pragma warning disable CS0618
                 return FromRules(LegacyPresets.TryReadConditions(entry));
 #pragma warning restore CS0618
         }
+    }
+
+    // The list payload of a kind slice: the first non-empty rule bucket, or the raw
+    // integration sections (a special-settings list); null when neither.
+    private static ListPresetFile? ListSliceOf(KindPresetFile file)
+    {
+        var typed = new[] { file.Kind.Priorities.PrioRulesAdultMale, file.Kind.Priorities.PrioRulesYoungMale, file.Kind.Priorities.PrioRulesAdultFemale, file.Kind.Priorities.PrioRulesYoungFemale }
+            .FirstOrDefault(rules => rules.Count > 0);
+
+        return typed != null ? new ListPresetFile { Rules = typed }
+            : file.Kind.SpecialSettings.Count > 0 ? ListPresetFile.OfSections(KindPresetFileSections.SectionsOf(file)) : null;
     }
 
     private static ListPresetFile? FromRules(List<BasePriorityRule>? rules) =>
@@ -192,9 +232,9 @@ public static class PresetRepository
 
     // ---- Helpers -------------------------------------------------------------------------
 
-    private static void Serialize(string name, string folder, IVersionedPresetDto dto)
+    private static void Serialize(string name, string folder, object content, PresetScope scope)
     {
-        Store.WriteText(Path.Combine(folder, Sanitize(name) + ".xml"), PresetSerializer.SerializePreset(dto));
+        Store.WriteText(Path.Combine(folder, Sanitize(name) + ".xml"), PresetSerializer.SerializePreset(content, scope));
     }
 
     private static string Sanitize(string name)

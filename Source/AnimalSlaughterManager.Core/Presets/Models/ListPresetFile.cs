@@ -6,14 +6,12 @@ using System.Xml.Serialization;
 
 namespace ASM;
 
-/// <summary>The file form of a list preset: the version plus either typed rule presets (the
-/// priority lists) or the owning settings' own section (the special lists).</summary>
+/// <summary>The file form of a list preset: either typed rule presets (the priority lists) or
+/// the owning settings' own section (the special lists).</summary>
 [XmlRoot("ListPreset")]
-public class ListPresetFile : IVersionedPresetDto, IXmlSerializable
+public class ListPresetFile : IXmlSerializable
 {
     private const string RulesElement = "Rules";
-
-    public int Version { get; set; }
 
     /// <summary>The priority rule presets; empty for a section-based list.</summary>
     public List<BasePriorityRulePreset> Rules = [];
@@ -31,8 +29,6 @@ public class ListPresetFile : IVersionedPresetDto, IXmlSerializable
 
     public void WriteXml(XmlWriter writer)
     {
-        writer.WriteAttributeString(nameof(Version), Version.ToString());
-
         if (Rules.Count > 0)
         {
             RulePresetXml.Bucket(RulesElement, PriorityRuleXml.ToRulePresets(Rules)).WriteTo(writer);
@@ -47,7 +43,6 @@ public class ListPresetFile : IVersionedPresetDto, IXmlSerializable
     public void ReadXml(XmlReader reader)
     {
         reader.MoveToContent();
-        Version = int.TryParse(reader.GetAttribute(nameof(Version)), out var v) ? v : 0;
 
         var doc = new XmlDocument();
         var root = (XmlElement)doc.ReadNode(reader.ReadSubtree())!;

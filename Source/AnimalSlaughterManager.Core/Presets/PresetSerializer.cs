@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
@@ -12,22 +10,22 @@ using Verse;
 namespace ASM;
 
 /// <summary>
-/// The preset format layer: (de)serialization of the preset DTOs, root-element dispatch
-/// between the current and historical formats, and the versioning — the preset is stamped
-/// with PresetFormat.CurrentVersion on save, versions above the current are refused, older
-/// ones migrate in ReadPreset. RimWorld is touched only by the refusal warning.
+/// The preset format layer: every current-format preset is one envelope — the version, the
+/// metadata (scope, content type) and the serialized content model — so reading is two plain
+/// steps with no root-element guessing. Historical formats are recognized by their root
+/// elements and read by the v1 machinery. The version is stamped on save, versions above the
+/// current are refused. RimWorld is touched only by the refusal warning.
 /// </summary>
 public static class PresetSerializer
 {
-    // XmlSerializer generates a serialization assembly on first use — cache the instances.
-    /// <summary>Root element names pairing the [XmlRoot] values of the preset DTOs; the
-    /// dispatcher matches them against a file root.</summary>
+    /// <summary>The envelope's root element; everything else is a historical format.</summary>
+    public const string EnvelopeRoot = "Preset";
+
+    // The historical root elements the v1 dispatch still matches.
     public const string PresetRoot = "SlaughterPreset";
     public const string RulePresetRoot = "RulePresetDto";
-    public const string AllPresetRoot = "AllPreset";
-    public const string KindPresetRoot = "KindPreset";
-    public const string ListPresetRoot = "ListPreset";
 
+    // XmlSerializer generates a serialization assembly on first use — cache the instances.
     private static readonly Dictionary<Type, XmlSerializer> serializers = new();
 
     /// <summary>Cached serializer of a preset model type (the DTO element name is its root).</summary>
@@ -84,7 +82,7 @@ public static class PresetSerializer
         }
     }
 
-    /// <summary>Root element name of the file — identifies which of the historical formats it is.</summary>
+    /// <summary>Root element name of the file — identifies a historical format.</summary>
     public static string? RootElementOf(string? text)
     {
         if (text == null)
@@ -112,35 +110,51 @@ public static class PresetSerializer
         return null;
     }
 
-    /// <summary>Writes a preset DTO of the current version (the caller picks the folder; the
-    /// root element is the DTO's own).</summary>
-    public static string SerializePreset<T>(T dto) where T : class, IVersionedPresetDto
+    /// <summary>Writes a preset of the current format: the content model wrapped in the
+    /// envelope carrying the version and the metadata.</summary>
+    public static string SerializePreset(object content, PresetScope scope)
     {
-        dto.Version = PresetFormat.CurrentVersion;
+        var envelope = new PresetEnvelope
+        {
+            Version = PresetFormat.CurrentVersion,
+            Scope = scope.ToString(),
+            Type = content.GetType().Name,
+            Content = SerializeContent(content)
+        };
 
         var sb = new StringBuilder();
         using (var w = new StringWriter(sb))
         {
-            Serializer<T>().Serialize(w, dto);
+            SerializerOf(typeof(PresetEnvelope)).Serialize(w, envelope);
         }
 
         return sb.ToString();
     }
 
-    /// <summary>Reads a preset DTO of the current format; refuses versions above the current
-    /// one (a preset saved by a newer mod), null when the text is not one.</summary>
-    public static T? DeserializePreset<T>(string? text) where T : class, IVersionedPresetDto
+    /// <summary>The envelope of a current-format preset; refuses versions above the current one
+    /// (a preset saved by a newer mod), null when the text is not one.</summary>
+    public static PresetEnvelope? ReadEnvelope(string? text)
     {
-        var dto = Deserialize<T>(text);
+        if (RootElementOf(text) != EnvelopeRoot)
+        {
+            return null;
+        }
 
-        if (dto != null && dto.Version > PresetFormat.CurrentVersion)
+        var envelope = Deserialize<PresetEnvelope>(text);
+
+        if (envelope != null && envelope.Version > PresetFormat.CurrentVersion)
         {
             Log.Warning("ASM: skipped a preset saved by a newer mod version.");
             return null;
         }
 
-        return dto;
+        return envelope;
     }
+
+    /// <summary>The envelope's content as the model; null when the type name does not match (the
+    /// preset is not of the expected shape).</summary>
+    public static T? ReadContent<T>(PresetEnvelope envelope) where T : class =>
+        envelope.Type == typeof(T).Name ? Deserialize<T>(envelope.Content) : null;
 
     /// <summary>The kind slices of a version-1 or older preset: the v1 carrier's own, or the
     /// old format's converted; null when the text is not a preset.</summary>
@@ -160,4 +174,15 @@ public static class PresetSerializer
         return LegacyPresets.TryReadPreset(text) ?? (dto == null ? null : [.. dto.Kinds.Select(V1ToCurrent).Where(k => k != null)]);
     }
 #pragma warning restore CS0618
+
+    private static string SerializeContent(object content)
+    {
+        var sb = new StringBuilder();
+        using (var w = new StringWriter(sb))
+        {
+            SerializerOf(content.GetType()).Serialize(w, content);
+        }
+
+        return sb.ToString();
+    }
 }
