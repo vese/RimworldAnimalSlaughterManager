@@ -63,9 +63,9 @@ public class ASM_MapComp : MapComponent, ISettingsProvider
 
 
     /// <summary>The full preset: every customized kind's slice.</summary>
-    public AllPreset ToPreset()
+    public AllKindsPreset ToPreset()
     {
-        var preset = new AllPreset();
+        var preset = new AllKindsPreset();
 
         foreach (var kv in kindSettings)
         {
@@ -78,7 +78,7 @@ public class ASM_MapComp : MapComponent, ISettingsProvider
         return preset;
     }
 
-    public void FromPreset(AllPreset preset)
+    public void FromPreset(AllKindsPreset preset)
     {
         foreach (var kind in preset.Kinds)
         {

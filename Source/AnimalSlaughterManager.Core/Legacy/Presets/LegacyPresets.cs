@@ -119,8 +119,8 @@ public static class LegacyPresets
 
     /// <summary>The version-1 preset as the current All model; null when the text is not a
     /// preset.</summary>
-    public static AllPreset? TryReadAll(string? text) =>
-        ReadV1Kinds(text) is { } kinds ? new AllPreset { Kinds = kinds } : null;
+    public static AllKindsPreset? TryReadAll(string? text) =>
+        ReadV1Kinds(text) is { } kinds ? new AllKindsPreset { Kinds = kinds } : null;
 
     /// <summary>A rule list of a legacy file: the RulePresetDto format, the v1 unified
     /// carrier's kind slice, or the condition-preset format; null when nothing readable.</summary>

@@ -113,14 +113,14 @@ public static class PresetRepository
     // ---- Read (the file's metadata, or the version-1 machinery by root) -------------------
 
     /// <summary>The full preset model; the version-1 unified format migrates into it.</summary>
-    public static AllPreset? ReadAll(PresetEntry entry)
+    public static AllKindsPreset? ReadAll(PresetEntry entry)
     {
         var text = Store.ReadText(entry.path);
         var file = PresetSerializer.ReadPreset(text);
 
         if (file != null)
         {
-            return PresetSerializer.ReadContent<AllPresetFile>(file)?.ToPreset();
+            return PresetSerializer.ReadContent<AllKindsPresetFile>(file)?.ToPreset();
         }
 
 #pragma warning disable CS0618
@@ -143,7 +143,7 @@ public static class PresetRepository
             }
 
             // An All preset applies the slice matching the target kind; if absent — nothing.
-            var match = PresetSerializer.ReadContent<AllPresetFile>(file)?.Kinds
+            var match = PresetSerializer.ReadContent<AllKindsPresetFile>(file)?.Kinds
                 .FirstOrDefault(k => k.Kind.AnimalDefName == targetDef.defName);
 
             return match == null ? null : new KindPresetFile { Kind = match.Kind };
@@ -190,7 +190,7 @@ public static class PresetRepository
 
             var slice = file.Scope == PresetScope.Kind
                 ? PresetSerializer.ReadContent<KindPresetFile>(file)
-                : PresetSerializer.ReadContent<AllPresetFile>(file)?.Kinds.FirstOrDefault();
+                : PresetSerializer.ReadContent<AllKindsPresetFile>(file)?.Kinds.FirstOrDefault();
 
             return slice == null ? null : ListSliceOf(slice);
         }
