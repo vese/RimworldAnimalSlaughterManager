@@ -180,20 +180,7 @@ public class KindTraitsSettings : ISpecialSettings
 
         public ISpecialSettings Create() => new KindTraitsSettings();
 
-        public void WriteSection(BaseSpecialSettingsPreset preset, XmlElement parent)
-        {
-            if (preset is not TraitsPreset p)
-            {
-                return;
-            }
-
-            PresetSectionSerialization.Serialize(parent, new TraitsSectionDto
-            {
-                KeepTraits = p.KeepTraits,
-                ForceCullTraits = p.ForceCullTraits
-            });
-        }
-
+#pragma warning disable CS0612, CS0618
         public BaseSpecialSettingsPreset? ReadSection(XmlElement kind)
         {
             var section = kind[SettingsKey];
@@ -222,7 +209,7 @@ public class KindTraitsSettings : ISpecialSettings
                 ForceCullTraits = PresetSectionSerialization.Deserialize<ForceCullTraitsListDto>(legacyCull)?.Trait ?? []
             };
         }
-
+#pragma warning restore CS0612, CS0618
 
     }
 

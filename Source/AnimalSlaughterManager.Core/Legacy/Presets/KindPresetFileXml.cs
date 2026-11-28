@@ -49,21 +49,6 @@ public static class KindPresetFileSerialization
     }
 }
 
-public static class KindPresetFileSections
-{
-    /// <summary>The integration sections of a kind file (serialized on demand).</summary>
-    public static List<XmlElement> GetSections(KindPreset file)
-    {
-        var holder = PresetSectionSerialization.Holder();
-
-        foreach (var kv in file.SpecialSettings)
-        {
-            ServiceRegistry.GetServices<IKindSettingsProvider>().FirstOrDefault(p => p.Key == kv.Key)?.WriteSection(kv.Value, holder);
-        }
-
-        return [.. PresetSectionSerialization.Children(holder)];
-    }
-}
 
 public static class KindPresetFileParsing
 {
