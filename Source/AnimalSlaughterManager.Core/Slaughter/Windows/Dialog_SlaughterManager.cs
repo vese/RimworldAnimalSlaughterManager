@@ -16,7 +16,6 @@ public class Dialog_SlaughterManager : Window
     private const float WindowFrame = 64f;
     private const float WindowHeight = 680f;
     private const float TableTopGap = 12f;
-    private const float PresetsRowHeight = 30f;
     private const float PresetsRowBottomGap = 2f;
 
     private readonly ASM_MapComp comp;
@@ -41,12 +40,12 @@ public class Dialog_SlaughterManager : Window
         Text.Font = GameFont.Small;
 
         // The table fills everything above the presets row.
-        var tableBottom = inRect.yMax - PresetsRowHeight - PresetsRowBottomGap;
+        var tableBottom = inRect.yMax - UIConstants.ButtonHeight - PresetsRowBottomGap;
         SlaughterTable.Draw(
             new Rect(inRect.x, inRect.y + TableTopGap, inRect.width, tableBottom - inRect.y - TableTopGap),
             comp, map, ref scroll, ref paintCol, ref paintValue);
 
-        if (Widgets.ButtonText(new Rect(inRect.x, tableBottom + PresetsRowBottomGap, inRect.width, PresetsRowHeight), ASMKeys.ManagePresets.Translate()))
+        if (Widgets.ButtonText(new Rect(inRect.x, tableBottom + PresetsRowBottomGap, inRect.width, UIConstants.ButtonHeight), ASMKeys.ManagePresets.Translate()))
         {
             Find.WindowStack.Add(new SettingsPresetBrowserDialog(comp));
         }
