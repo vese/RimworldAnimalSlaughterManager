@@ -11,13 +11,21 @@ namespace ASM;
 /// </summary>
 public class Dialog_SlaughterManager : Window
 {
+    // The window's chrome: the frame padding around the table, the presets row pinned to the
+    // bottom and the gap above it.
+    private const float WindowFrame = 64f;
+    private const float WindowHeight = 680f;
+    private const float TableTopGap = 12f;
+    private const float PresetsRowHeight = 30f;
+    private const float PresetsRowBottomGap = 2f;
+
     private readonly ASM_MapComp comp;
     private readonly Map map;
     private Vector2 scroll;
     private int paintCol = -1;   // active paint column for Pregnant/Bonded toggles (-1 = none)
     private bool paintValue;
 
-    public override Vector2 InitialSize => new Vector2(SlaughterColumns.TableWidth + 64f, 680f);
+    public override Vector2 InitialSize => new Vector2(SlaughterColumns.TableWidth + WindowFrame, WindowHeight);
 
     public Dialog_SlaughterManager(ASM_MapComp comp)
     {
@@ -31,10 +39,14 @@ public class Dialog_SlaughterManager : Window
     public override void DoWindowContents(Rect inRect)
     {
         Text.Font = GameFont.Small;
-        Rect outRect = new Rect(inRect.x, inRect.y + 12f, inRect.width, inRect.height - 52f);
-        SlaughterTable.Draw(outRect, comp, map, ref scroll, ref paintCol, ref paintValue);
 
-        if (Widgets.ButtonText(new Rect(inRect.x, inRect.yMax - 32f, inRect.width, 30f), ASMKeys.ManagePresets.Translate()))
+        // The table fills everything above the presets row.
+        var tableBottom = inRect.yMax - PresetsRowHeight - PresetsRowBottomGap;
+        SlaughterTable.Draw(
+            new Rect(inRect.x, inRect.y + TableTopGap, inRect.width, tableBottom - inRect.y - TableTopGap),
+            comp, map, ref scroll, ref paintCol, ref paintValue);
+
+        if (Widgets.ButtonText(new Rect(inRect.x, tableBottom + PresetsRowBottomGap, inRect.width, PresetsRowHeight), ASMKeys.ManagePresets.Translate()))
         {
             Find.WindowStack.Add(new SettingsPresetBrowserDialog(comp));
         }
