@@ -25,7 +25,7 @@ public class Dialog_SlaughterManager : Window
     private int paintCol = -1;   // active paint column for Pregnant/Bonded toggles (-1 = none)
     private bool paintValue;
 
-    public override Vector2 InitialSize => new Vector2(SlaughterColumns.TableWidth + WindowFrame, WindowHeight);
+    public override Vector2 InitialSize => new(SlaughterColumns.TableWidth + WindowFrame, WindowHeight);
 
     public Dialog_SlaughterManager(ASM_MapComp comp)
     {

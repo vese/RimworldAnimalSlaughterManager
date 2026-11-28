@@ -22,7 +22,7 @@ internal static class SlaughterTable
 
         var sorted = configs
             .Where(c => c?.animal != null)
-            .OrderBy(c => CountTotal(map, c.animal) > 0 ? 0 : 1)
+            .OrderBy(c => CountTotal(map!, c.animal) > 0 ? 0 : 1)
             .ThenBy(c => c.animal.LabelCap.ToString())
             .ToList();
 
@@ -38,7 +38,7 @@ internal static class SlaughterTable
         foreach (var config in sorted)
         {
             Rect row = new Rect(view.x, cy, view.width, SlaughterColumns.RowH);
-            SlaughterTableRow.Draw(row, config, comp, map, index, ref paintCol, ref paintValue);
+            SlaughterTableRow.Draw(row, config, comp, map!, index, ref paintCol, ref paintValue);
             cy += SlaughterColumns.RowH + 2f;
             index++;
         }
