@@ -21,8 +21,8 @@ public static class AnimalTraitsSystemRegistration
         ServiceRegistry.Add<IKindSettingsProvider>(new KindTraitsSettings.Provider());
 
         // The trait rules' factories: the preset model's factory creates its rule.
-        ServiceRegistry.Add<IPriorityRuleFactory<PriorityTraitRulePreset>>(new PriorityRuleFactory<TraitPriorityRule, PriorityTraitRulePreset>());
-        ServiceRegistry.Add<IPriorityRuleFactory<PriorityTraitGeneralRulePreset>>(new PriorityRuleFactory<TraitGeneralPriorityRule, PriorityTraitGeneralRulePreset>());
+        ServiceRegistry.Add<IPriorityRuleFactory<PriorityTraitRulePreset>>(new PriorityRuleFactory<PriorityTraitRulePreset>(p => new TraitPriorityRule(p)));
+        ServiceRegistry.Add<IPriorityRuleFactory<PriorityTraitGeneralRulePreset>>(new PriorityRuleFactory<PriorityTraitGeneralRulePreset>(p => new TraitGeneralPriorityRule(p)));
 
 #pragma warning disable CS0618
         // Legacy save/preset conversion — goes away together with the Legacy folder.

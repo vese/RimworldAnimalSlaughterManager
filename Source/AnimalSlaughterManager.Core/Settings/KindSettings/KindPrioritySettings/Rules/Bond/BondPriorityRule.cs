@@ -18,12 +18,13 @@ public class BondPriorityRule : BasePriorityRule
 
     public override BasePriorityRulePreset ToPreset() => new BondRulePreset { Has = has };
 
-    public override void FromPreset(BasePriorityRulePreset preset)
+    public BondPriorityRule()
     {
-        if (preset is BondRulePreset p)
-        {
-            has = p.Has;
-        }
+    }
+
+    public BondPriorityRule(BondRulePreset preset)
+    {
+        has = preset.Has;
     }
 
 

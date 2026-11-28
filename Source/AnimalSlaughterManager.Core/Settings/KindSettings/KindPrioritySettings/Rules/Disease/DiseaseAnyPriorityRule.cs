@@ -18,12 +18,13 @@ public class DiseaseAnyPriorityRule : BasePriorityRule, ICoversRule<DiseasePrior
 
     public override BasePriorityRulePreset ToPreset() => new DiseaseAnyRulePreset { Has = has };
 
-    public override void FromPreset(BasePriorityRulePreset preset)
+    public DiseaseAnyPriorityRule()
     {
-        if (preset is DiseaseAnyRulePreset p)
-        {
-            has = p.Has;
-        }
+    }
+
+    public DiseaseAnyPriorityRule(DiseaseAnyRulePreset preset)
+    {
+        has = preset.Has;
     }
 
 

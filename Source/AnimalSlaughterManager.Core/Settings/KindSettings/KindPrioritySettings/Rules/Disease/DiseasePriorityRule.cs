@@ -21,12 +21,14 @@ public class DiseasePriorityRule : BasePriorityRule, ICoversRule<DiseaseAnyPrior
 
     public override BasePriorityRulePreset ToPreset() => new DiseaseRulePreset { Has = has, Disease = disease?.defName };
 
-    public override void FromPreset(BasePriorityRulePreset preset)
+    public DiseasePriorityRule()
     {
-        if (preset is DiseaseRulePreset p)
-        {
-            has = p.Has; disease = (Verse.HediffDef?)Verse.GenDefDatabase.GetDef(typeof(Verse.HediffDef), p.Disease, false);
-        }
+    }
+
+    public DiseasePriorityRule(DiseaseRulePreset preset)
+    {
+        has = preset.Has;
+        disease = (Verse.HediffDef?)Verse.GenDefDatabase.GetDef(typeof(Verse.HediffDef), preset.Disease, false);
     }
 
 

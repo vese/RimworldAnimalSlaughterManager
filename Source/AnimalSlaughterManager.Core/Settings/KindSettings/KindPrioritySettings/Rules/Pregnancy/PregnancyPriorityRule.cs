@@ -18,12 +18,13 @@ public class PregnancyPriorityRule : BasePriorityRule
 
     public override BasePriorityRulePreset ToPreset() => new PregnancyRulePreset { Has = has };
 
-    public override void FromPreset(BasePriorityRulePreset preset)
+    public PregnancyPriorityRule()
     {
-        if (preset is PregnancyRulePreset p)
-        {
-            has = p.Has;
-        }
+    }
+
+    public PregnancyPriorityRule(PregnancyRulePreset preset)
+    {
+        has = preset.Has;
     }
 
 

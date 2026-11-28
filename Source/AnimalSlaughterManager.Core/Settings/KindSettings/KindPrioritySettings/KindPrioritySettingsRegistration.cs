@@ -18,11 +18,11 @@ public static class KindPrioritySettingsRegistration
         ServiceRegistry.Add<IRuleOptionsSource>(new TrainingRuleOptionsSource());
 
         // The rules' factories: the preset model's factory creates its rule.
-        ServiceRegistry.Add<IPriorityRuleFactory<PregnancyRulePreset>>(new PriorityRuleFactory<PregnancyPriorityRule, PregnancyRulePreset>());
-        ServiceRegistry.Add<IPriorityRuleFactory<BondRulePreset>>(new PriorityRuleFactory<BondPriorityRule, BondRulePreset>());
-        ServiceRegistry.Add<IPriorityRuleFactory<DiseaseRulePreset>>(new PriorityRuleFactory<DiseasePriorityRule, DiseaseRulePreset>());
-        ServiceRegistry.Add<IPriorityRuleFactory<DiseaseAnyRulePreset>>(new PriorityRuleFactory<DiseaseAnyPriorityRule, DiseaseAnyRulePreset>());
-        ServiceRegistry.Add<IPriorityRuleFactory<TrainingRulePreset>>(new PriorityRuleFactory<TrainingPriorityRule, TrainingRulePreset>());
-        ServiceRegistry.Add<IPriorityRuleFactory<TrainingGeneralRulePreset>>(new PriorityRuleFactory<TrainingGeneralPriorityRule, TrainingGeneralRulePreset>());
+        ServiceRegistry.Add<IPriorityRuleFactory<PregnancyRulePreset>>(new PriorityRuleFactory<PregnancyRulePreset>(p => new PregnancyPriorityRule(p)));
+        ServiceRegistry.Add<IPriorityRuleFactory<BondRulePreset>>(new PriorityRuleFactory<BondRulePreset>(p => new BondPriorityRule(p)));
+        ServiceRegistry.Add<IPriorityRuleFactory<DiseaseRulePreset>>(new PriorityRuleFactory<DiseaseRulePreset>(p => new DiseasePriorityRule(p)));
+        ServiceRegistry.Add<IPriorityRuleFactory<DiseaseAnyRulePreset>>(new PriorityRuleFactory<DiseaseAnyRulePreset>(p => new DiseaseAnyPriorityRule(p)));
+        ServiceRegistry.Add<IPriorityRuleFactory<TrainingRulePreset>>(new PriorityRuleFactory<TrainingRulePreset>(p => new TrainingPriorityRule(p)));
+        ServiceRegistry.Add<IPriorityRuleFactory<TrainingGeneralRulePreset>>(new PriorityRuleFactory<TrainingGeneralRulePreset>(p => new TrainingGeneralPriorityRule(p)));
     }
 }

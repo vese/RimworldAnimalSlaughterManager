@@ -50,21 +50,22 @@ public class TraitGeneralPriorityRule : BasePriorityRule, ICoversRule<TraitGener
         Inheritability = inheritability.ToString()
     };
 
-    public override void FromPreset(BasePriorityRulePreset preset)
+    public TraitGeneralPriorityRule()
     {
-        if (preset is PriorityTraitGeneralRulePreset p)
+    }
+
+    public TraitGeneralPriorityRule(PriorityTraitGeneralRulePreset preset)
+    {
+        has = preset.Has;
+
+        if (System.Enum.TryParse(preset.Type, out TraitType parsedType))
         {
-            has = p.Has;
+            type = parsedType;
+        }
 
-            if (System.Enum.TryParse(p.Type, out TraitType parsedType))
-            {
-                type = parsedType;
-            }
-
-            if (System.Enum.TryParse(p.Inheritability, out TraitInheritability parsedInherit))
-            {
-                inheritability = parsedInherit;
-            }
+        if (System.Enum.TryParse(preset.Inheritability, out TraitInheritability parsedInherit))
+        {
+            inheritability = parsedInherit;
         }
     }
 

@@ -21,12 +21,14 @@ public class TrainingPriorityRule : BasePriorityRule, ICoversRule<TrainingGenera
 
     public override BasePriorityRulePreset ToPreset() => new TrainingRulePreset { Has = has, Trainable = trainable?.defName };
 
-    public override void FromPreset(BasePriorityRulePreset preset)
+    public TrainingPriorityRule()
     {
-        if (preset is TrainingRulePreset p)
-        {
-            has = p.Has; trainable = (RimWorld.TrainableDef?)Verse.GenDefDatabase.GetDef(typeof(RimWorld.TrainableDef), p.Trainable, false);
-        }
+    }
+
+    public TrainingPriorityRule(TrainingRulePreset preset)
+    {
+        has = preset.Has;
+        trainable = (RimWorld.TrainableDef?)Verse.GenDefDatabase.GetDef(typeof(RimWorld.TrainableDef), preset.Trainable, false);
     }
 
 
