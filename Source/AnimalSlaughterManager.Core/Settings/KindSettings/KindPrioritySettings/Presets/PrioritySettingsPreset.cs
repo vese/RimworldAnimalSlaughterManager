@@ -16,7 +16,7 @@ public class PrioritySettingsPreset
         (true, true) => PriorityRulesAdultMale,
         (true, false) => PriorityRulesYoungMale,
         (false, true) => PriorityRulesAdultFemale,
-        _ => PriorityRulesYoungFemale,
+        (false, false) => PriorityRulesYoungFemale,
     };
 
     public void SetBucket((bool Male, bool Adult) bucket, List<BasePriorityRulePreset> presets)
@@ -32,7 +32,7 @@ public class PrioritySettingsPreset
             case (false, true):
                 PriorityRulesAdultFemale = presets;
                 break;
-            default:
+            case (false, false):
                 PriorityRulesYoungFemale = presets;
                 break;
         }

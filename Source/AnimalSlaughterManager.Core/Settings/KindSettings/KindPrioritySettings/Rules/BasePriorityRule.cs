@@ -1,17 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Xml;
 using Verse;
 
 namespace ASM;
 
 public abstract class BasePriorityRule : IExposable
 {
-    /// <summary>Rules from their preset models: each preset creates its own rule</summary>
-    public static List<BasePriorityRule> FromPresets(IEnumerable<BasePriorityRulePreset> presets) =>
-        [.. presets.Select(p => p.ToSetting())];
-
     /// <summary>
     /// True when this condition references a def (trait/disease/trainable) that failed
     /// to resolve on load (def-providing mod disabled). Such entries are no-ops and get pruned.

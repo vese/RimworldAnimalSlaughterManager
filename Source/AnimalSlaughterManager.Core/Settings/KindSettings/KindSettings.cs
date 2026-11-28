@@ -38,8 +38,8 @@ public class KindSettings : IExposable
     /// <summary>True when this kind deviates from vanilla behaviour and must be recomputed.</summary>
     public bool Customized => preferenceSettings.Customized || prioritySettings.HasRules || integrationsSettings.Values.Any(s => s.Customized);
 
+    // TODO: refactoring
     /// <summary>The integration's settings under the provider's key, created on first use.</summary>
-
     private static IKindSettingsProvider? ProviderOf(string key) =>
         ServiceRegistry.GetServices<IKindSettingsProvider>().FirstOrDefault(p => p.Key == key);
 

@@ -1,5 +1,3 @@
-
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
@@ -94,35 +92,32 @@ public class KindPrioritySettings : IPresettable<PrioritySettingsPreset>
         }
     }
 
+    public void FromPreset(PrioritySettingsPreset preset)
+    {
+        foreach (var key in keys)
+        {
+            FromPreset(preset.GetBucket(key), key);
+        }
+    }
+
+    public void FromPreset(List<BasePriorityRulePreset> rules, (bool Male, bool Adult) bucket) =>
+        ruleSets[bucket].ReplaceAll([.. rules.Select(p => p.ToSetting())]);
+
     public PrioritySettingsPreset ToPreset()
     {
         var preset = new PrioritySettingsPreset();
 
         foreach (var key in keys)
         {
-            preset.SetBucket(key, Get(key.Male, key.Adult).Select(r => r.ToPreset()).ToList());
+            ToPreset(key);
         }
 
         return preset;
     }
 
-    public void FromPreset(PrioritySettingsPreset preset)
-    {
-        foreach (var key in keys)
-        {
-            ruleSets[key].ReplaceAll(BasePriorityRule.FromPresets(preset.GetBucket(key)));
-        }
-    }
-
     /// <summary>One bucket's rules as a list preset.</summary>
     public List<BasePriorityRulePreset> ToPreset((bool Male, bool Adult) bucket) =>
-        Get(bucket.Male, bucket.Adult).Select(r => r.ToPreset()).ToList();
-
-    public void FromPreset(List<BasePriorityRulePreset> rules, (bool Male, bool Adult) bucket)
-    {
-        ruleSets[bucket].ReplaceAll(BasePriorityRule.FromPresets(rules));
-    }
-
+        [.. Get(bucket.Male, bucket.Adult).Select(r => r.ToPreset())];
 
     public void ExposeData()
     {
