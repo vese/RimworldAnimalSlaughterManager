@@ -19,11 +19,6 @@ public static class AnimalTraitsSystemRegistration
         // The kind-settings provider is registered unconditionally: the settings data
         // survives ATS being disabled (the types live in this assembly).
         ServiceRegistry.Add<IKindSettingsProvider>(new KindTraitsSettings.Provider());
-
-        // The trait rules' factories: the preset model's factory creates its rule.
-        ServiceRegistry.Add<IPriorityRuleFactory<PriorityTraitRulePreset>>(new PriorityRuleFactory<PriorityTraitRulePreset>(p => new TraitPriorityRule(p)));
-        ServiceRegistry.Add<IPriorityRuleFactory<PriorityTraitGeneralRulePreset>>(new PriorityRuleFactory<PriorityTraitGeneralRulePreset>(p => new TraitGeneralPriorityRule(p)));
-
 #pragma warning disable CS0618
         // Legacy save/preset conversion — goes away together with the Legacy folder.
         ServiceRegistry.Add<ILegacyConditionConverter>(new LegacyTraitConditions());

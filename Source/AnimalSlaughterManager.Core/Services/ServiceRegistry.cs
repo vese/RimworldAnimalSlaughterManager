@@ -38,13 +38,6 @@ public static class ServiceRegistry
     /// <summary>Every registered implementation of the contract, in registration order.</summary>
     public static IReadOnlyList<TContract> GetServices<TContract>() where TContract : class
     {
-        return [.. GetServices(typeof(TContract)).Cast<TContract>()];
-    }
-
-    /// <summary>Every registered implementation of a contract type (the closed generic of a
-    /// preset model, for one).</summary>
-    public static IReadOnlyList<object> GetServices(Type contract)
-    {
-        return services.TryGetValue(contract, out var list) ? [.. list] : [];
+        return services.TryGetValue(typeof(TContract), out var list) ? [.. list.Cast<TContract>()] : [];
     }
 }

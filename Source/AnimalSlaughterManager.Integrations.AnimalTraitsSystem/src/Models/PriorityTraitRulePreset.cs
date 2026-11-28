@@ -9,4 +9,6 @@ public class PriorityTraitRulePreset : BasePriorityRulePreset
     public bool Has { get; set; }
     public string? Trait { get; set; }
     public string Inheritability { get; set; } = null!;
+
+    public override BasePriorityRule ToSetting() => new TraitPriorityRule(this);
 }

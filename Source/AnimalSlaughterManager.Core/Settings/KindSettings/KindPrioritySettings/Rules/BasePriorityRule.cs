@@ -8,27 +8,9 @@ namespace ASM;
 
 public abstract class BasePriorityRule : IExposable
 {
-    /// <summary>Rules from their preset models: each preset's registered factory creates its
-    /// rule filled from the preset. Presets without a registered factory are dropped.</summary>
-    public static List<BasePriorityRule> FromPresets(IEnumerable<BasePriorityRulePreset> presets)
-    {
-        var rules = new List<BasePriorityRule>();
-
-        foreach (var preset in presets)
-        {
-            var rule = ServiceRegistry.GetServices(typeof(IPriorityRuleFactory<>).MakeGenericType(preset.GetType()))
-                .OfType<IPriorityRuleFactory<BasePriorityRulePreset>>()
-                .FirstOrDefault()
-                ?.Create(preset);
-
-            if (rule != null)
-            {
-                rules.Add(rule);
-            }
-        }
-
-        return rules;
-    }
+    /// <summary>Rules from their preset models: each preset creates its own rule</summary>
+    public static List<BasePriorityRule> FromPresets(IEnumerable<BasePriorityRulePreset> presets) =>
+        [.. presets.Select(p => p.ToSetting())];
 
     /// <summary>
     /// True when this condition references a def (trait/disease/trainable) that failed

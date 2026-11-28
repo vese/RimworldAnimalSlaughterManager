@@ -6,4 +6,6 @@ namespace ASM;
 public class DiseaseAnyRulePreset : BasePriorityRulePreset
 {
     public bool Has { get; set; }
+
+    public override BasePriorityRule ToSetting() => new DiseaseAnyPriorityRule(this);
 }

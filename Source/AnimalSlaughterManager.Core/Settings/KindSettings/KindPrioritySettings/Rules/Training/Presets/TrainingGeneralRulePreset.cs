@@ -6,4 +6,6 @@ namespace ASM;
 public class TrainingGeneralRulePreset : BasePriorityRulePreset
 {
     public string Type { get; set; } = null!;
+
+    public override BasePriorityRule ToSetting() => new TrainingGeneralPriorityRule(this);
 }

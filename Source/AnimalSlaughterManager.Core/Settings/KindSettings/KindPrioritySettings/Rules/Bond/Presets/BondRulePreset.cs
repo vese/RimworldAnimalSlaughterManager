@@ -6,4 +6,6 @@ namespace ASM;
 public class BondRulePreset : BasePriorityRulePreset
 {
     public bool Has { get; set; }
+
+    public override BasePriorityRule ToSetting() => new BondPriorityRule(this);
 }
